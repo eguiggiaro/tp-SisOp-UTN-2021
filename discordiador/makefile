@@ -1,5 +1,5 @@
 # Include libraries here
-LIBRARIES=
+LIBRARIES=commons pthread
 # Include custom library paths here
 LIBRARY_PATHS=
 

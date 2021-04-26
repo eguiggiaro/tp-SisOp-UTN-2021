@@ -1,5 +1,8 @@
 #include "store.h"
 
+#define MODULE_NAME		 "I-Mongo-Store"
+#define CONFIG_FILE_PATH "store/store.cfg"
+#define LOG_FILE_PATH	 "store/store.log"
 
 int main(int argc, char* argv[]) {
 
@@ -31,7 +34,7 @@ int main(int argc, char* argv[]) {
 }
 
 t_log* iniciar_logger(void){
-	return log_create("store/store.log", "I-Mongo-Store", true, LOG_LEVEL_INFO);
+	return log_create(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
 }
 
 int leer_config(t_log* logger){
@@ -39,7 +42,7 @@ int leer_config(t_log* logger){
 	t_config* config;
 	configuracion = malloc(sizeof(Configuracion));
 
-	config = config_create("store/store.cfg");
+	config = config_create(CONFIG_FILE_PATH);
 
 	if(config==NULL){
 		return EXIT_FAILURE;

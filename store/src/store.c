@@ -1,43 +1,38 @@
 #include "store.h"
 
-#define MODULE_NAME		 "I-Mongo-Store"
-#define CONFIG_FILE_PATH "store/store.cfg"
-#define LOG_FILE_PATH	 "store/store.log"
+#define MODULE_NAME "I-Mongo-Store"
+#define CONFIG_FILE_PATH "../store.cfg"
+#define CONFIG_FILE_PATH_ECLIPSE "store/store.cfg"
+#define LOG_FILE_PATH "../store.log"
 
 int main(int argc, char* argv[]) {
 
-	t_log* logger;
+	//Inicio el log en un thread... :O
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
+	miLogInfo("Inició I-Mongo-Store.");
 
-	logger = iniciar_logger();
 
-	log_info(logger, "Inició I-Mongo-Store.");
-	helloWorld();
-
-	if(leer_config(logger)){
-		log_info(logger, "Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
-		log_destroy(logger);
-
+	if(leer_config()){
+		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
+		miLogDestroy();
 		return EXIT_FAILURE;
 	}
 	/*Checkeo datos levantados del archivo de configuracion
-	log_info(logger, "Punto de montaje: %s", configuracion->puntoMontaje);
-	log_info(logger, "Puerto: %s", string_itoa(configuracion->puerto));
-	log_info(logger, "Tiempo sincronizacion: %s", string_itoa(configuracion->tiempoSincro));
+	miLogInfo("Punto de montaje: %s", configuracion->puntoMontaje);
+	miLogInfo("Puerto: %s", string_itoa(configuracion->puerto));
+	miLogInfo("Tiempo sincronizacion: %s", string_itoa(configuracion->tiempoSincro));
 	 */
 
 
+	miLogInfo("Finalizó I-Mongo-Store.");
+	miLogDestroy();
 
-	log_info(logger, "Finalizó I-Mongo-Store.");
-	log_destroy(logger);
 
 	return EXIT_SUCCESS;
 }
 
-t_log* iniciar_logger(void){
-	return log_create(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
-}
 
-int leer_config(t_log* logger){
+int leer_config(void){
 
 	t_config* config;
 	configuracion = malloc(sizeof(Configuracion));
@@ -45,7 +40,11 @@ int leer_config(t_log* logger){
 	config = config_create(CONFIG_FILE_PATH);
 
 	if(config==NULL){
-		return EXIT_FAILURE;
+		//Para debuggear desde eclipse.
+		config = config_create(CONFIG_FILE_PATH_ECLIPSE);
+		if(config==NULL){
+			return EXIT_FAILURE;
+		}
 	}
 
 	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));

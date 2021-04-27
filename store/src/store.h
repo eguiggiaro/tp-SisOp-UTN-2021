@@ -1,20 +1,13 @@
-/*
- * store.h
- *
- *  Created on: 24 abr. 2021
- *      Author: utnso
- */
-
-#ifndef _STORE_H_
-#define _STORE_H_
+#ifndef STORE_H_
+#define STORE_H_
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include<commons/log.h>
-#include<commons/string.h>
-#include<commons/config.h>
-#include <utils/hello.h>
+#include <commons/log.h>
+#include <commons/string.h>
+#include <commons/config.h>
+#include <utils/logger.h>
 
 typedef struct Configuracion{
 	char* puntoMontaje;
@@ -24,7 +17,6 @@ typedef struct Configuracion{
 
 Configuracion* configuracion;
 
-t_log* iniciar_logger(void);
-int leer_config(t_log*);
+int leer_config(void);
 
-#endif /* _STORE_H_ */
+#endif /* STORE_H_ */

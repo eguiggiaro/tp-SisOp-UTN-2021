@@ -7,10 +7,11 @@
 			"path": "miram"
 		},
 		{
-			"path": "store"
+			"path": "shared"
 		},
 		{
-			"path": "shared"
+			"path": "store"
 		}
-	]
+	],
+	"settings": {}
 }

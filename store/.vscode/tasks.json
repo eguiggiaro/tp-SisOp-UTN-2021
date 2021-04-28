@@ -12,7 +12,10 @@
         {
             "label": "store Normal",
             "type": "shell",
-            "command": "./exec"
+            "command": "./exec",
+            "problemMatcher": [
+                "$gcc"
+            ]
         },
         {
             "label": "store Valgrind",

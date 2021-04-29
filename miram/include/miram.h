@@ -5,5 +5,4 @@
 #include <commons/log.h>
 #include <stdbool.h>
 #include "shared_utils.h"
-
 #endif

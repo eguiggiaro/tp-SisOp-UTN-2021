@@ -23,6 +23,7 @@ int main(){
 
 
 	miLogInfo("Finalizó Discordiador");
+	free(configuracion);
 	miLogDestroy();
 
 }
@@ -44,6 +45,16 @@ int leer_config(void) {
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
 
+	configuracion->ip_mi_ram_hq = strdup(config_get_string_value(config, "IP_MI_RAM_HQ"));
+	configuracion->puerto_mi_ram_hq = config_get_int_value(config, "PUERTO_MI_RAM_HQ");
+	configuracion->ip_i_mongo_store = strdup(config_get_string_value(config, "IP_I_MONGO_STORE"));
+	configuracion->puerto_i_mongo_store = config_get_int_value(config, "PUERTO_I_MONGO_STORE");
+	configuracion->grado_multitarea = config_get_int_value(config, "GRADO_MULTITAREA");
+	configuracion->algoritmo = strdup(config_get_string_value(config, "ALGORITMO"));
+	configuracion->quantum = config_get_int_value(config, "QUANTUM");
+	configuracion->duracion_sabotaje = config_get_int_value(config, "DURACION_SABOTAJE");
+	configuracion->retardo_ciclo_cpu = config_get_int_value(config, "RETARDO_CICLO_CPU");
+	
 	config_destroy(config);
 	return EXIT_SUCCESS;
 }

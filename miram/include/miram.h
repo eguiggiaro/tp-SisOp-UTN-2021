@@ -12,9 +12,13 @@ typedef struct Configuracion{
 	char* puntoMontaje;
 	int puerto;
 	int tiempoSincro;
+    int ip_mi_ram_hq;
+    int puerto_mi_ram_hq;
 } Configuracion;
 
 Configuracion* configuracion;
 int leer_config(void) ;
+
+void atender_request_miram(uint32_t request_fd);
 
 #endif

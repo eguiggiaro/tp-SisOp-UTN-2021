@@ -12,11 +12,20 @@ typedef struct Configuracion{
 	char* puntoMontaje;
 	int puerto;
 	int tiempoSincro;
+	int ip_mi_ram_hq;
+	int puerto_mi_ram_hq;
+	int ip_i_mongo_store;
+	int puerto_i_mongo_store;
+	int grado_multitarea;
+	int algoritmo;
+	int quantum;
+	int duracion_sabotaje;
+	int retardo_ciclo_cpu;
 } Configuracion;
 
 Configuracion* configuracion;
 
 int leer_config(void);
-void atender_request_discordiador(uint32_t request_fd);
+
 
 #endif

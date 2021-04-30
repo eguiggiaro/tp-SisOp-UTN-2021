@@ -2,13 +2,13 @@
 
 #define MODULE_NAME "Discordiador"
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
-#define LOG_FILE_PATH "discordiador.log"
+#define LOG_FILE_PATH "cfg/discordiador.log"
 
 int main(){
 
-	char* puerto_discordiador = NULL;
+	
 	//Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició Discordiador.");
 
 	if(leer_config()){
@@ -16,11 +16,50 @@ int main(){
 		miLogDestroy();
 		return EXIT_FAILURE;
 	}
-	
-	puerto_discordiador = string_itoa(configuracion->puerto);
+		
+	//Obtención datos para conexion con miram
+	char* ip_miram = configuracion->ip_mi_ram_hq;
+	char* puerto_miram = configuracion->puerto_mi_ram_hq ;
 
-  	levantar_servidor(atender_request_discordiador,puerto_discordiador);
 
+	miLogInfo("Conectándose a MiRAM");
+	    
+	//inicia conexion con MiRAM
+    int socket_miram = crear_conexion_sinlogger(ip_miram, puerto_miram);
+
+	miLogInfo("Obtuve el socket y vale %d.\n", socket_miram);
+
+	if (socket_miram == -1) {
+		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
+		exit(3);
+	}
+    
+	//envia mensaje a MiRAM
+    t_paquete* paquete_miram = crear_paquete(PAQUETE);
+	t_buffer* buffer_miram;
+	t_list* lista_mensajes = list_create();
+
+	list_add(lista_mensajes, "hola");
+    list_add(lista_mensajes,"soy discordiador!");
+
+	buffer_miram = serializar_lista_strings(lista_mensajes);
+	paquete_miram->buffer = buffer_miram;
+	enviar_paquete(paquete_miram, socket_miram);
+
+	//recibe respuesta de MiRAM
+	op_code codigo_operacion = recibir_operacion(socket_miram);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = recibir_buffer(socket_miram);
+		t_list* lista = deserializar_lista_strings(buffer);
+
+		//loggear_lista_strings(lista);
+		list_iterate(lista, printf);
+
+		miLogInfo("Recibi los mensajes de MiRAM correctamente");
+	} else {
+		miLogInfo("No recibi los mensajes de MiRAM correctamente");
+	}
 
 	miLogInfo("Finalizó Discordiador");
 	free(configuracion);
@@ -44,9 +83,8 @@ int leer_config(void) {
 	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
-
 	configuracion->ip_mi_ram_hq = strdup(config_get_string_value(config, "IP_MI_RAM_HQ"));
-	configuracion->puerto_mi_ram_hq = config_get_int_value(config, "PUERTO_MI_RAM_HQ");
+	configuracion->puerto_mi_ram_hq = strdup(config_get_string_value(config, "PUERTO_MI_RAM_HQ"));
 	configuracion->ip_i_mongo_store = strdup(config_get_string_value(config, "IP_I_MONGO_STORE"));
 	configuracion->puerto_i_mongo_store = config_get_int_value(config, "PUERTO_I_MONGO_STORE");
 	configuracion->grado_multitarea = config_get_int_value(config, "GRADO_MULTITAREA");
@@ -61,44 +99,3 @@ int leer_config(void) {
 
 
 
-void atender_request_discordiador(uint32_t request_fd){
-
-	op_code codigo_operacion = recibir_operacion(request_fd);
-	t_buffer* buffer_miram;
-
-	switch(codigo_operacion){
-		
-	  case PAQUETE:
-	  //recibo los mensajes de miram
-	  miLogInfo("Me llego operacion: PAQUETE \n");
-	  buffer_miram = recibir_buffer(request_fd);
-
-	  t_list* lista = deserializar_lista_strings(buffer_miram);
-	  loggear_lista_strings(lista);
-
-	  //devuelve una lista de mensajes a miram
-	  t_paquete* paquete_miram = crear_paquete(OK);
-
-	  t_list* lista_mensajes = list_create();
-	  list_add(lista_mensajes, "hola");
-      list_add(lista_mensajes,"soy el discordiador");
-
-
-	  buffer_miram = serializar_lista_strings(lista_mensajes);
-	  paquete_miram->buffer = buffer_miram;
-	  enviar_paquete(paquete_miram, request_fd);
-
-	  break;
-	
-	  case MENSAJE:
-		miLogInfo("Me llego operacion: MENSAJE\n");
-
-	  break;
-
-	  default:
-		miLogInfo("Me llego operacion: ...\n");
-
-	  break;
-	}
-
-}

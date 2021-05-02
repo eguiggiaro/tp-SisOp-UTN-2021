@@ -23,48 +23,60 @@ int main(){
 
 
 	miLogInfo("Conectándose a MiRAM");
-	    
-	//inicia conexion con MiRAM
-    int socket_miram = crear_conexion_sinlogger(ip_miram, puerto_miram);
+	iniciar_conexion(ip_miram, puerto_miram);
 
-	miLogInfo("Obtuve el socket y vale %d.\n", socket_miram);
+	//Obtención datos para conexion con store
+	char* ip_store = configuracion->ip_i_mongo_store;
+	char* puerto_store = configuracion->puerto_i_mongo_store ;
 
-	if (socket_miram == -1) {
+
+	miLogInfo("Conectándose a Store");
+	iniciar_conexion(ip_store, puerto_store);
+	
+	miLogInfo("Finalizó Discordiador");
+	free(configuracion);
+	miLogDestroy();
+
+}
+
+void iniciar_conexion(char* ip_destino, char* puerto_destino) {
+
+//inicia conexion con destino
+    int socket = crear_conexion(logger, ip_destino, puerto_destino);
+
+	miLogInfo("Obtuve el socket y vale %d.\n", socket);
+
+	if (socket == -1) {
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
     
-	//envia mensaje a MiRAM
-    t_paquete* paquete_miram = crear_paquete(PAQUETE);
-	t_buffer* buffer_miram;
+	//envia mensaje a destino
+    t_paquete* paquete = crear_paquete(PAQUETE);
+	t_buffer* buffer;
 	t_list* lista_mensajes = list_create();
 
 	list_add(lista_mensajes, "hola");
     list_add(lista_mensajes,"soy discordiador!");
 
-	buffer_miram = serializar_lista_strings(lista_mensajes);
-	paquete_miram->buffer = buffer_miram;
-	enviar_paquete(paquete_miram, socket_miram);
+	buffer = serializar_lista_strings(lista_mensajes);
+	paquete ->buffer = buffer;
+	enviar_paquete(paquete, socket);
 
-	//recibe respuesta de MiRAM
-	op_code codigo_operacion = recibir_operacion(socket_miram);
+	//recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket_miram);
+		t_buffer* buffer = recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		//loggear_lista_strings(lista);
 		list_iterate(lista, printf);
 
-		miLogInfo("Recibi los mensajes de MiRAM correctamente");
+		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
-		miLogInfo("No recibi los mensajes de MiRAM correctamente");
+		miLogInfo("No recibi los mensajes del destino correctamente");
 	}
-
-	miLogInfo("Finalizó Discordiador");
-	free(configuracion);
-	miLogDestroy();
-
 }
 
 

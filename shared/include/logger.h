@@ -14,6 +14,8 @@
 #define LOG_PROGRAM_NAME "LOG_PROGRAM_NAME"
 #define LOG_PRINT_CONSOLE "LOG_PRINT_CONSOLE"
 
+t_log* logger;
+
 void miLogInitMutex(char*, char*, bool, t_log_level);
 void miLogInfo(const char*, ...);
 void miLogDebug(const char*, ...);

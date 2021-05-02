@@ -6,7 +6,8 @@
 #include <stdio.h>
 #include <commons/log.h>
 #include <stdbool.h>
-#include <paquete.h>
+#include "logger.h"
+#include "paquete.h"
 
 typedef struct Configuracion{
 	char* puntoMontaje;

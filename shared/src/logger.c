@@ -1,7 +1,7 @@
 #include "logger.h"
 
 pthread_mutex_t logMutex;
-t_log* logger;
+
 
 void miLogInitMutex(char* file, char* program_name, bool is_active_console, t_log_level level){
 	pthread_mutex_init(&logMutex,NULL);
@@ -79,3 +79,4 @@ void loggear_lista_strings(t_list* lista){
 		log_info(logger, "Lista vacia\n");
 	}
 }
+

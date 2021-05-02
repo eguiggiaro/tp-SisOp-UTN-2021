@@ -70,9 +70,8 @@ void iniciar_conexion(char* ip_destino, char* puerto_destino) {
 		t_buffer* buffer = recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
-		//loggear_lista_strings(lista);
-		list_iterate(lista, printf);
-
+		loggear_lista_strings(lista);
+		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
 		miLogInfo("No recibi los mensajes del destino correctamente");
@@ -98,7 +97,7 @@ int leer_config(void) {
 	configuracion->ip_mi_ram_hq = strdup(config_get_string_value(config, "IP_MI_RAM_HQ"));
 	configuracion->puerto_mi_ram_hq = strdup(config_get_string_value(config, "PUERTO_MI_RAM_HQ"));
 	configuracion->ip_i_mongo_store = strdup(config_get_string_value(config, "IP_I_MONGO_STORE"));
-	configuracion->puerto_i_mongo_store = config_get_int_value(config, "PUERTO_I_MONGO_STORE");
+	configuracion->puerto_i_mongo_store = strdup(config_get_string_value(config, "PUERTO_I_MONGO_STORE"));
 	configuracion->grado_multitarea = config_get_int_value(config, "GRADO_MULTITAREA");
 	configuracion->algoritmo = strdup(config_get_string_value(config, "ALGORITMO"));
 	configuracion->quantum = config_get_int_value(config, "QUANTUM");

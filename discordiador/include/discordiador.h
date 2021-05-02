@@ -12,12 +12,12 @@ typedef struct Configuracion{
 	char* puntoMontaje;
 	int puerto;
 	int tiempoSincro;
-	int ip_mi_ram_hq;
+	char* ip_mi_ram_hq;
 	int puerto_mi_ram_hq;
-	int ip_i_mongo_store;
+	char* ip_i_mongo_store;
 	int puerto_i_mongo_store;
 	int grado_multitarea;
-	int algoritmo;
+	char* algoritmo;
 	int quantum;
 	int duracion_sabotaje;
 	int retardo_ciclo_cpu;

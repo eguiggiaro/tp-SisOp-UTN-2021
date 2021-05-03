@@ -7,6 +7,8 @@
 #include <commons/log.h>
 #include <stdbool.h>
 #include <paquete.h>
+#include <nivel-gui/nivel-gui.h>
+#include <nivel-gui/tad_nivel.h>
 
 typedef struct Configuracion{
 	char* puntoMontaje;
@@ -20,5 +22,6 @@ Configuracion* configuracion;
 int leer_config(void) ;
 
 void atender_request_miram(uint32_t request_fd);
+void crear_grilla(void);
 
 #endif

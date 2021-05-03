@@ -6,9 +6,12 @@
 
 int main(){
 
+	pthread_t mapa;
+	pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
+
 	char* puerto_miram = NULL;
    //Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició MiRAM.");
 
 	if(leer_config()){
@@ -17,10 +20,10 @@ int main(){
 		return EXIT_FAILURE;
 	}
 
+
+
 	puerto_miram = string_itoa(configuracion->puerto);
-
 	levantar_servidor(atender_request_miram,puerto_miram);
-
 
 	miLogInfo("Finalizó MiRAM");
 	free(configuracion);
@@ -85,4 +88,26 @@ void atender_request_miram(uint32_t request_fd) {
 
 	  break;
 	}
+}
+
+void crear_grilla(void) {
+	NIVEL* nivel;
+
+	int cols, rows;
+	int err;
+
+	nivel_gui_inicializar();
+
+	nivel_gui_get_area_nivel(&cols, &rows);
+
+	nivel = nivel_crear("Test");
+
+	err = personaje_crear(nivel, 'A', cols - 1, rows - 1);
+	err = enemigo_crear(nivel, 'B', 10, 14);
+	err = caja_crear(nivel, 'X', 19, 9, 2);
+	nivel_gui_dibujar(nivel);
+    sleep(3);
+	nivel_destruir(nivel);
+	nivel_gui_terminar();
+	
 }

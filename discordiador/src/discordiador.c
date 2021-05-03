@@ -25,6 +25,23 @@ int main(){
 	miLogInfo("Conectándose a MiRAM");
 	iniciar_conexion(ip_miram, puerto_miram);
 
+	//iniciamos consola
+	char* opcion_seleccionada;
+	iniciar_consola();
+	opcion_seleccionada = readline(">>");
+
+	while(opcion_invalida(opcion_seleccionada)){
+		printf("\nError! %s no es una opción correcta.\n",opcion_seleccionada);
+		iniciar_consola();
+		opcion_seleccionada = readline(">>");
+	}
+
+	printf("\nOpcion seleccionada: %s \n", opcion_seleccionada);
+
+	//obtenemos el codigo de la operacion seleccionada por el usuario
+	op_code operacion_seleccionada;
+	operacion_seleccionada = convertir_codigo_operacion(opcion_seleccionada);
+
 	//Obtención datos para conexion con store
 	char* ip_store = configuracion->ip_i_mongo_store;
 	char* puerto_store = configuracion->puerto_i_mongo_store ;
@@ -108,5 +125,37 @@ int leer_config(void) {
 	return EXIT_SUCCESS;
 }
 
+void iniciar_consola(){
+	printf("Te mostramos a continuación las opciones disponibles:\n\n");
+	printf("1) Expulsar tripulante\n");
+	printf("2) Iniciar tripulante\n");
+	printf("3) Informar tareas de patota\n");
+	printf("4) Mover tripulante\n");
+	printf("5) Tarea siguiente\n");
+	printf("\n¿Qué querés hacer? Ingresá el número correspondiente\n\n");
+}
 
+bool opcion_invalida(char* opcion){
+	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0) &&
+			(strncmp(opcion,"3",1)!=0) && (strncmp(opcion,"4",1)!=0) &&
+			(strncmp(opcion,"5",1)!=0));
+}
+
+op_code convertir_codigo_operacion(char *codigo){
+	op_code codigo_operacion;
+
+	if(strncmp(codigo,"1",1)==0){
+		codigo_operacion=EXPULSAR_TRIPULANTE;
+	}else if(strncmp(codigo,"2",1)==0){
+		codigo_operacion=INICIAR_TRIPULANTE;
+	}else if(strncmp(codigo,"3",1)==0){
+		codigo_operacion = INFORMAR_TAREAS_PATOTA;
+	}else if(strncmp(codigo,"4",1)==0){
+		codigo_operacion = MOV_TRIPULANTE;
+	}else if(strncmp(codigo,"5",1)==0){
+		codigo_operacion = TAREA_SIGUIENTE;
+	}
+
+	return codigo_operacion;
+}
 

@@ -27,6 +27,9 @@ typedef struct Configuracion{
 Configuracion* configuracion;
 
 int leer_config(void);
+void iniciar_consola();
+bool opcion_invalida(char*);
+op_code convertir_codigo_operacion(char*);
 
 
 #endif

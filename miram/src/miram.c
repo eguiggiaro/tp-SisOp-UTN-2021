@@ -53,21 +53,25 @@ void atender_request_miram(uint32_t request_fd) {
 
 	op_code codigo_operacion = recibir_operacion(request_fd);
 	t_buffer* buffer_devolucion;
+	t_list* lista;
+	t_paquete* paquete_devuelto;
+	t_list* lista_mensajes;
+
 
 	switch(codigo_operacion){
 		
-	  case PAQUETE:
+	  case EXPULSAR_TRIPULANTE:
 	  //recibo los mensajes
-	  miLogInfo("Me llego operacion: PAQUETE \n");
+	  miLogInfo("Me llego operacion: EXPULSAR TRIPULANTE \n");
 	  buffer_devolucion = recibir_buffer(request_fd);
 
-	  t_list* lista = deserializar_lista_strings(buffer_devolucion);
+	  lista = deserializar_lista_strings(buffer_devolucion);
 	  loggear_lista_strings(lista);
 
 	  //devuelve una lista de mensajes
-	  t_paquete* paquete_devuelto = crear_paquete(OK);
+	  paquete_devuelto = crear_paquete(OK);
 
-	  t_list* lista_mensajes = list_create();
+	  lista_mensajes = list_create();
 	  list_add(lista_mensajes, "hola");
       list_add(lista_mensajes,"soy miram");
 
@@ -77,9 +81,92 @@ void atender_request_miram(uint32_t request_fd) {
 	  enviar_paquete(paquete_devuelto, request_fd);
 
 	  break;
-	
-	  case MENSAJE:
-		miLogInfo("Me llego operacion: MENSAJE\n");
+
+	  case INICIAR_TRIPULANTE:
+	  //recibo los mensajes
+	  miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
+	  buffer_devolucion = recibir_buffer(request_fd);
+
+	  lista = deserializar_lista_strings(buffer_devolucion);
+	  loggear_lista_strings(lista);
+
+	  //devuelve una lista de mensajes
+	  paquete_devuelto = crear_paquete(OK);
+
+	  lista_mensajes = list_create();
+	  list_add(lista_mensajes, "hola");
+      list_add(lista_mensajes,"soy miram");
+
+
+	  buffer_devolucion = serializar_lista_strings(lista_mensajes);
+	  paquete_devuelto->buffer = buffer_devolucion;
+	  enviar_paquete(paquete_devuelto, request_fd);
+
+	  break;
+
+	  case INFORMAR_TAREAS_PATOTA:
+	  //recibo los mensajes
+	  miLogInfo("Me llego operacion: INFORMAR TAREAS PATOTA \n");
+	  buffer_devolucion = recibir_buffer(request_fd);
+
+	  lista = deserializar_lista_strings(buffer_devolucion);
+	  loggear_lista_strings(lista);
+
+	  //devuelve una lista de mensajes
+	  paquete_devuelto = crear_paquete(OK);
+
+	  lista_mensajes = list_create();
+	  list_add(lista_mensajes, "hola");
+      list_add(lista_mensajes,"soy miram");
+
+
+	  buffer_devolucion = serializar_lista_strings(lista_mensajes);
+	  paquete_devuelto->buffer = buffer_devolucion;
+	  enviar_paquete(paquete_devuelto, request_fd);
+
+	  break;
+
+	  case TAREA_SIGUIENTE:
+	  //recibo los mensajes
+	  miLogInfo("Me llego operacion: TAREA SIGUIENTE \n");
+	  buffer_devolucion = recibir_buffer(request_fd);
+
+	  lista = deserializar_lista_strings(buffer_devolucion);
+	  loggear_lista_strings(lista);
+
+	  //devuelve una lista de mensajes
+	  paquete_devuelto = crear_paquete(OK);
+
+	  lista_mensajes = list_create();
+	  list_add(lista_mensajes, "hola");
+      list_add(lista_mensajes,"soy miram");
+
+
+	  buffer_devolucion = serializar_lista_strings(lista_mensajes);
+	  paquete_devuelto->buffer = buffer_devolucion;
+	  enviar_paquete(paquete_devuelto, request_fd);
+
+	  break;
+
+	  case MOV_TRIPULANTE:
+	  //recibo los mensajes
+	  miLogInfo("Me llego operacion: MOVER TRIPULANTE \n");
+	  buffer_devolucion = recibir_buffer(request_fd);
+
+	  lista = deserializar_lista_strings(buffer_devolucion);
+	  loggear_lista_strings(lista);
+
+	  //devuelve una lista de mensajes
+	  paquete_devuelto = crear_paquete(OK);
+
+	  lista_mensajes = list_create();
+	  list_add(lista_mensajes, "hola");
+      list_add(lista_mensajes,"soy miram");
+
+
+	  buffer_devolucion = serializar_lista_strings(lista_mensajes);
+	  paquete_devuelto->buffer = buffer_devolucion;
+	  enviar_paquete(paquete_devuelto, request_fd);
 
 	  break;
 

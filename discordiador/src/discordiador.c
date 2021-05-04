@@ -1,4 +1,5 @@
 #include "discordiador.h"
+#include "serializacion_discordiador.h"
 
 #define MODULE_NAME "Discordiador"
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
@@ -25,6 +26,32 @@ int main(){
 	miLogInfo("Conectándose a MiRAM");
 	iniciar_conexion(ip_miram, puerto_miram);
 
+	//Obtención datos para conexion con store
+	char* ip_store = configuracion->ip_i_mongo_store;
+	char* puerto_store = configuracion->puerto_i_mongo_store ;
+
+
+	miLogInfo("Conectándose a Store");
+	iniciar_conexion(ip_store, puerto_store);
+	
+	miLogInfo("Finalizó Discordiador");
+	free(configuracion);
+	miLogDestroy();
+
+}
+
+void iniciar_conexion(char* ip_destino, char* puerto_destino) {
+
+    //inicia conexion con destino
+    int socket = crear_conexion(logger, ip_destino, puerto_destino);
+
+	miLogInfo("Obtuve el socket y vale %d.\n", socket);
+
+	if (socket == -1) {
+		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
+		exit(3);
+	}
+
 	//iniciamos consola
 	char* opcion_seleccionada;
 	iniciar_consola();
@@ -42,57 +69,8 @@ int main(){
 	op_code operacion_seleccionada;
 	operacion_seleccionada = convertir_codigo_operacion(opcion_seleccionada);
 
-	//Obtención datos para conexion con store
-	char* ip_store = configuracion->ip_i_mongo_store;
-	char* puerto_store = configuracion->puerto_i_mongo_store ;
-
-
-	miLogInfo("Conectándose a Store");
-	iniciar_conexion(ip_store, puerto_store);
-	
-	miLogInfo("Finalizó Discordiador");
-	free(configuracion);
-	miLogDestroy();
-
-}
-
-void iniciar_conexion(char* ip_destino, char* puerto_destino) {
-
-//inicia conexion con destino
-    int socket = crear_conexion(logger, ip_destino, puerto_destino);
-
-	miLogInfo("Obtuve el socket y vale %d.\n", socket);
-
-	if (socket == -1) {
-		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
-		exit(3);
-	}
-    
-	//envia mensaje a destino
-    t_paquete* paquete = crear_paquete(PAQUETE);
-	t_buffer* buffer;
-	t_list* lista_mensajes = list_create();
-
-	list_add(lista_mensajes, "hola");
-    list_add(lista_mensajes,"soy discordiador!");
-
-	buffer = serializar_lista_strings(lista_mensajes);
-	paquete ->buffer = buffer;
-	enviar_paquete(paquete, socket);
-
-	//recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket);
-	if (codigo_operacion == OK) {
-
-		t_buffer* buffer = recibir_buffer(socket);
-		t_list* lista = deserializar_lista_strings(buffer);
-
-		loggear_lista_strings(lista);
-		
-		miLogInfo("Recibi los mensajes del destino correctamente");
-	} else {
-		miLogInfo("No recibi los mensajes del destino correctamente");
-	}
+	//enviamos accion a miram
+	enviar_accion_seleccionada(operacion_seleccionada, socket);
 }
 
 

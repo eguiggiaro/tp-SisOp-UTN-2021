@@ -24,5 +24,6 @@ typedef struct Configuracion{
 Configuracion* configuracion;
 
 int leer_config(void);
+void atender_request_store(uint32_t);
 
 #endif

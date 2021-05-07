@@ -30,6 +30,6 @@ int leer_config(void);
 void iniciar_consola();
 bool opcion_invalida(char*);
 op_code convertir_codigo_operacion(char*);
-
+void iniciar_conexion(char* ip_destino, char* puerto_destino);
 
 #endif

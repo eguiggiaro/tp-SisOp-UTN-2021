@@ -24,15 +24,18 @@ int main(){
 
 
 	miLogInfo("Conectándose a MiRAM");
+	printf("\nInicia conexion con MIRAM:\n");
 	iniciar_conexion(ip_miram, puerto_miram);
 
 	//Obtención datos para conexion con store
 	char* ip_store = configuracion->ip_i_mongo_store;
-	char* puerto_store = configuracion->puerto_i_mongo_store ;
+	char* puerto_store = configuracion->puerto_i_mongo_store;
 
 
 	miLogInfo("Conectándose a Store");
+	printf("\nInicia conexion con STORE:\n");
 	iniciar_conexion(ip_store, puerto_store);
+
 	
 	miLogInfo("Finalizó Discordiador");
 	free(configuracion);
@@ -51,7 +54,6 @@ void iniciar_conexion(char* ip_destino, char* puerto_destino) {
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
-
 	//iniciamos consola
 	char* opcion_seleccionada;
 	iniciar_consola();
@@ -69,7 +71,7 @@ void iniciar_conexion(char* ip_destino, char* puerto_destino) {
 	op_code operacion_seleccionada;
 	operacion_seleccionada = convertir_codigo_operacion(opcion_seleccionada);
 
-	//enviamos accion a miram
+	//enviamos accion a socket
 	enviar_accion_seleccionada(operacion_seleccionada, socket);
 }
 
@@ -110,13 +112,14 @@ void iniciar_consola(){
 	printf("3) Informar tareas de patota\n");
 	printf("4) Mover tripulante\n");
 	printf("5) Tarea siguiente\n");
+	printf("6) Enviar paquete de prueba\n");
 	printf("\n¿Qué querés hacer? Ingresá el número correspondiente\n\n");
 }
 
 bool opcion_invalida(char* opcion){
 	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0) &&
 			(strncmp(opcion,"3",1)!=0) && (strncmp(opcion,"4",1)!=0) &&
-			(strncmp(opcion,"5",1)!=0));
+			(strncmp(opcion,"5",1)!=0) && (strncmp(opcion,"6",1)!=0));
 }
 
 op_code convertir_codigo_operacion(char *codigo){
@@ -132,6 +135,9 @@ op_code convertir_codigo_operacion(char *codigo){
 		codigo_operacion = MOV_TRIPULANTE;
 	}else if(strncmp(codigo,"5",1)==0){
 		codigo_operacion = TAREA_SIGUIENTE;
+	}
+	else if(strncmp(codigo,"6",1)==0){
+		codigo_operacion = PAQUETE;
 	}
 
 	return codigo_operacion;

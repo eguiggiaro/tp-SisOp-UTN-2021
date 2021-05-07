@@ -9,4 +9,5 @@ void iniciar_tripulante(uint32_t socket);
 void informar_tareas_patota(uint32_t socket);
 void mover_tripulante(uint32_t socket);
 void tarea_siguiente(uint32_t socket);
+void paquete_de_prueba(uint32_t socket);
 #endif

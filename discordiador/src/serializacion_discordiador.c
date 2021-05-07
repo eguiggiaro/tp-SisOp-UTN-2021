@@ -33,6 +33,12 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 			tarea_siguiente(socket);
 
 			break;
+		case PAQUETE:
+		  printf("Entre al case de op_code %i.\n", codigo_operacion);
+
+		  paquete_de_prueba(socket);
+
+		  break;
 
 		default:
 				printf("CODIGO DE OPERACION INCORRECTO");
@@ -221,6 +227,37 @@ void tarea_siguiente(uint32_t socket){
 
     t_list* lista_mensajes = list_create();
     list_add(lista_mensajes,id_tripulante);
+    buffer = serializar_lista_strings(lista_mensajes);
+	paquete ->buffer = buffer;
+	enviar_paquete(paquete, socket);
+
+	//recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = recibir_buffer(socket);
+		t_list* lista = deserializar_lista_strings(buffer);
+
+		loggear_lista_strings(lista);
+		
+		miLogInfo("Recibi los mensajes del destino correctamente");
+	} else {
+		miLogInfo("No recibi los mensajes del destino correctamente");
+	}
+}
+
+void paquete_de_prueba(uint32_t socket){
+	printf("\nFuncion de PAQUETE DE PRUEBA");
+
+    t_paquete* paquete = crear_paquete(PAQUETE);
+	t_buffer* buffer;
+
+    char* mensaje_1;
+    printf("\nPor favor, ingrese un mensaje generico: \n");
+    mensaje_1 = readline(">>");
+
+    t_list* lista_mensajes = list_create();
+    list_add(lista_mensajes,mensaje_1);
     buffer = serializar_lista_strings(lista_mensajes);
 	paquete ->buffer = buffer;
 	enviar_paquete(paquete, socket);

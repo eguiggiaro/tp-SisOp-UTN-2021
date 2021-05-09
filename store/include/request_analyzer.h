@@ -1,5 +1,5 @@
-#ifndef FILE_SYSTEM_H
-#define FILE_SYSTEM_H
+#ifndef REQUEST_ANALYZER_H
+#define REQUEST_ANALYZER_H
 
 //Standard libs
 #include <stdlib.h>
@@ -18,15 +18,7 @@
 #include "shared_utils.h"
 
 
-uint32_t cantidadBloques;
-uint32_t tamanioBloque;
+void atender_request_store(uint32_t);
 
-
-void verificar_fs(char*);
-void leerSuperBloque(char*);
-
-void crearArbolDirectorios(char*);
-void crearBlocks(char*);
-void limpiarBitmap(char*);
 
 #endif

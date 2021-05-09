@@ -13,7 +13,7 @@ void verificar_fs(char* punto_montaje){
 
 	} else {
 
-        miLogTrace("Ya existe el archivo Blocks.ims\n");
+        miLogDebug("Ya existe el archivo Blocks.ims\n"); //Trace?
 	}
 
 	char* pathFiles = string_from_format("%s/%s", punto_montaje, "Files");
@@ -76,7 +76,7 @@ void limpiarBitmap(char* punto_montaje){
 	char* pathSuperbloque = string_from_format("%s/%s", punto_montaje, "SuperBloque.ims");
 	void* punteroABitmap = calloc(cantidadBloques/8, 1);
 
-	FILE* superBloqueFile = fopen(pathSuperbloque, "wrb");
+	FILE* superBloqueFile = fopen(pathSuperbloque, "w+");
 	
 	fwrite(punteroABitmap, 1, cantidadBloques/8, superBloqueFile);
 	fclose(superBloqueFile);

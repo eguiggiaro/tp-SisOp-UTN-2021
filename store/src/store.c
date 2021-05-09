@@ -8,8 +8,7 @@ int main(int argc, char* argv[]) {
 
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
-	miLogInfo("Inició I-Mongo-Store.");
-
+	
 	if(leer_config()){
 		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
 		miLogDestroy();
@@ -21,9 +20,7 @@ int main(int argc, char* argv[]) {
 	miLogInfo("Tiempo sincronizacion: %s", string_itoa(configuracion->tiempoSincro));
 	*/
 
-	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
-
-
+	inicializar_store();
 
 	miLogInfo("Finalizó I-Mongo-Store.");
 	miLogDestroy();
@@ -47,47 +44,23 @@ int leer_config(void){
 	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
-
+	configuracion->posicionesSabotaje = config_get_array_value(config, "POSICIONES_SABOTAJE");
+	/*Para tratar las posiciones:
+	char** posiciones = string_split(posicionesSabotaje[i], "|");
+	t_pos posicion;
+	posicion.x = atoi(posicion[0]);	
+	posicion.y = atoi(posicion[1]);
+	*/
+	
 	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
-void atender_request_store(uint32_t request_fd) {
 
-	op_code codigo_operacion = recibir_operacion(request_fd);
-	t_buffer* buffer_devolucion;
-
-	switch(codigo_operacion){
-		
-	  case PAQUETE:
-	  //recibo los mensajes
-	  miLogInfo("Me llego operacion: PAQUETE \n");
-	  buffer_devolucion = recibir_buffer(request_fd);
-
-	  t_list* lista = deserializar_lista_strings(buffer_devolucion);
-	  loggear_lista_strings(lista);
-
-	  //devuelve una lista de mensajes
-	  t_paquete* paquete_devuelto = crear_paquete(OK);
-
-	  t_list* lista_mensajes = list_create();
-	  list_add(lista_mensajes, "hola");
-      list_add(lista_mensajes, "soy store");
-
-	  buffer_devolucion = serializar_lista_strings(lista_mensajes);
-	  paquete_devuelto->buffer = buffer_devolucion;
-	  enviar_paquete(paquete_devuelto, request_fd);
-
-	  break;
+void inicializar_store (){
 	
-	  case MENSAJE:
-		miLogInfo("Me llego operacion: MENSAJE\n");
-
-	  break;
-
-	  default:
-		miLogInfo("Me llego operacion: ...\n");
-
-	  break;
-	}
+	miLogDebug("Inició I-Mongo-Store.");
+	
+	//verificar_fs(configuracion->puntoMontaje);
+	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }

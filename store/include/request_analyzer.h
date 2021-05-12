@@ -16,6 +16,7 @@
 
 //Shared libs
 #include "shared_utils.h"
+#include "paquete.h"
 
 
 void atender_request_store(uint32_t);

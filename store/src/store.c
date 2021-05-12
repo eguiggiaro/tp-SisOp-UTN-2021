@@ -44,7 +44,7 @@ int leer_config(void){
 	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
-	configuracion->posicionesSabotaje = config_get_array_value(config, "POSICIONES_SABOTAJE");
+	//configuracion->posicionesSabotaje = config_get_array_value(config, "POSICIONES_SABOTAJE");
 	/*Para tratar las posiciones:
 	char** posiciones = string_split(posicionesSabotaje[i], "|");
 	t_pos posicion;

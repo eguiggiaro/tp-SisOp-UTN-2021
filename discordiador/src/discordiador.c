@@ -194,7 +194,7 @@ op_code convertir_codigo_operacion_store(char *codigo){
 	}else if(strncmp(codigo,"2",1)==0){
 		codigo_operacion=FSCK;
 	}else if(strncmp(codigo,"3",1)==0){
-		codigo_operacion = GENERAR_OXIGENO;
+		codigo_operacion = INFORMAR_TAREA;
 	}else if(strncmp(codigo,"4",1)==0){
 		codigo_operacion = PAQUETE;
 	}

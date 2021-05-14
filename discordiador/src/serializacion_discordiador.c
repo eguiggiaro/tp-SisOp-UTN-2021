@@ -53,7 +53,7 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 
 		  break;
 
-		case GENERAR_OXIGENO:
+		case INFORMAR_TAREA:
 		  printf("Entre al case de op_code %i.\n", codigo_operacion);
 
 		  generar_oxigeno(socket);
@@ -354,7 +354,7 @@ void iniciar_fsck(uint32_t socket){
 void generar_oxigeno(uint32_t socket){
     printf("\nFuncion de GENERAR OXIGENO");
 
-    t_paquete* paquete = crear_paquete(GENERAR_OXIGENO);
+    t_paquete* paquete = crear_paquete(INFORMAR_TAREA);
 	t_buffer* buffer;
 
     char* cantidad;

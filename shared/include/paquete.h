@@ -15,7 +15,7 @@ typedef enum
 	TAREA_SIGUIENTE,
 	INFORMAR_TAREA,
 	FSCK,
-	ALTERTA_SABOTAJE,
+	ALERTA_SABOTAJE,
     OK = 20,
 	FAIL = 21,
 } op_code;

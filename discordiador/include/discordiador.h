@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include "logger.h"
 #include "paquete.h"
+#include "servidor_discordiador.h"
 
 typedef struct Configuracion{
 	char* puntoMontaje;
@@ -25,6 +26,8 @@ typedef struct Configuracion{
 } Configuracion;
 
 Configuracion* configuracion;
+
+char* puerto_discordiador;
 
 int leer_config(void);
 void elegir_modulo();

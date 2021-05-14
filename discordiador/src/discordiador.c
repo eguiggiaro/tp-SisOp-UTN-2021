@@ -18,6 +18,8 @@ int main(){
 		return EXIT_FAILURE;
 	}
 
+	puerto_discordiador = string_itoa(configuracion->puerto);
+
 	char* modulo;
 	elegir_modulo();
 	modulo = readline(">>");

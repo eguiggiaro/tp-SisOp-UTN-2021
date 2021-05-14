@@ -4,31 +4,6 @@
 #define CONFIG_FILE_PATH "cfg/miram.cfg"
 #define LOG_FILE_PATH "miram.log"
 
-int main(){
-
-	pthread_t mapa;
-	pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
-
-	char* puerto_miram = NULL;
-   //Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
-	miLogInfo("Inició MiRAM.");
-
-	if(leer_config()){
-		miLogInfo("Error al iniciar MiRAM: No se encontró el archivo de configuración");
-		miLogDestroy();
-		return EXIT_FAILURE;
-	}
-
-
-
-	puerto_miram = string_itoa(configuracion->puerto);
-	levantar_servidor(atender_request_miram,puerto_miram);
-
-	miLogInfo("Finalizó MiRAM");
-	free(configuracion);
-    miLogDestroy();
-}
 
 int leer_config(void) {
 
@@ -41,9 +16,13 @@ int leer_config(void) {
 		return EXIT_FAILURE;
 	}
 
-	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
-	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
+	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
+	configuracion->esquema_memoria = strdup(config_get_string_value(config, "ESQUEMA_MEMORIA"));
+	configuracion->tamanio_pagina = config_get_int_value(config, "TAMANIO_PAGINA");
+	configuracion->tamanio_swap = config_get_int_value(config, "TAMANIO_SWAP");
+	configuracion->path_swap = strdup(config_get_string_value(config, "PATH_SWAP"));
+	configuracion->algoritmo_reemplazo = strdup(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));
 
 	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -197,4 +176,55 @@ void crear_grilla(void) {
 	nivel_destruir(nivel);
 	nivel_gui_terminar();
 	
+}
+
+void iniciar_memoria(char* tamanio_memoria)
+{
+	MEMORIA = malloc(tamanio_memoria);
+
+	//SERVICIOS A CONSTRUIR
+	// 1- Crear tabla de segmentos
+	// 2- Crear un segmento
+	// 3- Eliminar un segmento
+	// 
+	
+	PCB* proceso1 = malloc(sizeof(PCB));
+	proceso1->PID = 100;
+	proceso1->Tareas = 150;
+
+	free(proceso1);
+	free(MEMORIA);
+
+}
+
+
+int main(){
+
+	//pthread_t mapa;
+	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
+
+	char* puerto_miram = NULL;
+   //Inicio el log en un thread... :O
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
+	miLogInfo("Inició MiRAM.");
+
+	if(leer_config()){
+		miLogInfo("Error al iniciar MiRAM: No se encontró el archivo de configuración");
+		miLogDestroy();
+		return EXIT_FAILURE;
+	}
+
+	char* tamanio_memoria = string_itoa(configuracion->tamanio_memoria);
+
+	iniciar_memoria(tamanio_memoria);
+
+
+	puerto_miram = string_itoa(configuracion->puerto);
+	levantar_servidor(atender_request_miram,puerto_miram);
+
+	miLogInfo("Finalizó MiRAM");
+	free(configuracion);
+    miLogDestroy();
+
+
 }

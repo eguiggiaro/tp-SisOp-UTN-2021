@@ -54,6 +54,13 @@ int main(){
 		miLogInfo("\nOpcion invalida\n");
 	}
 
+	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
+			NULL) != 0) {
+		printf("Error iniciando servidor/n");
+	}
+
+	pthread_join(threadSERVER, NULL);
+
 	
 	miLogInfo("Finalizó Discordiador");
 	free(configuracion);

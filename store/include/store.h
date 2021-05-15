@@ -29,7 +29,7 @@ typedef struct Configuracion{
 	char* puntoMontaje;
 	int puerto;
 	int tiempoSincro;
-	char** posicionesSabotaje;
+	//char** posicionesSabotaje;
 
 } Configuracion;
 

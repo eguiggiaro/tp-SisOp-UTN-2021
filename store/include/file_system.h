@@ -26,6 +26,7 @@ void verificar_fs(char*);
 void leerSuperBloque(char*);
 
 void crearArbolDirectorios(char*);
+void crearSuperbloque(char*);
 void crearBlocks(char*);
 void limpiarBitmap(char*);
 

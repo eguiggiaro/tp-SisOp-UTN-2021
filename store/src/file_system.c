@@ -2,12 +2,13 @@
 
 void verificar_fs(char* punto_montaje){
 
-	leerSuperBloque(punto_montaje);
+	//leerSuperBloque(punto_montaje);
 
-	char* pathBlocks = string_from_format("%s/%s", punto_montaje, "Blocks.ims");
+	char* pathSuperbloque = string_from_format("%s/%s", punto_montaje, "SuperBloque.ims"); //ej: /home/utnso/mnt/SuperBloque.ims
 
-	if(fopen(pathBlocks, "r") == NULL){
+	if(fopen(pathSuperbloque, "r") == NULL){
 		//No encontre el archivo de bloques. Lo creo.
+		crearSuperBloque(punto_montaje);
 		crearBlocks(punto_montaje);
 		limpiarBitmap(punto_montaje);
 
@@ -27,12 +28,12 @@ void verificar_fs(char* punto_montaje){
 		crearArbolDirectorios(pathFiles);
 	}
 
-	free(pathBlocks);    
+	free(pathSuperbloque);    
 	free(pathFiles); 
     
 }
 
-void leerSuperBloque(char* punto_montaje){
+/*void leerSuperBloque(char* punto_montaje){
 
 	char* pathSuperbloque = string_from_format("%s/%s", punto_montaje, "SuperBloque.ims");
 	t_config* md = config_create(pathSuperbloque);
@@ -46,7 +47,19 @@ void leerSuperBloque(char* punto_montaje){
 
 	config_destroy(md);
 	free(pathSuperbloque);
+}*/
+
+void crearSuperBloque(char* punto_montaje){
+	
+	char* pathSuperbloque = string_from_format("%s/%s", punto_montaje, "SuperBloque.ims");
+	FILE* archivoSuperbloque = fopen(pathSuperbloque, "wb");
+
+	//TODO: llenar el archivo con algo que no se..
+
+	fclose(archivoSuperbloque);
+	free(pathSuperbloque);
 }
+
 
 void crearBlocks(char* punto_montaje){
 	

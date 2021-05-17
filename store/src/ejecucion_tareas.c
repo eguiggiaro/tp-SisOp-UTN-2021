@@ -50,9 +50,9 @@ void generarRecursos(tipoRecurso recurso, int cantidad){
 
     //---------------------------------------------------ESCRITURA DE DATOS------------------------------------------------------------------------------------
 
-    int lugarDisponible = buscarLugarDisponible(archivoBlocks, archivoMetadata); //busco si tengo un lugar disponible y devuelvo la posición
-
-    agregarRecurso(punteroBloqueCopia, recurso, lugarDisponible, cantidad); //agrego la cantidad de caracteres en el archivo
+    int posicionDisponible = buscarposicionDisponible(archivoMetadata); //busco si tengo un lugar disponible y devuelvo la posición
+    
+    agregarRecurso(punteroBloqueCopia, recurso, posicionDisponible, cantidad, archivoMetadata); //agrego la cantidad de caracteres en el archivo
 
 
     //---------------------------------------------CIERRE, LIBERACION DE MEMORIA Y SINCRONIZACION---------------------------------------------------------
@@ -76,36 +76,47 @@ void generarRecursos(tipoRecurso recurso, int cantidad){
 
 }
 
-void agregarRecurso(char * punteroBloqueCopia, tipoRecurso recurso, int lugarDisponible, int cantidad){
+void agregarRecurso(char * punteroBloqueCopia, tipoRecurso recurso, int posicionDisponible, int cantidad, int archivoMetadata){
 
     switch(recurso){
         
         case OXIGENO: 
 
-            llenarDeCaracteres(punteroBloqueCopia, lugarDisponible, "O", cantidad); 
+            llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, "O", cantidad, archivoMetadata); 
             break;
 
         case BASURA:
 
-            llenarDeCaracteres(punteroBloqueCopia, lugarDisponible, "B", cantidad);
+            llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, "B", cantidad, archivoMetadata);
             break;
         
         case COMIDA:
 
-            llenarDeCaracteres(punteroBloqueCopia, lugarDisponible, "C", cantidad);
+            llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, "C", cantidad, archivoMetadata);
             break;
         
         default:  break;
     }
 }
 
-void llenarDeCaracteres(char * punteroBloqueCopia, int lugarDisponible, char * caracterDeLlenado, int cantidad){
+void llenarDeCaracteres(char * punteroBloqueCopia, int posicionDisponible, char * caracterDeLlenado, int cantidadCaracteres, int archivoMetadata){
     
-    for(int i = 0; i<=cantidad; i++){
+    int cantEspaciosLibresEnBloque = cantPosicionesLibresEn(posicionDisponible);
 
-        punteroBloqueCopia[lugarDisponible] = caracterDeLlenado; //Agrega el caracter deseado al lugar apuntado disponible
-        lugarDisponible++;
+    for(int i = 1; i<=cantEspaciosLibresEnBloque; i++){
 
+        punteroBloqueCopia[posicionDisponible] = caracterDeLlenado; //Agrega el caracter deseado al lugar apuntado disponible
+        posicionDisponible++;
+
+    }
+
+    if(cantidadCaracteres > cantEspaciosLibresEnBloque){
+        
+        int cantidadCaracteresRestantes = cantidadCaracteres - cantEspaciosLibresEnBloque;
+
+        posicionDisponible = buscarposicionDisponible(archivoMetadata);
+        
+        llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, caracterDeLlenado, cantidadCaracteresRestantes, archivoMetadata);
     }
         
 }
@@ -122,6 +133,10 @@ int calcularTamañoBlocks(){
     //Calcula el tamaño de Blocks.ims
 }
 
-int buscarLugarDisponible(int archivoBlocks,int archivoMetadata){
+int buscarposicionDisponible(int archivoMetadata){
     //Busca un lugar disponible en el archivo Blocks.ims
+}
+
+int cantPosicionesLibresEn (int posicionDisponible){
+    //Devuelve cuantas posiciones libres hay en el bloque
 }

@@ -178,22 +178,92 @@ void crear_grilla(void) {
 	
 }
 
-void iniciar_memoria(char* tamanio_memoria)
+void inicializar_memoria(int tamanio_memoria)
 {
 	MEMORIA = malloc(tamanio_memoria);
 
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		inicializar_segmentacion(tamanio_memoria);
+	}
+
+}
+
+void finalizar_memoria()
+{
+
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		finalizar_segmentacion();
+	}
+
+	free(MEMORIA);
+
+}
+
+void agregar_a_memoria(TCB* unTCB) 
+{
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		if (configuracion->esquema_memoria = "SEGMENTACION")
+		{
+
+		}
+	}
+
+
+
+}
+
+
+void hacer_memoria(char* tamanio_memoria)
+{
+
+
+	TCB* miTCB = MEMORIA;
+	miTCB->TID = 100;
+	miTCB->estado = 'E';
+	miTCB->pos_X = 15;
+	miTCB->pos_y = 20;
+	miTCB->proxima_instruccion = 1212;
+	miTCB->PCB = 1212;
+
+	nuevo_segmento_patota_first_fit_tcb(miTCB);
+	mostrar_tabla_segmentos(true);
+
+//  
 	//SERVICIOS A CONSTRUIR
-	// 1- Crear tabla de segmentos
+	// 1- NUEVO ELEMENTO:
 	// 2- Crear un segmento
 	// 3- Eliminar un segmento
-	// 
-	
-	PCB* proceso1 = malloc(sizeof(PCB));
-	proceso1->PID = 100;
-	proceso1->Tareas = 150;
+	// ¡cómo sé que llegué al final de la memoria?
 
-	free(proceso1);
-	free(MEMORIA);
+	// si direccion es mayor a base + limite o menor a base, error
+
+
+// list_add(t_list *self, void *data) {
+//void list_iterate(t_list* self, void(*closure)(void*)) {
+//void* list_find(t_list *self, bool(*condition)(void*)) {
+
+
+//static t_link_element* list_find_element(t_list *self, bool(*cutting_condition)(t_link_element*, int)) {
+//	t_link_element* element = self->head;
+//	int index = 0;
+
+//	while(!cutting_condition(element, index)) {
+//		element = element->next;
+//		index++;
+//	}
+
+//	return element;
+//}
+
+
+
+
+
+
+
 
 }
 
@@ -204,8 +274,9 @@ int main(){
 	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
 
 	char* puerto_miram = NULL;
+	
    //Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
 	miLogInfo("Inició MiRAM.");
 
 	if(leer_config()){
@@ -214,16 +285,21 @@ int main(){
 		return EXIT_FAILURE;
 	}
 
-	char* tamanio_memoria = string_itoa(configuracion->tamanio_memoria);
+	int tamanio_memoria = configuracion->tamanio_memoria;
 
-	iniciar_memoria(tamanio_memoria);
+	inicializar_memoria(tamanio_memoria);
+	mostrar_tabla_segmentos(true);
+	hacer_memoria(tamanio_memoria);
 
 
 	puerto_miram = string_itoa(configuracion->puerto);
-	levantar_servidor(atender_request_miram,puerto_miram);
+	//levantar_servidor(atender_request_miram,puerto_miram);
+
+
 
 	miLogInfo("Finalizó MiRAM");
 	free(configuracion);
+	finalizar_memoria();
     miLogDestroy();
 
 

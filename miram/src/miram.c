@@ -267,13 +267,22 @@ void hacer_memoria(char* tamanio_memoria)
 
 }
 
+void* iniciar_servidor_miram(){
+    levantar_servidor(atender_request_miram,puerto_miram);
+	return NULL;
+}
+
+void* iniciar_funciones_memoria(){
+    inicializar_memoria(tamanio_memoria);
+	mostrar_tabla_segmentos(true);
+	hacer_memoria(tamanio_memoria);
+	return NULL;
+}
 
 int main(){
 
 	//pthread_t mapa;
 	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
-
-	char* puerto_miram = NULL;
 	
    //Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
@@ -285,17 +294,29 @@ int main(){
 		return EXIT_FAILURE;
 	}
 
-	int tamanio_memoria = configuracion->tamanio_memoria;
-
-	inicializar_memoria(tamanio_memoria);
-	mostrar_tabla_segmentos(true);
-	hacer_memoria(tamanio_memoria);
-
+	tamanio_memoria = configuracion->tamanio_memoria;
 
 	puerto_miram = string_itoa(configuracion->puerto);
-	//levantar_servidor(atender_request_miram,puerto_miram);
+
+	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_miram,
+			NULL) != 0) {
+		printf("Error iniciando servidor/n");
+	}
+
+	if (pthread_create(&threadMAPA, NULL, (void*) crear_grilla,
+			NULL) != 0) {
+		printf("Error creando grilla/n");
+	}
+
+	if (pthread_create(&threadMEMORIA, NULL, (void*) iniciar_funciones_memoria,
+			NULL) != 0) {
+		printf("Error iniciando memoria/n");
+	}
 
 
+    pthread_join(threadSERVER, NULL);
+	pthread_join(threadMAPA, NULL);
+	pthread_join(threadMEMORIA, NULL);
 
 	miLogInfo("Finalizó MiRAM");
 	free(configuracion);

@@ -22,10 +22,17 @@ typedef struct Configuracion{
 } Configuracion;
 
 Configuracion* configuracion;
-int leer_config(void) ;
+pthread_t threadSERVER;
+pthread_t threadMEMORIA;
+pthread_t threadMAPA;
+char* puerto_miram;
+int tamanio_memoria;
 
+int leer_config(void);
 void atender_request_miram(uint32_t request_fd);
 void crear_grilla(void);
+void* iniciar_servidor_miram();
+void* iniciar_funciones_memoria();
 
 
 

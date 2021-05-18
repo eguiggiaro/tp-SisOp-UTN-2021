@@ -4,31 +4,6 @@
 #define CONFIG_FILE_PATH "cfg/miram.cfg"
 #define LOG_FILE_PATH "miram.log"
 
-int main(){
-
-	pthread_t mapa;
-	pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
-
-	char* puerto_miram = NULL;
-   //Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
-	miLogInfo("Inició MiRAM.");
-
-	if(leer_config()){
-		miLogInfo("Error al iniciar MiRAM: No se encontró el archivo de configuración");
-		miLogDestroy();
-		return EXIT_FAILURE;
-	}
-
-
-
-	puerto_miram = string_itoa(configuracion->puerto);
-	levantar_servidor(atender_request_miram,puerto_miram);
-
-	miLogInfo("Finalizó MiRAM");
-	free(configuracion);
-    miLogDestroy();
-}
 
 int leer_config(void) {
 
@@ -41,9 +16,13 @@ int leer_config(void) {
 		return EXIT_FAILURE;
 	}
 
-	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
-	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
+	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
+	configuracion->esquema_memoria = strdup(config_get_string_value(config, "ESQUEMA_MEMORIA"));
+	configuracion->tamanio_pagina = config_get_int_value(config, "TAMANIO_PAGINA");
+	configuracion->tamanio_swap = config_get_int_value(config, "TAMANIO_SWAP");
+	configuracion->path_swap = strdup(config_get_string_value(config, "PATH_SWAP"));
+	configuracion->algoritmo_reemplazo = strdup(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));
 
 	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -197,4 +176,152 @@ void crear_grilla(void) {
 	nivel_destruir(nivel);
 	nivel_gui_terminar();
 	
+}
+
+void inicializar_memoria(int tamanio_memoria)
+{
+	MEMORIA = malloc(tamanio_memoria);
+
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		inicializar_segmentacion(tamanio_memoria);
+	}
+
+}
+
+void finalizar_memoria()
+{
+
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		finalizar_segmentacion();
+	}
+
+	free(MEMORIA);
+
+}
+
+void agregar_a_memoria(TCB* unTCB) 
+{
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		if (configuracion->esquema_memoria = "SEGMENTACION")
+		{
+
+		}
+	}
+
+
+
+}
+
+
+void hacer_memoria(char* tamanio_memoria)
+{
+
+
+	TCB* miTCB = MEMORIA;
+	miTCB->TID = 100;
+	miTCB->estado = 'E';
+	miTCB->pos_X = 15;
+	miTCB->pos_y = 20;
+	miTCB->proxima_instruccion = 1212;
+	miTCB->PCB = 1212;
+
+	nuevo_segmento_patota_first_fit_tcb(miTCB);
+	mostrar_tabla_segmentos(true);
+
+//  
+	//SERVICIOS A CONSTRUIR
+	// 1- NUEVO ELEMENTO:
+	// 2- Crear un segmento
+	// 3- Eliminar un segmento
+	// ¡cómo sé que llegué al final de la memoria?
+
+	// si direccion es mayor a base + limite o menor a base, error
+
+
+// list_add(t_list *self, void *data) {
+//void list_iterate(t_list* self, void(*closure)(void*)) {
+//void* list_find(t_list *self, bool(*condition)(void*)) {
+
+
+//static t_link_element* list_find_element(t_list *self, bool(*cutting_condition)(t_link_element*, int)) {
+//	t_link_element* element = self->head;
+//	int index = 0;
+
+//	while(!cutting_condition(element, index)) {
+//		element = element->next;
+//		index++;
+//	}
+
+//	return element;
+//}
+
+
+
+
+
+
+
+
+}
+
+void* iniciar_servidor_miram(){
+    levantar_servidor(atender_request_miram,puerto_miram);
+	return NULL;
+}
+
+void* iniciar_funciones_memoria(){
+    inicializar_memoria(tamanio_memoria);
+	mostrar_tabla_segmentos(true);
+	hacer_memoria(tamanio_memoria);
+	return NULL;
+}
+
+int main(){
+
+	//pthread_t mapa;
+	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
+	
+   //Inicio el log en un thread... :O
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
+	miLogInfo("Inició MiRAM.");
+
+	if(leer_config()){
+		miLogInfo("Error al iniciar MiRAM: No se encontró el archivo de configuración");
+		miLogDestroy();
+		return EXIT_FAILURE;
+	}
+
+	tamanio_memoria = configuracion->tamanio_memoria;
+
+	puerto_miram = string_itoa(configuracion->puerto);
+
+	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_miram,
+			NULL) != 0) {
+		printf("Error iniciando servidor/n");
+	}
+
+	if (pthread_create(&threadMAPA, NULL, (void*) crear_grilla,
+			NULL) != 0) {
+		printf("Error creando grilla/n");
+	}
+
+	if (pthread_create(&threadMEMORIA, NULL, (void*) iniciar_funciones_memoria,
+			NULL) != 0) {
+		printf("Error iniciando memoria/n");
+	}
+
+
+    pthread_join(threadSERVER, NULL);
+	pthread_join(threadMAPA, NULL);
+	pthread_join(threadMEMORIA, NULL);
+
+	miLogInfo("Finalizó MiRAM");
+	free(configuracion);
+	finalizar_memoria();
+    miLogDestroy();
+
+
 }

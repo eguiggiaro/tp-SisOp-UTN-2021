@@ -1,2 +1,38 @@
 [INFO] 00:20:12:439 Discordiador/(23040:23040): Soy el discordiador desde utils! Hice uso de la shared!
 [INFO] 19:47:43:638 Discordiador/(17056:17056): Soy el discordiador desde utils! Hice uso de la shared!
+[INFO] 19:05:07:810 Discordiador/(10204:10204): Inició Discordiador.
+[INFO] 19:05:30:628 Discordiador/(10204:10204): Conectándose a Store
+[INFO] 19:05:30:628 Discordiador/(10204:10204): Obtuve el socket y vale 4.
+
+[INFO] 19:09:02:804 Discordiador/(10601:10601): Inició Discordiador.
+[INFO] 19:09:06:668 Discordiador/(10601:10601): Conectándose a Store
+[INFO] 19:09:06:668 Discordiador/(10601:10601): Obtuve el socket y vale 4.
+
+[INFO] 19:55:12:677 Discordiador/(11942:11942): Inició Discordiador.
+[INFO] 19:55:14:309 Discordiador/(11942:11942): Conectándose a Store
+[INFO] 19:55:14:310 Discordiador/(11942:11942): Obtuve el socket y vale 4.
+
+[INFO] 19:56:32:994 Discordiador/(11955:11955): Inició Discordiador.
+[INFO] 19:56:35:816 Discordiador/(11955:11955): Conectándose a Store
+[INFO] 19:56:35:816 Discordiador/(11955:11955): Obtuve el socket y vale 4.
+
+[INFO] 19:56:42:274 Discordiador/(11955:11955): El contenido de la lista es el siguiente
+
+[INFO] 19:56:42:274 Discordiador/(11955:11955): 	El elemento 1 es : hola
+
+[INFO] 19:56:42:274 Discordiador/(11955:11955): 	El elemento 2 es : soy store
+
+[INFO] 19:56:42:274 Discordiador/(11955:11955): Recibi los mensajes del destino correctamente
+[INFO] 19:56:42:274 Discordiador/(11955:11955): Finalizó Discordiador
+[INFO] 19:56:55:562 Discordiador/(11967:11967): Inició Discordiador.
+[INFO] 19:56:56:911 Discordiador/(11967:11967): Conectándose a Store
+[INFO] 19:56:56:911 Discordiador/(11967:11967): Obtuve el socket y vale 4.
+
+[INFO] 19:57:02:652 Discordiador/(11967:11967): El contenido de la lista es el siguiente
+
+[INFO] 19:57:02:652 Discordiador/(11967:11967): 	El elemento 1 es : hola
+
+[INFO] 19:57:02:652 Discordiador/(11967:11967): 	El elemento 2 es : soy store
+
+[INFO] 19:57:02:652 Discordiador/(11967:11967): Recibi los mensajes del destino correctamente
+[INFO] 19:57:02:652 Discordiador/(11967:11967): Finalizó Discordiador

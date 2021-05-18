@@ -9,19 +9,32 @@
 #include <paquete.h>
 #include <nivel-gui/nivel-gui.h>
 #include <nivel-gui/tad_nivel.h>
+#include "estructuras.h"
 
 typedef struct Configuracion{
-	char* puntoMontaje;
 	int puerto;
-	int tiempoSincro;
-    int ip_mi_ram_hq;
-    int puerto_mi_ram_hq;
+    int tamanio_memoria;
+    char* esquema_memoria;
+	int tamanio_pagina;
+    int tamanio_swap;
+	char* path_swap;
+	char* algoritmo_reemplazo;
 } Configuracion;
 
 Configuracion* configuracion;
-int leer_config(void) ;
+pthread_t threadSERVER;
+pthread_t threadMEMORIA;
+pthread_t threadMAPA;
+char* puerto_miram;
+int tamanio_memoria;
 
+int leer_config(void);
 void atender_request_miram(uint32_t request_fd);
 void crear_grilla(void);
+void* iniciar_servidor_miram();
+void* iniciar_funciones_memoria();
+
+
+
 
 #endif

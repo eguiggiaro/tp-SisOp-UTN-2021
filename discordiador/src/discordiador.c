@@ -17,24 +17,49 @@ int main(){
 		miLogDestroy();
 		return EXIT_FAILURE;
 	}
-		
+
+	puerto_discordiador = string_itoa(configuracion->puerto);
+
+	char* modulo;
+	elegir_modulo();
+	modulo = readline(">>");
+
+	while(modulo_invalido(modulo)){
+		printf("\nError! %s no es una opción correcta.\n",modulo);
+		elegir_modulo();
+		modulo = readline(">>");
+	}
+
+	if(strncmp(modulo,"1",1)==0){
 	//Obtención datos para conexion con miram
 	char* ip_miram = configuracion->ip_mi_ram_hq;
-	char* puerto_miram = configuracion->puerto_mi_ram_hq ;
-
+	char* puerto_miram = configuracion->puerto_mi_ram_hq;
 
 	miLogInfo("Conectándose a MiRAM");
 	printf("\nInicia conexion con MIRAM:\n");
-	iniciar_conexion(ip_miram, puerto_miram);
 
+	iniciar_conexion_miram(ip_miram, puerto_miram);
+	
+	}else if(strncmp(modulo,"2",1)==0){
 	//Obtención datos para conexion con store
 	char* ip_store = configuracion->ip_i_mongo_store;
 	char* puerto_store = configuracion->puerto_i_mongo_store;
 
-
 	miLogInfo("Conectándose a Store");
 	printf("\nInicia conexion con STORE:\n");
-	iniciar_conexion(ip_store, puerto_store);
+
+	iniciar_conexion_store(ip_store, puerto_store);
+	}
+	else{
+		miLogInfo("\nOpcion invalida\n");
+	}
+
+	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
+			NULL) != 0) {
+		printf("Error iniciando servidor/n");
+	}
+
+	pthread_join(threadSERVER, NULL);
 
 	
 	miLogInfo("Finalizó Discordiador");
@@ -43,7 +68,7 @@ int main(){
 
 }
 
-void iniciar_conexion(char* ip_destino, char* puerto_destino) {
+void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {
 
     //inicia conexion con destino
     int socket = crear_conexion(logger, ip_destino, puerto_destino);
@@ -56,12 +81,12 @@ void iniciar_conexion(char* ip_destino, char* puerto_destino) {
 	}
 	//iniciamos consola
 	char* opcion_seleccionada;
-	iniciar_consola();
+	iniciar_consola_miram();
 	opcion_seleccionada = readline(">>");
 
-	while(opcion_invalida(opcion_seleccionada)){
+	while(opcion_invalida_miram(opcion_seleccionada)){
 		printf("\nError! %s no es una opción correcta.\n",opcion_seleccionada);
-		iniciar_consola();
+		iniciar_consola_miram();
 		opcion_seleccionada = readline(">>");
 	}
 
@@ -69,12 +94,43 @@ void iniciar_conexion(char* ip_destino, char* puerto_destino) {
 
 	//obtenemos el codigo de la operacion seleccionada por el usuario
 	op_code operacion_seleccionada;
-	operacion_seleccionada = convertir_codigo_operacion(opcion_seleccionada);
+	operacion_seleccionada = convertir_codigo_operacion_miram(opcion_seleccionada);
 
 	//enviamos accion a socket
 	enviar_accion_seleccionada(operacion_seleccionada, socket);
 }
 
+void iniciar_conexion_store(char* ip_destino, char* puerto_destino) {
+
+    //inicia conexion con destino
+    int socket = crear_conexion(logger, ip_destino, puerto_destino);
+
+	miLogInfo("Obtuve el socket y vale %d.\n", socket);
+
+	if (socket == -1) {
+		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
+		exit(3);
+	}
+	//iniciamos consola
+	char* opcion_seleccionada;
+	iniciar_consola_store();
+	opcion_seleccionada = readline(">>");
+
+	while(opcion_invalida_store(opcion_seleccionada)){
+		printf("\nError! %s no es una opción correcta.\n",opcion_seleccionada);
+		iniciar_consola_store();
+		opcion_seleccionada = readline(">>");
+	}
+
+	printf("\nOpcion seleccionada: %s \n", opcion_seleccionada);
+
+	//obtenemos el codigo de la operacion seleccionada por el usuario
+	op_code operacion_seleccionada;
+	operacion_seleccionada = convertir_codigo_operacion_store(opcion_seleccionada);
+
+	//enviamos accion a socket
+	enviar_accion_seleccionada(operacion_seleccionada, socket);
+}
 
 
 int leer_config(void) {
@@ -105,24 +161,57 @@ int leer_config(void) {
 	return EXIT_SUCCESS;
 }
 
-void iniciar_consola(){
-	printf("Te mostramos a continuación las opciones disponibles:\n\n");
+void iniciar_consola_miram(){
+	printf("Mensajes posibles:\n\n");
 	printf("1) Expulsar tripulante\n");
 	printf("2) Iniciar tripulante\n");
 	printf("3) Informar tareas de patota\n");
 	printf("4) Mover tripulante\n");
 	printf("5) Tarea siguiente\n");
-	printf("6) Enviar paquete de prueba\n");
-	printf("\n¿Qué querés hacer? Ingresá el número correspondiente\n\n");
+	printf("\nSeleccione el numero correspondiente\n\n");
 }
 
-bool opcion_invalida(char* opcion){
+void iniciar_consola_store(){
+	printf("Mensajes posibles:\n\n");
+	printf("1) Obtener bitacora\n");
+	printf("2) Iniciar FSCK\n");
+	printf("3) Generar oxigeno\n");
+	printf("4) Enviar paquete de prueba\n");
+	printf("\nSeleccione el numero correspondiente\n\n");
+}
+
+bool opcion_invalida_miram(char* opcion){
 	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0) &&
 			(strncmp(opcion,"3",1)!=0) && (strncmp(opcion,"4",1)!=0) &&
-			(strncmp(opcion,"5",1)!=0) && (strncmp(opcion,"6",1)!=0));
+			(strncmp(opcion,"5",1)!=0));
 }
 
-op_code convertir_codigo_operacion(char *codigo){
+bool opcion_invalida_store(char* opcion){
+	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0) &&
+			(strncmp(opcion,"3",1)!=0) && (strncmp(opcion,"4",1)!=0));
+}
+
+bool modulo_invalido(char* opcion){
+	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0));
+}
+
+op_code convertir_codigo_operacion_store(char *codigo){
+	op_code codigo_operacion;
+
+	if(strncmp(codigo,"1",1)==0){
+		codigo_operacion=OBTENER_BITACORA;
+	}else if(strncmp(codigo,"2",1)==0){
+		codigo_operacion=FSCK;
+	}else if(strncmp(codigo,"3",1)==0){
+		codigo_operacion = INFORMAR_TAREA;
+	}else if(strncmp(codigo,"4",1)==0){
+		codigo_operacion = PAQUETE;
+	}
+
+	return codigo_operacion;
+}
+
+op_code convertir_codigo_operacion_miram(char *codigo){
 	op_code codigo_operacion;
 
 	if(strncmp(codigo,"1",1)==0){
@@ -136,10 +225,14 @@ op_code convertir_codigo_operacion(char *codigo){
 	}else if(strncmp(codigo,"5",1)==0){
 		codigo_operacion = TAREA_SIGUIENTE;
 	}
-	else if(strncmp(codigo,"6",1)==0){
-		codigo_operacion = PAQUETE;
-	}
 
 	return codigo_operacion;
+}
+
+void elegir_modulo(){
+	printf("Elija el modulo con el que desea comunicarse:\n\n");
+	printf("1) Mi-RAM\n");
+	printf("2) I-Store\n");
+	printf("\nSeleccione el numero correspondiente\n\n");
 }
 

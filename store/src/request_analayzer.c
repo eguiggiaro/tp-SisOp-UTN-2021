@@ -33,16 +33,18 @@ void atender_request_store(uint32_t request_fd) {
 
 	  break;
 
-	  case GENERAR_OXIGENO:
+	  case INFORMAR_TAREA:
 	  	/*TODO: 
-		Verificar que exista un archivo llamado Oxigeno.ims en el i-Mongo-Store
-		Si existe saltar al paso 4.
-		Si no existe el archivo, crearlo y asignarle el carácter de llenado O
-		Agregar tantos caracteres de llenado del archivo como indique el parámetro CANTIDAD
+		1) Ver cual fue la TAREA informada. 	
+		2) Verificar que exista un archivo llamado TAREA.ims en el i-Mongo-Store
+	 	3) Si existe saltar al paso 5.
+		4) Si no existe el archivo, crearlo y asignarle el carácter de llenado que corresponda segun la TAREA
+		5) Agregar tantos caracteres de llenado del archivo como indique el parámetro CANTIDAD
 		*/
-		miLogInfo("Me llego operacion: GENERAR_OXIGENO\n");
+		miLogInfo("Me llego operacion: INFORMAR_TAREA\n");
 
 	  break;
+
 			
 	  default:
 		miLogInfo("Me llego operacion: ...\n");

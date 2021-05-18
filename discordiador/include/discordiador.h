@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include "logger.h"
 #include "paquete.h"
+#include "servidor_discordiador.h"
 
 typedef struct Configuracion{
 	char* puntoMontaje;
@@ -26,10 +27,17 @@ typedef struct Configuracion{
 
 Configuracion* configuracion;
 
-int leer_config(void);
-void iniciar_consola();
-bool opcion_invalida(char*);
-op_code convertir_codigo_operacion(char*);
-void iniciar_conexion(char* ip_destino, char* puerto_destino);
+char* puerto_discordiador;
 
+int leer_config(void);
+void elegir_modulo();
+void iniciar_consola_miram();
+void iniciar_consola_store();
+bool opcion_invalida_miram(char*);
+bool opcion_invalida_store(char*);
+bool modulo_invalido(char*);
+op_code convertir_codigo_operacion_miram(char*);
+op_code convertir_codigo_operacion_store(char*);
+void iniciar_conexion_miram(char* ip_destino, char* puerto_destino);
+void iniciar_conexion_store(char* ip_destino, char* puerto_destino);
 #endif

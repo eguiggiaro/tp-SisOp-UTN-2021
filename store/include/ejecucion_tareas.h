@@ -1,5 +1,5 @@
-#ifndef REQUEST_ANALYZER_H
-#define REQUEST_ANALYZER_H
+#ifndef EJECUCION_TAREAS_H
+#define EJECUCION_TAREAS_H
 
 //Standard libs
 #include <stdlib.h>
@@ -8,6 +8,9 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <dirent.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 //Commons libs
 #include <commons/log.h>
@@ -16,10 +19,12 @@
 
 //Shared libs
 #include "shared_utils.h"
-#include "paquete.h"
 
-
-void atender_request_store(uint32_t);
-
+typedef enum
+{
+	OXIGENO,
+    COMIDA,
+    BASURA,
+} tipoRecurso;
 
 #endif

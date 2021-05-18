@@ -39,7 +39,27 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 		  paquete_de_prueba(socket);
 
 		  break;
+		case OBTENER_BITACORA:
+		  printf("Entre al case de op_code %i.\n", codigo_operacion);
 
+		  obtener_bitacora(socket);
+
+		  break;
+
+		case FSCK:
+		  printf("Entre al case de op_code %i.\n", codigo_operacion);
+
+		  iniciar_fsck(socket);
+
+		  break;
+
+		case INFORMAR_TAREA:
+		  printf("Entre al case de op_code %i.\n", codigo_operacion);
+
+		  generar_oxigeno(socket);
+
+		  break;
+		
 		default:
 				printf("CODIGO DE OPERACION INCORRECTO");
 			break;
@@ -258,6 +278,106 @@ void paquete_de_prueba(uint32_t socket){
 
     t_list* lista_mensajes = list_create();
     list_add(lista_mensajes,mensaje_1);
+    buffer = serializar_lista_strings(lista_mensajes);
+	paquete ->buffer = buffer;
+	enviar_paquete(paquete, socket);
+
+	//recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = recibir_buffer(socket);
+		t_list* lista = deserializar_lista_strings(buffer);
+
+		loggear_lista_strings(lista);
+		
+		miLogInfo("Recibi los mensajes del destino correctamente");
+	} else {
+		miLogInfo("No recibi los mensajes del destino correctamente");
+	}
+}
+
+void obtener_bitacora(uint32_t socket){
+	printf("\nFuncion de OBTENER BITACORA");
+
+    t_paquete* paquete = crear_paquete(OBTENER_BITACORA);
+	t_buffer* buffer;
+
+    char* id_tripulante;
+    printf("\nPor favor, ingrese el ID del tripulante: \n");
+    id_tripulante = readline(">>");
+
+    t_list* lista_mensajes = list_create();
+    list_add(lista_mensajes,id_tripulante);
+    buffer = serializar_lista_strings(lista_mensajes);
+	paquete ->buffer = buffer;
+	enviar_paquete(paquete, socket);
+
+	//recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = recibir_buffer(socket);
+		t_list* lista = deserializar_lista_strings(buffer);
+
+		loggear_lista_strings(lista);
+		
+		miLogInfo("Recibi los mensajes del destino correctamente");
+	} else {
+		miLogInfo("No recibi los mensajes del destino correctamente");
+	}
+}
+
+void iniciar_fsck(uint32_t socket){
+	printf("\nFuncion de INICIAR FSCK");
+
+    t_paquete* paquete = crear_paquete(FSCK);
+	t_buffer* buffer;
+	paquete ->buffer = buffer;
+	enviar_paquete(paquete, socket);
+
+	//recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = recibir_buffer(socket);
+		t_list* lista = deserializar_lista_strings(buffer);
+
+		loggear_lista_strings(lista);
+		
+		miLogInfo("Recibi los mensajes del destino correctamente");
+	} else {
+		miLogInfo("No recibi los mensajes del destino correctamente");
+	}
+}
+
+void generar_oxigeno(uint32_t socket){
+    printf("\nFuncion de GENERAR OXIGENO");
+
+    t_paquete* paquete = crear_paquete(INFORMAR_TAREA);
+	t_buffer* buffer;
+
+    char* cantidad;
+    printf("\nPor favor, ingrese la cantidad: \n");
+    cantidad = readline(">>");
+
+    char* pos_x;
+    printf("\nPor favor, ingrese la posicion X: \n");
+    pos_x = readline(">>");
+
+    char* pos_y;
+    printf("\nPor favor, ingrese la posicion Y: \n");
+    pos_y = readline(">>");
+
+    char* tiempo;
+    printf("\nPor favor, ingrese el tiempo: \n");
+    tiempo = readline(">>");
+
+    t_list* lista_mensajes = list_create();
+    list_add(lista_mensajes,cantidad);
+    list_add(lista_mensajes,pos_x);
+    list_add(lista_mensajes,pos_y);
+    list_add(lista_mensajes,tiempo);
     buffer = serializar_lista_strings(lista_mensajes);
 	paquete ->buffer = buffer;
 	enviar_paquete(paquete, socket);

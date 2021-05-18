@@ -1,4 +1,6 @@
 #include "store.h"
+#include "file_system.h"
+#include "request_analyzer.h"
 
 #define MODULE_NAME "I-Mongo-Store"
 #define CONFIG_FILE_PATH "cfg/store.cfg"
@@ -44,6 +46,10 @@ int leer_config(void){
 	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
+	configuracion->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
+	configuracion->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
+	//TODO: Levantar datos default de FS.
+
 	/*configuracion->posicionesSabotaje = config_get_array_value(config, "POSICIONES_SABOTAJE");
 	/*Para tratar las posiciones:
 	char** posiciones = string_split(posicionesSabotaje[i], "|");
@@ -51,8 +57,6 @@ int leer_config(void){
 	posicion.x = atoi(posicion[0]);	
 	posicion.y = atoi(posicion[1]);
 	*/
-	int i = 0;
-	char* str[i];
 	
 	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -63,6 +67,7 @@ void inicializar_store (){
 	
 	miLogDebug("Inició I-Mongo-Store.");
 	
-	//verificar_fs(configuracion->puntoMontaje);
+	verificar_fs(configuracion);
+	//subirblocksamemoria. (int* punteroABlocks = mmap de blocks.ims)   punteroABlocks[400] = 'O';
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }

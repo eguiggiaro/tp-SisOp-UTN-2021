@@ -7,6 +7,10 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include <sys/types.h>
+#include <unistd.h>
+#include <dirent.h>
+
 //Commons libs
 #include <commons/log.h>
 #include <commons/string.h>
@@ -15,22 +19,19 @@
 //Shared libs
 #include "shared_utils.h"
 
-//Support libs
-#include "file_system.h"
-#include "request_analyzer.h"
 
-typedef struct
-{
+typedef struct {
 	uint32_t x;
 	uint32_t y;
 }t_pos;
 
-typedef struct Configuracion{
+typedef struct {
 	char* puntoMontaje;
 	int puerto;
 	int tiempoSincro;
 	//char** posicionesSabotaje;
-
+	uint32_t blockSizeDefault;
+	uint32_t blocksQtyDefault;
 } Configuracion;
 
 Configuracion* configuracion;

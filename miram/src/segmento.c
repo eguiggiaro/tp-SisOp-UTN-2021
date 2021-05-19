@@ -39,22 +39,22 @@ void nuevo_segmento_patota_first_fit_tcb(TCB* unTCB)
                     segmento_a_ocupar = list_iterator_next(list_iterator);
 
                     //Si encuentro un segmento libre donde cabe el espacio a ocupar
-					if ((segmento_a_ocupar->estado = 'LIBRE') && (segmento_a_ocupar->desplazamiento >= sizeof(unTCB)))
+					if ((strcmp(segmento_a_ocupar->estado,"LIBRE") == 0) && (segmento_a_ocupar->desplazamiento >= sizeof(TCB*)))
 					{
                             
                             //Seteo el nuevo segmento
 							segmento* segmento_nuevo = malloc(sizeof(segmento));
 							segmento_nuevo->id = contador_segmentos++;
-							segmento_nuevo->dir_inicio =  segmento_a_ocupar;
-							segmento_nuevo->desplazamiento = sizeof(unTCB);
+							segmento_nuevo->dir_inicio =  segmento_a_ocupar->dir_inicio;
+							segmento_nuevo->desplazamiento = sizeof(TCB);
 							segmento_nuevo->estado = "OCUPADO";
 							
                             //Reduzco el segmento libre
-							segmento_a_ocupar->dir_inicio =  (segmento_nuevo + (segmento_nuevo->desplazamiento));
-							segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - (sizeof(unTCB));
+							segmento_a_ocupar->dir_inicio =  (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
+							segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - (sizeof(TCB));
 							
                             //Copio el TCB a memoria
-							memcpy(segmento_nuevo->dir_inicio, unTCB, sizeof(unTCB));
+							memcpy(segmento_nuevo->dir_inicio, unTCB, sizeof(TCB));
 
                             //Agrego el nuevo segmento a la tabla
 							list_add_in_index(tabla_segmentos,index,segmento_nuevo);

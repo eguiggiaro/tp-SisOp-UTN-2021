@@ -220,7 +220,7 @@ void hacer_memoria(char* tamanio_memoria)
 {
 
 
-	TCB* miTCB = MEMORIA;
+	TCB* miTCB = malloc(sizeof(TCB));
 	miTCB->TID = 100;
 	miTCB->estado = 'E';
 	miTCB->pos_X = 15;
@@ -231,6 +231,17 @@ void hacer_memoria(char* tamanio_memoria)
 	nuevo_segmento_patota_first_fit_tcb(miTCB);
 	mostrar_tabla_segmentos(true);
 
+
+	TCB* miTCB1 = malloc(sizeof(TCB));
+	miTCB1->TID = 101;
+	miTCB1->estado = 'E';
+	miTCB1->pos_X = 15;
+	miTCB1->pos_y = 20;
+	miTCB1->proxima_instruccion = 2424;
+	miTCB1->PCB = 2424;
+
+		nuevo_segmento_patota_first_fit_tcb(miTCB1);
+	mostrar_tabla_segmentos(true);
 //  
 	//SERVICIOS A CONSTRUIR
 	// 1- NUEVO ELEMENTO:

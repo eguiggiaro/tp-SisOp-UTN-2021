@@ -12,7 +12,7 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 		case INICIAR_TRIPULANTE:
 			printf("Entre al case de op_code %i.\n", codigo_operacion);
 
-			iniciar_tripulante(socket);
+			//iniciar_tripulante(socket);
 
 			break;
 		case INFORMAR_TAREAS_PATOTA:
@@ -99,7 +99,7 @@ void expulsar_tripulante(uint32_t socket){
 		miLogInfo("No recibi los mensajes del destino correctamente");
 	}
 }
-
+/*
 void iniciar_tripulante(uint32_t socket){
     printf("\nFuncion de INICIAR TRIPULANTE");
 
@@ -137,7 +137,7 @@ void iniciar_tripulante(uint32_t socket){
 		miLogInfo("No recibi los mensajes del destino correctamente");
 	}
 }
-
+*/
 void informar_tareas_patota(uint32_t socket){
     printf("\nFuncion de INFORMAR TAREAS PATOTA");
 

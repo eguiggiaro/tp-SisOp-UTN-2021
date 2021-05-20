@@ -23,7 +23,7 @@ int leer_config(void) {
 	configuracion->tamanio_swap = config_get_int_value(config, "TAMANIO_SWAP");
 	configuracion->path_swap = strdup(config_get_string_value(config, "PATH_SWAP"));
 	configuracion->algoritmo_reemplazo = strdup(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));
-
+	configuracion->algoritmo_busqueda = strdup(config_get_string_value(config, "ALGORITMO_BUSQUEDA"));
 	config_destroy(config);
 	return EXIT_SUCCESS;
 }
@@ -181,6 +181,8 @@ void crear_grilla(void) {
 void inicializar_memoria(int tamanio_memoria)
 {
 	MEMORIA = malloc(tamanio_memoria);
+	contador_patotas = 0;
+	contador_tripulantes = 0;
 
 	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
@@ -201,25 +203,69 @@ void finalizar_memoria()
 
 }
 
-void agregar_a_memoria(TCB* unTCB) 
+int reservar_memoria(int bytes)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
-	{
 		if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		if (configuracion->algoritmo_busqueda = "FF")
 		{
-
+			return reservar_memoria_segmentacion_ff(bytes);
 		}
 	}
+}
 
+int iniciar_patota(int cantidad_tripulantes, Tarea *tareas, Punto *puntos) 
+{
+	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
+	
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+	
+	// Seccion agregar tareas
 
+	// Fin seccion agregar tareas
+
+	PCB* unPCB = posicion_memoria;
+
+	// Sincronizar
+	unPCB->PID = contador_patotas++;
+	unPCB->Tareas = 1000;
 
 }
 
 
-void hacer_memoria(char* tamanio_memoria)
+int iniciar_tripulante(int patota, Punto* unPunto) 
+{
+	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
+
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+
+	TCB* miTCB = reservar_memoria(sizeof(TCB));
+
+	//sincronizar
+	miTCB->TID = contador_tripulantes++;
+
+	miTCB->estado = 'N';
+	miTCB->pos_X = unPunto->pos_x;
+	miTCB->pos_y = unPunto->pos_y;
+
+	//linkear a tareas
+	miTCB->proxima_instruccion = 1212;
+	miTCB->PCB = 1212;
+
+}
+
+
+
+void hacer_memoria(int tamanio_memoria)
 {
 
-
+/*
 	TCB* miTCB = malloc(sizeof(TCB));
 	miTCB->TID = 100;
 	miTCB->estado = 'E';
@@ -228,20 +274,10 @@ void hacer_memoria(char* tamanio_memoria)
 	miTCB->proxima_instruccion = 1212;
 	miTCB->PCB = 1212;
 
-	nuevo_segmento_patota_first_fit_tcb(miTCB);
 	mostrar_tabla_segmentos(true);
+*/
 
-
-	TCB* miTCB1 = malloc(sizeof(TCB));
-	miTCB1->TID = 101;
-	miTCB1->estado = 'E';
-	miTCB1->pos_X = 15;
-	miTCB1->pos_y = 20;
-	miTCB1->proxima_instruccion = 2424;
-	miTCB1->PCB = 2424;
-
-		nuevo_segmento_patota_first_fit_tcb(miTCB1);
-	mostrar_tabla_segmentos(true);
+	
 //  
 	//SERVICIOS A CONSTRUIR
 	// 1- NUEVO ELEMENTO:
@@ -268,14 +304,6 @@ void hacer_memoria(char* tamanio_memoria)
 
 //	return element;
 //}
-
-
-
-
-
-
-
-
 }
 
 void* iniciar_servidor_miram(){

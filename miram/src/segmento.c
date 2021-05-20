@@ -28,10 +28,63 @@ void imprimir_segmento(segmento* segmento_a_imprimir)
 }
 
 //Imprime el segmento, no es muy amigable, MEJORAR!
-//TODO el algoritmo debería ser un parámetro o condicion, no está dejando ok el segmento libre
-void nuevo_segmento_patota_first_fit_tcb(TCB* unTCB)
+int reservar_memoria_segmentacion_ff(int bytes)
 {
 	int index = 0;
+	bool encontre_segmento = false;
+	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
+                segmento* segmento_a_ocupar;
+				segmento* segmento_nuevo;				
+				while(list_iterator_has_next(list_iterator)) {
+                    segmento_a_ocupar = list_iterator_next(list_iterator);
+
+                    //Si encuentro un segmento libre donde cabe el espacio a ocupar
+					if ((strcmp(segmento_a_ocupar->estado,"LIBRE") == 0) && (segmento_a_ocupar->desplazamiento >= bytes))
+					{
+                            encontre_segmento = true;
+
+                            //Seteo el nuevo segmento
+							segmento_nuevo = malloc(sizeof(segmento));
+							segmento_nuevo->id = contador_segmentos++;
+							segmento_nuevo->dir_inicio =  segmento_a_ocupar->dir_inicio;
+							segmento_nuevo->desplazamiento = bytes;
+							segmento_nuevo->estado = "OCUPADO";
+							
+                            //Reduzco el segmento libre
+							segmento_a_ocupar->dir_inicio =  (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
+							segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - bytes;
+							
+                            //Agrego el nuevo segmento a la tabla
+							list_add_in_index(tabla_segmentos,index,segmento_nuevo);
+							break;
+					}
+					index++;
+
+                }
+	list_iterator_destroy(list_iterator);
+
+	if (encontre_segmento)
+	{
+		return segmento_nuevo->dir_inicio;
+	} else
+	{
+		return 99; //ERROR
+	}
+}
+
+
+uint32_t buscar_patota(int una_patota)
+{
+	// Buscar patota
+	return 0;
+}
+
+
+
+int segmentacion_nuevo_pcb(PCB* unPCB)
+{
+	int index = 0;
+	int encontre_segmento = -1;
 	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
                 segmento* segmento_a_ocupar;
 				
@@ -39,22 +92,23 @@ void nuevo_segmento_patota_first_fit_tcb(TCB* unTCB)
                     segmento_a_ocupar = list_iterator_next(list_iterator);
 
                     //Si encuentro un segmento libre donde cabe el espacio a ocupar
-					if ((strcmp(segmento_a_ocupar->estado,"LIBRE") == 0) && (segmento_a_ocupar->desplazamiento >= sizeof(TCB*)))
+					if ((strcmp(segmento_a_ocupar->estado,"LIBRE") == 0) && (segmento_a_ocupar->desplazamiento >= sizeof(PCB*)))
 					{
-                            
+                            encontre_segmento = 0;
+
                             //Seteo el nuevo segmento
 							segmento* segmento_nuevo = malloc(sizeof(segmento));
 							segmento_nuevo->id = contador_segmentos++;
 							segmento_nuevo->dir_inicio =  segmento_a_ocupar->dir_inicio;
-							segmento_nuevo->desplazamiento = sizeof(TCB);
+							segmento_nuevo->desplazamiento = sizeof(PCB);
 							segmento_nuevo->estado = "OCUPADO";
 							
                             //Reduzco el segmento libre
 							segmento_a_ocupar->dir_inicio =  (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
-							segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - (sizeof(TCB));
+							segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - (sizeof(PCB));
 							
                             //Copio el TCB a memoria
-							memcpy(segmento_nuevo->dir_inicio, unTCB, sizeof(TCB));
+							memcpy(segmento_nuevo->dir_inicio, unPCB, sizeof(PCB));
 
                             //Agrego el nuevo segmento a la tabla
 							list_add_in_index(tabla_segmentos,index,segmento_nuevo);
@@ -65,6 +119,7 @@ void nuevo_segmento_patota_first_fit_tcb(TCB* unTCB)
                 }
 	list_iterator_destroy(list_iterator);
 
+	return encontre_segmento;
 }
 
 //Crea la tabla de segmentos y el primer segmento vacio

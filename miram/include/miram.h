@@ -19,12 +19,17 @@ typedef struct Configuracion{
     int tamanio_swap;
 	char* path_swap;
 	char* algoritmo_reemplazo;
+	char* algoritmo_busqueda;
 } Configuracion;
+
+
+
 
 Configuracion* configuracion;
 pthread_t threadSERVER;
 pthread_t threadMEMORIA;
 pthread_t threadMAPA;
+
 char* puerto_miram;
 int tamanio_memoria;
 
@@ -33,8 +38,5 @@ void atender_request_miram(uint32_t request_fd);
 void crear_grilla(void);
 void* iniciar_servidor_miram();
 void* iniciar_funciones_memoria();
-
-
-
 
 #endif

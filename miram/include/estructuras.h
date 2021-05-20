@@ -15,16 +15,23 @@ typedef struct{
 	uint32_t PCB;	
 } TCB;
 
-typedef struct {
-	char* operacion;
+typedef struct Tarea{
+	char* nombre_tarea;
 	int parametro;
 	int pos_x;
 	int pos_y;
 	int tiempo;
-} tarea;
+} Tarea;
 
 
+typedef struct Punto{
+	int pos_x;
+	int pos_y;
+} Punto;
 
 void* MEMORIA;
+
+int contador_patotas;
+int contador_tripulantes;
 
 #endif

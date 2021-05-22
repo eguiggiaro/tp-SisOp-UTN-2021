@@ -6,15 +6,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-
-#include <sys/types.h>
+#include <semaphore.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <fcntl.h>
+
+#include <sys/types.h>
+#include <sys/mman.h>
 
 //Commons libs
 #include <commons/log.h>
 #include <commons/string.h>
 #include <commons/config.h>
+#include <commons/bitarray.h>
+#include <commons/memory.h>
 
 //Shared libs
 #include "shared_utils.h"

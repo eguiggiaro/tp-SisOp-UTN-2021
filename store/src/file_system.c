@@ -3,15 +3,16 @@
 
 void verificar_fs(Configuracion* config){
 
-	char* puntoMontaje = config->puntoMontaje;
-	char* pathSuperbloque = string_from_format("%s/%s", puntoMontaje, "SuperBloque.ims"); //ej: /home/utnso/mnt/SuperBloque.ims
-	char* pathBlocks = string_from_format("%s/%s", puntoMontaje, "Blocks.ims");
-		
+	puntoMontaje = config->puntoMontaje;
 	cantidadBloques = config->blocksQtyDefault;
 	tamanioBloque = config->blockSizeDefault;
 
+	char* pathSuperbloque = string_from_format("%s/%s", puntoMontaje, "SuperBloque.ims"); //ej: /home/utnso/mnt/SuperBloque.ims
+	char* pathBlocks = string_from_format("%s/%s", puntoMontaje, "Blocks.ims");
+		
+
 	if(fopen(pathSuperbloque, "r") == NULL || fopen(pathBlocks, "r") == NULL){
-		//No encontre el archivo de Superbloques. Creo el FS.
+		//No encontre el archivo de Superbloques o el Blocks. Creo el FS.
 		//Primero veo si esta la estructura de directorios.
 		DIR* dirFiles = opendir(puntoMontaje);
 		if (dirFiles) {
@@ -108,8 +109,8 @@ void inicializarBitmap(FILE* archivoSuperbloque){
 
 void leerSuperBloque(char* superbloques){
 	FILE* archivoSuperbloque = fopen(superbloques, "r");
-	uint32_t* buffer;
-
+	uint32_t* buffer = malloc(sizeof(uint32_t));
+	
 	fseek(archivoSuperbloque, 0, SEEK_SET);
 	fread(buffer, sizeof(uint32_t), 1, archivoSuperbloque);
 	tamanioBloque = *buffer;
@@ -118,7 +119,66 @@ void leerSuperBloque(char* superbloques){
 	fread(buffer, sizeof(uint32_t), 1, archivoSuperbloque);
 	cantidadBloques = *buffer;
 
-	//TODO: Aca tengo que cargar el bitmap en un bitarray.
-
+	//Cargar el bitmap en un bitarray.
+	/*char* bufferBitmap = malloc(cantidadBloques/8);
+	fseek(archivoSuperbloque, 0, SEEK_CUR);
+	fread(bufferBitmap, cantidadBloques/8, 1, archivoSuperbloque);
+	bitmap = bitarray_create_with_mode(bufferBitmap, cantidadBloques/8, MSB_FIRST);
+	
+	free(bufferBitmap);*/
+	free(buffer);
 	fclose(archivoSuperbloque);
+}
+
+void setearBitmapAUno(){
+	//char* pathSuperbloque = string_from_format("%s/%s", puntoMontaje, "SuperBloque.ims");
+	//FILE* archivoSuperbloque = fopen(pathSuperbloque, "rw");
+	int archivoSuperbloque = open("/home/utnso/mnt/SuperBloque.ims", O_RDWR);
+	//Cargo a memoria el Bitmap. Para eso hago un puntero al archivo de superbloques, desde la posición donde arranca
+	//el bitmap (START+8).
+	int tamanioSuperbloque = cantidadBloques/8 + sizeof(uint32_t) * 2;
+	char* punteroSuperbloque = mmap(NULL, tamanioSuperbloque, PROT_READ | PROT_WRITE, MAP_SHARED, archivoSuperbloque, 0);
+	char* punteroBitmap = punteroSuperbloque + sizeof(uint32_t) * 2;
+
+	t_bitarray* bitmap2 = bitarray_create_with_mode(punteroBitmap, cantidadBloques/8, MSB_FIRST);
+
+	for(int i=0; i<cantidadBloques; i++){
+		if(bitarray_test_bit(bitmap2, i) == 0){
+			bitarray_set_bit(bitmap2 ,i);			
+		}
+	}
+
+	msync(bitmap2->bitarray,cantidadBloques/8 ,0);
+	bitarray_destroy(bitmap2);
+
+	if (munmap(punteroSuperbloque, tamanioSuperbloque) == -1){ //desmapeo la copia del archivo bloque
+        exit(1);//Fallo el desmapeo de copia
+    }
+}
+
+void leerBitmap(){
+	//char* pathSuperbloque = string_from_format("%s/%s", puntoMontaje, "SuperBloque.ims");
+	//FILE* archivoSuperbloque = fopen(pathSuperbloque, "rw");
+	int archivoSuperbloque = open("/home/utnso/mnt/SuperBloque.ims", O_RDWR);
+	//Cargo a memoria el Bitmap. Para eso hago un puntero al archivo de superbloques, desde la posición donde arranca
+	//el bitmap (START+8).
+	int tamanioSuperbloque = cantidadBloques/8 + sizeof(uint32_t) * 2;
+	char* punteroSuperbloque = mmap(NULL, tamanioSuperbloque, PROT_READ | PROT_WRITE, MAP_SHARED, archivoSuperbloque, 0);
+	char* punteroBitmap = punteroSuperbloque + sizeof(uint32_t) * 2;
+
+	t_bitarray* bitmap2 = bitarray_create_with_mode(punteroBitmap, cantidadBloques/8, MSB_FIRST);
+
+	bool bit;
+	for(int i=0; i<cantidadBloques; i++){
+		bit = bitarray_test_bit(bitmap2, i);	
+	}
+	bitarray_destroy(bitmap2);
+
+	if (munmap(punteroSuperbloque, tamanioSuperbloque) == -1){ //desmapeo la copia del archivo bloque
+        exit(1);//Fallo el desmapeo de copia
+    }
+}
+
+void escribirStringEnBlocks(char* texto){
+	//bla...
 }

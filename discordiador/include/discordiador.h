@@ -6,7 +6,10 @@
 #include <stdio.h>
 #include <commons/log.h>
 #include <stdbool.h>
-#include "servidor_discordiador.h"
+#include <stdlib.h>
+#include <commons/string.h>
+#include<commons/collections/list.h>
+//#include "servidor_discordiador.h"
 #include "logger.h"
 #include "paquete.h"
 
@@ -26,12 +29,12 @@ typedef struct Configuracion{
 } Configuracion;
 
 typedef enum Estados{
-	llegada,
+	llegada,//?
 	listo,
 	trabajando,
 	bloqueado_io,
 	bloqueado_emergencia,
-	finalizado
+	finalizado//?
 }Estados;
 
 typedef enum Comandos{
@@ -45,22 +48,41 @@ typedef enum Comandos{
 	TEST_MENSAJES
 }Comandos;
  
-
+typedef struct Tripulante_disc{
+	pthread_t * id_hilo;
+	Estados estado_trip;
+	int quantum;
+} Tripulante_disc;
 
 Configuracion* configuracion;
+//Listas
 t_list * new_list;
 t_list * execute_list;
 t_list * blocked_io;
+void vaciar_listas();
 
+//Metodos mensajes
+int leer_config(void);
+void iniciar_conexion_miram(char* ip_destino, char* puerto_destino);
+void iniciar_conexion_store(char* ip_destino, char* puerto_destino);
+int socket_miram;
+int socket_store;
 char* puerto_discordiador;
 
-void consola_miriam();
-int socket_miriam;
-void consola_miriam();
-int socket_store;
 
-int leer_config(void);
+
+//Metodos Discordidor
+void iniciar_patota(char* ); //?string? chequer commons
+void consola();
+void leer_tareas_txt();
+void mandar_tareas_miram(char *);
+void enviar_tareas_miram(char* direccion_txt);
+
+
+//Metodos Test
 void elegir_modulo();
+void consola_miram();
+void consola_store();
 void iniciar_consola_miram();
 void iniciar_consola_store();
 bool opcion_invalida_miram(char*);
@@ -68,11 +90,5 @@ bool opcion_invalida_store(char*);
 bool modulo_invalido(char*);
 op_code convertir_codigo_operacion_miram(char*);
 op_code convertir_codigo_operacion_store(char*);
-void iniciar_conexion_miram(char* ip_destino, char* puerto_destino);
-void iniciar_conexion_store(char* ip_destino, char* puerto_destino);
 
-void iniciar_patota(char * token); //?string? chequer commons
-void consola();
-void leer_tareas_txt();
-void mandar_tareas_miriam();
 #endif

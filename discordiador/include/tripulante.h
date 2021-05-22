@@ -9,7 +9,7 @@
 #include <pthread.h>
 //#include <commons/string.h>
 #include <commons/collections/list.h>
-#include "discordiador.h"?
+#include "discordiador.h"//?
 
 
 
@@ -33,7 +33,7 @@ typedef struct Tripulante{
     
 } Tripulante;
 
-void *iniciar_tripulante(void * );
+void *inicializar_tripulante(void * );
 void mover_en_x(Tripulante, int);//siempre es 1... pero a derecha(-1) o izqueirda(+1)
 void mover_en_y(Tripulante, int);//siempre es 1... pero abajo(-1) o arriba(+1)
 void comunicar_bitacora();//?
@@ -42,11 +42,4 @@ void atender_sabotaje();//?
 void decodificar_tarea();
 void execute();//no se me ocurre mejor nombre para cuando esta en EXEC...
 void get_quantum_faltante();//para q el discordiador sepa cuanto le falta antes de sacarlo.
-
-
-
-
-
-
-
 #endif

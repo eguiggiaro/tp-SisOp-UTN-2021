@@ -18,12 +18,12 @@ int leer_config(void) {
 
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
-	configuracion->esquema_memoria = strdup(config_get_string_value(config, "ESQUEMA_MEMORIA"));
+	configuracion->esquema_memoria = config_get_string_value(config, "ESQUEMA_MEMORIA");
 	configuracion->tamanio_pagina = config_get_int_value(config, "TAMANIO_PAGINA");
 	configuracion->tamanio_swap = config_get_int_value(config, "TAMANIO_SWAP");
-	configuracion->path_swap = strdup(config_get_string_value(config, "PATH_SWAP"));
-	configuracion->algoritmo_reemplazo = strdup(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));
-	configuracion->algoritmo_busqueda = strdup(config_get_string_value(config, "ALGORITMO_BUSQUEDA"));
+	configuracion->path_swap = config_get_string_value(config, "PATH_SWAP");
+	configuracion->algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
+	configuracion->algoritmo_busqueda = config_get_string_value(config, "ALGORITMO_BUSQUEDA");
 	config_destroy(config);
 	return EXIT_SUCCESS;
 }
@@ -214,6 +214,38 @@ int reservar_memoria(int bytes)
 	}
 }
 
+int alta_patota(PCB* unPCB)
+{
+		if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		return alta_patota_segmentacion(unPCB);
+	}
+}
+
+u_int32_t buscar_patota(int PCB_ID)
+{
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		return buscar_patota_segmentacion(PCB_ID);
+	}
+}
+
+void alta_tripulante(TCB* unTCB)
+{
+		if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		return alta_tripulante_segmentacion(unTCB);
+	}
+}
+
+u_int32_t buscar_tripulante(int TCB_ID)
+{
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		return buscar_tripulante_segmentacion(TCB_ID);
+	}
+}
+
 int iniciar_patota(int cantidad_tripulantes, Tarea *tareas, Punto *puntos) 
 {
 	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
@@ -233,30 +265,43 @@ int iniciar_patota(int cantidad_tripulantes, Tarea *tareas, Punto *puntos)
 	unPCB->PID = contador_patotas++;
 	unPCB->Tareas = 1000;
 
+	//alta patota
+	alta_patota(unPCB);
+
+	for (int i=0; i<cantidad_tripulantes;i++)
+	{
+		iniciar_tripulante(unPCB->PID, puntos[i]);
+	}
+	return unPCB->PID;
 }
 
 
-int iniciar_tripulante(int patota, Punto* unPunto) 
+
+
+int iniciar_tripulante(int patota, Punto unPunto) 
 {
-	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
+	u_int32_t posicion_memoria = reservar_memoria(sizeof(TCB));
 
 	if (posicion_memoria == 99)
 	{
 		return -1;
 	}
 
-	TCB* miTCB = reservar_memoria(sizeof(TCB));
+	TCB* miTCB = posicion_memoria;
 
 	//sincronizar
 	miTCB->TID = contador_tripulantes++;
 
 	miTCB->estado = 'N';
-	miTCB->pos_X = unPunto->pos_x;
-	miTCB->pos_y = unPunto->pos_y;
+	miTCB->pos_X = (&unPunto)->pos_x;
+	miTCB->pos_y = (&unPunto)->pos_y;
 
 	//linkear a tareas
 	miTCB->proxima_instruccion = 1212;
-	miTCB->PCB = 1212;
+	miTCB->PCB = buscar_patota(patota);
+
+	//alta tripulante
+	alta_tripulante(miTCB);
 
 }
 
@@ -264,21 +309,35 @@ int iniciar_tripulante(int patota, Punto* unPunto)
 
 void hacer_memoria(int tamanio_memoria)
 {
+	Punto* unPunto = malloc(sizeof(Punto));
+	unPunto->pos_x = 10;
+	unPunto->pos_y = 15;
 
-/*
-	TCB* miTCB = malloc(sizeof(TCB));
-	miTCB->TID = 100;
-	miTCB->estado = 'E';
-	miTCB->pos_X = 15;
-	miTCB->pos_y = 20;
-	miTCB->proxima_instruccion = 1212;
-	miTCB->PCB = 1212;
+	Punto* unPunto2 = malloc(sizeof(Punto));
+	unPunto2->pos_x = 100;
+	unPunto2->pos_y = 125;
 
-	mostrar_tabla_segmentos(true);
-*/
+	Punto *puntos[2] = {unPunto,unPunto2};
 
+	Tarea* unaTarea = malloc(sizeof(Tarea));
+	unaTarea->nombre_tarea = "HACER ALGO";
+	unaTarea->parametro = 4;
+	unaTarea->pos_x = 15;
+	unaTarea->pos_y = 20;
+	unaTarea->tiempo = 15;
 	
-//  
+	Tarea *tareas[1] = {unaTarea};
+
+	int IDPATOTA = iniciar_patota(2,tareas,puntos);
+
+	PCB* unPCB = buscar_patota(IDPATOTA);
+
+	TCB* unTCB = buscar_tripulante(0);
+
+	free(unPunto);
+	free(unPunto2);
+	free(unaTarea);
+
 	//SERVICIOS A CONSTRUIR
 	// 1- NUEVO ELEMENTO:
 	// 2- Crear un segmento
@@ -313,8 +372,8 @@ void* iniciar_servidor_miram(){
 
 void* iniciar_funciones_memoria(){
     inicializar_memoria(tamanio_memoria);
-	mostrar_tabla_segmentos(true);
 	hacer_memoria(tamanio_memoria);
+	mostrar_tabla_segmentos(true);
 	return NULL;
 }
 

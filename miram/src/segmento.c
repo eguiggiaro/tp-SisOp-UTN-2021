@@ -73,13 +73,43 @@ int reservar_memoria_segmentacion_ff(int bytes)
 }
 
 
-uint32_t buscar_patota(int una_patota)
+
+
+int alta_patota_segmentacion(PCB* unPCB)
 {
-	// Buscar patota
-	return 0;
+	 list_add_in_index(tabla_segmentos_pcb,unPCB->PID,unPCB);
 }
 
+uint32_t buscar_patota_segmentacion(int PCB_ID)
+{
+	PCB* unPCB;
+	
+	if (PCB_ID > list_size(tabla_segmentos_pcb) -1)
+	{
+		return 99;
+	} else {
+		unPCB = list_get(tabla_segmentos_pcb, PCB_ID); 
+	}
+	return unPCB;
+}
 
+void alta_tripulante_segmentacion(TCB* unTCB)
+{
+	 list_add_in_index(tabla_segmentos_tcb,unTCB->TID,unTCB);
+}
+
+uint32_t buscar_tripulante_segmentacion(int TCB_ID)
+{
+	TCB* unTCB;
+	
+	if (TCB_ID > list_size(tabla_segmentos_tcb) -1)
+	{
+		return 99;
+	} else {
+		unTCB = list_get(tabla_segmentos_tcb, TCB_ID); 
+	}
+	return unTCB;
+}
 
 int segmentacion_nuevo_pcb(PCB* unPCB)
 {
@@ -127,6 +157,9 @@ void inicializar_segmentacion(int tamanio_memoria)
 {
     contador_segmentos = 0;
 	tabla_segmentos = list_create();
+	tabla_segmentos_pcb = list_create();
+	tabla_segmentos_tareas = list_create();
+	tabla_segmentos_tcb = list_create();
 
     //Creo un segmento vacío del tamanio de la memoria
 	segmento* segmento_aux = malloc(sizeof(segmento));
@@ -143,4 +176,7 @@ void inicializar_segmentacion(int tamanio_memoria)
 void finalizar_segmentacion()
 {
     list_destroy(tabla_segmentos);
+	list_destroy(tabla_segmentos_pcb);
+	list_destroy(tabla_segmentos_tareas);
+	list_destroy(tabla_segmentos_tcb);
 }

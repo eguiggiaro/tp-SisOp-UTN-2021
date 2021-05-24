@@ -15,6 +15,7 @@ int leer_config(void) {
 	if(config==NULL){
 		return EXIT_FAILURE;
 	}
+	
 
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");

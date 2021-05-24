@@ -238,6 +238,14 @@ void alta_tripulante(TCB* unTCB)
 	}
 }
 
+void alta_tareas(int PCB_ID, char* tareas)
+{
+		if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		return alta_tareas_segmentacion(PCB_ID, tareas);
+	}
+}
+
 u_int32_t buscar_tripulante(int TCB_ID)
 {
 	if (configuracion->esquema_memoria = "SEGMENTACION")
@@ -246,7 +254,23 @@ u_int32_t buscar_tripulante(int TCB_ID)
 	}
 }
 
-int iniciar_patota(int cantidad_tripulantes, Tarea *tareas, Punto *puntos) 
+
+u_int32_t iniciar_tareas(int PCB_ID, char* tareas) 
+{
+	u_int32_t posicion_memoria = reservar_memoria(sizeof(tareas));
+
+	if (posicion_memoria == 99)
+	{
+		return 99;
+	}
+
+	//alta tripulante
+	alta_tareas(PCB_ID,tareas);
+
+	return posicion_memoria;
+}
+
+int iniciar_patota(int cantidad_tripulantes, char* tareas, Punto *puntos) 
 {
 	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
 	
@@ -255,26 +279,32 @@ int iniciar_patota(int cantidad_tripulantes, Tarea *tareas, Punto *puntos)
 		return -1;
 	}
 	
-	// Seccion agregar tareas
-
-	// Fin seccion agregar tareas
-
 	PCB* unPCB = posicion_memoria;
-
 	// Sincronizar
 	unPCB->PID = contador_patotas++;
-	unPCB->Tareas = 1000;
+
+	posicion_memoria = iniciar_tareas(unPCB->PID, tareas);
+
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+
+	unPCB->Tareas = posicion_memoria;
 
 	//alta patota
 	alta_patota(unPCB);
 
 	for (int i=0; i<cantidad_tripulantes;i++)
 	{
-		iniciar_tripulante(unPCB->PID, puntos[i]);
+		if (iniciar_tripulante(unPCB->PID, puntos[i]) == -1)
+		{
+			return -1;
+		}
+		
 	}
 	return unPCB->PID;
 }
-
 
 
 
@@ -317,26 +347,19 @@ void hacer_memoria(int tamanio_memoria)
 	unPunto2->pos_x = 100;
 	unPunto2->pos_y = 125;
 
-	Punto *puntos[2] = {unPunto,unPunto2};
+	Punto puntos[2] = {*unPunto,*unPunto2};
 
-	Tarea* unaTarea = malloc(sizeof(Tarea));
-	unaTarea->nombre_tarea = "HACER ALGO";
-	unaTarea->parametro = 4;
-	unaTarea->pos_x = 15;
-	unaTarea->pos_y = 20;
-	unaTarea->tiempo = 15;
-	
-	Tarea *tareas[1] = {unaTarea};
+	char* tareas = "HACER_ALGO 5;5;6;8|HACER_OTRACOSA;5;6;8";
 
 	int IDPATOTA = iniciar_patota(2,tareas,puntos);
 
 	PCB* unPCB = buscar_patota(IDPATOTA);
+	char* tareas1 = unPCB->Tareas;
 
 	TCB* unTCB = buscar_tripulante(0);
 
 	free(unPunto);
 	free(unPunto2);
-	free(unaTarea);
 
 	//SERVICIOS A CONSTRUIR
 	// 1- NUEVO ELEMENTO:

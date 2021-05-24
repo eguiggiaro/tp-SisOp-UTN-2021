@@ -6,7 +6,7 @@ void mostrar_tabla_segmentos(bool mostrar_vacios)
 {
 	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
                 while(list_iterator_has_next(list_iterator)) {
-                    segmento* segmento_aux = list_iterator_next(list_iterator);
+                    Segmento* segmento_aux = list_iterator_next(list_iterator);
                     
 					//Imprime solo segmentos libres o no, según parámetro de entrada
 					if (mostrar_vacios || (segmento_aux->id) >= 0)
@@ -18,7 +18,7 @@ void mostrar_tabla_segmentos(bool mostrar_vacios)
 //Imprime el segmento
 //TO DO no es muy amigable el resultado MEJORAR!
 
-void imprimir_segmento(segmento* segmento_a_imprimir)
+void imprimir_segmento(Segmento* segmento_a_imprimir)
 
 {
 		miLogInfo("Id del segmento: %d\n",segmento_a_imprimir->id);
@@ -28,13 +28,15 @@ void imprimir_segmento(segmento* segmento_a_imprimir)
 }
 
 //Imprime el segmento, no es muy amigable, MEJORAR!
-int reservar_memoria_segmentacion_ff(int bytes)
+u_int32_t reservar_memoria_segmentacion_ff(int bytes)
 {
 	int index = 0;
 	bool encontre_segmento = false;
 	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
-                segmento* segmento_a_ocupar;
-				segmento* segmento_nuevo;				
+                Segmento* segmento_a_ocupar;
+				Segmento* segmento_nuevo;	
+				u_int32_t posicion_reservada;
+
 				while(list_iterator_has_next(list_iterator)) {
                     segmento_a_ocupar = list_iterator_next(list_iterator);
 
@@ -43,21 +45,33 @@ int reservar_memoria_segmentacion_ff(int bytes)
 					{
                             encontre_segmento = true;
 
-                            //Seteo el nuevo segmento
-							segmento_nuevo = malloc(sizeof(segmento));
-							segmento_nuevo->id = contador_segmentos++;
-							segmento_nuevo->dir_inicio =  segmento_a_ocupar->dir_inicio;
-							segmento_nuevo->desplazamiento = bytes;
-							segmento_nuevo->estado = "OCUPADO";
-							
-                            //Reduzco el segmento libre
-							segmento_a_ocupar->dir_inicio =  (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
-							segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - bytes;
-							
-                            //Agrego el nuevo segmento a la tabla
-							list_add_in_index(tabla_segmentos,index,segmento_nuevo);
-							break;
+							if (segmento_a_ocupar->desplazamiento == bytes)
+
+							{
+								segmento_a_ocupar->id = contador_segmentos++;
+								segmento_a_ocupar->desplazamiento = bytes;
+								segmento_a_ocupar->estado = "OCUPADO";
+								posicion_reservada = segmento_a_ocupar->dir_inicio;
+							} else {
+
+								//Seteo el nuevo segmento
+								segmento_nuevo = malloc(sizeof(Segmento));
+								segmento_nuevo->id = contador_segmentos++;
+								segmento_nuevo->dir_inicio =  segmento_a_ocupar->dir_inicio;
+								segmento_nuevo->desplazamiento = bytes;
+								segmento_nuevo->estado = "OCUPADO";
+								
+								//Reduzco el segmento libre
+								segmento_a_ocupar->dir_inicio =  (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
+								segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - bytes;
+								
+								//Agrego el nuevo segmento a la tabla
+								list_add_in_index(tabla_segmentos,index,segmento_nuevo);
+								posicion_reservada = segmento_nuevo->dir_inicio;
+								break;
+							}
 					}
+
 					index++;
 
                 }
@@ -65,92 +79,146 @@ int reservar_memoria_segmentacion_ff(int bytes)
 
 	if (encontre_segmento)
 	{
-		return segmento_nuevo->dir_inicio;
+		return posicion_reservada;
 	} else
 	{
 		return 99; //ERROR
 	}
 }
 
-
-
-
-int alta_patota_segmentacion(PCB* unPCB)
+int buscar_segmento(u_int32_t posicion_memoria)
 {
-	 list_add_in_index(tabla_segmentos_pcb,unPCB->PID,unPCB);
+	bool encontre_segmento = false;
+	int segmento_encontrado;
+	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
+                Segmento* segmento_busqueda;
+
+				while(list_iterator_has_next(list_iterator)) {
+                    segmento_busqueda = list_iterator_next(list_iterator);
+
+                    //Si encuentro un segmento libre donde cabe el espacio a ocupar
+					if ((segmento_busqueda->dir_inicio == posicion_memoria))
+					{
+						encontre_segmento = true;
+                        segmento_encontrado = segmento_busqueda->id; 
+						break;
+					}
+                }
+	list_iterator_destroy(list_iterator);
+	if (encontre_segmento) {
+		return segmento_encontrado;
+	} else {
+		return 99;
+	}
 }
 
-uint32_t buscar_patota_segmentacion(int PCB_ID)
+u_int32_t buscar_posicion(int segmento)
 {
-	PCB* unPCB;
-	
-	if (PCB_ID > list_size(tabla_segmentos_pcb) -1)
-	{
-		return 99;
+	bool encontre_posicion = false;
+	u_int32_t posicion_encontrada;
+	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
+                Segmento* segmento_busqueda;
+
+				while(list_iterator_has_next(list_iterator)) {
+                    segmento_busqueda = list_iterator_next(list_iterator);
+
+                    //Si encuentro un segmento libre donde cabe el espacio a ocupar
+					if ((segmento_busqueda->id == segmento))
+					{
+						encontre_posicion = true;
+                        posicion_encontrada = segmento_busqueda->dir_inicio; 
+						break;
+					}
+                }
+	list_iterator_destroy(list_iterator);
+	if (encontre_posicion) {
+		return posicion_encontrada;
 	} else {
-		unPCB = list_get(tabla_segmentos_pcb, PCB_ID); 
+		return 99;
 	}
-	return unPCB;
+}
+
+
+void alta_patota_segmentacion(PCB* unPCB)
+{
+	PCB_adm* pcb_adm = malloc(sizeof(PCB_adm));
+	pcb_adm->PID = unPCB->PID;
+	pcb_adm->segmento_nro = buscar_segmento(unPCB);
+    list_add(tabla_segmentos_pcb,pcb_adm);
+
+}
+
+uint32_t buscar_patota_segmentacion(int PID)
+{
+	bool encontre_patota = false;
+	u_int32_t posicion_patota;
+	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos_pcb);
+                PCB_adm* pcb_adm;
+
+				while(list_iterator_has_next(list_iterator)) {
+                    pcb_adm = list_iterator_next(list_iterator);
+
+                    //Si encuentro un segmento libre donde cabe el espacio a ocupar
+					if (pcb_adm->PID == PID)
+					{
+                        encontre_patota = true;
+						posicion_patota =buscar_posicion(pcb_adm->segmento_nro);
+						break;
+					}
+                }
+	list_iterator_destroy(list_iterator);
+	if (encontre_patota)
+	{
+		return posicion_patota;
+	} else {
+		return 99;
+	}
 }
 
 void alta_tripulante_segmentacion(TCB* unTCB)
 {
-	 list_add_in_index(tabla_segmentos_tcb,unTCB->TID,unTCB);
+	TCB_adm* tcb_adm = malloc(sizeof(TCB_adm));
+	tcb_adm->PID = unTCB->TID;
+	tcb_adm->segmento_nro = buscar_segmento(unTCB);
+    list_add(tabla_segmentos_tcb,tcb_adm);
 }
+
+void alta_tareas_segmentacion(int PCB_ID, char* tareas)
+{
+	Tarea_adm* tareas_adm = malloc(sizeof(Tarea_adm));
+	tareas_adm->PID = PCB_ID;
+	tareas_adm->segmento_nro = buscar_segmento(tareas);
+    list_add(tabla_segmentos_tareas,tareas_adm);
+}
+
 
 uint32_t buscar_tripulante_segmentacion(int TCB_ID)
 {
-	TCB* unTCB;
-	
-	if (TCB_ID > list_size(tabla_segmentos_tcb) -1)
-	{
-		return 99;
-	} else {
-		unTCB = list_get(tabla_segmentos_tcb, TCB_ID); 
-	}
-	return unTCB;
-}
+	bool encontre_tripulante = false;
+	u_int32_t posicion_tripulante;
+	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos_tcb);
+                TCB_adm* tcb_adm;
 
-int segmentacion_nuevo_pcb(PCB* unPCB)
-{
-	int index = 0;
-	int encontre_segmento = -1;
-	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
-                segmento* segmento_a_ocupar;
-				
 				while(list_iterator_has_next(list_iterator)) {
-                    segmento_a_ocupar = list_iterator_next(list_iterator);
+                    tcb_adm = list_iterator_next(list_iterator);
 
                     //Si encuentro un segmento libre donde cabe el espacio a ocupar
-					if ((strcmp(segmento_a_ocupar->estado,"LIBRE") == 0) && (segmento_a_ocupar->desplazamiento >= sizeof(PCB*)))
+					if (tcb_adm->TID == TCB_ID)
 					{
-                            encontre_segmento = 0;
-
-                            //Seteo el nuevo segmento
-							segmento* segmento_nuevo = malloc(sizeof(segmento));
-							segmento_nuevo->id = contador_segmentos++;
-							segmento_nuevo->dir_inicio =  segmento_a_ocupar->dir_inicio;
-							segmento_nuevo->desplazamiento = sizeof(PCB);
-							segmento_nuevo->estado = "OCUPADO";
-							
-                            //Reduzco el segmento libre
-							segmento_a_ocupar->dir_inicio =  (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
-							segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - (sizeof(PCB));
-							
-                            //Copio el TCB a memoria
-							memcpy(segmento_nuevo->dir_inicio, unPCB, sizeof(PCB));
-
-                            //Agrego el nuevo segmento a la tabla
-							list_add_in_index(tabla_segmentos,index,segmento_nuevo);
-							break;
+						encontre_tripulante = true;
+                        posicion_tripulante = buscar_posicion(tcb_adm->segmento_nro);
+						break;
 					}
-					index++;
-
                 }
 	list_iterator_destroy(list_iterator);
-
-	return encontre_segmento;
+	if (encontre_tripulante)
+	{
+		return posicion_tripulante;
+	} else {
+		return 99;
+	}
 }
+
 
 //Crea la tabla de segmentos y el primer segmento vacio
 void inicializar_segmentacion(int tamanio_memoria) 
@@ -162,7 +230,7 @@ void inicializar_segmentacion(int tamanio_memoria)
 	tabla_segmentos_tcb = list_create();
 
     //Creo un segmento vacío del tamanio de la memoria
-	segmento* segmento_aux = malloc(sizeof(segmento));
+	Segmento* segmento_aux = malloc(sizeof(Segmento));
 	segmento_aux->id = -1;
 	segmento_aux->dir_inicio =  MEMORIA;
 	segmento_aux->desplazamiento = tamanio_memoria;

@@ -27,6 +27,23 @@ typedef struct {
 	uint32_t dir_inicio;
 	int desplazamiento;
 	char* estado;
-} segmento;
+} Segmento;
+
+typedef struct{
+	uint32_t PID;
+	int segmento_nro;
+} PCB_adm;
+
+typedef struct{
+	uint32_t TID;
+	uint32_t PID;
+	int segmento_nro;
+} TCB_adm;
+
+
+typedef struct{
+	uint32_t PID;
+	int segmento_nro;
+} Tarea_adm;
 
 #endif

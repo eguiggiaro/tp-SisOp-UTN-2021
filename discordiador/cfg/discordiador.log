@@ -36,3 +36,416 @@
 
 [INFO] 19:57:02:652 Discordiador/(11967:11967): Recibi los mensajes del destino correctamente
 [INFO] 19:57:02:652 Discordiador/(11967:11967): Finalizó Discordiador
+[INFO] 22:09:16:204 Discordiador/(10099:10099): Inició Discordiador.
+[INFO] 22:09:16:206 Discordiador/(10099:10099): Conectándose a MiRAM
+[ERROR] 22:09:16:208 Discordiador/(10099:10099): Error al conectar
+[INFO] 22:25:17:826 Discordiador/(12757:12757): Inició Discordiador.
+[INFO] 22:25:17:828 Discordiador/(12757:12757): Conectándose a MiRAM
+[ERROR] 22:25:17:832 Discordiador/(12757:12757): Error al conectar
+[INFO] 12:02:33:451 Discordiador/(19533:19533): Inició Discordiador.
+[INFO] 12:02:33:453 Discordiador/(19533:19533): Conectándose a MiRAM
+[ERROR] 12:02:33:455 Discordiador/(19533:19533): Error al conectar
+[INFO] 12:06:14:435 Discordiador/(20223:20223): Inició Discordiador.
+[INFO] 12:06:14:437 Discordiador/(20223:20223): Conectándose a MiRAM
+[ERROR] 12:06:14:438 Discordiador/(20223:20223): Error al conectar
+[INFO] 12:08:07:922 Discordiador/(20401:20401): Inició Discordiador.
+[INFO] 12:08:07:924 Discordiador/(20401:20401): Conectándose a MiRAM
+[INFO] 12:08:07:924 Discordiador/(20401:20401): Conectándose a Store
+[INFO] 12:08:48:549 Discordiador/(20518:20518): Inició Discordiador.
+[INFO] 12:08:48:550 Discordiador/(20518:20518): Conectándose a MiRAM
+[INFO] 12:08:48:550 Discordiador/(20518:20518): Conectándose a Store
+[INFO] 12:15:19:002 Discordiador/(20991:20991): Inició Discordiador.
+[INFO] 12:15:19:005 Discordiador/(20991:20991): Conectándose a MiRAM
+[INFO] 12:15:19:005 Discordiador/(20991:20991): Conectándose a Store
+[INFO] 12:20:02:477 Discordiador/(21328:21328): Inició Discordiador.
+[INFO] 12:20:02:480 Discordiador/(21328:21328): Conectándose a MiRAM
+[INFO] 12:20:02:480 Discordiador/(21328:21328): Conectándose a Store
+[INFO] 12:20:30:977 Discordiador/(21420:21420): Inició Discordiador.
+[INFO] 12:20:30:979 Discordiador/(21420:21420): Conectándose a MiRAM
+[INFO] 12:20:30:980 Discordiador/(21420:21420): Conectándose a Store
+[INFO] 12:20:30:980 Discordiador/(21420:21420): Finalizó Discordiador
+
+[INFO] 12:21:19:212 Discordiador/(21532:21532): Inició Discordiador.
+[INFO] 12:21:19:214 Discordiador/(21532:21532): Conectándose a MiRAM
+[INFO] 12:21:19:215 Discordiador/(21532:21532): Conectándose a Store
+[INFO] 12:21:19:215 Discordiador/(21532:21532): Finalizó Discordiador
+
+[INFO] 12:22:17:092 Discordiador/(21653:21653): Inició Discordiador.
+[INFO] 12:22:17:094 Discordiador/(21653:21653): Conectándose a MiRAM
+[INFO] 12:22:17:094 Discordiador/(21653:21653): Conectándose a Store
+[INFO] 12:26:32:068 Discordiador/(21944:21944): Inició Discordiador.
+[INFO] 12:26:32:070 Discordiador/(21944:21944): Conectándose a MiRAM
+[INFO] 12:26:32:070 Discordiador/(21944:21944): Conectándose a Store
+[INFO] 12:27:28:769 Discordiador/(22219:22219): Inició Discordiador.
+[INFO] 12:27:28:771 Discordiador/(22219:22219): Conectándose a MiRAM
+[INFO] 12:27:28:771 Discordiador/(22219:22219): Conectándose a Store
+[INFO] 12:50:56:734 Discordiador/(23678:23678): Inició Discordiador.
+[INFO] 12:50:56:736 Discordiador/(23678:23678): Conectándose a MiRAM
+[INFO] 12:50:56:737 Discordiador/(23678:23678): Conectándose a Store
+[INFO] 12:51:20:279 Discordiador/(23758:23758): Inició Discordiador.
+[INFO] 12:51:20:281 Discordiador/(23758:23758): Conectándose a MiRAM
+[INFO] 12:51:20:282 Discordiador/(23758:23758): Conectándose a Store
+[INFO] 12:52:20:635 Discordiador/(23868:23868): Inició Discordiador.
+[INFO] 12:52:20:637 Discordiador/(23868:23868): Conectándose a MiRAM
+[INFO] 12:52:20:637 Discordiador/(23868:23868): Conectándose a Store
+[INFO] 12:52:50:894 Discordiador/(23955:23955): Inició Discordiador.
+[INFO] 12:52:50:897 Discordiador/(23955:23955): Conectándose a MiRAM
+[INFO] 12:52:50:898 Discordiador/(23955:23955): Conectándose a Store
+[INFO] 12:54:42:561 Discordiador/(24115:24115): Inició Discordiador.
+[INFO] 12:54:42:563 Discordiador/(24115:24115): Conectándose a MiRAM
+[INFO] 12:54:42:563 Discordiador/(24115:24115): Conectándose a Store
+[INFO] 12:55:38:174 Discordiador/(24228:24228): Inició Discordiador.
+[INFO] 12:55:38:176 Discordiador/(24228:24228): Conectándose a MiRAM
+[INFO] 12:55:38:176 Discordiador/(24228:24228): Conectándose a Store
+[INFO] 12:56:54:114 Discordiador/(24357:24357): Inició Discordiador.
+[INFO] 12:56:54:116 Discordiador/(24357:24357): Conectándose a MiRAM
+[INFO] 12:56:54:116 Discordiador/(24357:24357): Conectándose a Store
+[INFO] 13:01:44:205 Discordiador/(24896:24896): Inició Discordiador.
+[INFO] 13:01:44:207 Discordiador/(24896:24896): Conectándose a MiRAM
+[INFO] 13:01:44:207 Discordiador/(24896:24896): Conectándose a Store
+[INFO] 13:01:44:208 Discordiador/(24896:24896): Finalizó Discordiador
+
+[INFO] 13:03:01:897 Discordiador/(25025:25025): Inició Discordiador.
+[INFO] 13:03:01:899 Discordiador/(25025:25025): Conectándose a MiRAM
+[INFO] 13:03:01:899 Discordiador/(25025:25025): Conectándose a Store
+[INFO] 13:03:06:190 Discordiador/(25025:25025): Finalizó Discordiador
+
+[INFO] 13:04:49:322 Discordiador/(25191:25191): Inició Discordiador.
+[INFO] 13:04:49:324 Discordiador/(25191:25191): Conectándose a MiRAM
+[INFO] 13:04:49:324 Discordiador/(25191:25191): Conectándose a Store
+[INFO] 13:04:58:402 Discordiador/(25191:25191): Finalizó Discordiador
+
+[INFO] 13:05:24:482 Discordiador/(25279:25279): Inició Discordiador.
+[INFO] 13:05:24:484 Discordiador/(25279:25279): Conectándose a MiRAM
+[INFO] 13:05:24:484 Discordiador/(25279:25279): Conectándose a Store
+[INFO] 13:05:30:508 Discordiador/(25279:25279): Finalizó Discordiador
+
+[INFO] 13:07:11:754 Discordiador/(25441:25441): Inició Discordiador.
+[INFO] 13:07:11:756 Discordiador/(25441:25441): Conectándose a MiRAM
+[INFO] 13:07:11:756 Discordiador/(25441:25441): Conectándose a Store
+[INFO] 13:07:16:083 Discordiador/(25441:25441): Finalizó Discordiador
+
+[INFO] 13:13:26:028 Discordiador/(25830:25830): Inició Discordiador.
+[INFO] 13:13:26:030 Discordiador/(25830:25830): Conectándose a MiRAM
+[INFO] 13:13:26:030 Discordiador/(25830:25830): Conectándose a Store
+[INFO] 13:13:26:031 Discordiador/(25830:25830): Finalizó Discordiador
+
+[INFO] 13:14:22:511 Discordiador/(25942:25942): Inició Discordiador.
+[INFO] 13:14:22:513 Discordiador/(25942:25942): Conectándose a MiRAM
+[INFO] 13:14:22:513 Discordiador/(25942:25942): Conectándose a Store
+[INFO] 13:14:22:513 Discordiador/(25942:25942): Finalizó Discordiador
+
+[INFO] 13:15:38:990 Discordiador/(26401:26401): Inició Discordiador.
+[INFO] 13:15:38:992 Discordiador/(26401:26401): Conectándose a MiRAM
+[INFO] 13:15:38:993 Discordiador/(26401:26401): Conectándose a Store
+[INFO] 13:15:38:993 Discordiador/(26401:26401): Finalizó Discordiador
+
+[INFO] 13:15:58:849 Discordiador/(26495:26495): Inició Discordiador.
+[INFO] 13:15:58:851 Discordiador/(26495:26495): Conectándose a MiRAM
+[INFO] 13:15:58:851 Discordiador/(26495:26495): Conectándose a Store
+[INFO] 13:17:30:163 Discordiador/(26704:26704): Inició Discordiador.
+[INFO] 13:17:30:165 Discordiador/(26704:26704): Conectándose a MiRAM
+[INFO] 13:17:30:165 Discordiador/(26704:26704): Conectándose a Store
+[INFO] 13:17:33:205 Discordiador/(26704:26704): Finalizó Discordiador
+
+[INFO] 13:18:13:144 Discordiador/(26821:26821): Inició Discordiador.
+[INFO] 13:18:13:168 Discordiador/(26821:26821): Conectándose a MiRAM
+[INFO] 13:18:13:169 Discordiador/(26821:26821): Conectándose a Store
+[INFO] 13:18:15:933 Discordiador/(26821:26821): Finalizó Discordiador
+
+[INFO] 13:20:23:867 Discordiador/(27029:27029): Inició Discordiador.
+[INFO] 13:20:23:875 Discordiador/(27029:27029): Conectándose a MiRAM
+[INFO] 13:20:23:875 Discordiador/(27029:27029): Conectándose a Store
+[INFO] 13:21:05:607 Discordiador/(27140:27140): Inició Discordiador.
+[INFO] 13:21:05:609 Discordiador/(27140:27140): Conectándose a MiRAM
+[INFO] 13:21:05:610 Discordiador/(27140:27140): Conectándose a Store
+[INFO] 13:21:55:699 Discordiador/(27393:27393): Inició Discordiador.
+[INFO] 13:21:55:701 Discordiador/(27393:27393): Conectándose a MiRAM
+[INFO] 13:21:55:701 Discordiador/(27393:27393): Conectándose a Store
+[INFO] 13:22:43:621 Discordiador/(27550:27550): Inició Discordiador.
+[INFO] 13:22:43:622 Discordiador/(27550:27550): Conectándose a MiRAM
+[INFO] 13:22:43:622 Discordiador/(27550:27550): Conectándose a Store
+[INFO] 13:23:21:248 Discordiador/(27679:27679): Inició Discordiador.
+[INFO] 13:23:21:250 Discordiador/(27679:27679): Conectándose a MiRAM
+[INFO] 13:23:21:250 Discordiador/(27679:27679): Conectándose a Store
+[INFO] 13:26:38:266 Discordiador/(27949:27949): Inició Discordiador.
+[INFO] 13:26:38:268 Discordiador/(27949:27949): Conectándose a MiRAM
+[INFO] 13:26:38:269 Discordiador/(27949:27949): Conectándose a Store
+[INFO] 13:29:01:025 Discordiador/(28152:28152): Inició Discordiador.
+[INFO] 13:29:01:027 Discordiador/(28152:28152): Conectándose a MiRAM
+[INFO] 13:29:01:028 Discordiador/(28152:28152): Conectándose a Store
+[INFO] 13:29:01:028 Discordiador/(28152:28152): Finalizó Discordiador
+
+[INFO] 13:30:04:500 Discordiador/(28282:28282): Inició Discordiador.
+[INFO] 13:30:04:502 Discordiador/(28282:28282): Conectándose a MiRAM
+[INFO] 13:30:04:502 Discordiador/(28282:28282): Conectándose a Store
+[INFO] 13:30:04:503 Discordiador/(28282:28282): Finalizó Discordiador
+
+[INFO] 13:30:41:921 Discordiador/(28396:28396): Inició Discordiador.
+[INFO] 13:30:41:923 Discordiador/(28396:28396): Conectándose a MiRAM
+[INFO] 13:30:41:923 Discordiador/(28396:28396): Conectándose a Store
+[INFO] 13:30:41:923 Discordiador/(28396:28396): Finalizó Discordiador
+
+[INFO] 13:32:01:232 Discordiador/(28546:28546): Inició Discordiador.
+[INFO] 13:32:01:234 Discordiador/(28546:28546): Conectándose a MiRAM
+[INFO] 13:32:01:234 Discordiador/(28546:28546): Conectándose a Store
+[INFO] 13:32:49:499 Discordiador/(28665:28665): Inició Discordiador.
+[INFO] 13:32:49:501 Discordiador/(28665:28665): Conectándose a MiRAM
+[INFO] 13:32:49:501 Discordiador/(28665:28665): Conectándose a Store
+[INFO] 13:34:15:075 Discordiador/(28828:28828): Inició Discordiador.
+[INFO] 13:34:15:078 Discordiador/(28828:28828): Conectándose a MiRAM
+[INFO] 13:34:15:078 Discordiador/(28828:28828): Conectándose a Store
+[INFO] 13:35:15:357 Discordiador/(28963:28963): Inició Discordiador.
+[INFO] 13:35:15:359 Discordiador/(28963:28963): Conectándose a MiRAM
+[INFO] 13:35:15:359 Discordiador/(28963:28963): Conectándose a Store
+[INFO] 13:35:17:367 Discordiador/(28963:28963): Finalizó Discordiador
+
+[INFO] 13:35:35:731 Discordiador/(29061:29061): Inició Discordiador.
+[INFO] 13:35:35:732 Discordiador/(29061:29061): Conectándose a MiRAM
+[INFO] 13:35:35:732 Discordiador/(29061:29061): Conectándose a Store
+[INFO] 13:35:38:249 Discordiador/(29061:29061): Finalizó Discordiador
+
+[INFO] 13:36:17:383 Discordiador/(29186:29186): Inició Discordiador.
+[INFO] 13:36:17:385 Discordiador/(29186:29186): Conectándose a MiRAM
+[INFO] 13:36:17:386 Discordiador/(29186:29186): Conectándose a Store
+[INFO] 13:36:19:545 Discordiador/(29186:29186): Finalizó Discordiador
+
+[INFO] 13:37:59:159 Discordiador/(29353:29353): Inició Discordiador.
+[INFO] 13:37:59:162 Discordiador/(29353:29353): Conectándose a MiRAM
+[INFO] 13:37:59:162 Discordiador/(29353:29353): Conectándose a Store
+[INFO] 13:38:00:812 Discordiador/(29353:29353): Finalizó Discordiador
+
+[INFO] 13:38:19:448 Discordiador/(29454:29454): Inició Discordiador.
+[INFO] 13:38:19:450 Discordiador/(29454:29454): Conectándose a MiRAM
+[INFO] 13:38:19:450 Discordiador/(29454:29454): Conectándose a Store
+[INFO] 13:38:21:730 Discordiador/(29454:29454): Finalizó Discordiador
+
+[INFO] 13:39:01:911 Discordiador/(29574:29574): Inició Discordiador.
+[INFO] 13:39:01:914 Discordiador/(29574:29574): Conectándose a MiRAM
+[INFO] 13:39:01:914 Discordiador/(29574:29574): Conectándose a Store
+[INFO] 13:39:04:173 Discordiador/(29574:29574): Finalizó Discordiador
+
+[INFO] 13:39:31:513 Discordiador/(29683:29683): Inició Discordiador.
+[INFO] 13:39:31:515 Discordiador/(29683:29683): Conectándose a MiRAM
+[INFO] 13:39:31:515 Discordiador/(29683:29683): Conectándose a Store
+[INFO] 13:39:33:585 Discordiador/(29683:29683): Finalizó Discordiador
+
+[INFO] 13:40:25:555 Discordiador/(29806:29806): Inició Discordiador.
+[INFO] 13:40:25:557 Discordiador/(29806:29806): Conectándose a MiRAM
+[INFO] 13:40:25:557 Discordiador/(29806:29806): Conectándose a Store
+[INFO] 13:40:27:223 Discordiador/(29806:29806): Finalizó Discordiador
+
+[INFO] 13:41:24:731 Discordiador/(29938:29938): Inició Discordiador.
+[INFO] 13:41:24:732 Discordiador/(29938:29938): Conectándose a MiRAM
+[INFO] 13:41:24:733 Discordiador/(29938:29938): Conectándose a Store
+[INFO] 13:41:26:498 Discordiador/(29938:29938): Finalizó Discordiador
+
+[INFO] 13:42:23:193 Discordiador/(30090:30090): Inició Discordiador.
+[INFO] 13:42:23:195 Discordiador/(30090:30090): Conectándose a MiRAM
+[INFO] 13:42:23:195 Discordiador/(30090:30090): Conectándose a Store
+[INFO] 13:42:25:092 Discordiador/(30090:30090): Finalizó Discordiador
+
+[INFO] 13:44:47:310 Discordiador/(30313:30313): Inició Discordiador.
+[INFO] 13:44:47:317 Discordiador/(30313:30313): Conectándose a MiRAM
+[INFO] 13:44:47:317 Discordiador/(30313:30313): Conectándose a Store
+[INFO] 14:00:54:833 Discordiador/(31510:31510): Inició Discordiador.
+[INFO] 14:00:54:837 Discordiador/(31510:31510): Conectándose a MiRAM
+[INFO] 14:00:54:838 Discordiador/(31510:31510): Conectándose a Store
+[INFO] 14:02:29:751 Discordiador/(31674:31674): Inició Discordiador.
+[INFO] 14:02:29:753 Discordiador/(31674:31674): Conectándose a MiRAM
+[INFO] 14:02:29:753 Discordiador/(31674:31674): Conectándose a Store
+[INFO] 14:02:34:495 Discordiador/(31674:31674): Finalizó Discordiador
+
+[INFO] 14:03:39:897 Discordiador/(31832:31832): Inició Discordiador.
+[INFO] 14:03:39:898 Discordiador/(31832:31832): Conectándose a MiRAM
+[INFO] 14:03:39:899 Discordiador/(31832:31832): Conectándose a Store
+[INFO] 14:03:41:847 Discordiador/(31832:31832): Finalizó Discordiador
+
+[INFO] 14:06:36:619 Discordiador/(32081:32081): Inició Discordiador.
+[INFO] 14:06:36:622 Discordiador/(32081:32081): Conectándose a MiRAM
+[INFO] 14:06:36:622 Discordiador/(32081:32081): Conectándose a Store
+[INFO] 14:06:42:117 Discordiador/(32081:32081): Finalizó Discordiador
+
+[INFO] 14:07:01:141 Discordiador/(32172:32172): Inició Discordiador.
+[INFO] 14:07:01:143 Discordiador/(32172:32172): Conectándose a MiRAM
+[INFO] 14:07:01:144 Discordiador/(32172:32172): Conectándose a Store
+[INFO] 14:07:03:908 Discordiador/(32172:32172): Finalizó Discordiador
+
+[INFO] 14:10:40:649 Discordiador/(32455:32455): Inició Discordiador.
+[INFO] 14:10:40:653 Discordiador/(32455:32455): Conectándose a MiRAM
+[INFO] 14:10:40:654 Discordiador/(32455:32455): Conectándose a Store
+[INFO] 14:10:59:503 Discordiador/(32455:32455): Finalizó Discordiador
+
+[INFO] 14:11:17:857 Discordiador/(32565:32565): Inició Discordiador.
+[INFO] 14:11:17:860 Discordiador/(32565:32565): Conectándose a MiRAM
+[INFO] 14:11:17:861 Discordiador/(32565:32565): Conectándose a Store
+[INFO] 14:11:55:286 Discordiador/(32646:32646): Inició Discordiador.
+[INFO] 14:11:55:289 Discordiador/(32646:32646): Conectándose a MiRAM
+[INFO] 14:11:55:289 Discordiador/(32646:32646): Conectándose a Store
+[INFO] 14:12:10:292 Discordiador/(32646:32646): Finalizó Discordiador
+
+[INFO] 14:14:26:521 Discordiador/(620:620): Inició Discordiador.
+[INFO] 14:14:26:525 Discordiador/(620:620): Conectándose a MiRAM
+[INFO] 14:14:26:527 Discordiador/(620:620): Conectándose a Store
+[INFO] 14:14:34:344 Discordiador/(620:620): Finalizó Discordiador
+
+[INFO] 14:16:19:383 Discordiador/(836:836): Inició Discordiador.
+[INFO] 14:16:19:387 Discordiador/(836:836): Conectándose a MiRAM
+[INFO] 14:16:19:388 Discordiador/(836:836): Conectándose a Store
+[INFO] 14:17:04:306 Discordiador/(959:959): Inició Discordiador.
+[INFO] 14:17:04:309 Discordiador/(959:959): Conectándose a MiRAM
+[INFO] 14:17:04:310 Discordiador/(959:959): Conectándose a Store
+[INFO] 14:19:56:887 Discordiador/(1196:1196): Inició Discordiador.
+[INFO] 14:19:56:891 Discordiador/(1196:1196): Conectándose a MiRAM
+[INFO] 14:19:56:892 Discordiador/(1196:1196): Conectándose a Store
+[INFO] 14:20:42:205 Discordiador/(1306:1306): Inició Discordiador.
+[INFO] 14:20:42:215 Discordiador/(1306:1306): Conectándose a MiRAM
+[INFO] 14:20:42:215 Discordiador/(1306:1306): Conectándose a Store
+[INFO] 14:21:47:502 Discordiador/(1439:1439): Inició Discordiador.
+[INFO] 14:21:47:505 Discordiador/(1439:1439): Conectándose a MiRAM
+[INFO] 14:21:47:506 Discordiador/(1439:1439): Conectándose a Store
+[INFO] 14:24:48:994 Discordiador/(1688:1688): Inició Discordiador.
+[INFO] 14:24:48:997 Discordiador/(1688:1688): Conectándose a MiRAM
+[INFO] 14:24:48:997 Discordiador/(1688:1688): Conectándose a Store
+[INFO] 14:34:25:082 Discordiador/(2376:2376): Inició Discordiador.
+[INFO] 14:34:25:086 Discordiador/(2376:2376): Conectándose a MiRAM
+[INFO] 14:34:25:087 Discordiador/(2376:2376): Conectándose a Store
+[INFO] 14:35:13:969 Discordiador/(2471:2471): Inició Discordiador.
+[INFO] 14:35:13:972 Discordiador/(2471:2471): Conectándose a MiRAM
+[INFO] 14:35:13:973 Discordiador/(2471:2471): Conectándose a Store
+[INFO] 14:42:16:672 Discordiador/(3247:3247): Inició Discordiador.
+[INFO] 14:42:16:679 Discordiador/(3247:3247): Conectándose a MiRAM
+[INFO] 14:42:16:680 Discordiador/(3247:3247): Conectándose a Store
+[INFO] 14:43:34:780 Discordiador/(3403:3403): Inició Discordiador.
+[INFO] 14:43:34:783 Discordiador/(3403:3403): Conectándose a MiRAM
+[INFO] 14:43:34:784 Discordiador/(3403:3403): Conectándose a Store
+[INFO] 14:46:08:285 Discordiador/(4028:4028): Inició Discordiador.
+[INFO] 14:46:08:289 Discordiador/(4028:4028): Conectándose a MiRAM
+[INFO] 14:46:08:290 Discordiador/(4028:4028): Conectándose a Store
+[INFO] 14:47:28:963 Discordiador/(4169:4169): Inició Discordiador.
+[INFO] 14:47:28:966 Discordiador/(4169:4169): Conectándose a MiRAM
+[INFO] 14:47:28:967 Discordiador/(4169:4169): Conectándose a Store
+[INFO] 14:50:25:763 Discordiador/(4452:4452): Inició Discordiador.
+[INFO] 14:50:25:768 Discordiador/(4452:4452): Conectándose a MiRAM
+[INFO] 14:50:25:768 Discordiador/(4452:4452): Conectándose a Store
+[INFO] 14:57:44:249 Discordiador/(4954:4954): Inició Discordiador.
+[INFO] 14:57:44:253 Discordiador/(4954:4954): Conectándose a MiRAM
+[INFO] 14:57:44:256 Discordiador/(4954:4954): Conectándose a Store
+[INFO] 14:58:04:299 Discordiador/(5026:5026): Inició Discordiador.
+[INFO] 14:58:04:302 Discordiador/(5026:5026): Conectándose a MiRAM
+[INFO] 14:58:04:302 Discordiador/(5026:5026): Conectándose a Store
+[INFO] 15:00:06:667 Discordiador/(5215:5215): Inició Discordiador.
+[INFO] 15:00:06:670 Discordiador/(5215:5215): Conectándose a MiRAM
+[INFO] 15:00:06:670 Discordiador/(5215:5215): Conectándose a Store
+[INFO] 15:01:04:940 Discordiador/(5322:5322): Inició Discordiador.
+[INFO] 15:01:04:948 Discordiador/(5322:5322): Conectándose a MiRAM
+[INFO] 15:01:04:948 Discordiador/(5322:5322): Conectándose a Store
+[INFO] 15:01:48:243 Discordiador/(5417:5417): Inició Discordiador.
+[INFO] 15:01:48:251 Discordiador/(5417:5417): Conectándose a MiRAM
+[INFO] 15:01:48:251 Discordiador/(5417:5417): Conectándose a Store
+[INFO] 15:02:54:450 Discordiador/(5562:5562): Inició Discordiador.
+[INFO] 15:02:54:453 Discordiador/(5562:5562): Conectándose a MiRAM
+[INFO] 15:02:54:454 Discordiador/(5562:5562): Conectándose a Store
+[INFO] 15:04:00:864 Discordiador/(5687:5687): Inició Discordiador.
+[INFO] 15:04:00:871 Discordiador/(5687:5687): Conectándose a MiRAM
+[INFO] 15:04:00:872 Discordiador/(5687:5687): Conectándose a Store
+[INFO] 15:08:17:971 Discordiador/(5996:5996): Inició Discordiador.
+[INFO] 15:08:17:974 Discordiador/(5996:5996): Conectándose a MiRAM
+[INFO] 15:08:17:974 Discordiador/(5996:5996): Conectándose a Store
+[INFO] 15:10:25:553 Discordiador/(6368:6368): Inició Discordiador.
+[INFO] 15:10:25:556 Discordiador/(6368:6368): Conectándose a MiRAM
+[INFO] 15:10:25:559 Discordiador/(6368:6368): Conectándose a Store
+[INFO] 15:11:36:775 Discordiador/(6517:6517): Inició Discordiador.
+[INFO] 15:11:36:778 Discordiador/(6517:6517): Conectándose a MiRAM
+[INFO] 15:11:36:779 Discordiador/(6517:6517): Conectándose a Store
+[INFO] 15:12:58:589 Discordiador/(6664:6664): Inició Discordiador.
+[INFO] 15:12:58:592 Discordiador/(6664:6664): Conectándose a MiRAM
+[INFO] 15:12:58:593 Discordiador/(6664:6664): Conectándose a Store
+[INFO] 15:15:00:199 Discordiador/(6856:6856): Inició Discordiador.
+[INFO] 15:15:00:202 Discordiador/(6856:6856): Conectándose a MiRAM
+[INFO] 15:15:00:202 Discordiador/(6856:6856): Conectándose a Store
+[INFO] 15:18:31:980 Discordiador/(7241:7241): Inició Discordiador.
+[INFO] 15:18:31:983 Discordiador/(7241:7241): Conectándose a MiRAM
+[INFO] 15:18:31:984 Discordiador/(7241:7241): Conectándose a Store
+[INFO] 15:22:56:337 Discordiador/(7550:7550): Inició Discordiador.
+[INFO] 15:22:56:342 Discordiador/(7550:7550): Conectándose a MiRAM
+[INFO] 15:22:56:343 Discordiador/(7550:7550): Conectándose a Store
+[INFO] 15:25:36:637 Discordiador/(7770:7770): Inició Discordiador.
+[INFO] 15:25:36:640 Discordiador/(7770:7770): Conectándose a MiRAM
+[INFO] 15:25:36:641 Discordiador/(7770:7770): Conectándose a Store
+[INFO] 15:27:43:487 Discordiador/(7975:7975): Inició Discordiador.
+[INFO] 15:27:43:491 Discordiador/(7975:7975): Conectándose a MiRAM
+[INFO] 15:27:43:491 Discordiador/(7975:7975): Conectándose a Store
+[INFO] 15:29:03:210 Discordiador/(8109:8109): Inició Discordiador.
+[INFO] 15:29:03:214 Discordiador/(8109:8109): Conectándose a MiRAM
+[INFO] 15:29:03:214 Discordiador/(8109:8109): Conectándose a Store
+[INFO] 15:30:15:418 Discordiador/(8281:8281): Inició Discordiador.
+[INFO] 15:30:15:421 Discordiador/(8281:8281): Conectándose a MiRAM
+[INFO] 15:30:15:422 Discordiador/(8281:8281): Conectándose a Store
+[INFO] 15:31:53:679 Discordiador/(8434:8434): Inició Discordiador.
+[INFO] 15:31:53:680 Discordiador/(8434:8434): Conectándose a MiRAM
+[INFO] 15:31:53:680 Discordiador/(8434:8434): Conectándose a Store
+[INFO] 15:33:30:464 Discordiador/(9015:9015): Inició Discordiador.
+[INFO] 15:33:30:466 Discordiador/(9015:9015): Conectándose a MiRAM
+[INFO] 15:33:30:466 Discordiador/(9015:9015): Conectándose a Store
+[INFO] 15:34:40:059 Discordiador/(9675:9675): Inició Discordiador.
+[INFO] 15:34:40:062 Discordiador/(9675:9675): Conectándose a MiRAM
+[INFO] 15:34:40:062 Discordiador/(9675:9675): Conectándose a Store
+[INFO] 15:38:04:039 Discordiador/(10052:10052): Inició Discordiador.
+[INFO] 15:38:04:041 Discordiador/(10052:10052): Conectándose a MiRAM
+[INFO] 15:38:04:041 Discordiador/(10052:10052): Conectándose a Store
+[INFO] 15:38:34:986 Discordiador/(10154:10154): Inició Discordiador.
+[INFO] 15:38:34:989 Discordiador/(10154:10154): Conectándose a MiRAM
+[INFO] 15:38:34:989 Discordiador/(10154:10154): Conectándose a Store
+[INFO] 15:39:13:557 Discordiador/(10258:10258): Inició Discordiador.
+[INFO] 15:39:13:558 Discordiador/(10258:10258): Conectándose a MiRAM
+[INFO] 15:39:13:559 Discordiador/(10258:10258): Conectándose a Store
+[INFO] 15:39:40:789 Discordiador/(10363:10363): Inició Discordiador.
+[INFO] 15:39:40:791 Discordiador/(10363:10363): Conectándose a MiRAM
+[INFO] 15:39:40:791 Discordiador/(10363:10363): Conectándose a Store
+[INFO] 15:40:17:997 Discordiador/(10469:10469): Inició Discordiador.
+[INFO] 15:40:17:999 Discordiador/(10469:10469): Conectándose a MiRAM
+[INFO] 15:40:17:999 Discordiador/(10469:10469): Conectándose a Store
+[INFO] 15:40:40:653 Discordiador/(10546:10546): Inició Discordiador.
+[INFO] 15:40:40:656 Discordiador/(10546:10546): Conectándose a MiRAM
+[INFO] 15:40:40:656 Discordiador/(10546:10546): Conectándose a Store
+[INFO] 15:41:08:135 Discordiador/(10638:10638): Inició Discordiador.
+[INFO] 15:41:08:136 Discordiador/(10638:10638): Conectándose a MiRAM
+[INFO] 15:41:08:136 Discordiador/(10638:10638): Conectándose a Store
+[INFO] 15:41:36:018 Discordiador/(10727:10727): Inició Discordiador.
+[INFO] 15:41:36:021 Discordiador/(10727:10727): Conectándose a MiRAM
+[INFO] 15:41:36:022 Discordiador/(10727:10727): Conectándose a Store
+[INFO] 15:42:29:913 Discordiador/(10849:10849): Inició Discordiador.
+[INFO] 15:42:29:915 Discordiador/(10849:10849): Conectándose a MiRAM
+[INFO] 15:42:29:926 Discordiador/(10849:10849): Conectándose a Store
+[INFO] 15:45:10:519 Discordiador/(11074:11074): Inició Discordiador.
+[INFO] 15:45:10:521 Discordiador/(11074:11074): Conectándose a MiRAM
+[INFO] 15:45:10:521 Discordiador/(11074:11074): Conectándose a Store
+[INFO] 15:45:33:213 Discordiador/(11159:11159): Inició Discordiador.
+[INFO] 15:45:33:216 Discordiador/(11159:11159): Conectándose a MiRAM
+[INFO] 15:45:33:216 Discordiador/(11159:11159): Conectándose a Store
+[INFO] 15:49:36:498 Discordiador/(11464:11464): Inició Discordiador.
+[INFO] 15:49:36:505 Discordiador/(11464:11464): Conectándose a MiRAM
+[INFO] 15:49:36:506 Discordiador/(11464:11464): Conectándose a Store
+[INFO] 15:51:04:308 Discordiador/(11981:11981): Inició Discordiador.
+[INFO] 15:51:04:313 Discordiador/(11981:11981): Conectándose a MiRAM
+[INFO] 15:51:04:314 Discordiador/(11981:11981): Conectándose a Store
+[INFO] 15:51:31:230 Discordiador/(12106:12106): Inició Discordiador.
+[INFO] 15:51:31:235 Discordiador/(12106:12106): Conectándose a MiRAM
+[INFO] 15:51:31:235 Discordiador/(12106:12106): Conectándose a Store
+[INFO] 15:51:40:039 Discordiador/(12140:12140): Inició Discordiador.
+[INFO] 15:51:40:046 Discordiador/(12140:12140): Conectándose a MiRAM
+[INFO] 15:51:40:046 Discordiador/(12140:12140): Conectándose a Store
+[INFO] 15:53:05:050 Discordiador/(12140:12140): Finalizó Discordiador
+
+[INFO] 15:53:58:155 Discordiador/(12346:12346): Inició Discordiador.
+[INFO] 15:53:58:167 Discordiador/(12346:12346): Conectándose a MiRAM
+[INFO] 15:53:58:168 Discordiador/(12346:12346): Conectándose a Store
+[INFO] 15:58:33:633 Discordiador/(12346:12346): Finalizó Discordiador
+
+[INFO] 16:12:14:192 Discordiador/(14217:14217): Inició Discordiador.
+[INFO] 16:12:14:205 Discordiador/(14217:14217): Conectándose a MiRAM
+[INFO] 16:12:14:205 Discordiador/(14217:14217): Conectándose a Store
+[INFO] 16:14:50:004 Discordiador/(14417:14417): Inició Discordiador.
+[INFO] 16:14:50:010 Discordiador/(14417:14417): Conectándose a MiRAM
+[INFO] 16:14:50:011 Discordiador/(14417:14417): Conectándose a Store

@@ -1,13 +1,17 @@
 #include "discordiador.h"
 #include "serializacion_discordiador.h"
+#include "servidor_discordiador.h"
+#include "tripulante.h"
 
 #define MODULE_NAME "Discordiador"
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
 #define LOG_FILE_PATH "cfg/discordiador.log"
 
+int id_patota;
 int main(){
+id_patota=0;
 
-	
+//enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició Discordiador.");
@@ -19,18 +23,49 @@ int main(){
 	}
 
 	puerto_discordiador = string_itoa(configuracion->puerto);
-
-	char* modulo;
-	elegir_modulo();
-	modulo = readline(">>");
-
-	while(modulo_invalido(modulo)){
-		printf("\nError! %s no es una opción correcta.\n",modulo);
+	
+	/* 
+		char* modulo;
 		elegir_modulo();
 		modulo = readline(">>");
-	}
 
-	if(strncmp(modulo,"1",1)==0){
+		while(modulo_invalido(modulo)){
+			printf("\nError! %s no es una opción correcta.\n", modulo);
+			elegir_modulo();
+			modulo = readline(">>");
+		}
+
+		if(strncmp(modulo,"1",1)==0){
+		//Obtención datos para conexion con miram
+		char* ip_miram = configuracion->ip_mi_ram_hq;
+		char* puerto_miram = configuracion->puerto_mi_ram_hq;
+
+		miLogInfo("Conectándose a MiRAM");
+		printf("\nInicia conexion con MIRAM:\n");
+
+		iniciar_conexion_miram(ip_miram, puerto_miram);
+
+		char* ip_store = configuracion->ip_i_mongo_store;
+		char* puerto_store = configuracion->puerto_i_mongo_store;
+
+		miLogInfo("Conectándose a Store");
+		printf("\nInicia conexion con STORE:\n");
+
+		iniciar_conexion_store(ip_store, puerto_store);
+		}
+		else{
+			miLogInfo("\nOpcion invalida\n");
+		}
+
+		if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
+				NULL) != 0) {
+			printf("Error iniciando servidor/n");
+		}
+	
+	 */
+	
+	
+	
 	//Obtención datos para conexion con miram
 	char* ip_miram = configuracion->ip_mi_ram_hq;
 	char* puerto_miram = configuracion->puerto_mi_ram_hq;
@@ -38,40 +73,199 @@ int main(){
 	miLogInfo("Conectándose a MiRAM");
 	printf("\nInicia conexion con MIRAM:\n");
 
-	iniciar_conexion_miram(ip_miram, puerto_miram);
-	
-	}else if(strncmp(modulo,"2",1)==0){
-	//Obtención datos para conexion con store
+	//iniciar_conexion_miram(ip_miram, puerto_miram);
+
 	char* ip_store = configuracion->ip_i_mongo_store;
 	char* puerto_store = configuracion->puerto_i_mongo_store;
 
 	miLogInfo("Conectándose a Store");
 	printf("\nInicia conexion con STORE:\n");
 
-	iniciar_conexion_store(ip_store, puerto_store);
-	}
-	else{
-		miLogInfo("\nOpcion invalida\n");
-	}
+	//iniciar_conexion_store(ip_store, puerto_store);
+	
+/*
 
-	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
+if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 			NULL) != 0) {
 		printf("Error iniciando servidor/n");
 	}
-
 	pthread_join(threadSERVER, NULL);
+ */
+	 
 
 	
-	miLogInfo("Finalizó Discordiador");
+
+	
+	new_list=list_create();
+	//execute_list =list_create();
+	//blocked_io=list_create();
+		
+	consola();
+	miLogInfo("Finalizó Discordiador\n");
+	//vaciar_listas();
 	free(configuracion);
 	miLogDestroy();
 
 }
 
+void consola(){
+	char* input_consola = "INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4";
+	char** list;
+	printf("Hola!\n");
+	printf("Que desea hacer?\n");
+	//*se podria poner ejemplitos de que puede hacer...
+	while(strcmp(input_consola,"FIN")!=0)
+	{ 
+		printf("%s\n",input_consola);	
+		if(list == NULL)
+		{
+			//todo: poner algo un poco mas profesional... o no :D
+			printf("Emm... No escribiste nada...");
+			return;
+		}else
+		{
+				//*la primer linea debe ser la tarea. dependiendo esta chequeamos si va a tener mas tokens o no.
+				//!voy a hacer un enum con esto
+			list=string_split(input_consola, " ");
+
+			int a=atoi(list[0]);
+			switch (a)
+			{
+				case INICIAR_PATOTA_COM:
+				printf( "Comando es Iniciar patota\n" );
+					iniciar_patota(input_consola);
+					break;
+				case INICIAR_PLANIFICACION_COM:
+					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					break;
+				case PAUSAR_PLANIFICACION_COM:
+					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					break;
+				case LISTAR_TRIPULANTE_COM:
+					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					break;
+				case EXPULSAR_TRIPULANTE_COM:
+					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					break;
+				case OBTENER_BITACORA_COM:
+					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					break;
+				case TEST_MENSAJES:
+					printf( "1. Miram\n" );
+					printf( "2. Store\n" );
+
+					char test_modulo = readline(">>");
+
+					if(test_modulo=="1"){
+						consola_miram();
+					}else
+					{
+						consola_store();
+					}
+				
+					break;
+				
+
+				
+				default:
+					printf( "No conozco ese comando, seguro que esta bien?\n" );
+					printf( "Reescribir, por favor\n" );
+					input_consola = readline(">>");
+					break;
+			}
+			printf("Siguiente comando?\n");
+			input_consola = readline(">>");	
+		}
+		printf("Siguieksksksksknte comando?\n");
+			input_consola = readline(">>");
+	}
+}
+void iniciar_patota(char* comando){
+	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
+	pthread_t new_hilo_tripulante;
+	Tripulante_disc trip_hilo;
+	char** list;
+	char** list2;
+
+	list=string_split(comando, " ");
+	//*Contador de id_patotas. Esto hasta  decidan q hacer
+	id_patota=id_patota+1;
+	enviar_tareas_miram(list[2]);
+
+	int cantidad_trip=atoi(list[1]);
+	for(int i=0; i<=cantidad_trip;i++){
+		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
+		new_tripulante->estado= listo;
+		new_tripulante->id_patota=id_patota;
+		new_tripulante->id_tripulante=i;
+
+		if(sizeof(list)>i+1 && list[i+3] != NULL)
+		{
+			list2=string_split(list[i+3], "|");
+			new_tripulante->pos_x=atoi(list2[0]);
+			new_tripulante->pos_y=atoi(list2[1]);
+		}
+		else {
+			new_tripulante->pos_x=0;
+			new_tripulante->pos_y=0;
+		}
+
+		//*creo hilo y agrego a "listos"
+		pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
+		trip_hilo.id_hilo =new_hilo_tripulante;
+		trip_hilo.estado_trip= listo;
+		trip_hilo.quantum=0;
+		list_add(new_list, &trip_hilo);
+	}
+	printf ("DONE!");
+}
+
+void vaciar_listas(){
+	//! not so sure this will work running...
+	void* list_value;
+	Tripulante_disc* hilo_tripulante;
+	for(int i=0;list_size(new_list)<i;i++){
+		list_value =list_get(new_list, i);
+		hilo_tripulante=(Tripulante_disc*)list_value;
+		pthread_join(hilo_tripulante->id_hilo,NULL); 
+	}
+	list_destroy(new_list);
+	printf("Cerro hilo\n");
+}
+
+void enviar_tareas_miram(char* direccion_txt){
+	// ejemplo de tarea TAREA PARAMETROS;POS X;POS Y;TIEMPO
+	t_list* lista_mensajes = list_create();
+	char line[100];
+	char** list;
+	char** list2;
+
+	FILE* file_tarea=fopen(direccion_txt,"r");
+	if (file_tarea == NULL ) {
+		printf ("Error al abrir el fichero");}
+	while(!feof(file_tarea))
+	{
+		fgets(line,sizeof(line),file_tarea);
+		list=string_split(line, ";");
+		//1.Id_patota
+		list_add(lista_mensajes,id_patota);
+		list2=string_split(list[0], " ");//verificar que haya paramentro
+		list_add(lista_mensajes,list2[0]);//tarea
+		list_add(lista_mensajes,list2[1]);//parametro o NULL
+		list_add(lista_mensajes,list[1]);//pos X
+		list_add(lista_mensajes,list[2]);//pos Y
+		list_add(lista_mensajes,list[3]);//tiempo
+		//mandar a miram
+		//informar_tareas_patota(socket_miram,lista_mensajes);
+		list_clean(lista_mensajes);
+	}
+	list_destroy(lista_mensajes);
+	fclose(file_tarea);
+
+}
 void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {
 
-    //inicia conexion con destino
-    int socket = crear_conexion(logger, ip_destino, puerto_destino);
+   int socket = crear_conexion(logger, ip_destino, puerto_destino);
 
 	miLogInfo("Obtuve el socket y vale %d.\n", socket);
 
@@ -79,6 +273,9 @@ void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
+	socket_miram=socket;	
+}
+void consola_miram(){
 	//iniciamos consola
 	char* opcion_seleccionada;
 	iniciar_consola_miram();
@@ -97,12 +294,11 @@ void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {
 	operacion_seleccionada = convertir_codigo_operacion_miram(opcion_seleccionada);
 
 	//enviamos accion a socket
-	enviar_accion_seleccionada(operacion_seleccionada, socket);
+	enviar_accion_seleccionada(operacion_seleccionada, socket_miram);
 }
-
 void iniciar_conexion_store(char* ip_destino, char* puerto_destino) {
 
-    //inicia conexion con destino
+     //inicia conexion con destino
     int socket = crear_conexion(logger, ip_destino, puerto_destino);
 
 	miLogInfo("Obtuve el socket y vale %d.\n", socket);
@@ -111,6 +307,9 @@ void iniciar_conexion_store(char* ip_destino, char* puerto_destino) {
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
+	socket_store=socket;	
+}
+void consola_store(){
 	//iniciamos consola
 	char* opcion_seleccionada;
 	iniciar_consola_store();
@@ -129,10 +328,8 @@ void iniciar_conexion_store(char* ip_destino, char* puerto_destino) {
 	operacion_seleccionada = convertir_codigo_operacion_store(opcion_seleccionada);
 
 	//enviamos accion a socket
-	enviar_accion_seleccionada(operacion_seleccionada, socket);
+	enviar_accion_seleccionada(operacion_seleccionada, socket_store);
 }
-
-
 int leer_config(void) {
 
 	t_config* config;

@@ -12,13 +12,13 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 		case INICIAR_TRIPULANTE:
 			printf("Entre al case de op_code %i.\n", codigo_operacion);
 
-			iniciar_tripulante(socket);
+			//iniciar_tripulante(socket);
 
 			break;
 		case INFORMAR_TAREAS_PATOTA:
 			printf("Entre al case de op_code %i.\n", codigo_operacion);
 
-			informar_tareas_patota(socket);
+			informar_tareas_patota_test(socket);
 
 			break;
 		case MOV_TRIPULANTE:
@@ -127,7 +127,7 @@ void iniciar_tripulante(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
@@ -138,7 +138,30 @@ void iniciar_tripulante(uint32_t socket){
 	}
 }
 
-void informar_tareas_patota(uint32_t socket){
+void informar_tareas_patota(uint32_t socket, t_list* lista_mensajes ){
+    printf("\nFuncion de INFORMAR TAREAS PATOTA");
+
+    t_paquete* paquete = crear_paquete(INFORMAR_TAREAS_PATOTA);
+	t_buffer* buffer;
+    buffer = serializar_lista_strings(lista_mensajes);
+	paquete ->buffer = buffer;
+	enviar_paquete(paquete, socket);
+
+	//recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
+		t_list* lista = deserializar_lista_strings(buffer);
+
+		loggear_lista_strings(lista);
+		
+		miLogInfo("Recibi los mensajes del destino correctamente");
+	} else {
+		miLogInfo("No recibi los mensajes del destino correctamente");
+	}
+}
+void informar_tareas_patota_test(uint32_t socket){
     printf("\nFuncion de INFORMAR TAREAS PATOTA");
 
     t_paquete* paquete = crear_paquete(INFORMAR_TAREAS_PATOTA);
@@ -183,7 +206,7 @@ void informar_tareas_patota(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
@@ -224,7 +247,7 @@ void mover_tripulante(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
@@ -255,7 +278,7 @@ void tarea_siguiente(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
@@ -286,7 +309,7 @@ void paquete_de_prueba(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
@@ -317,7 +340,7 @@ void obtener_bitacora(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
@@ -340,7 +363,7 @@ void iniciar_fsck(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
@@ -386,7 +409,7 @@ void generar_oxigeno(uint32_t socket){
 	op_code codigo_operacion = recibir_operacion(socket);
 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = recibir_buffer(socket);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);

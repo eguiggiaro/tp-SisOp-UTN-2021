@@ -15,7 +15,7 @@ int leer_config(void) {
 	if(config==NULL){
 		return EXIT_FAILURE;
 	}
-	
+
 
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
@@ -84,7 +84,7 @@ void atender_request_miram(uint32_t request_fd) {
 
 	  break;
 
-	  case INFORMAR_TAREAS_PATOTA:
+	  case INICIAR_PATOTA:
 	  //recibo los mensajes
 	  miLogInfo("Me llego operacion: INFORMAR TAREAS PATOTA \n");
 	  buffer_devolucion = recibir_buffer(request_fd);

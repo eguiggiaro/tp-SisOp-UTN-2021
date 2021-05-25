@@ -67,6 +67,8 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
     close(socket);
 }
 
+
+
 void expulsar_tripulante(uint32_t socket){
 	printf("\nFuncion de EXPULSAR TRIPULANTE");
 
@@ -138,10 +140,10 @@ void iniciar_tripulante(uint32_t socket){
 	}
 }
 
-void informar_tareas_patota(uint32_t socket, t_list* lista_mensajes ){
+t_list* iniciar_patota_miram(uint32_t socket, t_list* lista_mensajes ){
     printf("\nFuncion de INFORMAR TAREAS PATOTA");
 
-    t_paquete* paquete = crear_paquete(INFORMAR_TAREAS_PATOTA);
+    t_paquete* paquete = crear_paquete(INICIAR_PATOTA);
 	t_buffer* buffer;
     buffer = serializar_lista_strings(lista_mensajes);
 	paquete ->buffer = buffer;
@@ -155,8 +157,9 @@ void informar_tareas_patota(uint32_t socket, t_list* lista_mensajes ){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
-		
 		miLogInfo("Recibi los mensajes del destino correctamente");
+		return lista;	
+		
 	} else {
 		miLogInfo("No recibi los mensajes del destino correctamente");
 	}

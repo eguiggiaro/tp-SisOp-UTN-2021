@@ -37,7 +37,7 @@ typedef enum Estados{
 	finalizado//?
 }Estados;
 
-typedef enum Comandos{
+typedef enum Comandos{	
 	INICIAR_PATOTA_COM,
 	INICIAR_PLANIFICACION_COM,
 	PAUSAR_PLANIFICACION_COM,
@@ -47,6 +47,7 @@ typedef enum Comandos{
 	FIN,
 	TEST_MENSAJES
 }Comandos;
+
  
 typedef struct Tripulante_disc{
 	pthread_t * id_hilo;
@@ -74,9 +75,7 @@ char* puerto_discordiador;
 //Metodos Discordidor
 void iniciar_patota(char* ); //?string? chequer commons
 void consola();
-void leer_tareas_txt();
-void mandar_tareas_miram(char *);
-void enviar_tareas_miram(char* direccion_txt);
+char* leer_tareas_txt(char* direccion_txt);
 
 
 //Metodos Test

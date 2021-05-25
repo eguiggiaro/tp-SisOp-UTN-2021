@@ -7,9 +7,7 @@
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
 #define LOG_FILE_PATH "cfg/discordiador.log"
 
-int id_patota;
 int main(){
-id_patota=0;
 
 //enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
@@ -63,7 +61,7 @@ id_patota=0;
 		}
 	
 	 */
-	
+
 	
 	
 	//Obtención datos para conexion con miram
@@ -84,17 +82,13 @@ id_patota=0;
 	//iniciar_conexion_store(ip_store, puerto_store);
 	
 /*
-
 if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 			NULL) != 0) {
 		printf("Error iniciando servidor/n");
 	}
 	pthread_join(threadSERVER, NULL);
- */
-	 
-
 	
-
+*/
 	
 	new_list=list_create();
 	//execute_list =list_create();
@@ -128,7 +122,7 @@ void consola(){
 				//!voy a hacer un enum con esto
 			list=string_split(input_consola, " ");
 
-			int a=atoi(list[0]);
+			Comandos a=atoi(list[0]);
 			switch (a)
 			{
 				case INICIAR_PATOTA_COM:
@@ -176,47 +170,54 @@ void consola(){
 			printf("Siguiente comando?\n");
 			input_consola = readline(">>");	
 		}
-		printf("Siguieksksksksknte comando?\n");
-			input_consola = readline(">>");
 	}
 }
 void iniciar_patota(char* comando){
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
 	pthread_t new_hilo_tripulante;
+	t_list* lista_mensajes, *mensajes_respuesta;
 	Tripulante_disc trip_hilo;
+
+	char* string_tareas,* string_posiciones =  string_new();
 	char** list;
-	char** list2;
 
 	list=string_split(comando, " ");
-	//*Contador de id_patotas. Esto hasta  decidan q hacer
-	id_patota=id_patota+1;
-	enviar_tareas_miram(list[2]);
+	string_tareas=leer_tareas_txt(list[2]);//leemos las tareas y las traemos como un solo string
 
 	int cantidad_trip=atoi(list[1]);
-	for(int i=0; i<=cantidad_trip;i++){
-		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
-		new_tripulante->estado= listo;
-		new_tripulante->id_patota=id_patota;
-		new_tripulante->id_tripulante=i;
-
+	for(int i=0; i<=cantidad_trip;i++){//string con todas las posiciones
+		
 		if(sizeof(list)>i+1 && list[i+3] != NULL)
 		{
-			list2=string_split(list[i+3], "|");
-			new_tripulante->pos_x=atoi(list2[0]);
-			new_tripulante->pos_y=atoi(list2[1]);
+			string_append_with_format(&string_posiciones, "%s|", list[i+3]);
 		}
 		else {
-			new_tripulante->pos_x=0;
-			new_tripulante->pos_y=0;
+			string_append(&string_posiciones, "0|0;");
 		}
+	}
 
-		//*creo hilo y agrego a "listos"
+	list_add(lista_mensajes,string_tareas);
+	mensajes_respuesta=iniciar_patota_miram(socket_miram,lista_mensajes);
+
+	char* patota_id=list_get(mensajes_respuesta,0);
+	
+	for(int i=0; i<=cantidad_trip;i++){
+		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
+
+		new_tripulante->id_patota=atoi(patota_id);
+		new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
+		new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
+
+		//*creo hilo y agrego a "new"
 		pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
 		trip_hilo.id_hilo =new_hilo_tripulante;
 		trip_hilo.estado_trip= listo;
 		trip_hilo.quantum=0;
 		list_add(new_list, &trip_hilo);
+
 	}
+	
+	list_destroy(lista_mensajes);	
 	printf ("DONE!");
 }
 
@@ -233,12 +234,10 @@ void vaciar_listas(){
 	printf("Cerro hilo\n");
 }
 
-void enviar_tareas_miram(char* direccion_txt){
+char* leer_tareas_txt(char* direccion_txt){
 	// ejemplo de tarea TAREA PARAMETROS;POS X;POS Y;TIEMPO
-	t_list* lista_mensajes = list_create();
+	char* lista_tareas =  string_new();
 	char line[100];
-	char** list;
-	char** list2;
 
 	FILE* file_tarea=fopen(direccion_txt,"r");
 	if (file_tarea == NULL ) {
@@ -246,21 +245,12 @@ void enviar_tareas_miram(char* direccion_txt){
 	while(!feof(file_tarea))
 	{
 		fgets(line,sizeof(line),file_tarea);
-		list=string_split(line, ";");
-		//1.Id_patota
-		list_add(lista_mensajes,id_patota);
-		list2=string_split(list[0], " ");//verificar que haya paramentro
-		list_add(lista_mensajes,list2[0]);//tarea
-		list_add(lista_mensajes,list2[1]);//parametro o NULL
-		list_add(lista_mensajes,list[1]);//pos X
-		list_add(lista_mensajes,list[2]);//pos Y
-		list_add(lista_mensajes,list[3]);//tiempo
-		//mandar a miram
-		//informar_tareas_patota(socket_miram,lista_mensajes);
-		list_clean(lista_mensajes);
+		
+		string_append_with_format(&lista_tareas, "%s|", line);
 	}
-	list_destroy(lista_mensajes);
+
 	fclose(file_tarea);
+	return lista_tareas;
 
 }
 void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {

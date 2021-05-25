@@ -219,6 +219,46 @@ uint32_t buscar_tripulante_segmentacion(int TCB_ID)
 	}
 }
 
+uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
+{
+	if (PCB_ID > contador_patotas) {
+		miLogInfo("La patota %d aún no ha sido iniciada", PCB_ID);
+		return 99;
+	}
+
+	bool encontre_tripulante = false;
+	u_int32_t posicion_tripulante;
+	TCB* unTCB;
+	TCB* TCB_encontrado;
+
+	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos_tcb);
+                TCB_adm* tcb_adm;
+
+				while(list_iterator_has_next(list_iterator)) {
+                    tcb_adm = list_iterator_next(list_iterator);
+					
+					if (tcb_adm->PID == PCB_ID)
+					{
+						unTCB = buscar_tripulante_segmentacion(tcb_adm->TID);
+
+						if (unTCB->estado == 'N') {
+							encontre_tripulante = true;
+							TCB_encontrado = unTCB;
+							break;
+						}
+					}
+                }
+	list_iterator_destroy(list_iterator);
+
+	if (encontre_tripulante)
+	{
+		return TCB_encontrado;
+	} else {
+		miLogInfo("No existen tripulantes no iniciados para la patota %d",PCB_ID);
+		return 99;
+	}
+}
+
 
 //Crea la tabla de segmentos y el primer segmento vacio
 void inicializar_segmentacion(int tamanio_memoria) 

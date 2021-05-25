@@ -97,8 +97,17 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 
 	
 	new_list=list_create();
-	//execute_list =list_create();
-	//blocked_io=list_create();
+	execute_list = list_create();
+	blocked_io=list_create();
+	exit_list=list_create();
+    ready_list=list_create();
+
+	//inicializo semaforos
+	sem_init(&mutexNEW, 0, 1);
+	sem_init(&mutexREADY, 0, 1);
+	sem_init(&mutexEXEC, 0, 1);
+	sem_init(&mutexBLOCK, 0, 1);
+	sem_init(&mutexEXIT, 0, 1);
 		
 	consola();
 	miLogInfo("Finalizó Discordiador\n");
@@ -195,7 +204,7 @@ void iniciar_patota(char* comando){
 	int cantidad_trip=atoi(list[1]);
 	for(int i=0; i<=cantidad_trip;i++){
 		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
-		new_tripulante->estado= listo;
+		new_tripulante->estado= llegada;
 		new_tripulante->id_patota=id_patota;
 		new_tripulante->id_tripulante=i;
 
@@ -213,9 +222,7 @@ void iniciar_patota(char* comando){
 		//*creo hilo y agrego a "listos"
 		pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
 		trip_hilo.id_hilo =new_hilo_tripulante;
-		trip_hilo.estado_trip= listo;
 		trip_hilo.quantum=0;
-		list_add(new_list, &trip_hilo);
 	}
 	printf ("DONE!");
 }
@@ -263,6 +270,15 @@ void enviar_tareas_miram(char* direccion_txt){
 	fclose(file_tarea);
 
 }
+
+void tripulante_listo(Tripulante* trip){
+	//Se pasa tripulante a cola de READY.
+	sem_wait(&mutexREADY);
+    list_add(ready_list, trip);
+    sem_post(&mutexREADY);
+}
+
+
 void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {
 
    int socket = crear_conexion(logger, ip_destino, puerto_destino);

@@ -6,7 +6,7 @@
 
 
 
-
+// Lee la configuración y la deja disponible
 int leer_config(void) {
 
 	t_config* config;
@@ -31,6 +31,7 @@ int leer_config(void) {
 	return EXIT_SUCCESS;
 }
 
+// Atiende con hilos los request que son enviados a MiRAM
 void atender_request_miram(uint32_t request_fd) {
 
 	op_code codigo_operacion = recibir_operacion(request_fd);
@@ -194,6 +195,7 @@ void atender_request_miram(uint32_t request_fd) {
 	}
 }
 
+// Crea la grilla inicial y la muestra en pantalla
 void crear_grilla(void) {
 
 	int err;
@@ -202,29 +204,100 @@ void crear_grilla(void) {
 
 	nivel_gui_get_area_nivel(&cols, &rows);
 
-	nivel = nivel_crear("Test");
+	nivel = nivel_crear("AMONGOS");
 
 	err = personaje_crear(nivel, 'A', 0,0);
 	err = personaje_crear(nivel, 'B', 3,3);
 	nivel_gui_dibujar(nivel);
 }
 
-void mover_tripulante(void) {
+void crear_personaje_grilla(int tripulante, int pos_x, int pos_y) {
+	char identificador = identificadores[proximo_identificador++];
+	
+	Identidad_grilla* id_grilla = malloc(sizeof(Identidad_grilla));
+	id_grilla->TID = tripulante;
+	id_grilla->identificador = identificador;
+	
+	list_add(tabla_identificadores_grilla, id_grilla);
+	personaje_crear(nivel, identificador, pos_x,pos_y);
+	nivel_gui_dibujar(nivel);
+}
+
+//Mueve un tripulante a una dirección destino
+int mover_tripulante(int tripulante, int posicion_x_final, int posicion_y_final)
+{
+	TCB* miTCB = buscar_tripulante(tripulante);
+
+	if (miTCB = 99) {
+		return -1;
+	}
+
+	char identificador = buscar_tripulante_grilla(tripulante);
+
+	if (identificador == '-') {
+		return -1;
+	}
+
+	mover_tripulante_grilla(identificador, posicion_x_final - miTCB->pos_X, posicion_y_final - miTCB->pos_y);
+}
+
+void mover_tripulante_grilla(char identificador, int pos_x, int pos_y) {
 
 	int err;
 
-	err = item_desplazar(nivel, 'A', 0, 5);
+	err = item_desplazar(nivel, identificador, pos_x, pos_y);
 	nivel_gui_dibujar(nivel);
-    sleep(10);
-	nivel_destruir(nivel);
-	nivel_gui_terminar();
+
 }
+
+//buscar el caracter asignado en la grilla, para el tripulante
+char buscar_tripulante_grilla(int tripulante)
+{
+
+	if (tripulante > contador_patotas) {
+		miLogInfo("El tripulante %d a mover no existe", tripulante);
+		return '-';
+	}
+
+	bool encontre_tripulante = false;
+	char identificador_tripulante;
+	TCB* unTCB;
+	TCB* TCB_encontrado;
+
+	t_list_iterator* list_iterator = list_iterator_create(tabla_identificadores_grilla);
+                Identidad_grilla* id_grilla;
+
+				while(list_iterator_has_next(list_iterator)) {
+                    id_grilla = list_iterator_next(list_iterator);
+					
+					if (id_grilla->TID == tripulante)
+					{
+						encontre_tripulante = true;
+						identificador_tripulante = id_grilla->identificador;
+						break;
+					}
+                }
+	list_iterator_destroy(list_iterator);
+
+	if (encontre_tripulante)
+	{
+		return identificador_tripulante;
+	} else {
+		miLogInfo("El tripulante %d a mover no existe", tripulante);
+		return '-';
+	}
+
+
+}
+
+
 
 void inicializar_memoria(int tamanio_memoria)
 {
 	MEMORIA = malloc(tamanio_memoria);
 	contador_patotas = 0;
 	contador_tripulantes = 0;
+	tabla_identificadores_grilla = list_create();
 
 	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
@@ -242,6 +315,8 @@ void finalizar_memoria()
 	}
 
 	free(MEMORIA);
+	nivel_destruir(nivel);
+	nivel_gui_terminar();
 
 }
 
@@ -317,7 +392,6 @@ u_int32_t iniciar_tareas(int PCB_ID, char* tareas)
 
 	memcpy(posicion_memoria, tareas,sizeof(tareas));
 
-	//alta tripulante
 	alta_tareas(PCB_ID,posicion_memoria);
 
 	return posicion_memoria;

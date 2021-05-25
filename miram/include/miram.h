@@ -40,10 +40,17 @@ void* iniciar_servidor_miram();
 void* iniciar_funciones_memoria();
 
 //GUI
+	t_list* tabla_identificadores_grilla;
 	NIVEL* nivel;
-
 	int cols, rows;
+	// mejorar
+	char identificadores[11] = {'A','B','C','D','E','F','G','H','I','J','K'};
+	int proximo_identificador = 0;
 
 char* proxima_tarea_tripulante(int tripulante_id);
 char* buscar_posicion_tripulante(int tripulante_id);
+char buscar_tripulante_grilla(int tripulante);
+u_int32_t buscar_tripulante(int TCB_ID);
+
+
 #endif

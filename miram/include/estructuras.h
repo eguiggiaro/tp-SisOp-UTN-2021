@@ -20,6 +20,11 @@ typedef struct Punto{
 	int pos_y;
 } Punto;
 
+typedef struct Identidad_grilla{
+	int TID;
+	char identificador;
+} Identidad_grilla;
+
 void* MEMORIA;
 
 int contador_patotas;

@@ -5,6 +5,8 @@
 #define LOG_FILE_PATH "miram.log"
 
 
+
+
 int leer_config(void) {
 
 	t_config* config;
@@ -36,7 +38,7 @@ void atender_request_miram(uint32_t request_fd) {
 	t_list* lista;
 	t_paquete* paquete_devuelto;
 	t_list* lista_mensajes;
-
+	int resultado;
 
 	switch(codigo_operacion){
 		
@@ -70,18 +72,29 @@ void atender_request_miram(uint32_t request_fd) {
 			lista = deserializar_lista_strings(buffer_devolucion);
 
 			int PATOTA_ID =  atoi(list_get(lista,0));
+			
+			resultado = iniciar_tripulante(PATOTA_ID);
 
-			//devuelve una lista de mensajes
-			paquete_devuelto = crear_paquete(OK);
+			if (resultado == -1)
+			{
+				miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
+				paquete_devuelto = crear_paquete(FAIL);
+				list_add(lista_mensajes, "Se produjo un error al iniciar el tripulante");
+			} else {
+				miLogInfo("TRIPULANTE INICIADO CORRECTAMENTE \n");
 
-			lista_mensajes = list_create();
-			list_add(lista_mensajes, "hola");
-			list_add(lista_mensajes,"soy miram");
+				char* posicion = buscar_posicion_tripulante(resultado);
+				char* proxima_tarea = proxima_tarea_tripulante(resultado);
 
+				paquete_devuelto = crear_paquete(OK);
+				list_add(lista_mensajes, string_itoa(resultado));
+				list_add(lista_mensajes, posicion);
+				list_add(lista_mensajes, proxima_tarea);
+			}
 
-			buffer_devolucion = serializar_lista_strings(lista_mensajes);
-			paquete_devuelto->buffer = buffer_devolucion;
-			enviar_paquete(paquete_devuelto, request_fd);
+				buffer_devolucion = serializar_lista_strings(lista_mensajes);
+				paquete_devuelto->buffer = buffer_devolucion;
+				enviar_paquete(paquete_devuelto, request_fd);
 
 			break;
 
@@ -105,7 +118,7 @@ void atender_request_miram(uint32_t request_fd) {
 
 			Punto puntos[2] = {*unPunto,*unPunto2};
 			lista_mensajes = list_create();
-			int resultado = iniciar_patota(cantidad_tripulantes,tareas,puntos);
+			resultado = iniciar_patota(cantidad_tripulantes,tareas,puntos);
 
 			if (resultado == -1)
 			{
@@ -182,9 +195,7 @@ void atender_request_miram(uint32_t request_fd) {
 }
 
 void crear_grilla(void) {
-	NIVEL* nivel;
 
-	int cols, rows;
 	int err;
 
 	nivel_gui_inicializar();
@@ -193,14 +204,20 @@ void crear_grilla(void) {
 
 	nivel = nivel_crear("Test");
 
-	err = personaje_crear(nivel, 'A', cols - 1, rows - 1);
-	err = enemigo_crear(nivel, 'B', 10, 14);
-	err = caja_crear(nivel, 'X', 19, 9, 2);
+	err = personaje_crear(nivel, 'A', 0,0);
+	err = personaje_crear(nivel, 'B', 3,3);
 	nivel_gui_dibujar(nivel);
-    sleep(3);
+}
+
+void mover_tripulante(void) {
+
+	int err;
+
+	err = item_desplazar(nivel, 'A', 0, 5);
+	nivel_gui_dibujar(nivel);
+    sleep(10);
 	nivel_destruir(nivel);
 	nivel_gui_terminar();
-	
 }
 
 void inicializar_memoria(int tamanio_memoria)
@@ -280,7 +297,7 @@ u_int32_t buscar_tripulante(int TCB_ID)
 }
 
 
-u_int32_t buscar_tripulante(int PCB_ID)
+u_int32_t buscar_tripulante_no_asignado(int PCB_ID)
 {
 	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
@@ -305,6 +322,42 @@ u_int32_t iniciar_tareas(int PCB_ID, char* tareas)
 
 	return posicion_memoria;
 }
+
+char* buscar_posicion_tripulante(int tripulante_id) {
+
+	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
+	
+	if (posicion_memoria == 99)
+	{
+		return "";
+	}
+
+	TCB* unTCB = posicion_memoria;
+	char* posicion_tripulante = string_duplicate(string_itoa(unTCB->pos_X));
+	
+	posicion_tripulante = (posicion_tripulante,'|');
+	posicion_tripulante = (posicion_tripulante,string_itoa(unTCB->pos_y));
+
+	return posicion_tripulante;
+}
+
+char* proxima_tarea_tripulante(int tripulante_id) {
+
+	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
+	
+	if (posicion_memoria == 99)
+	{
+		return "";
+	}
+
+	TCB* unTCB = posicion_memoria;
+
+	//TODO
+
+	return "";
+}
+
+
 
 int iniciar_patota(int cantidad_tripulantes, char* tareas, Punto *puntos) 
 {
@@ -338,7 +391,7 @@ int iniciar_patota(int cantidad_tripulantes, char* tareas, Punto *puntos)
 
 	for (int i=0; i<cantidad_tripulantes;i++)
 	{
-		if (inicializar_tripulante(unPCB->PID, puntos[i]) == -1)
+		if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
 		{
 			return -1;
 		}
@@ -349,7 +402,7 @@ int iniciar_patota(int cantidad_tripulantes, char* tareas, Punto *puntos)
 
 
 
-int inicializar_tripulante(int patota, Punto unPunto) 
+int inicializar_tripulante(int patota, Punto unPunto, u_int32_t tareas) 
 {
 	u_int32_t posicion_memoria = reservar_memoria(sizeof(TCB));
 
@@ -368,7 +421,7 @@ int inicializar_tripulante(int patota, Punto unPunto)
 	miTCB->pos_y = (&unPunto)->pos_y;
 
 	//linkear a tareas
-	miTCB->proxima_instruccion = 1212;
+	miTCB->proxima_instruccion = tareas;
 	miTCB->PCB = buscar_patota(patota);
 
 	//alta tripulante
@@ -378,31 +431,17 @@ int inicializar_tripulante(int patota, Punto unPunto)
 
 int iniciar_tripulante(int patota_id) 
 {
-	buscar_tripulante_no_asignado(patota_id);
-	
-	u_int32_t posicion_memoria = reservar_memoria(sizeof(TCB));
+	u_int32_t posicion_memoria = buscar_tripulante_no_asignado(patota_id);
 
 	if (posicion_memoria == 99)
 	{
 		return -1;
 	}
 
-	TCB* miTCB = posicion_memoria;
+	TCB* unTCB = posicion_memoria;
+	unTCB->estado = 'R';
 
-	//sincronizar
-	miTCB->TID = contador_tripulantes++;
-
-	miTCB->estado = 'N';
-	miTCB->pos_X = (&unPunto)->pos_x;
-	miTCB->pos_y = (&unPunto)->pos_y;
-
-	//linkear a tareas
-	miTCB->proxima_instruccion = 1212;
-	miTCB->PCB = buscar_patota(patota);
-
-	//alta tripulante
-	alta_tripulante(miTCB);
-
+	return unTCB->TID;
 }
 
 

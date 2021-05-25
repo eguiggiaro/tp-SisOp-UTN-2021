@@ -39,4 +39,11 @@ void crear_grilla(void);
 void* iniciar_servidor_miram();
 void* iniciar_funciones_memoria();
 
+//GUI
+	NIVEL* nivel;
+
+	int cols, rows;
+
+char* proxima_tarea_tripulante(int tripulante_id);
+char* buscar_posicion_tripulante(int tripulante_id);
 #endif

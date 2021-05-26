@@ -4,6 +4,7 @@
 //Shared libs#include "shared_utils.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "logger.h"
 #include "paquete.h"
 #include <pthread.h>
@@ -21,17 +22,6 @@ typedef struct Tarea{
     int pos_y;
     int tiempo;
 } Tarea;
-
-typedef struct Tripulante{
-    //should i use ponters for all right?
-    int id_patota;
-    int id_tripulante;
-    int pos_x;
-    int pos_y;
-    Estados estado;//deberia saber yo mi estado for sakes de semaforos? de ser si, q sea un enum...
-    char* tarea_actual;//chequear la libreria de strings... 
-    
-} Tripulante;
 
 void *inicializar_tripulante(void * );
 void mover_en_x(Tripulante, int);//siempre es 1... pero a derecha(-1) o izqueirda(+1)

@@ -91,8 +91,17 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 */
 	
 	new_list=list_create();
-	//execute_list =list_create();
-	//blocked_io=list_create();
+	execute_list = list_create();
+	blocked_io=list_create();
+	exit_list=list_create();
+    ready_list=list_create();
+
+	//inicializo semaforos
+	sem_init(&mutexNEW, 0, 1);
+	sem_init(&mutexREADY, 0, 1);
+	sem_init(&mutexEXEC, 0, 1);
+	sem_init(&mutexBLOCK, 0, 1);
+	sem_init(&mutexEXIT, 0, 1);
 		
 	consola();
 	miLogInfo("Finalizó Discordiador\n");
@@ -118,12 +127,11 @@ void consola(){
 			return;
 		}else
 		{
-				//*la primer linea debe ser la tarea. dependiendo esta chequeamos si va a tener mas tokens o no.
-				//!voy a hacer un enum con esto
+			//*la primer linea debe ser la tarea. dependiendo esta chequeamos si va a tener mas tokens o no.
 			list=string_split(input_consola, " ");
 
-			Comandos a=atoi(list[0]);
-			switch (a)
+			Comandos opc=find_enum_consola(list[0]);
+			switch (opc)
 			{
 				case INICIAR_PATOTA_COM:
 				printf( "Comando es Iniciar patota\n" );
@@ -211,7 +219,6 @@ void iniciar_patota(char* comando){
 		//*creo hilo y agrego a "new"
 		pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
 		trip_hilo.id_hilo =new_hilo_tripulante;
-		trip_hilo.estado_trip= listo;
 		trip_hilo.quantum=0;
 		list_add(new_list, &trip_hilo);
 
@@ -253,6 +260,15 @@ char* leer_tareas_txt(char* direccion_txt){
 	return lista_tareas;
 
 }
+
+void tripulante_listo(Tripulante* trip){
+	//Se pasa tripulante a cola de READY.
+	sem_wait(&mutexREADY);
+    list_add(ready_list, trip);
+    sem_post(&mutexREADY);
+}
+
+
 void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {
 
    int socket = crear_conexion(logger, ip_destino, puerto_destino);
@@ -423,3 +439,11 @@ void elegir_modulo(){
 	printf("\nSeleccione el numero correspondiente\n\n");
 }
 
+Comandos find_enum_consola(char *sval)
+{
+    Comandos result=INICIAR_PATOTA_COM; /* value corresponding to etable[0] */
+    int i=0;
+    for (i=0; comandos_table[i]!=NULL; ++i, ++result)
+        if (0==strcmp(sval, comandos_table[i])) return result;
+    return -1;
+}

@@ -12,6 +12,7 @@
 //#include "servidor_discordiador.h"
 #include "logger.h"
 #include "paquete.h"
+#include<semaphore.h>
 
 typedef struct Configuracion{
 	char* puntoMontaje;
@@ -34,7 +35,7 @@ typedef enum Estados{
 	trabajando,
 	bloqueado_io,
 	bloqueado_emergencia,
-	finalizado//?
+	finalizado,//?
 }Estados;
 
 typedef enum Comandos{	
@@ -47,6 +48,15 @@ typedef enum Comandos{
 	FIN,
 	TEST_MENSAJES
 }Comandos;
+const char *comandos_table = { "INICIAR_PATOTA_COM",
+	"INICIAR_PLANIFICACION_COM",
+	"PAUSAR_PLANIFICACION_COM",
+	"LISTAR_TRIPULANTE_COM",
+	"EXPULSAR_TRIPULANTE_COM",
+	"OBTENER_BITACORA_COM",
+	"FIN",
+	"TEST_MENSAJES", NULL };
+Comandos find_enum_consola(char *sval);
 
  
 typedef struct Tripulante_disc{
@@ -55,12 +65,31 @@ typedef struct Tripulante_disc{
 	int quantum;
 } Tripulante_disc;
 
+typedef struct Tripulante{
+    //should i use ponters for all right?
+    int id_patota;
+    int id_tripulante;
+    int pos_x;
+    int pos_y;
+    Estados estado;//deberia saber yo mi estado for sakes de semaforos? de ser si, q sea un enum...
+    char* tarea_actual;//chequear la libreria de strings... 
+    
+} Tripulante;
+
 Configuracion* configuracion;
 //Listas
 t_list * new_list;
 t_list * execute_list;
 t_list * blocked_io;
-void vaciar_listas();
+t_list* exit_list;
+t_list* ready_list;
+
+//Semaforos
+sem_t mutexNEW;
+sem_t mutexEXEC;
+sem_t mutexBLOCK;
+sem_t mutexEXIT;
+sem_t mutexREADY;
 
 //Metodos mensajes
 int leer_config(void);

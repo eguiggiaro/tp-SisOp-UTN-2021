@@ -215,6 +215,7 @@ void iniciar_patota(char* comando){
 	}
 
 	list_add(lista_mensajes,string_tareas);
+	list_add(lista_mensajes,list[1]);
 	list_add(lista_mensajes,string_posiciones);
 	mensajes_respuesta=iniciar_patota_miram(socket_miram,lista_mensajes);
 

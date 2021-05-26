@@ -48,14 +48,8 @@ typedef enum Comandos{
 	FIN,
 	TEST_MENSAJES
 }Comandos;
-const char *comandos_table = { "INICIAR_PATOTA_COM",
-	"INICIAR_PLANIFICACION_COM",
-	"PAUSAR_PLANIFICACION_COM",
-	"LISTAR_TRIPULANTE_COM",
-	"EXPULSAR_TRIPULANTE_COM",
-	"OBTENER_BITACORA_COM",
-	"FIN",
-	"TEST_MENSAJES", NULL };
+
+	
 Comandos find_enum_consola(char *sval);
 
  

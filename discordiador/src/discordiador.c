@@ -7,6 +7,15 @@
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
 #define LOG_FILE_PATH "cfg/discordiador.log"
 
+const char *comandos_table [] = { "INICIAR_PATOTA",
+	"INICIAR_PLANIFICACION",
+	"PAUSAR_PLANIFICACION",
+	"LISTAR_TRIPULANTE",
+	"EXPULSAR_TRIPULANTE",
+	"OBTENER_BITACORA",
+	"FIN",
+	"TEST_MENSAJES", NULL };
+
 int main(){
 
 //enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
@@ -183,10 +192,11 @@ void consola(){
 void iniciar_patota(char* comando){
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
 	pthread_t new_hilo_tripulante;
-	t_list* lista_mensajes, *mensajes_respuesta;
+	t_list* lista_mensajes=list_create(), *mensajes_respuesta= list_create();
 	Tripulante_disc trip_hilo;
 
-	char* string_tareas,* string_posiciones =  string_new();
+	char* string_tareas;
+	char* string_posiciones = string_new();
 	char** list;
 
 	list=string_split(comando, " ");
@@ -197,7 +207,7 @@ void iniciar_patota(char* comando){
 		
 		if(sizeof(list)>i+1 && list[i+3] != NULL)
 		{
-			string_append_with_format(&string_posiciones, "%s|", list[i+3]);
+			string_append_with_format(&string_posiciones, "%s;", list[i+3]);
 		}
 		else {
 			string_append(&string_posiciones, "0|0;");
@@ -205,6 +215,7 @@ void iniciar_patota(char* comando){
 	}
 
 	list_add(lista_mensajes,string_tareas);
+	list_add(lista_mensajes,string_posiciones);
 	mensajes_respuesta=iniciar_patota_miram(socket_miram,lista_mensajes);
 
 	char* patota_id=list_get(mensajes_respuesta,0);
@@ -438,6 +449,8 @@ void elegir_modulo(){
 	printf("2) I-Store\n");
 	printf("\nSeleccione el numero correspondiente\n\n");
 }
+
+
 
 Comandos find_enum_consola(char *sval)
 {

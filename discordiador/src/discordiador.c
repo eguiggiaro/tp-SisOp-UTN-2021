@@ -213,7 +213,8 @@ void iniciar_patota(char* comando){
 	string_tareas=leer_tareas_txt(list[2]);//leemos las tareas y las traemos como un solo string
 
 	int cantidad_trip=atoi(list[1]);
-	for(int i=0; i<=cantidad_trip;i++){//string con todas las posiciones
+	printf("\ncantidad tripulantes: %i", cantidad_trip);
+	for(int i=0; i<cantidad_trip;i++){//string con todas las posiciones
 		
 		if(sizeof(list)>i+1 && list[i+3] != NULL)
 		{
@@ -231,7 +232,7 @@ void iniciar_patota(char* comando){
 
 	char* patota_id=list_get(mensajes_respuesta,0);
 	
-	for(int i=0; i<=cantidad_trip;i++){
+	for(int i=0; i<cantidad_trip;i++){
 		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
 
 		new_tripulante->id_patota=atoi(patota_id);
@@ -292,7 +293,7 @@ void tripulante_listo(Tripulante* trip){
     list_add(ready_list, list_remove(new_list,0));
 	sem_post(&mutexNEW);
     sem_post(&mutexREADY);
-	miLogInfo("Se pasa el tripulante a la cola de READY");
+	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 
 	pthread_t new_hilo_tripulante;
 

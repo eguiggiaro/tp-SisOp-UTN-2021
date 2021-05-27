@@ -10,7 +10,7 @@ void *inicializar_tripulante(void* tripulante_dato){
   tripulante->pos_y = 1;
   tripulante->tarea_actual = "GENERAR_COMIDA 2;1;0;4";
 
-  miLogInfo("Se pasa el tripulante a la cola de NEW");
+  miLogInfo("\nSe pasa el tripulante a la cola de NEW\n");
 
   sem_wait(&mutexNEW);
   list_add(new_list, tripulante);
@@ -90,7 +90,7 @@ void planificar_con_FIFO(Tripulante* trip){
   list_add(execute_list,list_remove(ready_list,0));
   sem_post(&mutexREADY);
   
-  miLogInfo("\nSe pasa tripulante a estado EXEC");
+  miLogInfo("\nSe pasa tripulante a estado EXEC\n");
   //ejecutar_proxima_tarea(trip);
 }
 

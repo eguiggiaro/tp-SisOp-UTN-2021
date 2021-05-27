@@ -7,6 +7,8 @@
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
 #define LOG_FILE_PATH "cfg/discordiador.log"
 
+int id_patota;
+
 const char *comandos_table [] = { "INICIAR_PATOTA",
 	"INICIAR_PLANIFICACION",
 	"PAUSAR_PLANIFICACION",
@@ -17,7 +19,8 @@ const char *comandos_table [] = { "INICIAR_PATOTA",
 	"TEST_MENSAJES", NULL };
 
 int main(){
-
+id_patota=0;
+aux_id_tripulante = 0;
 //enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
@@ -80,7 +83,7 @@ int main(){
 	miLogInfo("Conectándose a MiRAM");
 	printf("\nInicia conexion con MIRAM:\n");
 
-	//iniciar_conexion_miram(ip_miram, puerto_miram);
+	iniciar_conexion_miram(ip_miram, puerto_miram);
 
 	char* ip_store = configuracion->ip_i_mongo_store;
 	char* puerto_store = configuracion->puerto_i_mongo_store;
@@ -225,8 +228,8 @@ void iniciar_patota(char* comando){
 		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
 
 		new_tripulante->id_patota=atoi(patota_id);
-		new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
-		new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
+		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
+		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
 		//*creo hilo y agrego a "new"
 		pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
@@ -278,6 +281,7 @@ void tripulante_listo(Tripulante* trip){
 	sem_wait(&mutexREADY);
     list_add(ready_list, trip);
     sem_post(&mutexREADY);
+	miLogInfo("Se pasa el tripulante a la cola de READY");
 }
 
 

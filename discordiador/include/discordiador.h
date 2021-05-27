@@ -93,12 +93,15 @@ int socket_miram;
 int socket_store;
 char* puerto_discordiador;
 
-
+int aux_id_tripulante;
 
 //Metodos Discordidor
 void iniciar_patota(char* ); //?string? chequer commons
 void consola();
 char* leer_tareas_txt(char* direccion_txt);
+void mandar_tareas_miram(char *);
+int enviar_tareas_miram(char* direccion_txt);
+void tripulante_listo(Tripulante*);
 
 
 //Metodos Test

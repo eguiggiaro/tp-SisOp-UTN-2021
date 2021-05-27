@@ -32,4 +32,6 @@ void atender_sabotaje();//?
 void decodificar_tarea();
 void execute();//no se me ocurre mejor nombre para cuando esta en EXEC...
 void get_quantum_faltante();//para q el discordiador sepa cuanto le falta antes de sacarlo.
+void* planificar_tripulante(void*);
+void planificar_con_FIFO(Tripulante*);
 #endif

@@ -69,6 +69,31 @@ void *inicializar_tripulante(void* tripulante_dato){
 return;
 }
 
+void* planificar_tripulante(void* trip_dato){
+  Tripulante* trip = (Tripulante*) trip_dato;
+  if((strncmp(configuracion->algoritmo,"FIFO",4))==0){
+    planificar_con_FIFO(trip);
+  }
+  else if((strncmp(configuracion->algoritmo,"RR",2))==0){
+    //planificar_con_RR(trip);
+  }
+  else{
+    miLogError("\nNo se pudo detectar algoritmo");
+  }
+
+  return NULL;
+}
+
+void planificar_con_FIFO(Tripulante* trip){
+  sem_wait(&semaforoEXEC);
+  sem_wait(&mutexREADY);
+  list_add(execute_list,list_remove(ready_list,0));
+  sem_post(&mutexREADY);
+  
+  miLogInfo("\nSe pasa tripulante a estado EXEC");
+  //ejecutar_proxima_tarea(trip);
+}
+
 void execute(Tripulante tripulante){
 
 }

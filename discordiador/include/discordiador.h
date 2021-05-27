@@ -80,7 +80,7 @@ t_list* ready_list;
 
 //Semaforos
 sem_t mutexNEW;
-sem_t mutexEXEC;
+sem_t semaforoEXEC;
 sem_t mutexBLOCK;
 sem_t mutexEXIT;
 sem_t mutexREADY;
@@ -94,6 +94,8 @@ int socket_store;
 char* puerto_discordiador;
 
 int aux_id_tripulante;
+
+bool planificacion_activada;
 
 //Metodos Discordidor
 void iniciar_patota(char* ); //?string? chequer commons

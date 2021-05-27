@@ -21,6 +21,7 @@ const char *comandos_table [] = { "INICIAR_PATOTA",
 int main(){
 id_patota=0;
 aux_id_tripulante = 0;
+planificacion_activada = true;
 //enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
@@ -111,7 +112,7 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	//inicializo semaforos
 	sem_init(&mutexNEW, 0, 1);
 	sem_init(&mutexREADY, 0, 1);
-	sem_init(&mutexEXEC, 0, 1);
+	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
 	sem_init(&mutexBLOCK, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
 		
@@ -120,6 +121,12 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	//vaciar_listas();
 	free(configuracion);
 	miLogDestroy();
+
+	sem_destroy(&mutexNEW);
+	sem_destroy(&mutexREADY);
+	sem_destroy(&semaforoEXEC);
+	sem_destroy(&mutexBLOCK);
+	sem_destroy(&mutexEXIT);
 
 }
 
@@ -194,7 +201,7 @@ void consola(){
 }
 void iniciar_patota(char* comando){
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
-	pthread_t new_hilo_tripulante;
+	//pthread_t new_hilo_tripulante;
 	t_list* lista_mensajes=list_create(), *mensajes_respuesta= list_create();
 	Tripulante_disc trip_hilo;
 
@@ -232,10 +239,12 @@ void iniciar_patota(char* comando){
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
 		//*creo hilo y agrego a "new"
-		pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
-		trip_hilo.id_hilo =new_hilo_tripulante;
-		trip_hilo.quantum=0;
-		list_add(new_list, &trip_hilo);
+		// pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
+		// trip_hilo.id_hilo =new_hilo_tripulante;
+		// trip_hilo.quantum=0;
+		// list_add(new_list, &trip_hilo);
+
+		inicializar_tripulante(new_tripulante);
 
 	}
 	
@@ -277,11 +286,20 @@ char* leer_tareas_txt(char* direccion_txt){
 }
 
 void tripulante_listo(Tripulante* trip){
-	//Se pasa tripulante a cola de READY.
+	//Se saca tripulante de cola de NEW y se pasa a cola de READY.
+	sem_wait(&mutexNEW);
 	sem_wait(&mutexREADY);
-    list_add(ready_list, trip);
+    list_add(ready_list, list_remove(new_list,0));
+	sem_post(&mutexNEW);
     sem_post(&mutexREADY);
 	miLogInfo("Se pasa el tripulante a la cola de READY");
+
+	pthread_t new_hilo_tripulante;
+
+	if(planificacion_activada){
+	//creo un hilo por cada tripulante
+	pthread_create (&new_hilo_tripulante, NULL, planificar_tripulante, (void *)&trip);
+	}
 }
 
 

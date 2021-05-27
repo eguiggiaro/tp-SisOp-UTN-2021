@@ -3,19 +3,36 @@
 
 #include "store.h"
 
+#define SUPERBLOQUE_FILE "Superbloques.ims"
+#define BLOCKS_FILE "Blocks.ims"
+
+//Paths
 char* puntoMontaje;
-uint32_t cantidadBloques;
+char* pathSuperbloque;
+char* pathBlocks;
+char* pathFiles;
+char* pathBitacoras;
+
+//Superbloque
 uint32_t tamanioBloque; 
+uint32_t cantidadBloques;
 t_bitarray* bitmap;
 
-void verificar_fs(Configuracion*);
-void crearSuperbloque(char*);
-void crearBlocks(char*);
-void crearArbolDirectorios(char*);
-void leerSuperBloque(char*);
 
-//void llenarBitmapTest();
-void setearBitmapAUno();
-void leerBitmap();
+/*----------------------------------------------*/
+bool verificarFS(void);
+bool verificarEstructuraDirectorios(void);
+void crearSuperbloque(void);
+void crearBlocks(void);
+void crearArbolDirectorios(void);
+void leerSuperbloque(void);
+int buscarYAsignarProximoBloqueLibre(void);
+void liberarBloque(int);
+int tamanioArchivo(char*);
+
+
+
+void finalizarFS(void);
+void leerSuperBloqueSinMapear(void);
 
 #endif

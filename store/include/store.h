@@ -20,6 +20,7 @@
 #include <commons/config.h>
 #include <commons/bitarray.h>
 #include <commons/memory.h>
+#include <commons/collections/list.h>
 
 //Shared libs
 #include "shared_utils.h"
@@ -34,15 +35,17 @@ typedef struct {
 	char* puntoMontaje;
 	int puerto;
 	int tiempoSincro;
-	//char** posicionesSabotaje;
+	char* posicionesSabotaje;
 	uint32_t blockSizeDefault;
 	uint32_t blocksQtyDefault;
 } Configuracion;
 
 Configuracion* configuracion;
 
-int leer_config(void);
+int leerConfig(void);
 void atender_request_store(uint32_t);
-void inicializar_store();
+void inicializarParametrosFS(void);
+void inicializarStore(void);
+t_list* obtenerListaSabotaje(char*);
 
 #endif

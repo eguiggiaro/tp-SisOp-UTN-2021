@@ -1,45 +1,37 @@
 #include "file_system.h"
 
 
-void verificar_fs(Configuracion* config){
-
-	puntoMontaje = config->puntoMontaje;
-	cantidadBloques = config->blocksQtyDefault;
-	tamanioBloque = config->blockSizeDefault;
-
-	char* pathSuperbloque = string_from_format("%s/%s", puntoMontaje, "SuperBloque.ims"); //ej: /home/utnso/mnt/SuperBloque.ims
-	char* pathBlocks = string_from_format("%s/%s", puntoMontaje, "Blocks.ims");
-		
-
-	if(fopen(pathSuperbloque, "r") == NULL || fopen(pathBlocks, "r") == NULL){
-		//No encontre el archivo de Superbloques o el Blocks. Creo el FS.
-		//Primero veo si esta la estructura de directorios.
-		DIR* dirFiles = opendir(puntoMontaje);
-		if (dirFiles) {
-    	//El directorio existe.
-    		closedir(dirFiles);
-		} else {
-		//La estructura de directorios no existe. La creo.
-			crearArbolDirectorios(puntoMontaje);
-		}
-		crearSuperbloque(pathSuperbloque);
-		crearBlocks(pathBlocks);
-	} else {
-		
-        miLogDebug("Ya existe el archivo SuperBloque.ims\n"); //Trace?
-	}
-
-	leerSuperBloque(pathSuperbloque);
-
-	free(puntoMontaje);    
-	free(pathSuperbloque); 
-	free(pathBlocks);    
+bool verificarFS(void){
+		return !(fopen(pathSuperbloque, "r") == NULL || fopen(pathBlocks, "r") == NULL);
 }
 
-void crearArbolDirectorios(char* puntoMontaje){
+bool verificarEstructuraDirectorios(void){
+	DIR* dirMontaje = opendir(puntoMontaje);
+	DIR* dirFiles = opendir(pathFiles);
+	DIR* dirBitacoras = opendir(pathBitacoras);
+	bool respuesta;
 
-	char* pathFiles = string_from_format("%s/%s", puntoMontaje, "/Files");
-	char* pathBitacoras = string_from_format("%s/%s", puntoMontaje, "/Files/Bitacoras");
+	if(dirMontaje) {
+		respuesta = true;
+	} else {
+		if(dirFiles){
+			respuesta = true;
+		} else {
+			if(dirBitacoras){
+				respuesta = true;
+			}
+		}
+		respuesta = false;
+	}
+
+	closedir(dirMontaje);
+	closedir(dirFiles);
+	closedir(dirBitacoras);
+
+	return respuesta;
+}
+
+void crearArbolDirectorios(void){
 
 	if(mkdir(puntoMontaje, 0777) == -1){
 		printf("No se pudo crear el punto de montaje.\n");
@@ -58,12 +50,9 @@ void crearArbolDirectorios(char* puntoMontaje){
 		exit(1);
 	}
 	miLogInfo("Agrego subdirectorio Bitácoras");
-
-	free(pathFiles);
-	free(pathBitacoras);
 }
 
-void crearSuperbloque(char* pathSuperbloque){
+void crearSuperbloque(void){
 	
 	FILE* archivoSuperbloque = fopen(pathSuperbloque, "w+");
 	if(archivoSuperbloque==NULL){
@@ -78,7 +67,7 @@ void crearSuperbloque(char* pathSuperbloque){
 	fclose(archivoSuperbloque);
 }
 
-void crearBlocks(char* pathBlocks){
+void crearBlocks(void){
 	
 	FILE* archivoBlocks = fopen(pathBlocks, "w+");
 	int tamanioBlocks = cantidadBloques * tamanioBloque;
@@ -93,12 +82,10 @@ void crearBlocks(char* pathBlocks){
 	}
 
 	fclose(archivoBlocks);
-	free(pathBlocks);
 }
 
 void inicializarBitmap(FILE* archivoSuperbloque){
 	//Reservo memoria para el bitmap y lo inicializo en cero. El bitmap es a nivel bits, por eso lo divido por 8.
-	//Despues lo voy a meter en un t_bitarray
 	void* bitmap = calloc(cantidadBloques/8, 1);
 
 	fwrite(bitmap, 1, cantidadBloques/8, archivoSuperbloque);
@@ -107,8 +94,28 @@ void inicializarBitmap(FILE* archivoSuperbloque){
 	free(bitmap);
 }
 
-void leerSuperBloque(char* superbloques){
-	FILE* archivoSuperbloque = fopen(superbloques, "r");
+void leerSuperbloque(void){
+
+	int archivoSuperbloque = open(pathSuperbloque, O_RDWR);
+	int tamanioSuperbloque = cantidadBloques/8 + sizeof(uint32_t) * 2;
+
+	char* punteroSuperbloque = mmap(NULL, tamanioSuperbloque, PROT_READ | PROT_WRITE, MAP_SHARED, archivoSuperbloque, 0);
+	char* punteroBitmap = punteroSuperbloque + sizeof(uint32_t) * 2;
+
+	memcpy(&tamanioBloque, punteroSuperbloque, sizeof(uint32_t));
+	memcpy(&cantidadBloques, punteroSuperbloque + sizeof(uint32_t), sizeof(uint32_t));
+	bitmap = bitarray_create_with_mode(punteroBitmap, cantidadBloques/8, MSB_FIRST);
+
+	//Test
+	/*bool bit;
+	for(int i=0; i<cantidadBloques; i++){
+		bit = bitarray_test_bit(bitmap, i);	
+	}*/
+	close(archivoSuperbloque);
+}
+
+void leerSuperBloqueSinMapear(void){
+	FILE* archivoSuperbloque = fopen(pathSuperbloque, "r");
 	uint32_t* buffer = malloc(sizeof(uint32_t));
 	
 	fseek(archivoSuperbloque, 0, SEEK_SET);
@@ -130,55 +137,64 @@ void leerSuperBloque(char* superbloques){
 	fclose(archivoSuperbloque);
 }
 
-void setearBitmapAUno(){
-	//char* pathSuperbloque = string_from_format("%s/%s", puntoMontaje, "SuperBloque.ims");
-	//FILE* archivoSuperbloque = fopen(pathSuperbloque, "rw");
-	int archivoSuperbloque = open("/home/utnso/mnt/SuperBloque.ims", O_RDWR);
-	//Cargo a memoria el Bitmap. Para eso hago un puntero al archivo de superbloques, desde la posición donde arranca
-	//el bitmap (START+8).
-	int tamanioSuperbloque = cantidadBloques/8 + sizeof(uint32_t) * 2;
-	char* punteroSuperbloque = mmap(NULL, tamanioSuperbloque, PROT_READ | PROT_WRITE, MAP_SHARED, archivoSuperbloque, 0);
-	char* punteroBitmap = punteroSuperbloque + sizeof(uint32_t) * 2;
-
-	t_bitarray* bitmap2 = bitarray_create_with_mode(punteroBitmap, cantidadBloques/8, MSB_FIRST);
+int buscarYAsignarProximoBloqueLibre(void){
+//Ejemplo de uso: int bloqueLibre = buscarYAsignarProximoBloqueLibre(configuracion->puntoMontaje);
 
 	for(int i=0; i<cantidadBloques; i++){
-		if(bitarray_test_bit(bitmap2, i) == 0){
-			bitarray_set_bit(bitmap2 ,i);			
+		if(bitarray_test_bit(bitmap, i) == 0){
+			bitarray_set_bit(bitmap ,i); //Asigno el bloque libre (pongo en 1 el bit).
+			msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
+
+			miLogInfo("Asignó el bloque %d.", i);	
+			return i; //Devuelvo el número de bloque que asigné.		 
 		}
 	}
+	/*bitarray_destroy(bitmap);
+	close(archivoSuperbloque);
+	free(pathSuperbloque);
 
-	msync(bitmap2->bitarray,cantidadBloques/8 ,0);
-	bitarray_destroy(bitmap2);
-
-	if (munmap(punteroSuperbloque, tamanioSuperbloque) == -1){ //desmapeo la copia del archivo bloque
-        exit(1);//Fallo el desmapeo de copia
-    }
+	if (munmap(punteroSuperbloque, tamanioSuperbloque) == -1){ 
+		perror("Falló al desmapear el Superbloque.");
+        exit(1); 
+    }*/
+	miLogError("No pudo asignar ningun bloque. El Bitmap estaba lleno!.");
+	return -1;
 }
 
-void leerBitmap(){
-	//char* pathSuperbloque = string_from_format("%s/%s", puntoMontaje, "SuperBloque.ims");
-	//FILE* archivoSuperbloque = fopen(pathSuperbloque, "rw");
-	int archivoSuperbloque = open("/home/utnso/mnt/SuperBloque.ims", O_RDWR);
-	//Cargo a memoria el Bitmap. Para eso hago un puntero al archivo de superbloques, desde la posición donde arranca
-	//el bitmap (START+8).
-	int tamanioSuperbloque = cantidadBloques/8 + sizeof(uint32_t) * 2;
-	char* punteroSuperbloque = mmap(NULL, tamanioSuperbloque, PROT_READ | PROT_WRITE, MAP_SHARED, archivoSuperbloque, 0);
-	char* punteroBitmap = punteroSuperbloque + sizeof(uint32_t) * 2;
+void liberarBloque(int index){
+//Ejemplo de uso: liberarBloque(nroBloque);
+	bitarray_clean_bit(bitmap, index);
+	miLogInfo("Se liberó el bloque %d", index );
 
-	t_bitarray* bitmap2 = bitarray_create_with_mode(punteroBitmap, cantidadBloques/8, MSB_FIRST);
-
-	bool bit;
-	for(int i=0; i<cantidadBloques; i++){
-		bit = bitarray_test_bit(bitmap2, i);	
-	}
-	bitarray_destroy(bitmap2);
-
-	if (munmap(punteroSuperbloque, tamanioSuperbloque) == -1){ //desmapeo la copia del archivo bloque
-        exit(1);//Fallo el desmapeo de copia
-    }
+	msync(bitmap, cantidadBloques/8 ,0);
 }
 
-void escribirStringEnBlocks(char* texto){
-	//bla...
+int buscarposicionDisponible(int archivoMetadata){
+    //Busca un lugar disponible en el archivo Blocks.ims
 }
+
+int cantPosicionesLibresEn (int posicionDisponible){
+    //Devuelve cuantas posiciones libres hay en el bloque
+}
+
+int tamanioArchivo(char* path){
+
+	FILE* fd = fopen(path, "rb");
+	fseek(fd, 0, SEEK_END);
+	int tamanio = ftell(fd);
+	fclose(fd);
+
+	return tamanio;
+}
+
+void finalizarFS(void){
+	
+	bitarray_destroy(bitmap);
+	free(puntoMontaje);    
+	free(pathSuperbloque); 
+	free(pathBlocks);  
+	free(pathFiles);
+	free(pathBitacoras);
+
+}
+

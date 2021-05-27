@@ -11,18 +11,13 @@ int main(int argc, char* argv[]) {
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
 	
-	if(leer_config()){
+	if(leerConfig()){
 		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
 		miLogDestroy();
 		return EXIT_FAILURE;
 	}
-	//Checkeo datos levantados del archivo de configuracion
-	/*miLogInfo("Punto de montaje: %s", configuracion->puntoMontaje);
-	miLogInfo("Puerto: %s", string_itoa(configuracion->puerto));
-	miLogInfo("Tiempo sincronizacion: %s", string_itoa(configuracion->tiempoSincro));
-	*/
 
-	inicializar_store();
+	inicializarStore();
 
 	miLogInfo("Finalizó I-Mongo-Store.");
 	miLogDestroy();
@@ -32,7 +27,7 @@ int main(int argc, char* argv[]) {
 }
 
 
-int leer_config(void){
+int leerConfig(void){
 
 	t_config* config;
 	configuracion = malloc(sizeof(Configuracion));
@@ -48,31 +43,71 @@ int leer_config(void){
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
 	configuracion->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
 	configuracion->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
-	//TODO: Levantar datos default de FS.
-
-	/*configuracion->posicionesSabotaje = config_get_array_value(config, "POSICIONES_SABOTAJE");
-	/*Para tratar las posiciones:
-	char** posiciones = string_split(posicionesSabotaje[i], "|");
-	t_pos posicion;
-	posicion.x = atoi(posicion[0]);	
-	posicion.y = atoi(posicion[1]);
-	*/
+	configuracion->posicionesSabotaje = config_get_string_value(config, "POSICIONES_SABOTAJE"); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]
 	
+	//t_list* posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);
+
 	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
+void inicializarParametrosFS(void){
+	puntoMontaje = configuracion->puntoMontaje;
+	pathSuperbloque = string_from_format("%s/%s", puntoMontaje, SUPERBLOQUE_FILE); //ej: /home/utnso/mnt/SuperBloque.ims
+	pathBlocks = string_from_format("%s/%s", puntoMontaje, BLOCKS_FILE);
+	pathFiles = string_from_format("%s/%s", puntoMontaje, "Files");
+	pathBitacoras = string_from_format("%s/%s", puntoMontaje, "Files/Bitacoras");
 
-void inicializar_store (){
+	tamanioBloque = configuracion->blockSizeDefault;
+	cantidadBloques = configuracion->blocksQtyDefault;
+}
+
+void inicializarStore(void){
 	
 	miLogDebug("Inició I-Mongo-Store.");
 	
-	verificar_fs(configuracion);
-	leerBitmap();
-	setearBitmapAUno();
-	leerBitmap();
+	inicializarParametrosFS();
+
+	if (!verificarFS()){
+		if (!verificarEstructuraDirectorios()){
+			crearArbolDirectorios();
+		} 
+		crearSuperbloque();
+		crearBlocks();
+	}
+
+	leerSuperbloque();
+	//subirBlocksAMemoria();
 	//leerArchivosMetadata();
-	//subirblocksamemoria. (int* punteroABlocks = mmap de blocks.ims)   punteroABlocks[400] = 'O';
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }
 
+
+t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
+	
+	char** posicionesSabotaje = string_get_string_as_array(strPosicionesSabotaje);
+	int largo = strlen(strPosicionesSabotaje) - 1;
+
+	t_list* listaPosicionesSabotaje = list_create();
+
+	t_pos* posicion;
+
+	for(int i = 0;largo > 0; i++){
+		char** strPosicion =  string_split(posicionesSabotaje[i], "|");
+		posicion = malloc(sizeof(t_pos));
+		posicion->x = atoi(strPosicion[0]);	
+		posicion->y = atoi(strPosicion[1]);
+		list_add(listaPosicionesSabotaje,(void*) posicion);
+
+		largo-=3;
+		largo-=strlen(strPosicion[0]);
+		largo-=strlen(strPosicion[1]);
+	}
+	//Test
+	for(int i = 0; list_size(listaPosicionesSabotaje) > i; i++){
+		posicion = (t_pos*) list_get(listaPosicionesSabotaje, i);
+		printf("x:%s, y:%s\n", string_itoa(posicion->x), string_itoa(posicion->y));
+	}
+	free(posicion);
+	return listaPosicionesSabotaje;
+}

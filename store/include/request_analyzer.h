@@ -17,9 +17,10 @@
 //Shared libs
 #include "shared_utils.h"
 #include "paquete.h"
-
+#include "store.h"
 
 void atender_request_store(uint32_t);
+tipoTarea find_enum_consola(char*);
 
 
 #endif

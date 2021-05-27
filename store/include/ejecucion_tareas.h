@@ -19,12 +19,8 @@
 
 //Shared libs
 #include "shared_utils.h"
+#include "store.h"
 
-typedef enum
-{
-	OXIGENO,
-    COMIDA,
-    BASURA,
-} tipoRecurso;
+void generarRecursos(tipoRecurso, int);
 
 #endif

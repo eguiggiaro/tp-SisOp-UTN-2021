@@ -115,6 +115,7 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
 	sem_init(&mutexBLOCK, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
+	proxima_tarea = malloc(sizeof(Tarea));
 		
 	consola();
 	miLogInfo("Finalizó Discordiador\n");
@@ -127,6 +128,7 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	sem_destroy(&semaforoEXEC);
 	sem_destroy(&mutexBLOCK);
 	sem_destroy(&mutexEXIT);
+	free(proxima_tarea);
 
 }
 
@@ -232,10 +234,13 @@ void iniciar_patota(char* comando){
 
 	char* patota_id=list_get(mensajes_respuesta,0);
 	
+	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
+	
 	for(int i=0; i<cantidad_trip;i++){
 		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
 
 		new_tripulante->id_patota=atoi(patota_id);
+		new_tripulante->tarea_actual = proxima_tarea;
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
@@ -293,13 +298,14 @@ void tripulante_listo(Tripulante* trip){
     list_add(ready_list, list_remove(new_list,0));
 	sem_post(&mutexNEW);
     sem_post(&mutexREADY);
+	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 
 	pthread_t new_hilo_tripulante;
 
 	if(planificacion_activada){
 	//creo un hilo por cada tripulante
-	pthread_create (&new_hilo_tripulante, NULL, planificar_tripulante, (void *)&trip);
+	pthread_create (&new_hilo_tripulante, NULL, planificar_tripulante, (Tripulante *)trip);
 	}
 }
 
@@ -483,4 +489,53 @@ Comandos find_enum_consola(char *sval)
     for (i=0; comandos_table[i]!=NULL; ++i, ++result)
         if (0==strcmp(sval, comandos_table[i])) return result;
     return -1;
+}
+
+Tarea* obtener_tarea(char* tarea_str, Tarea* nueva_tarea){
+	char* token;
+
+	int cont = 0;
+	char* parametros;
+	char* pos_x;
+	char* pos_y;
+	char* tiempo;
+
+	token = strtok(tarea_str, ";");
+
+	 while( token != NULL ) {
+
+      if(cont == 0){
+		  parametros = token;
+	  }
+	  else if(cont == 1){
+		  pos_x = token;
+	  }
+	  else if(cont == 2){
+		  pos_y = token;
+	  }
+	  else{
+		  tiempo = token;
+	  }
+
+      token = strtok(NULL, ";");
+
+	  cont++;
+	}
+
+	nueva_tarea->nombre_tarea = strtok(parametros, " ");
+	printf( " nombre tarea: %s\n", nueva_tarea->nombre_tarea );
+	nueva_tarea->parametros = strtok(NULL, " ");
+	printf( " parametros: %s\n", nueva_tarea->parametros );
+	nueva_tarea->pos_x = pos_x;
+	printf( " pos x: %s\n", nueva_tarea->pos_x );
+	nueva_tarea->pos_y = pos_y;
+	printf( " pos y: %s\n", nueva_tarea->pos_y );
+	char* tiempo_aux = strtok(tiempo, "|");
+	nueva_tarea->tiempo = atoi(tiempo_aux);
+	printf( " tiempo: %i\n", nueva_tarea->tiempo );
+
+	return nueva_tarea;
+
+	//free(nueva_tarea);
+
 }

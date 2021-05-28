@@ -14,16 +14,16 @@
 
 
 
-typedef struct Tarea{
-    //should i use ponters for all right?
-    char* tarea_completa;//? - chequear la libreria de strings... 
-    char* tarea;//chequear la libreria de strings... 
-    int pos_x;
-    int pos_y;
-    int tiempo;
-} Tarea;
+// typedef struct Tarea{
+//     //should i use ponters for all right?
+//     char* tarea_completa;//? - chequear la libreria de strings... 
+//     char* tarea;//chequear la libreria de strings... 
+//     int pos_x;
+//     int pos_y;
+//     int tiempo;
+// } Tarea;
 
-void *inicializar_tripulante(void * );
+void *inicializar_tripulante(Tripulante* );
 void mover_en_x(Tripulante, int);//siempre es 1... pero a derecha(-1) o izqueirda(+1)
 void mover_en_y(Tripulante, int);//siempre es 1... pero abajo(-1) o arriba(+1)
 void comunicar_bitacora();//?
@@ -32,6 +32,7 @@ void atender_sabotaje();//?
 void decodificar_tarea();
 void execute();//no se me ocurre mejor nombre para cuando esta en EXEC...
 void get_quantum_faltante();//para q el discordiador sepa cuanto le falta antes de sacarlo.
-void* planificar_tripulante(void*);
+void* planificar_tripulante(Tripulante*);
 void planificar_con_FIFO(Tripulante*);
+
 #endif

@@ -52,6 +52,13 @@ typedef enum Comandos{
 	
 Comandos find_enum_consola(char *sval);
 
+typedef struct Tarea{
+	char* nombre_tarea;
+	char* parametros;
+	char* pos_x;
+	char* pos_y;
+	int tiempo;
+}Tarea;
  
 typedef struct Tripulante_disc{
 	pthread_t * id_hilo;
@@ -66,7 +73,8 @@ typedef struct Tripulante{
     int pos_x;
     int pos_y;
     Estados estado;//deberia saber yo mi estado for sakes de semaforos? de ser si, q sea un enum...
-    char* tarea_actual;//chequear la libreria de strings... 
+    //char* tarea_actual;//chequear la libreria de strings... 
+	Tarea* tarea_actual;
     
 } Tripulante;
 
@@ -97,6 +105,8 @@ int aux_id_tripulante;
 
 bool planificacion_activada;
 
+Tarea* proxima_tarea;
+
 //Metodos Discordidor
 void iniciar_patota(char* ); //?string? chequer commons
 void consola();
@@ -104,7 +114,7 @@ char* leer_tareas_txt(char* direccion_txt);
 void mandar_tareas_miram(char *);
 int enviar_tareas_miram(char* direccion_txt);
 void tripulante_listo(Tripulante*);
-
+Tarea* obtener_tarea(char* tarea_string, Tarea* nueva_tarea); //dado un string con los parametros de tarea, genera la estructura Tarea
 
 //Metodos Test
 void elegir_modulo();

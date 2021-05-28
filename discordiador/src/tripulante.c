@@ -1,14 +1,11 @@
 #include "tripulante.h"
 
-void *inicializar_tripulante(void* tripulante_dato){
-  aux_id_tripulante++; 
-
-  Tripulante *tripulante = (Tripulante *)tripulante_dato;
+void *inicializar_tripulante(Tripulante* tripulante){
+  aux_id_tripulante++;
 
   tripulante->id_tripulante = aux_id_tripulante;
   tripulante->pos_x = 1;
   tripulante->pos_y = 1;
-  tripulante->tarea_actual = "GENERAR_COMIDA 2;1;0;4";
 
   miLogInfo("\nSe pasa el tripulante a la cola de NEW\n");
 
@@ -69,8 +66,7 @@ void *inicializar_tripulante(void* tripulante_dato){
 return;
 }
 
-void* planificar_tripulante(void* trip_dato){
-  Tripulante* trip = (Tripulante*) trip_dato;
+void* planificar_tripulante(Tripulante* trip){
   if((strncmp(configuracion->algoritmo,"FIFO",4))==0){
     planificar_con_FIFO(trip);
   }
@@ -89,11 +85,14 @@ void planificar_con_FIFO(Tripulante* trip){
   sem_wait(&mutexREADY);
   list_add(execute_list,list_remove(ready_list,0));
   sem_post(&mutexREADY);
-  
+  trip->estado = trabajando;
   miLogInfo("\nSe pasa tripulante a estado EXEC\n");
+
   //ejecutar_proxima_tarea(trip);
+  printf("\nProxima tarea a ejecutar: %s", (trip->tarea_actual)->nombre_tarea);
 }
 
 void execute(Tripulante tripulante){
 
 }
+

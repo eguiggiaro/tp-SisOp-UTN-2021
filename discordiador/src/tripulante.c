@@ -88,11 +88,28 @@ void planificar_con_FIFO(Tripulante* trip){
   trip->estado = trabajando;
   miLogInfo("\nSe pasa tripulante a estado EXEC\n");
 
-  //ejecutar_proxima_tarea(trip);
   printf("\nProxima tarea a ejecutar: %s", (trip->tarea_actual)->nombre_tarea);
+  ejecutar_proxima_tarea(trip);
 }
 
 void execute(Tripulante tripulante){
 
+}
+
+void ejecutar_proxima_tarea(Tripulante* trip){
+
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+
+  if(strncmp(tarea,"GENERAR_COMIDA", string_length(tarea))==0){
+    generar_comida(trip);
+  }
+  //else if...resto de tareas posibles...
+}
+
+void generar_comida(Tripulante* trip){
+  //Completar pasos 1, 2, 3 y 4.
+  miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
+  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
 }
 

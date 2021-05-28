@@ -35,4 +35,6 @@ void get_quantum_faltante();//para q el discordiador sepa cuanto le falta antes 
 void* planificar_tripulante(Tripulante*);
 void planificar_con_FIFO(Tripulante*);
 
+void ejecutar_proxima_tarea(Tripulante*);
+void generar_comida(Tripulante*);
 #endif

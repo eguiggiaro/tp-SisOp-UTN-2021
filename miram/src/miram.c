@@ -5,7 +5,6 @@
 #define LOG_FILE_PATH "miram.log"
 
 
-
 // Lee la configuración y la deja disponible
 int leer_config(void) {
 
@@ -32,10 +31,11 @@ int leer_config(void) {
 }
 
 // Atiende con hilos los request que son enviados a MiRAM
-void atender_request_miram(uint32_t request_fd) {
+void atender_request_miram(Request* request) {
 
-	op_code codigo_operacion = recibir_operacion(request_fd);
-	t_buffer* buffer_devolucion;
+	op_code codigo_operacion = request->codigo_operacion;
+	t_buffer* buffer_devolucion = request->buffer_devolucion;
+	int request_fd = request->request_fd;
 	t_list* lista;
 	t_paquete* paquete_devuelto;
 	t_list* lista_mensajes;
@@ -46,8 +46,6 @@ void atender_request_miram(uint32_t request_fd) {
 	  case EXPULSAR_TRIPULANTE:
 			//recibo los mensajes
 			miLogInfo("Me llego operacion: EXPULSAR TRIPULANTE \n");
-			buffer_devolucion = recibir_buffer(request_fd);
-
 			lista = deserializar_lista_strings(buffer_devolucion);
 			loggear_lista_strings(lista);
 
@@ -62,18 +60,19 @@ void atender_request_miram(uint32_t request_fd) {
 			buffer_devolucion = serializar_lista_strings(lista_mensajes);
 			paquete_devuelto->buffer = buffer_devolucion;
 			enviar_paquete(paquete_devuelto, request_fd);
-
+			list_destroy(lista_mensajes);
 			break;
 
 	  case INICIAR_TRIPULANTE:
+	  		pthread_mutex_lock(&mutex_tripulantes);
+			lista_mensajes = list_create();
+
 			//recibo los mensajes
 			miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
-			buffer_devolucion = recibir_buffer(request_fd);
-
 			lista = deserializar_lista_strings(buffer_devolucion);
 
 			int PATOTA_ID =  atoi(list_get(lista,0));
-			
+	
 			resultado = iniciar_tripulante(PATOTA_ID);
 
 			if (resultado == -1)
@@ -96,13 +95,13 @@ void atender_request_miram(uint32_t request_fd) {
 				buffer_devolucion = serializar_lista_strings(lista_mensajes);
 				paquete_devuelto->buffer = buffer_devolucion;
 				enviar_paquete(paquete_devuelto, request_fd);
-
+	  		pthread_mutex_unlock(&mutex_tripulantes);
+			list_destroy(lista_mensajes);
 			break;
 
 	  case INICIAR_PATOTA:
 			//recibo los mensajes
 			miLogInfo("Me llego operacion: INICIAR PATOTA \n");
-			buffer_devolucion = recibir_buffer(request_fd);
 
 			lista = deserializar_lista_strings(buffer_devolucion);
 
@@ -147,7 +146,6 @@ void atender_request_miram(uint32_t request_fd) {
 	  case TAREA_SIGUIENTE:
 	  //recibo los mensajes
 	  miLogInfo("Me llego operacion: TAREA SIGUIENTE \n");
-	  buffer_devolucion = recibir_buffer(request_fd);
 
 	  lista = deserializar_lista_strings(buffer_devolucion);
 	  loggear_lista_strings(lista);
@@ -169,7 +167,6 @@ void atender_request_miram(uint32_t request_fd) {
 	  case MOV_TRIPULANTE:
 	  //recibo los mensajes
 	  miLogInfo("Me llego operacion: MOVER TRIPULANTE \n");
-	  buffer_devolucion = recibir_buffer(request_fd);
 
 	  lista = deserializar_lista_strings(buffer_devolucion);
 	  loggear_lista_strings(lista);
@@ -347,11 +344,11 @@ u_int32_t buscar_patota(int PCB_ID)
 	}
 }
 
-void alta_tripulante(TCB* unTCB)
+void alta_tripulante(TCB* unTCB, int patota)
 {
 		if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
-		return alta_tripulante_segmentacion(unTCB);
+		return alta_tripulante_segmentacion(unTCB, patota);
 	}
 }
 
@@ -465,11 +462,18 @@ int iniciar_patota(int cantidad_tripulantes, char* tareas, Punto *puntos)
 
 	for (int i=0; i<cantidad_tripulantes;i++)
 	{
-		if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
+		//Mejorar
+		Punto* unPunto =malloc(sizeof(unPunto));
+		unPunto->pos_x = 0;
+		unPunto->pos_y = 0;
+
+		//if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
+		if (inicializar_tripulante(unPCB->PID, *unPunto, unPCB->Tareas) == -1)
 		{
 			return -1;
 		}
 		
+		free(unPunto);
 	}
 	return unPCB->PID;
 }
@@ -499,7 +503,7 @@ int inicializar_tripulante(int patota, Punto unPunto, u_int32_t tareas)
 	miTCB->PCB = buscar_patota(patota);
 
 	//alta tripulante
-	alta_tripulante(miTCB);
+	alta_tripulante(miTCB,patota);
 
 }
 

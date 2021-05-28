@@ -6,6 +6,9 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 	struct sockaddr_storage direccionRequest;
 	socklen_t tamanioDireccion;
 	int servidor_fd, puerto_app;
+	op_code codigo_operacion;
+	t_buffer* buffer_devolucion;
+	Request* request;
 
 	puerto_app = atoi(puerto);
 	direccionServidor.sin_family = AF_INET;
@@ -21,29 +24,54 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 		perror("fallo el bind");
 	}
 
-	if(listen(servidor_fd, 10) == -1){
-		perror("fallo el listen");
-	}
+	while (1)
+ 	{
 
-	printf("(Esperando conexiones en Direccion: %i, Puerto: %i ) \n",INADDR_ANY,puerto_app);
-	  while(1){
-		tamanioDireccion = sizeof(direccionRequest);
-		pthread_t trequest;
+		if(listen(servidor_fd, 10) == -1){
+			perror("fallo el listen");
+		}
+
+		printf("(Esperando conexiones en Direccion: %i, Puerto: %i ) \n",INADDR_ANY,puerto_app);
 
 		int request_fd;
 		request_fd = accept(servidor_fd, (void*) &direccionRequest, &tamanioDireccion);
+		
+		printf("Se conectó un cliente!");
 
-		//log_info(logger, "(Recibi request del puerto: %i)",request_fd);
+		while(1){
 
-		int thread_status = pthread_create(&trequest, NULL, (void*) atender_request,(void*) request_fd);
-		if( thread_status != 0 ){
-			printf("Thread create returno");
-			printf("Thread create returno");
-			} 
-		else {
-		  pthread_detach( trequest );
+			codigo_operacion = recibir_operacion(request_fd);
+
+			if (codigo_operacion == -1)
+			{
+				printf("El cliente se desconectó");
+				break;
+			}
+
+			buffer_devolucion = recibir_buffer(request_fd);
+
+			request = malloc(sizeof(Request));
+			request->codigo_operacion = codigo_operacion;
+			request->buffer_devolucion = buffer_devolucion;
+			request->request_fd = request_fd;
+
+			tamanioDireccion = sizeof(direccionRequest);
+			pthread_t trequest;
+
+
+			//log_info(logger, "(Recibi request del puerto: %i)",request_fd);
+
+			int thread_status = pthread_create(&trequest, NULL, (void*) atender_request,(void*) request);
+			if( thread_status != 0 ){
+				printf("Thread create returno");
+				printf("Thread create returno");
+				} 
+			else {
+			pthread_detach( trequest );
+			}
+
 		}
-	   }
+	}
 }
 
 int nueva_conexion(char *ip, char* puerto)
@@ -93,6 +121,7 @@ int esperar_conexion_cliente(int socket_servidor)
 
 int recibir_operacion(int fd_entrada)
 {
+	
 	int cod_op;
 	if(recv(fd_entrada, &cod_op, sizeof(op_code), MSG_WAITALL) != 0)
 		return cod_op;
@@ -127,7 +156,7 @@ void enviar_paquete(t_paquete* paquete, int fd_socket){
 	memcpy(a_enviar + offset, paquete->buffer->stream, paquete->buffer->size);
 	offset += paquete->buffer->size;
 
-	send(fd_socket, a_enviar, paquete->buffer->size + sizeof(op_code) + sizeof(uint32_t),0);
+	int retorno = send(fd_socket, a_enviar, paquete->buffer->size + sizeof(op_code) + sizeof(uint32_t),0);
 
 	free(a_enviar);
 	free(paquete->buffer->stream);

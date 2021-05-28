@@ -27,4 +27,10 @@ int recibir_operacion(int socket);
 //dado un socket de entrada, devuelve el buffer recibido
 void* recibir_buffer(int socket);
 
+typedef struct Request {
+    op_code codigo_operacion;
+	t_buffer* buffer_devolucion;
+    int request_fd;
+} Request;
+
 #endif

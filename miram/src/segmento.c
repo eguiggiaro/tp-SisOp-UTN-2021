@@ -175,10 +175,11 @@ uint32_t buscar_patota_segmentacion(int PID)
 	}
 }
 
-void alta_tripulante_segmentacion(TCB* unTCB)
+void alta_tripulante_segmentacion(TCB* unTCB, int patota)
 {
 	TCB_adm* tcb_adm = malloc(sizeof(TCB_adm));
-	tcb_adm->PID = unTCB->TID;
+	tcb_adm->TID = unTCB->TID;
+	tcb_adm->PID = patota;
 	tcb_adm->segmento_nro = buscar_segmento(unTCB);
     list_add(tabla_segmentos_tcb,tcb_adm);
 }

@@ -5,6 +5,16 @@
 #define LOG_FILE_PATH "miram.log"
 
 
+
+
+void controlador (int parametro)
+{
+	miLogInfo("Finalizando memoria");
+	finalizar_memoria();
+}
+
+
+
 // Lee la configuración y la deja disponible
 int leer_config(void) {
 
@@ -144,23 +154,34 @@ void atender_request_miram(Request* request) {
 			break;
 
 	  case TAREA_SIGUIENTE:
-	  //recibo los mensajes
-	  miLogInfo("Me llego operacion: TAREA SIGUIENTE \n");
+			pthread_mutex_lock(&mutex_tareas);
+			lista_mensajes = list_create();
 
-	  lista = deserializar_lista_strings(buffer_devolucion);
-	  loggear_lista_strings(lista);
+			//recibo los mensajes
+			miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
+			lista = deserializar_lista_strings(buffer_devolucion);
 
-	  //devuelve una lista de mensajes
-	  paquete_devuelto = crear_paquete(OK);
+			int tripulante_id =  atoi(list_get(lista,0));
+	
+			char* tarea = proxima_tarea_tripulante(tripulante_id);
 
-	  lista_mensajes = list_create();
-	  list_add(lista_mensajes, "hola");
-      list_add(lista_mensajes,"soy miram");
+			if (tarea[0] == '$')
+			{
+				miLogInfo("ERROR: TRIPULANTE SIN TAREAS \n");
+				paquete_devuelto = crear_paquete(FAIL);
+				list_add(lista_mensajes, "Se produjo un error al obtener tarea del tripulante");
+			} else {
+				miLogInfo("Proxima tarea de tripulante %d enviada \n",tripulante_id);
+				paquete_devuelto = crear_paquete(OK);
+				list_add(lista_mensajes, tarea);
+			}
 
-
-	  buffer_devolucion = serializar_lista_strings(lista_mensajes);
-	  paquete_devuelto->buffer = buffer_devolucion;
-	  enviar_paquete(paquete_devuelto, request_fd);
+				buffer_devolucion = serializar_lista_strings(lista_mensajes);
+				paquete_devuelto->buffer = buffer_devolucion;
+				enviar_paquete(paquete_devuelto, request_fd);
+	  		pthread_mutex_unlock(&mutex_tareas);
+			list_destroy(lista_mensajes);
+			break;
 
 	  break;
 
@@ -190,6 +211,8 @@ void atender_request_miram(Request* request) {
 
 	  break;
 	}
+
+	mostrar_tabla_segmentos(true);
 }
 
 // Crea la grilla inicial y la muestra en pantalla
@@ -305,13 +328,14 @@ void inicializar_memoria(int tamanio_memoria)
 
 void finalizar_memoria()
 {
+	mostrar_tabla_segmentos(true);
+	free(MEMORIA);
 
 	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
 		finalizar_segmentacion();
 	}
 
-	free(MEMORIA);
 	nivel_destruir(nivel);
 	nivel_gui_terminar();
 
@@ -387,7 +411,7 @@ u_int32_t iniciar_tareas(int PCB_ID, char* tareas)
 		return 99;
 	}
 
-	memcpy(posicion_memoria, tareas,sizeof(tareas));
+	memcpy(posicion_memoria, tareas,strlen(tareas));
 
 	alta_tareas(PCB_ID,posicion_memoria);
 
@@ -423,9 +447,39 @@ char* proxima_tarea_tripulante(int tripulante_id) {
 
 	TCB* unTCB = posicion_memoria;
 
-	//TODO
+	char* proxima_tarea = unTCB->proxima_instruccion;
 
-	return "";
+	if (proxima_tarea[0] == '$')
+	{
+		return proxima_tarea;
+	}
+
+	int index = 0;
+	char* string_tarea = string_new();
+	char caracter;
+
+	while(1){//string con todas las posiciones
+		caracter = proxima_tarea[index];
+		if(caracter == '$')
+		{
+			string_append_with_format(&string_tarea, "%c",caracter);
+			break;
+		}
+
+		if(caracter == '|')
+		{
+			string_append_with_format(&string_tarea, "%c",caracter);
+			index++;
+			break;
+		} else {
+			string_append_with_format(&string_tarea, "%c",caracter);
+			index++;
+		}
+	}
+
+	unTCB->proxima_instruccion = unTCB->proxima_instruccion + index;
+
+	return string_tarea;
 }
 
 
@@ -526,7 +580,7 @@ int iniciar_tripulante(int patota_id)
 
 void hacer_memoria(int tamanio_memoria)
 {
-	/*
+	
 	Punto* unPunto = malloc(sizeof(Punto));
 	unPunto->pos_x = 10;
 	unPunto->pos_y = 15;
@@ -537,7 +591,7 @@ void hacer_memoria(int tamanio_memoria)
 
 	Punto puntos[2] = {*unPunto,*unPunto2};
 
-	char* tareas = "HACER_ALGO 5;5;6;8|HACER_OTRACOSA;5;6;8";
+	char* tareas = "HACER_ALGO 5;5;6;8|HACER_OTRACOSA;5;6;8$";
 
 	int IDPATOTA = iniciar_patota(2,tareas,puntos);
 
@@ -546,9 +600,12 @@ void hacer_memoria(int tamanio_memoria)
 
 	TCB* unTCB = buscar_tripulante(0);
 
+	miLogInfo(proxima_tarea_tripulante(0));
+	miLogInfo(proxima_tarea_tripulante(0));
+	
 	free(unPunto);
 	free(unPunto2);
-*/
+
 	//SERVICIOS A CONSTRUIR
 	// 1- NUEVO ELEMENTO:
 	// 2- Crear un segmento
@@ -583,12 +640,14 @@ void* iniciar_servidor_miram(){
 
 void* iniciar_funciones_memoria(){
     inicializar_memoria(tamanio_memoria);
-	hacer_memoria(tamanio_memoria);
 	mostrar_tabla_segmentos(true);
 	return NULL;
 }
 
 int main(){
+
+signal (SIGINT, controlador);
+
 
 	//pthread_t mapa;
 	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
@@ -607,9 +666,11 @@ int main(){
 
 	puerto_miram = string_itoa(configuracion->puerto);
 	iniciar_funciones_memoria();
+	
+	
 	iniciar_servidor_miram();
 
-
+	//hacer_memoria(1000);
 /*
 	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_miram,
 			NULL) != 0) {

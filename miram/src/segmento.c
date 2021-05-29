@@ -4,6 +4,7 @@
 void mostrar_tabla_segmentos(bool mostrar_vacios)
 
 {
+			miLogInfo("Id segmento\tDir inicio\tDesplazamiento\tEstado");
 	t_list_iterator* list_iterator = list_iterator_create(tabla_segmentos);
                 while(list_iterator_has_next(list_iterator)) {
                     Segmento* segmento_aux = list_iterator_next(list_iterator);
@@ -21,10 +22,7 @@ void mostrar_tabla_segmentos(bool mostrar_vacios)
 void imprimir_segmento(Segmento* segmento_a_imprimir)
 
 {
-		miLogInfo("Id del segmento: %d\n",segmento_a_imprimir->id);
-		miLogInfo("Direccion de inicio %d\n",segmento_a_imprimir->dir_inicio);
-		miLogInfo("Desplazamiento %d\n",segmento_a_imprimir->desplazamiento);	
-		miLogInfo("El estado es %s\n", segmento_a_imprimir->estado);
+		miLogInfo("%8d\t%8d\t%8d\t%8s",segmento_a_imprimir->id,segmento_a_imprimir->dir_inicio,segmento_a_imprimir->desplazamiento,segmento_a_imprimir->estado);
 }
 
 //Imprime el segmento, no es muy amigable, MEJORAR!

@@ -35,6 +35,13 @@ void get_quantum_faltante();//para q el discordiador sepa cuanto le falta antes 
 void* planificar_tripulante(Tripulante*);
 void planificar_con_FIFO(Tripulante*);
 
-void ejecutar_proxima_tarea(Tripulante*);
-void generar_comida(Tripulante*);
+void ejecutar_proxima_tarea_FIFO(Tripulante*); //lee el parametro nombre_tarea de la tarea asignada al tripulante
+                                          //y envia al tripulante a realizar la tarea correspondiente
+void generar_comida_FIFO(Tripulante*);
+void generar_oxigeno_FIFO(Tripulante*);
+void consumir_oxigeno_FIFO(Tripulante*);
+void consumir_comida_FIFO(Tripulante*);
+void generar_basura_FIFO(Tripulante*);
+void descartar_basura_FIFO(Tripulante*);
+void tarea_generica_FIFO(Tripulante*); //consiste solo en  llegar a la ubicación y esperar que pase el tiempo solicitado en el estado EXEC
 #endif

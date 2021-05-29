@@ -89,27 +89,87 @@ void planificar_con_FIFO(Tripulante* trip){
   miLogInfo("\nSe pasa tripulante a estado EXEC\n");
 
   printf("\nProxima tarea a ejecutar: %s", (trip->tarea_actual)->nombre_tarea);
-  ejecutar_proxima_tarea(trip);
+  ejecutar_proxima_tarea_FIFO(trip);
 }
 
 void execute(Tripulante tripulante){
 
 }
 
-void ejecutar_proxima_tarea(Tripulante* trip){
+void ejecutar_proxima_tarea_FIFO(Tripulante* trip){
 
   char* tarea = (trip->tarea_actual)->nombre_tarea;
 
   if(strncmp(tarea,"GENERAR_COMIDA", string_length(tarea))==0){
-    generar_comida(trip);
+    generar_comida_FIFO(trip);
   }
-  //else if...resto de tareas posibles...
+  else if(strncmp(tarea,"GENERAR_OXIGENO", string_length(tarea))==0){
+    generar_oxigeno_FIFO(trip);
+  }
+  else if(strncmp(tarea,"CONSUMIR_OXIGENO", string_length(tarea))==0){
+    consumir_oxigeno_FIFO(trip);
+  }
+  else if(strncmp(tarea," CONSUMIR_COMIDA", string_length(tarea))==0){
+    consumir_comida_FIFO(trip);
+  }
+  else if(strncmp(tarea,"GENERAR_BASURA", string_length(tarea))==0){
+    generar_basura_FIFO(trip);
+  }
+  else if(strncmp(tarea,"DESCARTAR_BASURA", string_length(tarea))==0){
+    descartar_basura_FIFO(trip);
+  }
+  else
+  {
+    tarea_generica_FIFO(trip);
+  }
+  
 }
 
-void generar_comida(Tripulante* trip){
+void generar_comida_FIFO(Tripulante* trip){
   //Completar pasos 1, 2, 3 y 4.
   miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
   int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
   miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
 }
 
+void generar_oxigeno_FIFO(Tripulante* trip){
+  //Completar pasos 1, 2, 3 y 4.
+  miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
+  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+}
+
+void consumir_oxigeno_FIFO(Tripulante* trip){
+  //Completar pasos 1, 2 y 3.
+  miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
+  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+}
+
+void consumir_comida_FIFO(Tripulante* trip){
+  //Completar pasos 1, 2 y 3.
+  miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
+  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+}
+
+void generar_basura_FIFO(Tripulante* trip){
+  //Completar pasos 1, 2, 3 y 4.
+  miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
+  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+}
+
+void descartar_basura_FIFO(Tripulante* trip){
+  //Completar pasos 1, 2 y 3.
+  miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
+  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+}
+
+void tarea_generica_FIFO(Tripulante* trip){
+  //Moverse a ubicacion.
+  miLogInfo("\nComienza ejecucion de TAREA GENERICA");
+  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
+}

@@ -56,6 +56,8 @@ u_int32_t buscar_tripulante(int TCB_ID);
 
 pthread_mutex_t mutex_tripulantes;
 pthread_mutex_t mutex_tareas;
+pthread_mutex_t mutex_expulsion;
+
 
 
 

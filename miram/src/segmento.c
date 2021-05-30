@@ -218,6 +218,63 @@ uint32_t buscar_tripulante_segmentacion(int TCB_ID)
 	}
 }
 
+int expulsar_tripulante_segmentacion(int tripulante_id)
+{
+	Segmento* segmento;
+	bool elimine_segmento = false;
+	bool elimine_tripulante = false;
+	int index = 0;
+
+	t_list_iterator* list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
+	t_list_iterator* list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+	TCB_adm* tcb_adm;
+
+				while(list_iterator_has_next(list_iterator_tcb)) {
+                    tcb_adm = list_iterator_next(list_iterator_tcb);
+
+                    //Si encuentro un segmento libre donde cabe el espacio a ocupar
+					if (tcb_adm->TID == tripulante_id)
+					{
+						
+						while(list_iterator_has_next(list_iterator_segmentos)) {
+                    		segmento = list_iterator_next(list_iterator_segmentos);
+								if (segmento->id == tcb_adm->segmento_nro)
+								{
+									segmento->estado = "LIBRE";
+									elimine_segmento = true;				
+								}						
+							if (elimine_segmento)
+							{
+								break;
+							}
+						}
+					}
+
+					if (elimine_segmento)
+					{
+						list_remove(tabla_segmentos_tcb, index);
+						elimine_tripulante = true;
+
+					} else {
+						index++;
+					}
+					if (elimine_tripulante)
+					{
+						break;
+					}
+                }
+	list_iterator_destroy(list_iterator_tcb);
+	list_iterator_destroy(list_iterator_segmentos);
+
+	if (elimine_tripulante)
+	{
+		return 1;
+	} else {
+		return -1;
+	}
+}
+
+
 uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 {
 	if (PCB_ID > contador_patotas) {

@@ -4,29 +4,25 @@
 #define CONFIG_FILE_PATH "cfg/miram.cfg"
 #define LOG_FILE_PATH "miram.log"
 
-
-
-
-void controlador (int parametro)
+void controlador(int parametro)
 {
 	miLogInfo("Finalizando memoria");
 	finalizar_memoria();
 }
 
-
-
 // Lee la configuración y la deja disponible
-int leer_config(void) {
+int leer_config(void)
+{
 
-	t_config* config;
+	t_config *config;
 	configuracion = malloc(sizeof(Configuracion));
 
 	config = config_create(CONFIG_FILE_PATH);
 
-	if(config==NULL){
+	if (config == NULL)
+	{
 		return EXIT_FAILURE;
 	}
-
 
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
@@ -41,190 +37,198 @@ int leer_config(void) {
 }
 
 // Atiende con hilos los request que son enviados a MiRAM
-void atender_request_miram(Request* request) {
+void atender_request_miram(Request *request)
+{
 
 	op_code codigo_operacion = request->codigo_operacion;
-	t_buffer* buffer_devolucion = request->buffer_devolucion;
+	t_buffer *buffer_devolucion = request->buffer_devolucion;
 	int request_fd = request->request_fd;
-	t_list* lista;
-	t_paquete* paquete_devuelto;
-	t_list* lista_mensajes;
+	t_list *lista;
+	t_paquete *paquete_devuelto;
+	t_list *lista_mensajes;
 	int resultado;
 
-	switch(codigo_operacion){
-		
-	  case EXPULSAR_TRIPULANTE:
-			//recibo los mensajes
-			pthread_mutex_lock(&mutex_expulsion);
-			lista_mensajes = list_create();
+	switch (codigo_operacion)
+	{
 
-			//recibo los mensajes
-			miLogInfo("Me llego operacion: EXPULSAR TRIPULANTE \n");
-			lista = deserializar_lista_strings(buffer_devolucion);
+	case EXPULSAR_TRIPULANTE:
+		//recibo los mensajes
+		pthread_mutex_lock(&mutex_expulsion);
+		lista_mensajes = list_create();
 
-			int tripulante_expulsion =  atoi(list_get(lista,0));
-	
-			resultado = expulsar_tripulante(tripulante_expulsion);
+		//recibo los mensajes
+		miLogInfo("Me llego operacion: EXPULSAR TRIPULANTE \n");
+		lista = deserializar_lista_strings(buffer_devolucion);
 
-			if (resultado == -1)
-			{
-				miLogInfo("ERROR: TRIPULANTE NO EXPULSADO \n");
-				paquete_devuelto = crear_paquete(FAIL);
-				list_add(lista_mensajes, "Se produjo un error al expulsar el tripulante");
-			} else {
-				miLogInfo("TRIPULANTE EXPULSADO CORRECTAMENTE \n");
+		int tripulante_expulsion = atoi(list_get(lista, 0));
 
-				paquete_devuelto = crear_paquete(OK);
-				list_add(lista_mensajes, string_itoa(tripulante_expulsion));
-			}
+		resultado = expulsar_tripulante(tripulante_expulsion);
 
-				buffer_devolucion = serializar_lista_strings(lista_mensajes);
-				paquete_devuelto->buffer = buffer_devolucion;
-				enviar_paquete(paquete_devuelto, request_fd);
-	  		pthread_mutex_unlock(&mutex_expulsion);
-			list_destroy(lista_mensajes);
-			break;
+		if (resultado == -1)
+		{
+			miLogInfo("ERROR: TRIPULANTE NO EXPULSADO \n");
+			paquete_devuelto = crear_paquete(FAIL);
+			list_add(lista_mensajes, "Se produjo un error al expulsar el tripulante");
+		}
+		else
+		{
+			miLogInfo("TRIPULANTE EXPULSADO CORRECTAMENTE \n");
 
-	  case INICIAR_TRIPULANTE:
-	  		pthread_mutex_lock(&mutex_tripulantes);
-			lista_mensajes = list_create();
+			paquete_devuelto = crear_paquete(OK);
+			list_add(lista_mensajes, string_itoa(tripulante_expulsion));
+		}
 
-			//recibo los mensajes
-			miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
-			lista = deserializar_lista_strings(buffer_devolucion);
+		buffer_devolucion = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_devolucion;
+		enviar_paquete(paquete_devuelto, request_fd);
+		pthread_mutex_unlock(&mutex_expulsion);
+		list_destroy(lista_mensajes);
+		break;
 
-			int PATOTA_ID =  atoi(list_get(lista,0));
-	
-			resultado = iniciar_tripulante(PATOTA_ID);
+	case INICIAR_TRIPULANTE:
+		pthread_mutex_lock(&mutex_tripulantes);
+		lista_mensajes = list_create();
 
-			char* posicion;
-			char* proxima_tarea;
+		//recibo los mensajes
+		miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
+		lista = deserializar_lista_strings(buffer_devolucion);
 
-			if (resultado == -1)
-			{
-				miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
-				paquete_devuelto = crear_paquete(FAIL);
-				list_add(lista_mensajes, "Se produjo un error al iniciar el tripulante");
-			} else {
-				miLogInfo("TRIPULANTE INICIADO CORRECTAMENTE \n");
+		int PATOTA_ID = atoi(list_get(lista, 0));
 
-				posicion = buscar_posicion_tripulante(resultado);
-				proxima_tarea = proxima_tarea_tripulante(resultado);
+		resultado = iniciar_tripulante(PATOTA_ID);
 
-				paquete_devuelto = crear_paquete(OK);
-				list_add(lista_mensajes, string_itoa(resultado));
-				list_add(lista_mensajes, posicion);
-				list_add(lista_mensajes, proxima_tarea);
-			}
+		char *posicion;
+		char *proxima_tarea;
 
-				buffer_devolucion = serializar_lista_strings(lista_mensajes);
-				paquete_devuelto->buffer = buffer_devolucion;
-				enviar_paquete(paquete_devuelto, request_fd);
-	  		pthread_mutex_unlock(&mutex_tripulantes);
-			list_destroy(lista_mensajes);
-			break;
+		if (resultado == -1)
+		{
+			miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
+			paquete_devuelto = crear_paquete(FAIL);
+			list_add(lista_mensajes, "Se produjo un error al iniciar el tripulante");
+		}
+		else
+		{
+			miLogInfo("TRIPULANTE INICIADO CORRECTAMENTE \n");
 
-	  case INICIAR_PATOTA:
-			//recibo los mensajes
-			miLogInfo("Me llego operacion: INICIAR PATOTA \n");
+			posicion = buscar_posicion_tripulante(resultado);
+			proxima_tarea = proxima_tarea_tripulante(resultado);
 
-			lista = deserializar_lista_strings(buffer_devolucion);
+			paquete_devuelto = crear_paquete(OK);
+			list_add(lista_mensajes, string_itoa(resultado));
+			list_add(lista_mensajes, posicion);
+			list_add(lista_mensajes, proxima_tarea);
+		}
 
-			int cantidad_tripulantes =  atoi(list_get(lista,0));
-			char* tareas = list_get(lista,1);
-			char* puntos = list_get(lista,2);
+		buffer_devolucion = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_devolucion;
+		enviar_paquete(paquete_devuelto, request_fd);
+		pthread_mutex_unlock(&mutex_tripulantes);
+		list_destroy(lista_mensajes);
+		break;
 
+	case INICIAR_PATOTA:
+		//recibo los mensajes
+		miLogInfo("Me llego operacion: INICIAR PATOTA \n");
 
-			lista_mensajes = list_create();
-			resultado = iniciar_patota(cantidad_tripulantes,tareas,puntos);
+		lista = deserializar_lista_strings(buffer_devolucion);
 
-			if (resultado == -1)
-			{
-				miLogInfo("ERROR: PATOTA NO INICIADA \n");
+		int cantidad_tripulantes = atoi(list_get(lista, 0));
+		char *tareas = list_get(lista, 1);
+		char *puntos = list_get(lista, 2);
 
-				paquete_devuelto = crear_paquete(FAIL);
-				list_add(lista_mensajes, "Se produjo un error al iniciar la patota");
-			} else {
-				miLogInfo("PATOTA INICIADA CORRECTAMENTE \n");
+		lista_mensajes = list_create();
+		resultado = iniciar_patota(cantidad_tripulantes, tareas, puntos);
 
-				paquete_devuelto = crear_paquete(OK);
-				list_add(lista_mensajes, string_itoa(resultado));
-			}
+		if (resultado == -1)
+		{
+			miLogInfo("ERROR: PATOTA NO INICIADA \n");
 
-			buffer_devolucion = serializar_lista_strings(lista_mensajes);
-			paquete_devuelto->buffer = buffer_devolucion;
+			paquete_devuelto = crear_paquete(FAIL);
+			list_add(lista_mensajes, "Se produjo un error al iniciar la patota");
+		}
+		else
+		{
+			miLogInfo("PATOTA INICIADA CORRECTAMENTE \n");
 
-			miLogInfo("Enviando paquete de vuelta \n");
+			paquete_devuelto = crear_paquete(OK);
+			list_add(lista_mensajes, string_itoa(resultado));
+		}
 
+		buffer_devolucion = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_devolucion;
 
-			enviar_paquete(paquete_devuelto, request_fd);
+		miLogInfo("Enviando paquete de vuelta \n");
 
-			break;
+		enviar_paquete(paquete_devuelto, request_fd);
 
-	  case TAREA_SIGUIENTE:
-			pthread_mutex_lock(&mutex_tareas);
-			lista_mensajes = list_create();
+		break;
 
-			//recibo los mensajes
-			miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
-			lista = deserializar_lista_strings(buffer_devolucion);
+	case TAREA_SIGUIENTE:
+		pthread_mutex_lock(&mutex_tareas);
+		lista_mensajes = list_create();
 
-			int tripulante_id =  atoi(list_get(lista,0));
-	
-			char* tarea = proxima_tarea_tripulante(tripulante_id);
+		//recibo los mensajes
+		miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
+		lista = deserializar_lista_strings(buffer_devolucion);
 
-			if (tarea[0] == '$')
-			{
-				miLogInfo("ERROR: TRIPULANTE SIN TAREAS \n");
-				paquete_devuelto = crear_paquete(FAIL);
-				list_add(lista_mensajes, "Se produjo un error al obtener tarea del tripulante");
-			} else {
-				miLogInfo("Proxima tarea de tripulante %d enviada \n",tripulante_id);
-				paquete_devuelto = crear_paquete(OK);
-				list_add(lista_mensajes, tarea);
-			}
+		int tripulante_id = atoi(list_get(lista, 0));
 
-				buffer_devolucion = serializar_lista_strings(lista_mensajes);
-				paquete_devuelto->buffer = buffer_devolucion;
-				enviar_paquete(paquete_devuelto, request_fd);
-	  		pthread_mutex_unlock(&mutex_tareas);
-			list_destroy(lista_mensajes);
-			break;
+		char *tarea = proxima_tarea_tripulante(tripulante_id);
 
-	  break;
+		if (tarea[0] == '$')
+		{
+			miLogInfo("ERROR: TRIPULANTE SIN TAREAS \n");
+			paquete_devuelto = crear_paquete(FAIL);
+			list_add(lista_mensajes, "Se produjo un error al obtener tarea del tripulante");
+		}
+		else
+		{
+			miLogInfo("Proxima tarea de tripulante %d enviada \n", tripulante_id);
+			paquete_devuelto = crear_paquete(OK);
+			list_add(lista_mensajes, tarea);
+		}
 
-	  case MOV_TRIPULANTE:
-	  //recibo los mensajes
-	  miLogInfo("Me llego operacion: MOVER TRIPULANTE \n");
+		buffer_devolucion = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_devolucion;
+		enviar_paquete(paquete_devuelto, request_fd);
+		pthread_mutex_unlock(&mutex_tareas);
+		list_destroy(lista_mensajes);
+		break;
 
-	  lista = deserializar_lista_strings(buffer_devolucion);
-	  loggear_lista_strings(lista);
+		break;
 
-	  //devuelve una lista de mensajes
-	  paquete_devuelto = crear_paquete(OK);
+	case MOV_TRIPULANTE:
+		//recibo los mensajes
+		miLogInfo("Me llego operacion: MOVER TRIPULANTE \n");
 
-	  lista_mensajes = list_create();
-	  list_add(lista_mensajes, "hola");
-      list_add(lista_mensajes,"soy miram");
+		lista = deserializar_lista_strings(buffer_devolucion);
+		loggear_lista_strings(lista);
 
+		//devuelve una lista de mensajes
+		paquete_devuelto = crear_paquete(OK);
 
-	  buffer_devolucion = serializar_lista_strings(lista_mensajes);
-	  paquete_devuelto->buffer = buffer_devolucion;
-	  enviar_paquete(paquete_devuelto, request_fd);
+		lista_mensajes = list_create();
+		list_add(lista_mensajes, "hola");
+		list_add(lista_mensajes, "soy miram");
 
-	  break;
+		buffer_devolucion = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_devolucion;
+		enviar_paquete(paquete_devuelto, request_fd);
 
-	  default:
+		break;
+
+	default:
 		miLogInfo("Me llego operacion: ...\n");
 
-	  break;
+		break;
 	}
 
-	mostrar_tabla_segmentos(true);
+	dump_memoria(true);
 }
 
 // Crea la grilla inicial y la muestra en pantalla
-void crear_grilla(void) {
+void crear_grilla(void)
+{
 
 	int err;
 	nivel_gui_inicializar();
@@ -233,90 +237,96 @@ void crear_grilla(void) {
 	nivel_gui_dibujar(nivel);
 }
 
-void crear_personaje_grilla(int tripulante, int pos_x, int pos_y) {
+void crear_personaje_grilla(int tripulante, int pos_x, int pos_y)
+{
 	char identificador = identificadores[proximo_identificador++];
-	
-	Identidad_grilla* id_grilla = malloc(sizeof(Identidad_grilla));
+
+	Identidad_grilla *id_grilla = malloc(sizeof(Identidad_grilla));
 	id_grilla->TID = tripulante;
 	id_grilla->identificador = identificador;
-	
+
 	list_add(tabla_identificadores_grilla, id_grilla);
-	personaje_crear(nivel, identificador, pos_x,pos_y);
+	personaje_crear(nivel, identificador, pos_x, pos_y);
 	nivel_gui_dibujar(nivel);
 }
 
 //Mueve un tripulante a una dirección destino
 int mover_tripulante(int tripulante, int posicion_x_final, int posicion_y_final)
 {
-	TCB* miTCB = buscar_tripulante(tripulante);
+	TCB *miTCB = buscar_tripulante(tripulante);
 
-	if (miTCB = 99) {
+	if (miTCB = 99)
+	{
 		return -1;
 	}
 
 	char identificador = buscar_tripulante_grilla(tripulante);
 
-	if (identificador == '-') {
+	if (identificador == '-')
+	{
 		return -1;
 	}
 
 	mover_tripulante_grilla(identificador, posicion_x_final - miTCB->pos_X, posicion_y_final - miTCB->pos_y);
 }
 
-void mover_tripulante_grilla(char identificador, int pos_x, int pos_y) {
+void mover_tripulante_grilla(char identificador, int pos_x, int pos_y)
+{
 
 	int err;
 
 	err = item_desplazar(nivel, identificador, pos_x, pos_y);
 	nivel_gui_dibujar(nivel);
-
 }
 
 //buscar el caracter asignado en la grilla, para el tripulante
 char buscar_tripulante_grilla(int tripulante)
 {
 
-	if (tripulante > contador_patotas) {
+	if (tripulante > contador_patotas)
+	{
 		miLogInfo("El tripulante %d a mover no existe", tripulante);
 		return '-';
 	}
 
 	bool encontre_tripulante = false;
 	char identificador_tripulante;
-	TCB* unTCB;
-	TCB* TCB_encontrado;
+	TCB *unTCB;
+	TCB *TCB_encontrado;
 
-	t_list_iterator* list_iterator = list_iterator_create(tabla_identificadores_grilla);
-                Identidad_grilla* id_grilla;
+	t_list_iterator *list_iterator = list_iterator_create(tabla_identificadores_grilla);
+	Identidad_grilla *id_grilla;
 
-				while(list_iterator_has_next(list_iterator)) {
-                    id_grilla = list_iterator_next(list_iterator);
-					
-					if (id_grilla->TID == tripulante)
-					{
-						encontre_tripulante = true;
-						identificador_tripulante = id_grilla->identificador;
-						break;
-					}
-                }
+	while (list_iterator_has_next(list_iterator))
+	{
+		id_grilla = list_iterator_next(list_iterator);
+
+		if (id_grilla->TID == tripulante)
+		{
+			encontre_tripulante = true;
+			identificador_tripulante = id_grilla->identificador;
+			break;
+		}
+	}
 	list_iterator_destroy(list_iterator);
 
 	if (encontre_tripulante)
 	{
 		return identificador_tripulante;
-	} else {
+	}
+	else
+	{
 		miLogInfo("El tripulante %d a mover no existe", tripulante);
 		return '-';
 	}
-
-
 }
-
-
 
 void inicializar_memoria(int tamanio_memoria)
 {
 	MEMORIA = malloc(tamanio_memoria);
+
+	miLogInfo("Inicia MEMORIA, primera direccion %p",MEMORIA);
+
 	contador_patotas = 0;
 	contador_tripulantes = 0;
 	tabla_identificadores_grilla = list_create();
@@ -325,35 +335,39 @@ void inicializar_memoria(int tamanio_memoria)
 	{
 		inicializar_segmentacion(tamanio_memoria);
 	}
-
 }
 
 void finalizar_memoria()
 {
-	mostrar_tabla_segmentos(true);
-	free(MEMORIA);
-
 	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
 		finalizar_segmentacion();
 	}
 
-	nivel_destruir(nivel);
-	nivel_gui_terminar();
-
+	free(MEMORIA);
+	//nivel_destruir(nivel);
+	//nivel_gui_terminar();
 }
 
-char* obtener_punto_string(char* puntos, int i)
-{	
-	char** lista_puntos;
-	lista_puntos=string_split(puntos, ";");
-	char* string_punto = lista_puntos[i];
+void dump_memoria(bool mostrar_vacios)
+{
+	if (configuracion->esquema_memoria = "SEGMENTACION")
+	{
+		dump_memoria_segmentacion(mostrar_vacios);
+	}
+}
+
+char *obtener_punto_string(char *puntos, int i)
+{
+	char **lista_puntos;
+	lista_puntos = string_split(puntos, ";");
+	char *string_punto = lista_puntos[i];
 	return string_punto;
 }
 
 int reservar_memoria(int bytes)
 {
-		if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
 		if (configuracion->algoritmo_busqueda = "FF")
 		{
@@ -362,9 +376,9 @@ int reservar_memoria(int bytes)
 	}
 }
 
-int alta_patota(PCB* unPCB)
+int alta_patota(PCB *unPCB)
 {
-		if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
 		return alta_patota_segmentacion(unPCB);
 	}
@@ -378,17 +392,17 @@ u_int32_t buscar_patota(int PCB_ID)
 	}
 }
 
-void alta_tripulante(TCB* unTCB, int patota)
+void alta_tripulante(TCB *unTCB, int patota)
 {
-		if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
 		return alta_tripulante_segmentacion(unTCB, patota);
 	}
 }
 
-void alta_tareas(int PCB_ID, char* tareas)
+void alta_tareas(int PCB_ID, char *tareas)
 {
-		if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
 		return alta_tareas_segmentacion(PCB_ID, tareas);
 	}
@@ -402,7 +416,6 @@ u_int32_t buscar_tripulante(int TCB_ID)
 	}
 }
 
-
 u_int32_t buscar_tripulante_no_asignado(int PCB_ID)
 {
 	if (configuracion->esquema_memoria = "SEGMENTACION")
@@ -411,8 +424,7 @@ u_int32_t buscar_tripulante_no_asignado(int PCB_ID)
 	}
 }
 
-
-u_int32_t iniciar_tareas(int PCB_ID, char* tareas) 
+u_int32_t iniciar_tareas(int PCB_ID, char *tareas)
 {
 	u_int32_t posicion_memoria = reservar_memoria(strlen(tareas));
 
@@ -421,44 +433,46 @@ u_int32_t iniciar_tareas(int PCB_ID, char* tareas)
 		return 99;
 	}
 
-	memcpy(posicion_memoria, tareas,strlen(tareas));
+	memcpy(posicion_memoria, tareas, strlen(tareas));
 
-	alta_tareas(PCB_ID,posicion_memoria);
+	alta_tareas(PCB_ID, posicion_memoria);
 
 	return posicion_memoria;
 }
 
-char* buscar_posicion_tripulante(int tripulante_id) {
+char *buscar_posicion_tripulante(int tripulante_id)
+{
 
 	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
-	
+
 	if (posicion_memoria == 99)
 	{
 		return "";
 	}
 
-	TCB* unTCB = posicion_memoria;
-	char* posicion_tripulante = string_new();
+	TCB *unTCB = posicion_memoria;
+	char *posicion_tripulante = string_new();
 
 	posicion_tripulante = string_itoa(unTCB->pos_X);
-	string_append(&posicion_tripulante,"|");
-	string_append(&posicion_tripulante,string_itoa(unTCB->pos_y));
+	string_append(&posicion_tripulante, "|");
+	string_append(&posicion_tripulante, string_itoa(unTCB->pos_y));
 
 	return posicion_tripulante;
 }
 
-char* proxima_tarea_tripulante(int tripulante_id) {
+char *proxima_tarea_tripulante(int tripulante_id)
+{
 
 	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
-	
+
 	if (posicion_memoria == 99)
 	{
 		return "";
 	}
 
-	TCB* unTCB = posicion_memoria;
+	TCB *unTCB = posicion_memoria;
 
-	char* proxima_tarea = unTCB->proxima_instruccion;
+	char *proxima_tarea = unTCB->proxima_instruccion;
 
 	if (proxima_tarea[0] == '$')
 	{
@@ -466,24 +480,27 @@ char* proxima_tarea_tripulante(int tripulante_id) {
 	}
 
 	int index = 0;
-	char* string_tarea = string_new();
+	char *string_tarea = string_new();
 	char caracter;
 
-	while(1){//string con todas las posiciones
+	while (1)
+	{ //string con todas las posiciones
 		caracter = proxima_tarea[index];
-		if(caracter == '$')
+		if (caracter == '$')
 		{
-			string_append_with_format(&string_tarea, "%c",caracter);
+			string_append_with_format(&string_tarea, "%c", caracter);
 			break;
 		}
 
-		if(caracter == '|')
+		if (caracter == '|')
 		{
-			string_append_with_format(&string_tarea, "%c",caracter);
+			string_append_with_format(&string_tarea, "%c", caracter);
 			index++;
 			break;
-		} else {
-			string_append_with_format(&string_tarea, "%c",caracter);
+		}
+		else
+		{
+			string_append_with_format(&string_tarea, "%c", caracter);
 			index++;
 		}
 	}
@@ -493,19 +510,17 @@ char* proxima_tarea_tripulante(int tripulante_id) {
 	return string_tarea;
 }
 
-
-
-int iniciar_patota(int cantidad_tripulantes, char* tareas, char* puntos) 
+int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 {
 	miLogInfo("Iniciando patota \n");
 	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
-	
+
 	if (posicion_memoria == 99)
 	{
 		return -1;
 	}
 
-	PCB* unPCB = posicion_memoria;
+	PCB *unPCB = posicion_memoria;
 	// Sincronizar
 	unPCB->PID = contador_patotas++;
 
@@ -525,38 +540,35 @@ int iniciar_patota(int cantidad_tripulantes, char* tareas, char* puntos)
 
 	miLogInfo("Iniciando tripulantes \n");
 
-	for (int i=0; i<cantidad_tripulantes;i++)
+	for (int i = 0; i < cantidad_tripulantes; i++)
 	{
 
 		//if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
-		if (inicializar_tripulante(unPCB->PID, obtener_punto_string(puntos,i), unPCB->Tareas) == -1)
+		if (inicializar_tripulante(unPCB->PID, obtener_punto_string(puntos, i), unPCB->Tareas) == -1)
 		{
 			return -1;
 		}
-
 	}
 	return unPCB->PID;
 }
 
-
-
-int inicializar_tripulante(int patota, char* unPunto, u_int32_t tareas) 
+int inicializar_tripulante(int patota, char *unPunto, u_int32_t tareas)
 {
-	u_int32_t posicion_memoria = reservar_memoria(sizeof(TCB));
+	u_int32_t posicion_memoria = reservar_memoria(21);
 
 	if (posicion_memoria == 99)
 	{
 		return -1;
 	}
 
-	TCB* miTCB = posicion_memoria;
+	TCB *miTCB = posicion_memoria;
 
 	//sincronizar
 	miTCB->TID = contador_tripulantes++;
 	miTCB->estado = 'N';
 
-	char** lista_puntos;
-	lista_puntos=string_split(unPunto, "|");
+	char **lista_puntos;
+	lista_puntos = string_split(unPunto, "|");
 	miTCB->pos_X = atoi(lista_puntos[0]);
 	miTCB->pos_y = atoi(lista_puntos[1]);
 
@@ -565,11 +577,10 @@ int inicializar_tripulante(int patota, char* unPunto, u_int32_t tareas)
 	miTCB->PCB = buscar_patota(patota);
 
 	//alta tripulante
-	alta_tripulante(miTCB,patota);
-
+	alta_tripulante(miTCB, patota);
 }
 
-int iniciar_tripulante(int patota_id) 
+int iniciar_tripulante(int patota_id)
 {
 	u_int32_t posicion_memoria = buscar_tripulante_no_asignado(patota_id);
 
@@ -578,13 +589,13 @@ int iniciar_tripulante(int patota_id)
 		return -1;
 	}
 
-	TCB* unTCB = posicion_memoria;
+	TCB *unTCB = posicion_memoria;
 	unTCB->estado = 'R';
 
 	return unTCB->TID;
 }
 
-int expulsar_tripulante(int tripulante_id) 
+int expulsar_tripulante(int tripulante_id)
 {
 	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
 	int resultado;
@@ -592,53 +603,48 @@ int expulsar_tripulante(int tripulante_id)
 	if (posicion_memoria == 99)
 	{
 		return -1;
-	} else {
-		if (configuracion->esquema_memoria = "SEGMENTACION")
-			{
-				resultado = expulsar_tripulante_segmentacion(tripulante_id);
-			}
-
-
 	}
-
-
+	else
+	{
+		if (configuracion->esquema_memoria = "SEGMENTACION")
+		{
+			resultado = expulsar_tripulante_segmentacion(tripulante_id);
+		}
+	}
 }
-
 
 void hacer_memoria(int tamanio_memoria)
 {
-	
-	char* puntos ="1|2;3|4";
-	char* tareas = "HACER_ALGO 5;5;6;8|HACER_OTRACOSA;5;6;8$";
 
-	char* puntos2 ="1|2";
-	char* tareas2 = "HACER_ALGO 5;5;6;8$";
+	char *puntos = "1|2;3|4";
+	char *tareas = "HACER_ALGO 5;5;6;8|HACER_OTRACOSA;5;6;8$";
 
-	int IDPATOTA = iniciar_patota(2,tareas,puntos);
-	mostrar_tabla_segmentos(true);
+	char *puntos2 = "1|2";
+	char *tareas2 = "HACER_ALGO 5;5;6;8$";
+
+	int IDPATOTA = iniciar_patota(2, tareas, puntos);
+	dump_memoria(true);
 
 	int tripulante1 = iniciar_tripulante(IDPATOTA);
 	int tripulante2 = iniciar_tripulante(IDPATOTA);
 
-	mostrar_tabla_segmentos(true);
+	dump_memoria(true);
 
 	miLogInfo(proxima_tarea_tripulante(tripulante1));
 	miLogInfo(proxima_tarea_tripulante(tripulante1));
 	miLogInfo(proxima_tarea_tripulante(tripulante1));
 	miLogInfo(proxima_tarea_tripulante(tripulante2));
 
-	mostrar_tabla_segmentos(true);
+	dump_memoria(true);
 
 	expulsar_tripulante(tripulante1);
 
-	mostrar_tabla_segmentos(true);
+	dump_memoria(true);
 
-	int IDPATOTA2 = iniciar_patota(1,tareas2,puntos2);
+	int IDPATOTA2 = iniciar_patota(1, tareas2, puntos2);
 	int tripulante3 = iniciar_tripulante(IDPATOTA2);
-	
-	mostrar_tabla_segmentos(true);
 
-
+	dump_memoria(true);
 
 	//SERVICIOS A CONSTRUIR
 	// 1- NUEVO ELEMENTO:
@@ -648,49 +654,50 @@ void hacer_memoria(int tamanio_memoria)
 
 	// si direccion es mayor a base + limite o menor a base, error
 
+	// list_add(t_list *self, void *data) {
+	//void list_iterate(t_list* self, void(*closure)(void*)) {
+	//void* list_find(t_list *self, bool(*condition)(void*)) {
 
-// list_add(t_list *self, void *data) {
-//void list_iterate(t_list* self, void(*closure)(void*)) {
-//void* list_find(t_list *self, bool(*condition)(void*)) {
+	//static t_link_element* list_find_element(t_list *self, bool(*cutting_condition)(t_link_element*, int)) {
+	//	t_link_element* element = self->head;
+	//	int index = 0;
 
+	//	while(!cutting_condition(element, index)) {
+	//		element = element->next;
+	//		index++;
+	//	}
 
-//static t_link_element* list_find_element(t_list *self, bool(*cutting_condition)(t_link_element*, int)) {
-//	t_link_element* element = self->head;
-//	int index = 0;
-
-//	while(!cutting_condition(element, index)) {
-//		element = element->next;
-//		index++;
-//	}
-
-//	return element;
-//}
+	//	return element;
+	//}
 }
 
-void* iniciar_servidor_miram(){
-    levantar_servidor(atender_request_miram,puerto_miram);
+void *iniciar_servidor_miram()
+{
+	levantar_servidor(atender_request_miram, puerto_miram);
 	return NULL;
 }
 
-void* iniciar_funciones_memoria(){
-    inicializar_memoria(tamanio_memoria);
-	mostrar_tabla_segmentos(true);
+void *iniciar_funciones_memoria()
+{
+	inicializar_memoria(tamanio_memoria);
+	dump_memoria(true);
 	return NULL;
 }
 
-int main(){
+int main()
+{
 
-signal (SIGINT, controlador);
-
+	//signal(SIGINT, controlador);
 
 	//pthread_t mapa;
 	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
-	
-   //Inicio el log en un thread... :O
+
+	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
 	miLogInfo("Inició MiRAM.");
 
-	if(leer_config()){
+	if (leer_config())
+	{
 		miLogInfo("Error al iniciar MiRAM: No se encontró el archivo de configuración");
 		miLogDestroy();
 		return EXIT_FAILURE;
@@ -700,12 +707,11 @@ signal (SIGINT, controlador);
 
 	puerto_miram = string_itoa(configuracion->puerto);
 	iniciar_funciones_memoria();
-	
-	
-	//iniciar_servidor_miram();
 
-	hacer_memoria(1000);
-/*
+	iniciar_servidor_miram();
+
+	//hacer_memoria(1000);
+	/*
 	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_miram,
 			NULL) != 0) {
 		printf("Error iniciando servidor/n");
@@ -722,14 +728,12 @@ signal (SIGINT, controlador);
 	}
 */
 
-    //pthread_join(threadSERVER, NULL);
+	pthread_join(threadSERVER, NULL);
 	//pthread_join(threadMAPA, NULL);
 	//pthread_join(threadMEMORIA, NULL);
 
 	miLogInfo("Finalizó MiRAM");
 	free(configuracion);
 	finalizar_memoria();
-    miLogDestroy();
-
-
+	miLogDestroy();
 }

@@ -8,6 +8,8 @@ void controlador(int parametro)
 {
 	miLogInfo("Finalizando memoria");
 	finalizar_memoria();
+		miLogInfo("Memoria liberada de Miram");
+
 }
 
 // Lee la configuración y la deja disponible
@@ -223,7 +225,6 @@ void atender_request_miram(Request *request)
 		break;
 	}
 
-	dump_memoria(true);
 }
 
 // Crea la grilla inicial y la muestra en pantalla
@@ -339,12 +340,15 @@ void inicializar_memoria(int tamanio_memoria)
 
 void finalizar_memoria()
 {
+	dump_memoria(true); 
+	
 	if (configuracion->esquema_memoria = "SEGMENTACION")
 	{
 		finalizar_segmentacion();
 	}
 
 	free(MEMORIA);
+
 	//nivel_destruir(nivel);
 	//nivel_gui_terminar();
 }
@@ -687,7 +691,7 @@ void *iniciar_funciones_memoria()
 int main()
 {
 
-	//signal(SIGINT, controlador);
+	signal(SIGINT, controlador);
 
 	//pthread_t mapa;
 	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
@@ -728,7 +732,7 @@ int main()
 	}
 */
 
-	pthread_join(threadSERVER, NULL);
+	//pthread_join(threadSERVER, NULL);
 	//pthread_join(threadMAPA, NULL);
 	//pthread_join(threadMEMORIA, NULL);
 

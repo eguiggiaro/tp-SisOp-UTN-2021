@@ -1,14 +1,12 @@
 #include "segmento.h"
 
-//Muestra el contenido de la tabla de segmentos
-void dump_memoria_segmentacion(bool mostrar_vacios)
-
+void dump_memoria_segmentos(bool mostrar_vacios)
 {
 
-	miLogInfo("--------------------------------------------------------------------");
-	miLogInfo("Detalle tabla de segmentos");
-	miLogInfo("--------------------------------------------------------------------");
-	miLogInfo("Dir Inicio\tId segmento\tDesplazamiento\tEstado");
+	printf("--------------------------------------------------------------------\n");
+	printf("Detalle tabla de segmentos\n");
+	printf("--------------------------------------------------------------------\n");
+	printf("Dir Inicio\tId segmento\tDesplazamiento\tEstado\n");
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
 	while (list_iterator_has_next(list_iterator))
 	{
@@ -19,12 +17,16 @@ void dump_memoria_segmentacion(bool mostrar_vacios)
 			imprimir_segmento(segmento_aux);
 	}
 
-	miLogInfo("--------------------------------------------------------------------");
+	printf("--------------------------------------------------------------------\n");
 	list_iterator_destroy(list_iterator);
+}
 
-	miLogInfo("Detalle memoria");
-	miLogInfo("--------------------------------------------------------------------");
-	miLogInfo("Patota Id\t# Segmento\t  Tipo\t   Inicio\tTamaño");
+void dump_memoria_contenido_segmentacion()
+{
+
+	printf("Detalle memoria\n");
+	printf("--------------------------------------------------------------------\n");
+	printf("Patota Id\t# Segmento\t  Tipo\t   Inicio\tTamaño\n");
 
 	t_list_iterator *list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
 	t_list_iterator *list_iterator_tareas;
@@ -52,7 +54,7 @@ void dump_memoria_segmentacion(bool mostrar_vacios)
 		tamanio = un_segmento->desplazamiento;
 		pcb = buscar_patota_segmentacion(pcbadm->PID);
 
-		miLogInfo("%9d\t%10d\t%6s\t%p\t%5db", patota, segmento, tipo,pcb,tamanio);
+		printf("%9d\t%10d\t%6s\t%p\t%5db\n", patota, segmento, tipo,pcb,tamanio);
 
 		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
 
@@ -69,7 +71,7 @@ void dump_memoria_segmentacion(bool mostrar_vacios)
 				tamanio = un_segmento->desplazamiento;
 				tareas = pcb->Tareas;
 
-				miLogInfo("%9d\t%10d\t%4s\t%p\t%5db", patota, segmento, tipo,tareas,tamanio);
+				printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tareas,tamanio);
 				break;
 			}
 		}
@@ -90,16 +92,26 @@ void dump_memoria_segmentacion(bool mostrar_vacios)
 						tamanio = un_segmento->desplazamiento;
 						tcb = buscar_tripulante_segmentacion(tcbadm->TID);
 
-						miLogInfo("%9d\t%10d\t%4s\t%p\t%5db", patota, segmento, tipo,tcb,tamanio);
+						printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tcb,tamanio);
 					}
 			}
 		list_iterator_destroy(list_iterator_tcb);
 
 	}
 
-	miLogInfo("--------------------------------------------------------------------");
+	printf("--------------------------------------------------------------------\n");
 	list_iterator_destroy(list_iterator_pcb);
+}
 
+
+
+//Muestra el contenido de la tabla de segmentos
+void dump_memoria_segmentacion(bool mostrar_vacios)
+
+{
+	dump_memoria_segmentos(mostrar_vacios);
+	dump_memoria_contenido_segmentacion();
+	fflush(stdout); 
 }
 
 //Imprime el segmento
@@ -108,7 +120,7 @@ void dump_memoria_segmentacion(bool mostrar_vacios)
 void imprimir_segmento(Segmento *segmento_a_imprimir)
 
 {
-	miLogInfo("%d\t%d\t\t%d\t\t%s", segmento_a_imprimir->dir_inicio, segmento_a_imprimir->id, segmento_a_imprimir->desplazamiento, segmento_a_imprimir->estado);
+	printf("%d\t%d\t\t%d\t\t%s\n", segmento_a_imprimir->dir_inicio, segmento_a_imprimir->id, segmento_a_imprimir->desplazamiento, segmento_a_imprimir->estado);
 }
 
 //Imprime el segmento, no es muy amigable, MEJORAR!

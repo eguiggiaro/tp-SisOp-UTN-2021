@@ -43,10 +43,11 @@ void atender_request_miram(Request *request)
 {
 
 	op_code codigo_operacion = request->codigo_operacion;
-	t_buffer *buffer_devolucion = request->buffer_devolucion;
+	t_buffer *buffer_devolucion;
 	int request_fd = request->request_fd;
 	t_list *lista;
 	t_paquete *paquete_devuelto;
+	t_paquete *paquete_devuelto_iniciar_patota;
 	t_list *lista_mensajes;
 	int resultado;
 
@@ -56,11 +57,12 @@ void atender_request_miram(Request *request)
 	case EXPULSAR_TRIPULANTE:
 		//recibo los mensajes
 		pthread_mutex_lock(&mutex_expulsion);
+		t_buffer *buffer_devolucion_expulsar = request->buffer_devolucion;
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
 		miLogInfo("Me llego operacion: EXPULSAR TRIPULANTE \n");
-		lista = deserializar_lista_strings(buffer_devolucion);
+		lista = deserializar_lista_strings(buffer_devolucion_expulsar);
 
 		int tripulante_expulsion = atoi(list_get(lista, 0));
 
@@ -80,20 +82,26 @@ void atender_request_miram(Request *request)
 			list_add(lista_mensajes, string_itoa(tripulante_expulsion));
 		}
 
-		buffer_devolucion = serializar_lista_strings(lista_mensajes);
-		paquete_devuelto->buffer = buffer_devolucion;
+		t_buffer *buffer_respuesta_expulsar = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_respuesta_expulsar;
 		enviar_paquete(paquete_devuelto, request_fd);
-		pthread_mutex_unlock(&mutex_expulsion);
+		eliminar_buffer(buffer_devolucion_expulsar);
 		list_destroy(lista_mensajes);
+		list_destroy(lista);
+		free(request);
+		pthread_mutex_unlock(&mutex_expulsion);
+	
 		break;
 
 	case INICIAR_TRIPULANTE:
 		pthread_mutex_lock(&mutex_tripulantes);
+		t_paquete *paquete_devuelto_iniciar_tripulante;
+		t_buffer *buffer_devolucion_iniciar_tripulante = request->buffer_devolucion;
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
 		miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
-		lista = deserializar_lista_strings(buffer_devolucion);
+		lista = deserializar_lista_strings(buffer_devolucion_iniciar_tripulante);
 
 		int PATOTA_ID = atoi(list_get(lista, 0));
 
@@ -105,7 +113,7 @@ void atender_request_miram(Request *request)
 		if (resultado == -1)
 		{
 			miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
-			paquete_devuelto = crear_paquete(FAIL);
+			paquete_devuelto_iniciar_tripulante = crear_paquete(FAIL);
 			list_add(lista_mensajes, "Se produjo un error al iniciar el tripulante");
 		}
 		else
@@ -115,24 +123,31 @@ void atender_request_miram(Request *request)
 			posicion = buscar_posicion_tripulante(resultado);
 			proxima_tarea = proxima_tarea_tripulante(resultado);
 
-			paquete_devuelto = crear_paquete(OK);
+			paquete_devuelto_iniciar_tripulante = crear_paquete(OK);
 			list_add(lista_mensajes, string_itoa(resultado));
 			list_add(lista_mensajes, posicion);
 			list_add(lista_mensajes, proxima_tarea);
 		}
 
-		buffer_devolucion = serializar_lista_strings(lista_mensajes);
-		paquete_devuelto->buffer = buffer_devolucion;
-		enviar_paquete(paquete_devuelto, request_fd);
-		pthread_mutex_unlock(&mutex_tripulantes);
+		t_buffer *buffer_respuesta_iniciar_tripulante = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto_iniciar_tripulante->buffer = buffer_respuesta_iniciar_tripulante;
+		enviar_paquete(paquete_devuelto_iniciar_tripulante, request_fd);
+		eliminar_buffer(buffer_devolucion_iniciar_tripulante);
 		list_destroy(lista_mensajes);
+		list_destroy(lista);
+		free(proxima_tarea);
+		free(request);
+		pthread_mutex_unlock(&mutex_tripulantes);
 		break;
 
 	case INICIAR_PATOTA:
+
+		pthread_mutex_lock(&mutex_patota);
+		t_buffer *buffer_devolucion_iniciar_patota = request->buffer_devolucion;
 		//recibo los mensajes
 		miLogInfo("Me llego operacion: INICIAR PATOTA \n");
 
-		lista = deserializar_lista_strings(buffer_devolucion);
+		lista = deserializar_lista_strings(buffer_devolucion_iniciar_patota);
 
 		int cantidad_tripulantes = atoi(list_get(lista, 0));
 		char *tareas = list_get(lista, 1);
@@ -145,33 +160,39 @@ void atender_request_miram(Request *request)
 		{
 			miLogInfo("ERROR: PATOTA NO INICIADA \n");
 
-			paquete_devuelto = crear_paquete(FAIL);
+			paquete_devuelto_iniciar_patota = crear_paquete(FAIL);
 			list_add(lista_mensajes, "Se produjo un error al iniciar la patota");
 		}
 		else
 		{
 			miLogInfo("PATOTA INICIADA CORRECTAMENTE \n");
 
-			paquete_devuelto = crear_paquete(OK);
+			paquete_devuelto_iniciar_patota = crear_paquete(OK);
 			list_add(lista_mensajes, string_itoa(resultado));
 		}
 
-		buffer_devolucion = serializar_lista_strings(lista_mensajes);
-		paquete_devuelto->buffer = buffer_devolucion;
+		t_buffer *buffer_respuesta_iniciar_patota = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto_iniciar_patota->buffer = buffer_respuesta_iniciar_patota;
 
 		miLogInfo("Enviando paquete de vuelta \n");
 
-		enviar_paquete(paquete_devuelto, request_fd);
-
+		enviar_paquete(paquete_devuelto_iniciar_patota, request_fd);
+		eliminar_buffer(buffer_devolucion_iniciar_patota);
+		list_destroy(lista);
+		list_destroy(lista_mensajes);
+		free(request);
+		pthread_mutex_lock(&mutex_patota);
 		break;
 
 	case TAREA_SIGUIENTE:
 		pthread_mutex_lock(&mutex_tareas);
+		t_buffer *buffer_devolucion_tareas = request->buffer_devolucion;
+
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
 		miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
-		lista = deserializar_lista_strings(buffer_devolucion);
+		lista = deserializar_lista_strings(buffer_devolucion_tareas);
 
 		int tripulante_id = atoi(list_get(lista, 0));
 
@@ -190,14 +211,16 @@ void atender_request_miram(Request *request)
 			list_add(lista_mensajes, tarea);
 		}
 
-		buffer_devolucion = serializar_lista_strings(lista_mensajes);
-		paquete_devuelto->buffer = buffer_devolucion;
+		t_buffer *buffer_respuesta_tareas = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_respuesta_tareas;
 		enviar_paquete(paquete_devuelto, request_fd);
-		pthread_mutex_unlock(&mutex_tareas);
+		eliminar_buffer(buffer_devolucion_tareas);
 		list_destroy(lista_mensajes);
+		list_destroy(lista);
+		free(request);
+		pthread_mutex_unlock(&mutex_tareas);
 		break;
 
-		break;
 
 	case MOV_TRIPULANTE:
 		//recibo los mensajes
@@ -216,7 +239,9 @@ void atender_request_miram(Request *request)
 		buffer_devolucion = serializar_lista_strings(lista_mensajes);
 		paquete_devuelto->buffer = buffer_devolucion;
 		enviar_paquete(paquete_devuelto, request_fd);
-
+		eliminar_paquete(paquete_devuelto);
+		list_destroy(lista);
+		list_destroy(lista_mensajes);
 		break;
 
 	default:
@@ -365,7 +390,11 @@ char *obtener_punto_string(char *puntos, int i)
 {
 	char **lista_puntos;
 	lista_puntos = string_split(puntos, ";");
-	char *string_punto = lista_puntos[i];
+	char *string_punto = strdup(lista_puntos[i]);
+
+
+    string_iterate_lines(lista_puntos, (void*) free);
+	free(lista_puntos);
 	return string_punto;
 }
 
@@ -455,7 +484,7 @@ char *buscar_posicion_tripulante(int tripulante_id)
 	}
 
 	TCB *unTCB = posicion_memoria;
-	char *posicion_tripulante = string_new();
+	char *posicion_tripulante;
 
 	posicion_tripulante = string_itoa(unTCB->pos_X);
 	string_append(&posicion_tripulante, "|");
@@ -576,6 +605,7 @@ int inicializar_tripulante(int patota, char *unPunto, u_int32_t tareas)
 	miTCB->pos_X = atoi(lista_puntos[0]);
 	miTCB->pos_y = atoi(lista_puntos[1]);
 
+	free(lista_puntos); 
 	//linkear a tareas
 	miTCB->proxima_instruccion = tareas;
 	miTCB->PCB = buscar_patota(patota);
@@ -691,7 +721,7 @@ void *iniciar_funciones_memoria()
 int main()
 {
 
-	signal(SIGINT, controlador);
+	//signal(SIGINT, controlador);
 
 	//pthread_t mapa;
 	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);

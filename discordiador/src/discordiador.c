@@ -536,6 +536,4 @@ Tarea* obtener_tarea(char* tarea_str, Tarea* nueva_tarea){
 
 	return nueva_tarea;
 
-	//free(nueva_tarea);
-
 }

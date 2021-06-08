@@ -75,6 +75,7 @@ typedef struct Tripulante{
     Estados estado;//deberia saber yo mi estado for sakes de semaforos? de ser si, q sea un enum...
     //char* tarea_actual;//chequear la libreria de strings... 
 	Tarea* tarea_actual;
+	pthread_t* id_hilo;
     
 } Tripulante;
 

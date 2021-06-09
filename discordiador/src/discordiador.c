@@ -237,6 +237,8 @@ void iniciar_patota(char* comando){
 	char* patota_id=list_get(mensajes_respuesta,0);
 	
 	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
+
+	pthread_t hilos_tripulantes[cantidad_trip];
 	
 	for(int i=0; i<cantidad_trip;i++){
 		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
@@ -252,7 +254,10 @@ void iniciar_patota(char* comando){
 		// trip_hilo.quantum=0;
 		// list_add(new_list, &trip_hilo);
 
-		inicializar_tripulante(new_tripulante);
+		if (pthread_create(&hilos_tripulantes[i], NULL, inicializar_tripulante,
+				(Tripulante*)new_tripulante) != 0) {
+			printf("Error inicializando tripulante/n");
+		}
 
 	}
 	
@@ -303,12 +308,7 @@ void tripulante_listo(Tripulante* trip){
 	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 
-	pthread_t new_hilo_tripulante;
-
-	if(planificacion_activada){
-	//creo un hilo por cada tripulante
-	pthread_create (&new_hilo_tripulante, NULL, planificar_tripulante, (Tripulante *)trip);
-	}
+	planificar_tripulante(trip);
 }
 
 

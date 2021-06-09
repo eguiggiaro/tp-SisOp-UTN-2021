@@ -167,3 +167,28 @@ void tarea_generica_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
 }
+
+void bloquear_tripulante(Tripulante* trip){
+
+  int indice;
+
+  for(int i =0; i<list_size(execute_list);i++){
+
+    Tripulante* trip_auxiliar = list_get(execute_list,i);
+
+    if(trip->id_tripulante == trip_auxiliar->id_tripulante){
+      indice = i;
+    }
+  }
+
+  if(indice!=NULL){
+  //Se saca tripulante de cola de EXEC y se pasa a cola de BLOCK.
+	sem_wait(&mutexBLOCK);
+    list_add(blocked_io, list_remove(execute_list,indice));
+	sem_post(&mutexBLOCK);
+  //libero un lugar en la cola de EXEC
+  sem_post(&semaforoEXEC);
+	trip->estado = bloqueado_io;
+	miLogInfo("\nSe pasa el tripulante a la cola de BLOCK\n");
+  }
+}

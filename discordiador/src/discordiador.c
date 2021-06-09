@@ -159,10 +159,12 @@ void consola(){
 					iniciar_patota(input_consola);
 					break;
 				case INICIAR_PLANIFICACION_COM:
-					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					printf( "Comando es Iniciar Planificacion\n" );
+					iniciar_planificacion();
 					break;
 				case PAUSAR_PLANIFICACION_COM:
-					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					printf( "Comando es Pausar Planificacion\n" );
+					pausar_planificacion();
 					break;
 				case LISTAR_TRIPULANTE_COM:
 					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
@@ -536,4 +538,12 @@ Tarea* obtener_tarea(char* tarea_str, Tarea* nueva_tarea){
 
 	return nueva_tarea;
 
+}
+
+void iniciar_planificacion(){
+	planificacion_activada = true;
+}
+
+void pausar_planificacion(){
+	planificacion_activada = false;
 }

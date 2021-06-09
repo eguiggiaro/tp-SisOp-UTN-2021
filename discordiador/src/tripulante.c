@@ -192,3 +192,27 @@ void bloquear_tripulante(Tripulante* trip){
 	miLogInfo("\nSe pasa el tripulante a la cola de BLOCK\n");
   }
 }
+
+void desbloquear_tripulante(Tripulante* trip){
+  int indice;
+
+  for(int i =0; i<list_size(blocked_io);i++){
+
+    Tripulante* trip_auxiliar = list_get(blocked_io,i);
+
+    if(trip->id_tripulante == trip_auxiliar->id_tripulante){
+      indice = i;
+    }
+  }
+
+  if(indice!=NULL){
+  //Se saca tripulante de cola de BLOCK y se pasa a cola de READY.
+	sem_wait(&mutexBLOCK);
+  sem_wait(&mutexREADY);
+    list_add(ready_list, list_remove(blocked_io,indice));
+	sem_post(&mutexBLOCK);
+  sem_wait(&mutexREADY);
+
+  miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
+}
+}

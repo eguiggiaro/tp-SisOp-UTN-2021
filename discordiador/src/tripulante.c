@@ -34,6 +34,8 @@ void *inicializar_tripulante(Tripulante* tripulante){
         tripulante->pos_x = atoi(posicion[0]);
         tripulante->pos_y = atoi(posicion[1]);
 	    	tripulante->tarea_actual = list_get(lista,2);
+        sem_init(&(tripulante->semaforo_trip),0,0);
+        //sem_destroy...
 
         miLogInfo("Se pasa el tripulante a la cola de NEW");
 
@@ -61,33 +63,24 @@ return;
 }
 
 void* planificar_tripulante(Tripulante* trip){
-  if((strncmp(configuracion->algoritmo,"FIFO",4))==0){
-    planificar_con_FIFO(trip);
-  }
-  else if((strncmp(configuracion->algoritmo,"RR",2))==0){
-    //planificar_con_RR(trip);
-  }
-  else{
-    miLogError("\nNo se pudo detectar algoritmo");
-  }
-
-  return NULL;
-}
-
-void planificar_con_FIFO(Tripulante* trip){
+  while(planificacion_activada==true){
+    
   sem_wait(&semaforoEXEC);
   sem_wait(&mutexREADY);
+  //tomo proximo tripulante de la cola de READY y lo paso a EXEC
   list_add(execute_list,list_remove(ready_list,0));
   sem_post(&mutexREADY);
   trip->estado = trabajando;
   miLogInfo("\nSe pasa tripulante a estado EXEC\n");
 
+  //le doy signal al semaforo del tripulante
+  sem_post(&(trip->semaforo_trip));
+
   printf("\nProxima tarea a ejecutar: %s", (trip->tarea_actual)->nombre_tarea);
   ejecutar_proxima_tarea_FIFO(trip);
-}
+  }
 
-void execute(Tripulante tripulante){
-
+  return NULL;
 }
 
 void ejecutar_proxima_tarea_FIFO(Tripulante* trip){
@@ -122,48 +115,55 @@ void ejecutar_proxima_tarea_FIFO(Tripulante* trip){
 void generar_comida_FIFO(Tripulante* trip){
   //Completar pasos 1, 2, 3 y 4.
   miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
-  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
 }
 
 void generar_oxigeno_FIFO(Tripulante* trip){
   //Completar pasos 1, 2, 3 y 4.
   miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
-  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
 }
 
 void consumir_oxigeno_FIFO(Tripulante* trip){
   //Completar pasos 1, 2 y 3.
   miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
-  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
 }
 
 void consumir_comida_FIFO(Tripulante* trip){
   //Completar pasos 1, 2 y 3.
   miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
-  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
 }
 
 void generar_basura_FIFO(Tripulante* trip){
   //Completar pasos 1, 2, 3 y 4.
   miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
-  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
 }
 
 void descartar_basura_FIFO(Tripulante* trip){
   //Completar pasos 1, 2 y 3.
   miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
-  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
 }
 
 void tarea_generica_FIFO(Tripulante* trip){
   //Moverse a ubicacion.
   miLogInfo("\nComienza ejecucion de TAREA GENERICA");
-  int ciclos_cpu = sleep((trip->tarea_actual)->tiempo);
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
 }

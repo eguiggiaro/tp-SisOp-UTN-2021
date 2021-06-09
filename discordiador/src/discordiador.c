@@ -259,6 +259,7 @@ void iniciar_patota(char* comando){
 			printf("Error inicializando tripulante/n");
 		}
 
+		//pthread_join(hilos_tripulantes[i]);
 	}
 	
 	list_destroy(lista_mensajes);	

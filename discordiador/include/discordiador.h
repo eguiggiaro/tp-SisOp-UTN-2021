@@ -76,6 +76,7 @@ typedef struct Tripulante{
     //char* tarea_actual;//chequear la libreria de strings... 
 	Tarea* tarea_actual;
 	pthread_t* id_hilo;
+	sem_t semaforo_trip; //este semaforo indica si el tripulante puede ejecutar
     
 } Tripulante;
 

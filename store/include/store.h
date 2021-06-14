@@ -24,12 +24,15 @@
 
 //Shared libs
 #include "shared_utils.h"
+#include "servidor.h"
 
 typedef enum { 
 	OXIGENO,
     COMIDA,
     BASURA, 
 }tipoRecurso;
+
+char* stringFromRecurso(tipoRecurso f);
 
 typedef enum { 
 	GENERAR_OXIGENO,
@@ -43,10 +46,9 @@ typedef enum {
 typedef struct {
 	int size;
 	int block_count;
-	t_list* blocks;
-	char caracter_llenado;
-	uint32_t blockSizeDefault;
-	uint32_t blocksQtyDefault;
+	char* blocks;
+	char* caracter_llenado;
+	//int md5;
 } Metadata;
 
 typedef struct {
@@ -64,11 +66,15 @@ typedef struct {
 } Configuracion;
 
 Configuracion* configuracion;
+Metadata* metadata;
 
 int leerConfig(void);
-void atender_request_store(uint32_t);
+void atender_request_store(Request *request);
 void inicializarParametrosFS(void);
 void inicializarStore(void);
 t_list* obtenerListaSabotaje(char*);
+
+pthread_mutex_t mutex_informartareas;
+
 
 #endif

@@ -38,6 +38,8 @@ int calcularCantBloques(char*);
 t_list* escribirBloquesNuevo(char*);
 void escribirBloque(int, int, char*);
 void escribirBloqueUsado(int, int , char*);
+char* leerBloque(int , int);
+char* leerBloques(t_list*, int);
 
 
 

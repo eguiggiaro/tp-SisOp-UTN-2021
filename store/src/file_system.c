@@ -163,9 +163,14 @@ void liberarBloque(int index){
 
 int calcularCantBloques(char* datos) {
 
-	//TODO:ver caso donde entra justo.
+	int cantidadBloques = string_length(datos) / tamanioBloque;
+	int resto = string_length(datos) % (tamanioBloque); //Para saber si esta completo.
+	
+	if(resto != 0){
+		cantidadBloques++; // No estaba completo -> agrego un bloque mas para el bloque incompleto.
+	}
 
-	return (string_length(datos) / tamanioBloque) + 1;
+	return cantidadBloques;
 }
 
 // Recibo un bloque incompleto y lo completo.
@@ -173,7 +178,6 @@ void escribirBloqueUsado(int bloque, int cantidadBytesLibres, char* datos){
 
 	escribirBloque(bloque, tamanioBloque - cantidadBytesLibres, datos);
 }
-
 
 // Recibo la cadena de caracteres que tengo que escribir. Busco bloques libres y los voy escribiendo.
 // Devuelvo la lista de bloques que ocupe.
@@ -192,12 +196,11 @@ t_list* escribirBloquesNuevo(char* datos){
 			return -1;
 		}
 		
-		if(i + 1 == cantidadBloquesNecesarios){
-			endEscritura = string_length(datos);
-		} else {
-			endEscritura = startEscritura + tamanioBloque;
-		}
+		endEscritura = startEscritura + tamanioBloque;
 
+		if(i + 1 == cantidadBloquesNecesarios){
+			endEscritura = string_length(datos); //El ultimo bloque tengo que ir hasta el final de la cadena.
+		}
 		//endEscritura = string_lenght(datos) * X + (startEscritura + tamanioBloque) * Y;
 		
 		escribirBloque(bloqueNuevo, 0, string_substring(datos, startEscritura, endEscritura));
@@ -212,9 +215,41 @@ t_list* escribirBloquesNuevo(char* datos){
 void escribirBloque(int bloque, int offset, char* escritura){
 	
 	int desplazamiento = (bloque - 1) * tamanioBloque + offset;
-	memcpy(escritura, punteroBlocks + desplazamiento, string_length(escritura));
+	memcpy(punteroBlocks + desplazamiento, escritura, string_length(escritura));
 }
 
+//TODO: 
+char* leerBloques(t_list* bloques, int size){
+	char* lectura = string_new();
+	char* lecturaAux;
+	int cantidadLecturas = calcularCantBloques(size);
+	int proximoBloque = list_get(bloques, 0);
+
+	for(int i = 0; i < cantidadLecturas - 1; i++){ //Hasta cantidadLecturas - 1 para analizar el ultimo bloque despues.
+		lecturaAux = leerBloque(proximoBloque, tamanioBloque);
+		string_append(&lectura, lecturaAux);
+		proximoBloque = list_get(bloques, i + 1);
+		free(lecturaAux);
+	}
+	
+	int resto = size % (tamanioBloque); //Para saber si esta completo.
+	if(resto == 0){
+		resto = tamanioBloque; //Estaba completo -> lo que falta es un bloque entero.
+	}
+	lecturaAux = leerBloque(proximoBloque, resto); //Ultimo bloque.
+	string_append(&lectura, lecturaAux);
+	free(lecturaAux);
+	return lectura;
+}
+
+char* leerBloque(int bloque, int size) {
+	char* lectura = malloc(size);
+	int desplazamiento = (bloque - 1) * tamanioBloque;
+
+	memcpy(lectura, punteroBlocks + desplazamiento, size);
+
+	return lectura;
+}
 
 int tamanioArchivo(char* path){
 

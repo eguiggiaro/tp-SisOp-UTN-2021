@@ -19,12 +19,13 @@ void atender_request_store(Request *request) {
 	t_list *lista;
 	t_paquete *paquete_devuelto;
 	t_list *lista_mensajes;
-	int resultado;
+	int resultadoTarea;
+	int resultadoBitacora;
 
 	switch(codigo_operacion)
 	{	
 
-		case INFORMAR_TAREA:
+		case INFORMAR_TAREA: //por ejemplo: GENERAR_OXIGENO 12
 
 			pthread_mutex_lock(&mutex_informartareas);
 			t_buffer* buffer_devolucion_informar_tarea = request->buffer_devolucion;
@@ -33,21 +34,18 @@ void atender_request_store(Request *request) {
 			lista = deserializar_lista_strings(buffer_devolucion);
 
 			char* id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
-			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12;2;3
-			char** lista1;
-			char** lista2;
+			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12
+			char** lista;
 
-			lista1 = string_split(informeTarea[1], ";");//Crea una lista separando la cadena informeTarea[1] por ;. Resultado: lista1[0]= GENERAR_OXIGENO 12. ls[1]=2. ls [2]=3
-			lista2 = string_split(lista1[0], " ");//Crea una lista separando la cadena lista[0] por SPACE. Resultado lista2[0]= GENERAR_OXIGENO . ls2[1] = 12
+			lista = string_split(informeTarea[1] , " ");//Crea una lista separando la cadena informeTarea[1] por SPACE. Resultado lista[0]= GENERAR_OXIGENO . lista[1] = 12
 	
-			char* tarea = list_get(lista2,0);//tarea
-			int cantidadRecursos = atoi(list_get(lista2,1)); //En el caso de DESCARTAR_BASURA es NULL
-			int posX = atoi(list_get(lista1,1));
-			int posY = atoi(list_get(lista1,2));
+			char* tarea = list_get(lista,0);//tarea
+			int cantidadRecursos = atoi(list_get(lista,1)); //En el caso de DESCARTAR_BASURA es NULL
 
-	 		resultado = ejecutarTarea(tarea, cantidadRecursos);
+	 		resultadoTarea = ejecutarTarea(tarea, cantidadRecursos);
+			// resultadoBitacora = guardarEnBitacora(tarea);
 
-			if (resultado == -1)
+			if (resultadoTarea == -1)
 			{
 				miLogInfo("ERROR: NO SE PUDO REALIZAR LA TAREA \n");
 				paquete_devuelto = crear_paquete(FAIL);

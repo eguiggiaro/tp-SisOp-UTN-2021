@@ -10,47 +10,51 @@
 #include <nivel-gui/nivel-gui.h>
 #include <nivel-gui/tad_nivel.h>
 #include "estructuras.h"
+#include "servidor.h"
 
-typedef struct Configuracion{
+typedef struct Configuracion
+{
 	int puerto;
-    int tamanio_memoria;
-    char* esquema_memoria;
+	int tamanio_memoria;
+	char *esquema_memoria;
 	int tamanio_pagina;
-    int tamanio_swap;
-	char* path_swap;
-	char* algoritmo_reemplazo;
-	char* algoritmo_busqueda;
+	int tamanio_swap;
+	char *path_swap;
+	char *algoritmo_reemplazo;
+	char *algoritmo_busqueda;
 } Configuracion;
 
-
-
-
-Configuracion* configuracion;
+Configuracion *configuracion;
 pthread_t threadSERVER;
 pthread_t threadMEMORIA;
 pthread_t threadMAPA;
 
-char* puerto_miram;
+char *puerto_miram;
 int tamanio_memoria;
 
 int leer_config(void);
-void atender_request_miram(uint32_t request_fd);
+void atender_request_miram(Request *request);
 void crear_grilla(void);
-void* iniciar_servidor_miram();
-void* iniciar_funciones_memoria();
+void *iniciar_servidor_miram();
+void *iniciar_funciones_memoria();
 
 //GUI
-	t_list* tabla_identificadores_grilla;
-	NIVEL* nivel;
-	int cols, rows;
-	// mejorar
-	char identificadores[11] = {'A','B','C','D','E','F','G','H','I','J','K'};
-	int proximo_identificador = 0;
+t_list *tabla_identificadores_grilla;
+NIVEL *nivel;
+int cols, rows;
+// mejorar
+char identificadores[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'};
+int proximo_identificador = 0;
 
-char* proxima_tarea_tripulante(int tripulante_id);
-char* buscar_posicion_tripulante(int tripulante_id);
+char *proxima_tarea_tripulante(int tripulante_id);
+char *buscar_posicion_tripulante(int tripulante_id);
 char buscar_tripulante_grilla(int tripulante);
 u_int32_t buscar_tripulante(int TCB_ID);
+
+pthread_mutex_t mutex_tripulantes;
+pthread_mutex_t mutex_tareas;
+pthread_mutex_t mutex_expulsion;
+pthread_mutex_t mutex_patota;
 
 
 #endif

@@ -25,9 +25,6 @@ void quitar_de_buffer(t_buffer* buffer, void* dest, int size)
 
 void eliminar_buffer(t_buffer* buffer) 
 {
-    if(buffer->size > 0) 
-    {
-        free(buffer->stream);
-    }
+     free(buffer->stream);
     free(buffer);
 }

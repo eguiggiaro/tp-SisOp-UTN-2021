@@ -150,6 +150,8 @@ size_t peso_de_una_lista(t_list* lista){
 
 	size = size + (sizeof(uint32_t)*list_size(lista));
 
+	list_destroy(lista_auxiliar);
+
 	return size;
 }
 

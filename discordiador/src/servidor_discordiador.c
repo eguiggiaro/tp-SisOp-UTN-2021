@@ -35,6 +35,10 @@ void atender_request_discordiador(int request_fd){
 	  paquete_devuelto->buffer = buffer_devolucion;
 	  enviar_paquete(paquete_devuelto, request_fd);
 
+	  list_destroy(lista);
+	  list_destroy(lista_mensajes);
+	  eliminar_buffer(buffer_devolucion);
+
 	  break;
 
 	  default:

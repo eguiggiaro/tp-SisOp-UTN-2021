@@ -1,8 +1,9 @@
 #include "ejecucion_tareas.h"
+#include "store.h"
 
 void generarRecursos(tipoRecurso recurso, int cantidad){
 
-    vericarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
+    verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
 
 
 //-------------------------------------------------APERTURA DE ARCHIVOS-----------------------------------------------------------------------------
@@ -10,19 +11,19 @@ void generarRecursos(tipoRecurso recurso, int cantidad){
     int archivoBlocks = open("Blocks.ims",O_RDWR); //abro el archivo blocks en modo lectura/escritura
 
     if (archivoBlocks == -1) {
-        errExit("open"); //fallo apertura de archivo
+        exit(1); //fallo apertura de archivo
     }
 
-    int tamanioDeBlocks = calcularTamañoBlocks(); //Calcula el tamaño de Block.ims, tomando los datos del archivo SuperBloque y haciendo Block_size * Blocks
+    int tamanioDeBlocks = calcularTamanioBlocks(); //Calcula el tamaño de Block.ims, tomando los datos del archivo SuperBloque y haciendo Block_size * Blocks
 
     int copiaArchivoBlocks = open("copia", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR); //creo un archivo nuevo
 
     if (copiaArchivoBlocks == -1){
-        errExit("open"); //fallo apertura de archivo
+       exit(1); //fallo apertura de archivo
     }
     
     if (ftruncate(copiaArchivoBlocks, tamanioDeBlocks) == -1){ //trunco la copia del archivo al tamaño de blocks.
-        errExit("ftruncate"); //fallo recorte de archivo copia
+        exit(1); //fallo recorte de archivo copia
     }
 
     
@@ -35,13 +36,13 @@ void generarRecursos(tipoRecurso recurso, int cantidad){
     //char * mmap (void *address, size_t length, int protect, int flags, int filedes, off_t offset)
     
     if (punteroBloque == MAP_FAILED){
-        errExit("mmap"); //fallo mapeo de archivo
+        exit(1); //fallo mapeo de archivo
     }
     
     char *punteroBloqueCopia = mmap(NULL, tamanioDeBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, copiaArchivoBlocks, 0); //mapeo el archivo vacio a memoria
     
     if (punteroBloqueCopia == MAP_FAILED){
-        errExit("mmap"); //fallo mapeo de archivo
+        exit(1); //fallo mapeo de archivo
     }
 
     memcpy(punteroBloqueCopia, punteroBloque, tamanioDeBlocks);  //copio el contenido del archivo Blocks en el archivo vacio creado
@@ -57,50 +58,70 @@ void generarRecursos(tipoRecurso recurso, int cantidad){
 
     //---------------------------------------------CIERRE, LIBERACION DE MEMORIA Y SINCRONIZACION---------------------------------------------------------
     
-    close(archivoBlocks); 
-    close(copiaArchivoBlocks);
-    close(archivoMetadata); 
+   
         
-
     if (msync(punteroBloqueCopia, tamanioDeBlocks, MS_SYNC) == -1){ //Sincronizo la copia del archivo bloque a disco
-        errExit("msync"); //Fallo la sincronizacion
+        exit(1); //Fallo la sincronizacion
     }
 
     if (munmap(punteroBloqueCopia, tamanioDeBlocks) == -1){ //desmapeo la copia del archivo bloque
-        errExit("munmap");//Fallo el desmapeo de copia
+        exit(1);//Fallo el desmapeo de copia
     }
 
     if (munmap(punteroBloque, tamanioDeBlocks) == -1){ //desmapeo el archivo bloque
-        errExit("munmap");//Fallo el desmapeo de original
+       exit(1);//Fallo el desmapeo de original
     }
+
+    close(archivoBlocks); 
+    close(copiaArchivoBlocks);
+    close(archivoMetadata); 
+}
+
+void agregarRecurso(char * punteroBloqueCopia, int posicionDisponible, int cantidad, int archivoMetadata, char* cadenaAEscribir){
+
+            llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, cadenaAEscribir, archivoMetadata); 
 
 }
 
-void agregarRecurso(char * punteroBloqueCopia, tipoRecurso recurso, int posicionDisponible, int cantidad, int archivoMetadata){
-
-    switch(recurso){
-        
-        case OXIGENO: 
-
-            llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, "O", cantidad, archivoMetadata); 
-            break;
-
-        case BASURA:
-
-            llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, "B", cantidad, archivoMetadata);
-            break;
-        
-        case COMIDA:
-
-            llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, "C", cantidad, archivoMetadata);
-            break;
-        
-        default:  break;
-    }
-}
-
-void llenarDeCaracteres(char * punteroBloqueCopia, int posicionDisponible, char * caracterDeLlenado, int cantidadCaracteres, int archivoMetadata){
+void llenarDeCaracteres(char * punteroBloquedisponible, int posicionDisponible, char * cadenaAEscribir, int archivoMetadata){
     
+    /*
+    char src[] = "OOO";
+    char dest[6] = "OOOO--";
+
+    memcpy(punteroBloquedisponible,src,6);
+
+      printf("dest after first memcpy() => %s\n",dest);
+
+      memcpy(dest+4, src ,2);
+
+      printf("dest after second memcpy() => %s\n",dest);
+
+      return 0;
+ 
+ /*
+    char src[] = cadenaAEscribir; //ej "OOOO"
+    char dest[]  = punteroBloqueCopia; //ej "OO"
+    int cantEspaciosLibresEnBloque = cantPosicionesLibresEn(posicionDisponible); //caulcula cuantos espacios libres tengo en ese bloque
+    
+    if (string_length(cadenaAEscribir) > cantEspaciosLibresEnBloque){
+        
+        src =  string_substring_until(cadenaAEscribir, cantEspaciosLibresEnBloque-1); //retorna los primeros caracteres de la cadena a escribir
+        
+        memcpy(dest, src, strlen(src)+1);
+        
+        posicionDisponible = buscarposicionDisponible(archivoMetadata);
+        
+        char * restanteAEscribir =  string_substring_from(cadenaAEscribir, cantEspaciosLibresEnBloque); //retorna los ultimos caracteres desde el indice
+
+        llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, restanteAEscribir, archivoMetadata);
+    }
+
+    src = cadenaAEscribir;
+    
+    memcpy(dest, src, strlen(src)+1);
+
+  /* 
     int cantEspaciosLibresEnBloque = cantPosicionesLibresEn(posicionDisponible);
 
     for(int i = 1; i<=cantEspaciosLibresEnBloque; i++){
@@ -117,11 +138,13 @@ void llenarDeCaracteres(char * punteroBloqueCopia, int posicionDisponible, char 
         posicionDisponible = buscarposicionDisponible(archivoMetadata);
         
         llenarDeCaracteres(punteroBloqueCopia, posicionDisponible, caracterDeLlenado, cantidadCaracteresRestantes, archivoMetadata);
-    }
+    }*/
+
+
         
 }
 
-bool vericarMetadata(tipoRecurso recurso){
+void verificarMetadata(tipoRecurso recurso){
     //Verifico si existe el archivo metadata de ese, sino lo creo.
 }
 
@@ -129,14 +152,6 @@ int obtenerMetadata(tipoRecurso recurso) {
     //Devuelve el archivo de metadata correspondiente al recurso
 }
 
-int calcularTamañoBlocks(){
+int calcularTamanioBlocks(){
     //Calcula el tamaño de Blocks.ims
-}
-
-int buscarposicionDisponible(int archivoMetadata){
-    //Busca un lugar disponible en el archivo Blocks.ims
-}
-
-int cantPosicionesLibresEn (int posicionDisponible){
-    //Devuelve cuantas posiciones libres hay en el bloque
 }

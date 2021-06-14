@@ -115,6 +115,7 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
 	sem_init(&mutexBLOCK, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
+	proxima_tarea = malloc(sizeof(Tarea));
 		
 	consola();
 	miLogInfo("Finalizó Discordiador\n");
@@ -127,6 +128,7 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	sem_destroy(&semaforoEXEC);
 	sem_destroy(&mutexBLOCK);
 	sem_destroy(&mutexEXIT);
+	free(proxima_tarea);
 
 }
 
@@ -157,10 +159,12 @@ void consola(){
 					iniciar_patota(input_consola);
 					break;
 				case INICIAR_PLANIFICACION_COM:
-					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					printf( "Comando es Iniciar Planificacion\n" );
+					iniciar_planificacion();
 					break;
 				case PAUSAR_PLANIFICACION_COM:
-					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
+					printf( "Comando es Pausar Planificacion\n" );
+					pausar_planificacion();
 					break;
 				case LISTAR_TRIPULANTE_COM:
 					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
@@ -213,7 +217,8 @@ void iniciar_patota(char* comando){
 	string_tareas=leer_tareas_txt(list[2]);//leemos las tareas y las traemos como un solo string
 
 	int cantidad_trip=atoi(list[1]);
-	for(int i=0; i<=cantidad_trip;i++){//string con todas las posiciones
+	printf("\ncantidad tripulantes: %i", cantidad_trip);
+	for(int i=0; i<cantidad_trip;i++){//string con todas las posiciones
 		
 		if(sizeof(list)>i+1 && list[i+3] != NULL)
 		{
@@ -231,10 +236,15 @@ void iniciar_patota(char* comando){
 
 	char* patota_id=list_get(mensajes_respuesta,0);
 	
-	for(int i=0; i<=cantidad_trip;i++){
+	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
+
+	pthread_t hilos_tripulantes[cantidad_trip];
+	
+	for(int i=0; i<cantidad_trip;i++){
 		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
 
 		new_tripulante->id_patota=atoi(patota_id);
+		new_tripulante->tarea_actual = proxima_tarea;
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
@@ -244,8 +254,12 @@ void iniciar_patota(char* comando){
 		// trip_hilo.quantum=0;
 		// list_add(new_list, &trip_hilo);
 
-		inicializar_tripulante(new_tripulante);
+		if (pthread_create(&hilos_tripulantes[i], NULL, inicializar_tripulante,
+				(Tripulante*)new_tripulante) != 0) {
+			printf("Error inicializando tripulante/n");
+		}
 
+		//pthread_join(hilos_tripulantes[i]);
 	}
 	
 	list_destroy(lista_mensajes);	
@@ -292,14 +306,10 @@ void tripulante_listo(Tripulante* trip){
     list_add(ready_list, list_remove(new_list,0));
 	sem_post(&mutexNEW);
     sem_post(&mutexREADY);
-	miLogInfo("Se pasa el tripulante a la cola de READY");
+	trip->estado = listo;
+	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 
-	pthread_t new_hilo_tripulante;
-
-	if(planificacion_activada){
-	//creo un hilo por cada tripulante
-	pthread_create (&new_hilo_tripulante, NULL, planificar_tripulante, (void *)&trip);
-	}
+	planificar_tripulante(trip);
 }
 
 
@@ -482,4 +492,59 @@ Comandos find_enum_consola(char *sval)
     for (i=0; comandos_table[i]!=NULL; ++i, ++result)
         if (0==strcmp(sval, comandos_table[i])) return result;
     return -1;
+}
+
+Tarea* obtener_tarea(char* tarea_str, Tarea* nueva_tarea){
+	char* token;
+
+	int cont = 0;
+	char* parametros;
+	char* pos_x;
+	char* pos_y;
+	char* tiempo;
+
+	token = strtok(tarea_str, ";");
+
+	 while( token != NULL ) {
+
+      if(cont == 0){
+		  parametros = token;
+	  }
+	  else if(cont == 1){
+		  pos_x = token;
+	  }
+	  else if(cont == 2){
+		  pos_y = token;
+	  }
+	  else{
+		  tiempo = token;
+	  }
+
+      token = strtok(NULL, ";");
+
+	  cont++;
+	}
+
+	nueva_tarea->nombre_tarea = strtok(parametros, " ");
+	printf( " nombre tarea: %s\n", nueva_tarea->nombre_tarea );
+	nueva_tarea->parametros = strtok(NULL, " ");
+	printf( " parametros: %s\n", nueva_tarea->parametros );
+	nueva_tarea->pos_x = pos_x;
+	printf( " pos x: %s\n", nueva_tarea->pos_x );
+	nueva_tarea->pos_y = pos_y;
+	printf( " pos y: %s\n", nueva_tarea->pos_y );
+	char* tiempo_aux = strtok(tiempo, "|");
+	nueva_tarea->tiempo = atoi(tiempo_aux);
+	printf( " tiempo: %i\n", nueva_tarea->tiempo );
+
+	return nueva_tarea;
+
+}
+
+void iniciar_planificacion(){
+	planificacion_activada = true;
+}
+
+void pausar_planificacion(){
+	planificacion_activada = false;
 }

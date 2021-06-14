@@ -25,6 +25,20 @@
 //Shared libs
 #include "shared_utils.h"
 
+typedef enum { 
+	OXIGENO,
+    COMIDA,
+    BASURA, 
+}tipoRecurso;
+
+typedef enum { 
+	GENERAR_OXIGENO,
+    GENERAR_COMIDA,
+    GENERAR_BASURA,
+    CONSUMIR_OXIGENO,
+    CONSUMIR_COMIDA,
+    DESECHAR_BASURA, 
+}tipoTarea;
 
 typedef struct {
 	uint32_t x;

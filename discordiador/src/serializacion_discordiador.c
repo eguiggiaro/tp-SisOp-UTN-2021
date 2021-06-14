@@ -95,6 +95,10 @@ void expulsar_tripulante(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -133,6 +137,10 @@ void iniciar_tripulante(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -157,6 +165,9 @@ t_list* iniciar_patota_miram(uint32_t socket, t_list* lista_mensajes ){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		eliminar_buffer(buffer);
+
 		miLogInfo("Recibi los mensajes del destino correctamente");
 		return lista;	
 		
@@ -213,6 +224,10 @@ void informar_tareas_patota_test(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -254,6 +269,10 @@ void mover_tripulante(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -285,6 +304,10 @@ void tarea_siguiente(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -316,6 +339,10 @@ void paquete_de_prueba(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -347,6 +374,10 @@ void obtener_bitacora(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -370,6 +401,10 @@ void iniciar_fsck(uint32_t socket){
 		t_list* lista = deserializar_lista_strings(buffer);
 
 		loggear_lista_strings(lista);
+
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
 		
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
@@ -417,6 +452,10 @@ void generar_oxigeno(uint32_t socket){
 
 		loggear_lista_strings(lista);
 		
+		list_destroy(lista);
+
+		eliminar_buffer(buffer);
+
 		miLogInfo("Recibi los mensajes del destino correctamente");
 	} else {
 		miLogInfo("No recibi los mensajes del destino correctamente");

@@ -5,51 +5,33 @@ bool verificarFS(void){
 		return !(fopen(pathSuperbloque, "r") == NULL || fopen(pathBlocks, "r") == NULL);
 }
 
-bool verificarEstructuraDirectorios(void){
+void crearDirectorio(char* path){
+
+	if(mkdir(path, 0777) == -1){
+		printf("No se pudo crear el directorio %s.\n", path);
+		exit(1);
+	}
+	miLogInfo("Agrego directorio %s.", path);
+}
+
+void crearArbolDirectorios(void){
 	DIR* dirMontaje = opendir(puntoMontaje);
 	DIR* dirFiles = opendir(pathFiles);
 	DIR* dirBitacoras = opendir(pathBitacoras);
-	bool respuesta;
 
-	if(dirMontaje) {
-		respuesta = true;
-	} else {
-		if(dirFiles){
-			respuesta = true;
-		} else {
-			if(dirBitacoras){
-				respuesta = true;
-			}
-		}
-		respuesta = false;
+	if(!dirMontaje){
+		crearDirectorio(puntoMontaje);
 	}
+	if(!dirFiles){
+		crearDirectorio(pathFiles);			
+	}
+	if(!dirBitacoras){
+		crearDirectorio(pathBitacoras);
+	} 
 
 	closedir(dirMontaje);
 	closedir(dirFiles);
 	closedir(dirBitacoras);
-
-	return respuesta;
-}
-
-void crearArbolDirectorios(void){
-
-	if(mkdir(puntoMontaje, 0777) == -1){
-		printf("No se pudo crear el punto de montaje.\n");
-		exit(1);
-	}
-	miLogInfo("Agrego directorio punto de montaje.");
-
-	if(mkdir(pathFiles, 0777) == -1){
-		printf("No se pudo crear el directorio Files.\n");
-		exit(1);
-	}
-	miLogInfo("Agrego directorio Files");
-	
-	if(mkdir(pathBitacoras, 0777) == -1){
-		printf("No se pudo crear el directorio Bitácoras.\n");
-		exit(1);
-	}
-	miLogInfo("Agrego subdirectorio Bitácoras");
 }
 
 void crearSuperbloque(void){
@@ -137,6 +119,15 @@ void leerSuperBloqueSinMapear(void){
 	fclose(archivoSuperbloque);
 }
 
+void subirBlocksAMemoria(){
+	int archivoBlocks = open(pathBlocks, O_RDWR);
+	int tamanioBlocks = cantidadBloques * tamanioBloque;
+	
+	punteroBlocks = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBlocks, 0);
+
+	close(archivoBlocks);
+}
+
 int buscarYAsignarProximoBloqueLibre(void){
 //Ejemplo de uso: int bloqueLibre = buscarYAsignarProximoBloqueLibre(configuracion->puntoMontaje);
 
@@ -169,13 +160,61 @@ void liberarBloque(int index){
 	msync(bitmap, cantidadBloques/8 ,0);
 }
 
-int buscarposicionDisponible(int archivoMetadata){
-    //Busca un lugar disponible en el archivo Blocks.ims
+
+int calcularCantBloques(char* datos) {
+
+	//TODO:ver caso donde entra justo.
+
+	return (string_length(datos) / tamanioBloque) + 1;
 }
 
-int cantPosicionesLibresEn (int posicionDisponible){
-    //Devuelve cuantas posiciones libres hay en el bloque
+// Recibo un bloque incompleto y lo completo.
+void escribirBloqueUsado(int bloque, int cantidadBytesLibres, char* datos){
+
+	escribirBloque(bloque, tamanioBloque - cantidadBytesLibres, datos);
 }
+
+
+// Recibo la cadena de caracteres que tengo que escribir. Busco bloques libres y los voy escribiendo.
+// Devuelvo la lista de bloques que ocupe.
+t_list* escribirBloquesNuevo(char* datos){ 
+	
+	int cantidadBloquesNecesarios = calcularCantBloques(datos);
+	int startEscritura = 0;
+	int endEscritura; 
+
+	t_list* bloques = list_create();	
+
+	for(int i = 0; i < cantidadBloquesNecesarios; i++) {
+		int bloqueNuevo = buscarYAsignarProximoBloqueLibre();
+		if(bloqueNuevo == -1) {
+			printf("No hay mas lugar en el archivo Blocks.ims");
+			return -1;
+		}
+		
+		if(i + 1 == cantidadBloquesNecesarios){
+			endEscritura = string_length(datos);
+		} else {
+			endEscritura = startEscritura + tamanioBloque;
+		}
+
+		//endEscritura = string_lenght(datos) * X + (startEscritura + tamanioBloque) * Y;
+		
+		escribirBloque(bloqueNuevo, 0, string_substring(datos, startEscritura, endEscritura));
+		list_add(bloques, (void*)bloqueNuevo);
+		startEscritura = endEscritura + 1;	
+	}
+	//list_destroy(bloques);
+	return bloques;
+}
+
+
+void escribirBloque(int bloque, int offset, char* escritura){
+	
+	int desplazamiento = (bloque - 1) * tamanioBloque + offset;
+	memcpy(escritura, punteroBlocks + desplazamiento, string_length(escritura));
+}
+
 
 int tamanioArchivo(char* path){
 
@@ -186,6 +225,7 @@ int tamanioArchivo(char* path){
 
 	return tamanio;
 }
+
 
 void finalizarFS(void){
 	

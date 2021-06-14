@@ -52,7 +52,7 @@ int leerConfig(void){
 }
 
 void inicializarParametrosFS(void){
-	puntoMontaje = configuracion->puntoMontaje;
+	puntoMontaje = strdup(configuracion->puntoMontaje);
 	pathSuperbloque = string_from_format("%s/%s", puntoMontaje, SUPERBLOQUE_FILE); //ej: /home/utnso/mnt/SuperBloque.ims
 	pathBlocks = string_from_format("%s/%s", puntoMontaje, BLOCKS_FILE);
 	pathFiles = string_from_format("%s/%s", puntoMontaje, "Files");
@@ -69,15 +69,13 @@ void inicializarStore(void){
 	inicializarParametrosFS();
 
 	if (!verificarFS()){
-		if (!verificarEstructuraDirectorios()){
-			crearArbolDirectorios();
-		} 
+		crearArbolDirectorios();
 		crearSuperbloque();
 		crearBlocks();
 	}
 
 	leerSuperbloque();
-	//subirBlocksAMemoria();
+	subirBlocksAMemoria();
 	//leerArchivosMetadata();
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }
@@ -104,10 +102,10 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=strlen(strPosicion[1]);
 	}
 	//Test
-	for(int i = 0; list_size(listaPosicionesSabotaje) > i; i++){
+	/*for(int i = 0; list_size(listaPosicionesSabotaje) > i; i++){
 		posicion = (t_pos*) list_get(listaPosicionesSabotaje, i);
 		printf("x:%s, y:%s\n", string_itoa(posicion->x), string_itoa(posicion->y));
-	}
+	}*/
 	free(posicion);
 	return listaPosicionesSabotaje;
 }

@@ -5,11 +5,11 @@
 
 void generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
-	/*verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
+	//verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
 
 	//leerMetadata();
 
-	char * cadenaCaracteres = generarCadenaCaracteres(recurso, cantidad);
+	char * cadenaCaracteres = generarCadenaCaracteres(recurso, cantidadCaracteres);
 
 	t_list* listaBloquesOcupados = list_create();
 	listaBloquesOcupados = llenarBloque(2, 2, 2, cadenaCaracteres);
@@ -23,15 +23,17 @@ void generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCaracteres){
    
     int cantidadBytesLibres = bytesLibresUltimoBloque(size, blockCount);
-
-    char* cadenaDesdeCantidad = truncarCadenaDesdeCantidad(cadenaCaracteres, cantidadBytesLibres); 
+    int posicionEnCadena = cantidadBytesLibres;
 
     if(cantidadBytesLibres > 0){
 
-        char* cadenaHastaCantidad = truncarCadenaHastaCantidad(cadenaCaracteres, cantidadBytesLibres);
+        char* cadenaHastaCantidad = truncarCadenaHastaCantidad(cadenaCaracteres, posicionEnCadena);
         escribirBloqueUsado(ultimoBloque, cantidadBytesLibres, cadenaHastaCantidad);
+		posicionEnCadena++;
     }
     
+	char* cadenaDesdeCantidad = truncarCadenaDesdeCantidad(cadenaCaracteres, posicionEnCadena); 
+
     t_list* bloquesEscritos = list_create(); 
 	bloquesEscritos = escribirBloquesNuevo(cadenaDesdeCantidad);
 
@@ -68,28 +70,28 @@ int leerMetadata(void){
 	return EXIT_SUCCESS;
 }
 */
-char * generarCadenaCaracteres(tipoRecurso recurso, int cantidad){
+char * generarCadenaCaracteres(tipoRecurso recurso, int cantidadCaracteres){
 
 
     tipoRecurso opc = recurso;
     char * cadenaDeCaracteres;
-	cadenaDeCaracteres = malloc(sizeof (char) * cantidad);
+	cadenaDeCaracteres = malloc(sizeof (char) * cantidadCaracteres);
 
 		switch (opc)
 		{
 				case OXIGENO:
 					printf( "OXIGENO\n" );
-					cadenaDeCaracteres = string_repeat('O', cantidad);
+					cadenaDeCaracteres = string_repeat('O', cantidadCaracteres);
 					break;
 
 				case COMIDA:
 					printf( "COMIDA\n" );
-                    cadenaDeCaracteres = string_repeat('C', cantidad);
+                    cadenaDeCaracteres = string_repeat('C', cantidadCaracteres);
 					break;
 
 				case BASURA:
 					printf( "BASURA\n" );
-					cadenaDeCaracteres = string_repeat('B', cantidad);
+					cadenaDeCaracteres = string_repeat('B', cantidadCaracteres);
 					break;
 
 				default:
@@ -106,6 +108,17 @@ int bytesLibresUltimoBloque(int size, int blockCount){
 	return bytesLibres; 
 } 
 
-char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int cantidad){return cadenaCaracteres;}
-char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int cantidad){return cadenaCaracteres;}
+char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int posicionEnCadena){
+
+	char * cadenaDesdeCantidad = string_substring_from(cadenaCaracteres, posicionEnCadena);
+	return cadenaDesdeCantidad;
+	
+	}
+
+char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int posicionEnCadena){
+	
+	char * cadenaHastaCantidad = string_substring_until(cadenaCaracteres, posicionEnCadena);
+	return cadenaHastaCantidad;
+
+}
 

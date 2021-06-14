@@ -41,6 +41,15 @@ typedef enum {
 }tipoTarea;
 
 typedef struct {
+	int size;
+	int block_count;
+	t_list* blocks;
+	char caracter_llenado;
+	uint32_t blockSizeDefault;
+	uint32_t blocksQtyDefault;
+} Metadata;
+
+typedef struct {
 	uint32_t x;
 	uint32_t y;
 }t_pos;

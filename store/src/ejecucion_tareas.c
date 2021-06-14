@@ -1,4 +1,5 @@
 #include "ejecucion_tareas.h"
+#include "file_system.h"
 #include "store.h"
 
 
@@ -107,5 +108,4 @@ int bytesLibresUltimoBloque(int size, int blockCount){
 
 char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int cantidad){return cadenaCaracteres;}
 char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int cantidad){return cadenaCaracteres;}
-void escribirBloqueUsado(int ultimoBloque,int cantidad, char * cadenaHastaCantidad){}
-t_list* escribirBloquesNuevo(char * cadenaDesdeCantidad){return;}
+

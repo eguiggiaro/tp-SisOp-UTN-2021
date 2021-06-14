@@ -28,7 +28,5 @@ int bytesLibresUltimoBloque(int size, int blockCount);
 void verificarMetadata(tipoRecurso recurso);
 char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int cantidad);
 char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int cantidad);
-void escribirBloquesUsado(int ultimoBloque,int cantidad, char * cadenaHastaCantidad);
-t_list* escribirBloquesNuevo(char * cadenaDesdeCantidad);
 
 #endif

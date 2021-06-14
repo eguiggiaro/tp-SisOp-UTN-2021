@@ -24,6 +24,7 @@
 
 //Shared libs
 #include "shared_utils.h"
+#include "servidor.h"
 
 typedef enum { 
 	OXIGENO,
@@ -68,9 +69,12 @@ Configuracion* configuracion;
 Metadata* metadata;
 
 int leerConfig(void);
-void atender_request_store(uint32_t);
+void atender_request_store(Request *request);
 void inicializarParametrosFS(void);
 void inicializarStore(void);
 t_list* obtenerListaSabotaje(char*);
+
+pthread_mutex_t mutex_informartareas;
+
 
 #endif

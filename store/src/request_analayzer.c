@@ -11,43 +11,25 @@ const char *tipoTarea_table [] = {
     "DESECHAR_BASURA", 
 	NULL };
 
-void atender_request_store(uint32_t request_fd) {
+void atender_request_store(Request *request) {
 
-	op_code codigo_operacion = recibir_operacion(request_fd);
-	t_buffer* buffer_devolucion;
+	op_code codigo_operacion = request->codigo_operacion;
+	t_buffer *buffer_devolucion;
+	int request_fd = request->request_fd;
+	t_list *lista;
+	t_paquete *paquete_devuelto;
+	t_list *lista_mensajes;
+	int resultado;
 
 	switch(codigo_operacion)
 	{	
-	  case PAQUETE:
-	 	 	//recibo los mensajes
-	  	miLogInfo("Me llego operacion: PAQUETE \n");
-	  	buffer_devolucion = recibir_buffer(request_fd);
 
-	  	t_list* lista = deserializar_lista_strings(buffer_devolucion);
-	  	loggear_lista_strings(lista);
+		case INFORMAR_TAREA:
 
-	  	//devuelve una lista de mensajes
-	  	t_paquete* paquete_devuelto = crear_paquete(OK);
-
-	  	t_list* lista_mensajes = list_create();
-	  	list_add(lista_mensajes, "hola");
-      list_add(lista_mensajes, "soy store");
-
-	 	 	buffer_devolucion = serializar_lista_strings(lista_mensajes);
-	  	paquete_devuelto->buffer = buffer_devolucion;
-	  	enviar_paquete(paquete_devuelto, request_fd);
-
-	  	break;
-	
-	  case MENSAJE:
-			miLogInfo("Me llego operacion: MENSAJE\n");
-	  	break;
-
-	  case INFORMAR_TAREA:
-
-			miLogInfo("Me llego operacion: INICIAR PATOTA \n");
-			buffer_devolucion = recibir_buffer(request_fd);
-
+			pthread_mutex_lock(&mutex_informartareas);
+			t_buffer* buffer_devolucion_informar_tarea = request->buffer_devolucion;
+			
+			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
 			lista = deserializar_lista_strings(buffer_devolucion);
 
 			char* id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
@@ -63,20 +45,41 @@ void atender_request_store(uint32_t request_fd) {
 			int posX = atoi(list_get(lista1,1));
 			int posY = atoi(list_get(lista1,2));
 
-	 		ejecutarTarea(tarea, cantidadRecursos);
+	 		resultado = ejecutarTarea(tarea, cantidadRecursos);
 
-			miLogInfo("Me llego operacion: INFORMAR_TAREA\n");
+			if (resultado == -1)
+			{
+				miLogInfo("ERROR: NO SE PUDO REALIZAR LA TAREA \n");
+				paquete_devuelto = crear_paquete(FAIL);
+				list_add(lista_mensajes, "Se produjo un error intentar realizar la tarea");
+			}
+			else
+			{
+				miLogInfo("TAREA REALIZADA CORRECTAMENTE \n");
+
+				paquete_devuelto = crear_paquete(OK);
+				list_add(lista_mensajes, "Se realizó la tarea correctamente");
+			}
+
+			t_buffer *buffer_respuesta_informarTarea = serializar_lista_strings(lista_mensajes);
+			paquete_devuelto->buffer = buffer_respuesta_informarTarea;
+			enviar_paquete(paquete_devuelto, request_fd);
+			eliminar_buffer(buffer_devolucion_informar_tarea);
+			list_destroy(lista_mensajes);
+			list_destroy(lista);
+			free(request);
+			pthread_mutex_unlock(&mutex_informartareas);
 
 	  	break;
-
-	  default:
+		
+		default:
 			miLogInfo("Me llego operacion: ...\n");
 	  	break;
 	}
 }
 
 
-void ejecutarTarea(char* tarea, int cantidadRecursos){
+int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 		tipoTarea opc = find_enum_consola(tarea);
 
@@ -113,6 +116,8 @@ void ejecutarTarea(char* tarea, int cantidadRecursos){
 					printf( "Error: tarea inexistente\n" );
 					break;
 		}
+		//aca tengo que devolver -1 si falló
+		return 1;
 }
 
 tipoTarea find_enum_consola(char *sval)

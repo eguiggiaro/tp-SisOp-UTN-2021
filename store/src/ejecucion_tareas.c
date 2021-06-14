@@ -7,7 +7,7 @@ void generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	//verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
 
-	//leerMetadata();
+	leerMetadata(recurso);
 
 	char * cadenaCaracteres = generarCadenaCaracteres(recurso, cantidadCaracteres);
 
@@ -41,35 +41,52 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
     
 }
 
-/*
+
 void verificarMetadata(tipoRecurso recurso){
     //Verifico si existe el archivo metadata de ese, sino lo creo.
 }
 
-int leerMetadata(void){
+char* obtenerDireccionDeMetadata (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
 
-	t_config* config;
-	metadata = malloc(sizeof(Configuracion));
+	char* direccionDeMetadata = string_new();
+	char* nombreMetadata = stringFromRecurso(recurso);
+	char* extencionDeMetadata = ".txt";
+	string_append(&direccionDeMetadata, nombreMetadata);
+	string_append(&direccionDeMetadata, extencionDeMetadata);
 
-	config = config_create(CONFIG_FILE_PATH);
+	return direccionDeMetadata;
+}
 
-	if(config==NULL){
+char* stringFromRecurso(tipoRecurso f) //Obtiene un string de acuerdo al enum que le envío
+{
+    static const char *strings[] = { "oxigeno", "comida", "basura"};
+
+    return strings[f];
+}
+
+int leerMetadata(tipoRecurso recurso){
+
+	t_config* meta;
+	metadata = malloc(sizeof(Metadata));
+
+	char * direccionDeMetadata = obtenerDireccionDeMetadata(recurso);	
+
+	meta = config_create(direccionDeMetadata);
+
+	if(meta==NULL){
 		return EXIT_FAILURE;
 	}
 
-	metadata->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
-	metadata->puerto = config_get_int_value(config, "PUERTO");
-	metadata->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
-	metadata->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
-	metadata->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
-	metadata->posicionesSabotaje = config_get_string_value(config, "POSICIONES_SABOTAJE"); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]
-	
-	t_list* posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);
+	metadata->size = config_get_int_value(meta, "SIZE");
+	metadata->block_count = config_get_int_value(meta, "{BLOCK_COUNT}");
+	metadata->blocks = config_get_string_value(meta, "BLOCKS");
+	metadata->caracter_llenado = config_get_string_value(meta, "CARACTER_LLENADO");
+	//metadata->caracter_llenado = config_get_int_value(meta, "MD5");
 
-	config_destroy(config);
+	config_destroy(meta);
 	return EXIT_SUCCESS;
 }
-*/
+
 char * generarCadenaCaracteres(tipoRecurso recurso, int cantidadCaracteres){
 
 

@@ -28,5 +28,6 @@ int bytesLibresUltimoBloque(int size, int blockCount);
 void verificarMetadata(tipoRecurso recurso);
 char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int cantidad);
 char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int cantidad);
+char* obtenerDireccionDeMetadata (tipoRecurso recurso);
 
 #endif

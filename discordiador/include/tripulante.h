@@ -11,7 +11,7 @@
 //#include <commons/string.h>
 #include <commons/collections/list.h>
 #include "discordiador.h"//?
-
+#include "planificador.h"
 
 
 // typedef struct Tarea{
@@ -46,5 +46,4 @@ void descartar_basura_FIFO(Tripulante*);
 void tarea_generica_FIFO(Tripulante*); //consiste solo en  llegar a la ubicación y esperar que pase el tiempo solicitado en el estado EXEC
 
 void bloquear_tripulante(Tripulante*);
-void desbloquear_tripulante(Tripulante*);
 #endif

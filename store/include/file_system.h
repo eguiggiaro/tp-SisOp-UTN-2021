@@ -34,7 +34,7 @@ void subirBlocksAMemoria();
 int buscarYAsignarProximoBloqueLibre(void);
 void liberarBloque(int);
 int tamanioArchivo(char*);
-int calcularCantBloques(char*);
+int calcularCantBloques(int);
 t_list* escribirBloquesNuevo(char*);
 void escribirBloque(int, int, char*);
 void escribirBloqueUsado(int, int , char*);

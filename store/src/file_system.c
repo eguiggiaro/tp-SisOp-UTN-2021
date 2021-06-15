@@ -161,10 +161,10 @@ void liberarBloque(int index){
 }
 
 
-int calcularCantBloques(char* datos) {
+int calcularCantBloques(int size) {
 
-	int cantidadBloques = string_length(datos) / tamanioBloque;
-	int resto = string_length(datos) % (tamanioBloque); //Para saber si esta completo.
+	int cantidadBloques = size / tamanioBloque;
+	int resto = size % (tamanioBloque); //Para saber si esta completo.
 	
 	if(resto != 0){
 		cantidadBloques++; // No estaba completo -> agrego un bloque mas para el bloque incompleto.
@@ -183,10 +183,9 @@ void escribirBloqueUsado(int bloque, int cantidadBytesLibres, char* datos){
 // Devuelvo la lista de bloques que ocupe.
 t_list* escribirBloquesNuevo(char* datos){ 
 	
-	int cantidadBloquesNecesarios = calcularCantBloques(datos);
+	int cantidadBloquesNecesarios = calcularCantBloques(string_length(datos));
 	int startEscritura = 0;
-	int endEscritura; 
-
+	
 	t_list* bloques = list_create();	
 
 	for(int i = 0; i < cantidadBloquesNecesarios; i++) {
@@ -196,16 +195,22 @@ t_list* escribirBloquesNuevo(char* datos){
 			return -1;
 		}
 		
-		endEscritura = startEscritura + tamanioBloque;
+		int tamanioEscritura = tamanioBloque;
 
-		if(i + 1 == cantidadBloquesNecesarios){
-			endEscritura = string_length(datos); //El ultimo bloque tengo que ir hasta el final de la cadena.
+		if(i + 1 == cantidadBloquesNecesarios){ // Tratamiento del último bloque.
+			int diferencialBloque = string_length(datos) % (tamanioBloque); // Me fijo si ocupa un bloque completo.
+
+			if(diferencialBloque != 0){
+				tamanioEscritura = diferencialBloque; // No ocupa un bloque entero -> lo que escribo es lo que ocupa.
+			}
 		}
-		//endEscritura = string_lenght(datos) * X + (startEscritura + tamanioBloque) * Y;
 		
-		escribirBloque(bloqueNuevo, 0, string_substring(datos, startEscritura, endEscritura));
+		char* escritura = string_substring(datos, startEscritura, tamanioEscritura);
+
+		escribirBloque(bloqueNuevo, 0, escritura);
 		list_add(bloques, (void*)bloqueNuevo);
-		startEscritura = endEscritura + 1;	
+		startEscritura += tamanioBloque;	
+		free(escritura);
 	}
 	//list_destroy(bloques);
 	return bloques;
@@ -214,7 +219,10 @@ t_list* escribirBloquesNuevo(char* datos){
 
 void escribirBloque(int bloque, int offset, char* escritura){
 	
-	int desplazamiento = (bloque - 1) * tamanioBloque + offset;
+	//|----------|----------|----------|----------|----------|
+
+	int desplazamiento = (bloque * tamanioBloque) + offset;
+	
 	memcpy(punteroBlocks + desplazamiento, escritura, string_length(escritura));
 }
 
@@ -238,15 +246,19 @@ char* leerBloques(t_list* bloques, int size){
 	}
 	lecturaAux = leerBloque(proximoBloque, resto); //Ultimo bloque.
 	string_append(&lectura, lecturaAux);
+	
 	free(lecturaAux);
 	return lectura;
 }
 
 char* leerBloque(int bloque, int size) {
-	char* lectura = malloc(size);
-	int desplazamiento = (bloque - 1) * tamanioBloque;
+	char* lectura = malloc(tamanioBloque);
+	int desplazamiento = bloque * tamanioBloque;
 
-	memcpy(lectura, punteroBlocks + desplazamiento, size);
+	memcpy(lectura, punteroBlocks + desplazamiento, tamanioBloque);
+	miLogInfo("Leyó: %s, del bloque: %d", lectura, bloque);
+
+	lectura = string_substring(lectura, 0, size); // Porque tengo que hacer esto???
 
 	return lectura;
 }

@@ -6,6 +6,30 @@
 #define CONFIG_FILE_PATH "cfg/store.cfg"
 #define LOG_FILE_PATH "store.log"
 
+void testRWBlocks(){
+
+	t_list* bloquesTest = list_create();
+	t_list* bloquesTest2 = list_create();
+	char* stringTest = "Test de escritura de bloques.";
+	char* stringTest2 = "Escritura de bloques mas larga para probar como funciona el manejo de memcpy.";
+
+	list_add_all(bloquesTest, escribirBloquesNuevo(stringTest));
+	list_add_all(bloquesTest2, escribirBloquesNuevo(stringTest2));
+	
+	/*	liberarBloque(15);
+	liberarBloque(18);
+	liberarBloque(21);*/
+
+	/*list_add(bloquesTest, 0);
+	list_add(bloquesTest, 1);
+	list_add(bloquesTest, 2);*/
+
+	char* lectura = leerBloques(bloquesTest, string_length(stringTest));
+	char* lectura2 = leerBloques(bloquesTest2, string_length(stringTest2));
+
+}
+
+
 int main(int argc, char* argv[]) {
 
 	//Inicio el log en un thread... :O
@@ -76,6 +100,9 @@ void inicializarStore(void){
 
 	leerSuperbloque();
 	subirBlocksAMemoria();
+
+	testRWBlocks();
+
 	//leerArchivosMetadata();
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }

@@ -171,10 +171,11 @@ void tarea_generica_FIFO(Tripulante* trip){
 void bloquear_tripulante(Tripulante* trip){
 
   int indice;
+  Tripulante* trip_auxiliar;
 
   for(int i =0; i<list_size(execute_list);i++){
 
-    Tripulante* trip_auxiliar = list_get(execute_list,i);
+    trip_auxiliar = list_get(execute_list,i);
 
     if(trip->id_tripulante == trip_auxiliar->id_tripulante){
       indice = i;
@@ -184,12 +185,20 @@ void bloquear_tripulante(Tripulante* trip){
   if(indice!=NULL){
   //Se saca tripulante de cola de EXEC y se pasa a cola de BLOCK.
 	sem_wait(&mutexBLOCK);
-    list_add(blocked_io, list_remove(execute_list,indice));
+  sem_wait(&mutexEXEC); //esta bien?
+  //comienza seccion critica
+  //list_remove() devuelve el tripulante que se elimina de la lista
+  trip_auxiliar = list_remove(execute_list,indice);
+  list_add(exit_list,trip_auxiliar);
+  //finaliza seccion critica
 	sem_post(&mutexBLOCK);
+  sem_post(&mutexEXEC);
+
   //libero un lugar en la cola de EXEC
   sem_post(&semaforoEXEC);
 	trip->estado = bloqueado_io;
 	miLogInfo("\nSe pasa el tripulante a la cola de BLOCK\n");
   }
+  
 }
 

@@ -42,46 +42,6 @@ int main()
 
 	puerto_discordiador = string_itoa(configuracion->puerto);
 
-	/* 
-		char* modulo;
-		elegir_modulo();
-		modulo = readline(">>");
-
-		while(modulo_invalido(modulo)){
-			printf("\nError! %s no es una opción correcta.\n", modulo);
-			elegir_modulo();
-			modulo = readline(">>");
-		}
-
-		if(strncmp(modulo,"1",1)==0){
-		//Obtención datos para conexion con miram
-		char* ip_miram = configuracion->ip_mi_ram_hq;
-		char* puerto_miram = configuracion->puerto_mi_ram_hq;
-
-		miLogInfo("Conectándose a MiRAM");
-		printf("\nInicia conexion con MIRAM:\n");
-
-		iniciar_conexion_miram(ip_miram, puerto_miram);
-
-		char* ip_store = configuracion->ip_i_mongo_store;
-		char* puerto_store = configuracion->puerto_i_mongo_store;
-
-		miLogInfo("Conectándose a Store");
-		printf("\nInicia conexion con STORE:\n");
-
-		iniciar_conexion_store(ip_store, puerto_store);
-		}
-		else{
-			miLogInfo("\nOpcion invalida\n");
-		}
-
-		if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
-				NULL) != 0) {
-			printf("Error iniciando servidor/n");
-		}
-	
-	 */
-
 	//Obtención datos para conexion con miram
 	char *ip_miram = configuracion->ip_mi_ram_hq;
 	char *puerto_miram = configuracion->puerto_mi_ram_hq;
@@ -96,17 +56,6 @@ int main()
 
 	miLogInfo("Conectándose a Store");
 	printf("\nInicia conexion con STORE:\n");
-
-	//iniciar_conexion_store(ip_store, puerto_store);
-
-	/*
-if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
-			NULL) != 0) {
-		printf("Error iniciando servidor/n");
-	}
-	pthread_join(threadSERVER, NULL);
-	
-*/
 
 	new_list = list_create();
 	execute_list = list_create();
@@ -145,6 +94,9 @@ void consola()
 	char **list;
 	printf("Hola!\n");
 	printf("Que desea hacer?\n");
+	pthread_t *threadPATOTA;
+	pthread_t *threadINICIAR_PLANIFICACION;
+	pthread_t *threadPAUSAR_PLANIFICACION;
 	//*se podria poner ejemplitos de que puede hacer...
 	while (strcmp(input_consola, "FIN") != 0)
 	{
@@ -165,15 +117,24 @@ void consola()
 			{
 			case INICIAR_PATOTA_COM:
 				printf("Comando es Iniciar patota\n");
-				iniciar_patota(input_consola);
+				if (pthread_create(&threadPATOTA, NULL, (void*) iniciar_patota,
+				(char*)input_consola) != 0) {
+			     printf("Error iniciando patota/n");
+		        }
 				break;
 			case INICIAR_PLANIFICACION_COM:
 				printf("Comando es Iniciar Planificacion\n");
-				iniciar_planificacion();
+				if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
+				NULL) != 0) {
+			     printf("Error iniciando planificacion/n");
+		        }
 				break;
 			case PAUSAR_PLANIFICACION_COM:
 				printf("Comando es Pausar Planificacion\n");
-				pausar_planificacion();
+				if (pthread_create(&threadPAUSAR_PLANIFICACION, NULL, (void*) pausar_planificacion,
+				NULL) != 0) {
+			     printf("Error pausando planificacion/n");
+		        }
 				break;
 			case LISTAR_TRIPULANTE_COM:
 				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
@@ -252,9 +213,11 @@ void iniciar_patota(char *comando)
 
 	pthread_t hilos_tripulantes[cantidad_trip];
 
+	Tripulante *new_tripulante;
+
 	for (int i = 0; i < cantidad_trip; i++)
 	{
-		Tripulante *new_tripulante = malloc(sizeof(Tripulante));
+		new_tripulante = malloc(sizeof(Tripulante));
 
 		new_tripulante->id_patota = atoi(patota_id);
 		new_tripulante->tarea_actual = proxima_tarea;
@@ -262,19 +225,14 @@ void iniciar_patota(char *comando)
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
-		//*creo hilo y agrego a "new"
-		// pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
-		// trip_hilo.id_hilo =new_hilo_tripulante;
-		// trip_hilo.quantum=0;
-		// list_add(new_list, &trip_hilo);
-
 		if (pthread_create(&hilos_tripulantes[i], NULL, inicializar_tripulante,
 						   (Tripulante *)new_tripulante) != 0)
 		{
 			printf("Error inicializando tripulante/n");
 		}
-
-		//pthread_join(hilos_tripulantes[i]);
+		else{
+			new_tripulante->id_hilo = &hilos_tripulantes[i]; //le asigno el hilo a cada tripulante
+		}
 	}
 
 	list_destroy(lista_mensajes);
@@ -619,6 +577,41 @@ int planificar() {
 	}
 	sem_post(&mutexEXEC);
 	sem_post(&mutexREADY);
+}
+
+void finalizar_tripulante(Tripulante* trip){
+  //obtengo indice del tripulante en la cola de EXEC
+  int indice;
+  Tripulante* trip_auxiliar;
+
+  for(int i =0; i<list_size(execute_list);i++){
+
+  trip_auxiliar = list_get(execute_list,i);
+
+  if(trip->id_tripulante == trip_auxiliar->id_tripulante){
+    indice = i;
+    }
+  }
+
+  if(indice!=NULL){
+
+  sem_wait(&mutexEXEC); //esta bien?
+  sem_wait(&mutexEXIT);
+  //empieza seccion critica
+  //list_remove() devuelve el tripulante que se elimina de la lista
+  trip_auxiliar = list_remove(execute_list,indice);
+  list_add(exit_list,trip_auxiliar);
+  //finaliza seccion critica
+  sem_post(&mutexEXEC);
+  sem_post(&mutexEXIT);
+
+  trip_auxiliar->estado = finalizado;
+  //libero lugar en la cola de EXEC
+  sem_post(&semaforoEXEC);
+
+  //libero recursos ocupados por el Hilo
+  pthread_detach(&(trip_auxiliar->id_hilo));
+  }
 
 
 }

@@ -9,32 +9,35 @@
 
 int id_patota;
 
-const char *comandos_table [] = { "INICIAR_PATOTA",
-	"INICIAR_PLANIFICACION",
-	"PAUSAR_PLANIFICACION",
-	"LISTAR_TRIPULANTE",
-	"EXPULSAR_TRIPULANTE",
-	"OBTENER_BITACORA",
-	"FIN",
-	"TEST_MENSAJES", NULL };
+const char *comandos_table[] = {"INICIAR_PATOTA",
+								"INICIAR_PLANIFICACION",
+								"PAUSAR_PLANIFICACION",
+								"LISTAR_TRIPULANTE",
+								"EXPULSAR_TRIPULANTE",
+								"OBTENER_BITACORA",
+								"FIN",
+								"TEST_MENSAJES", NULL};
 
-int main(){
-id_patota=0;
-aux_id_tripulante = 0;
-planificacion_activada = true;
-//enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
+int main()
+{
+
+	id_patota = 0;
+	aux_id_tripulante = 0;
+	planificacion_activada = true;
+	//enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició Discordiador.");
 
-	if(leer_config()){
+	if (leer_config())
+	{
 		miLogInfo("Error al iniciar Discordiador: No se encontró el archivo de configuración");
 		miLogDestroy();
 		return EXIT_FAILURE;
 	}
 
 	puerto_discordiador = string_itoa(configuracion->puerto);
-	
+
 	/* 
 		char* modulo;
 		elegir_modulo();
@@ -75,26 +78,24 @@ planificacion_activada = true;
 	
 	 */
 
-	
-	
 	//Obtención datos para conexion con miram
-	char* ip_miram = configuracion->ip_mi_ram_hq;
-	char* puerto_miram = configuracion->puerto_mi_ram_hq;
+	char *ip_miram = configuracion->ip_mi_ram_hq;
+	char *puerto_miram = configuracion->puerto_mi_ram_hq;
 
 	miLogInfo("Conectándose a MiRAM");
 	printf("\nInicia conexion con MIRAM:\n");
 
 	iniciar_conexion_miram(ip_miram, puerto_miram);
 
-	char* ip_store = configuracion->ip_i_mongo_store;
-	char* puerto_store = configuracion->puerto_i_mongo_store;
+	char *ip_store = configuracion->ip_i_mongo_store;
+	char *puerto_store = configuracion->puerto_i_mongo_store;
 
 	miLogInfo("Conectándose a Store");
 	printf("\nInicia conexion con STORE:\n");
 
 	//iniciar_conexion_store(ip_store, puerto_store);
-	
-/*
+
+	/*
 if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 			NULL) != 0) {
 		printf("Error iniciando servidor/n");
@@ -102,21 +103,23 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	pthread_join(threadSERVER, NULL);
 	
 */
-	
-	new_list=list_create();
+
+	new_list = list_create();
 	execute_list = list_create();
-	blocked_io=list_create();
-	exit_list=list_create();
-    ready_list=list_create();
+	blocked_io = list_create();
+	exit_list = list_create();
+	ready_list = list_create();
 
 	//inicializo semaforos
+	//OJO! los semaforos mutex deben usar la biblioteca pthread
 	sem_init(&mutexNEW, 0, 1);
 	sem_init(&mutexREADY, 0, 1);
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
 	sem_init(&mutexBLOCK, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
+	sem_init(&mutexEXEC, 0, 1);
 	proxima_tarea = malloc(sizeof(Tarea));
-		
+
 	consola();
 	miLogInfo("Finalizó Discordiador\n");
 	//vaciar_listas();
@@ -128,123 +131,130 @@ if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
 	sem_destroy(&semaforoEXEC);
 	sem_destroy(&mutexBLOCK);
 	sem_destroy(&mutexEXIT);
+	sem_destroy(&mutexEXIT);
 	free(proxima_tarea);
-
 }
 
-void consola(){
-	char* input_consola = "INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4";
-	char** list;
+void consola()
+{
+	char *input_consola = "INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4";
+	char **list;
 	printf("Hola!\n");
 	printf("Que desea hacer?\n");
 	//*se podria poner ejemplitos de que puede hacer...
-	while(strcmp(input_consola,"FIN")!=0)
-	{ 
-		printf("%s\n",input_consola);	
-		if(list == NULL)
+	while (strcmp(input_consola, "FIN") != 0)
+	{
+		printf("%s\n", input_consola);
+		if (list == NULL)
 		{
 			//todo: poner algo un poco mas profesional... o no :D
 			printf("Emm... No escribiste nada...");
 			return;
-		}else
+		}
+		else
 		{
 			//*la primer linea debe ser la tarea. dependiendo esta chequeamos si va a tener mas tokens o no.
-			list=string_split(input_consola, " ");
+			list = string_split(input_consola, " ");
 
-			Comandos opc=find_enum_consola(list[0]);
+			Comandos opc = find_enum_consola(list[0]);
 			switch (opc)
 			{
-				case INICIAR_PATOTA_COM:
-				printf( "Comando es Iniciar patota\n" );
-					iniciar_patota(input_consola);
-					break;
-				case INICIAR_PLANIFICACION_COM:
-					printf( "Comando es Iniciar Planificacion\n" );
-					iniciar_planificacion();
-					break;
-				case PAUSAR_PLANIFICACION_COM:
-					printf( "Comando es Pausar Planificacion\n" );
-					pausar_planificacion();
-					break;
-				case LISTAR_TRIPULANTE_COM:
-					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
-					break;
-				case EXPULSAR_TRIPULANTE_COM:
-					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
-					break;
-				case OBTENER_BITACORA_COM:
-					printf( "No implementado todavia. Gracias y vuelva pronto. :)\n" );
-					break;
-				case TEST_MENSAJES:
-					printf( "1. Miram\n" );
-					printf( "2. Store\n" );
+			case INICIAR_PATOTA_COM:
+				printf("Comando es Iniciar patota\n");
+				iniciar_patota(input_consola);
+				break;
+			case INICIAR_PLANIFICACION_COM:
+				printf("Comando es Iniciar Planificacion\n");
+				iniciar_planificacion();
+				break;
+			case PAUSAR_PLANIFICACION_COM:
+				printf("Comando es Pausar Planificacion\n");
+				pausar_planificacion();
+				break;
+			case LISTAR_TRIPULANTE_COM:
+				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
+				break;
+			case EXPULSAR_TRIPULANTE_COM:
+				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
+				break;
+			case OBTENER_BITACORA_COM:
+				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
+				break;
+			case TEST_MENSAJES:
+				printf("1. Miram\n");
+				printf("2. Store\n");
 
-					char test_modulo = readline(">>");
+				char test_modulo = readline(">>");
 
-					if(test_modulo=="1"){
-						consola_miram();
-					}else
-					{
-						consola_store();
-					}
-				
-					break;
-				
+				if (test_modulo == "1")
+				{
+					consola_miram();
+				}
+				else
+				{
+					consola_store();
+				}
 
-				
-				default:
-					printf( "No conozco ese comando, seguro que esta bien?\n" );
-					printf( "Reescribir, por favor\n" );
-					input_consola = readline(">>");
-					break;
+				break;
+
+			default:
+				printf("No conozco ese comando, seguro que esta bien?\n");
+				printf("Reescribir, por favor\n");
+				input_consola = readline(">>");
+				break;
 			}
 			printf("Siguiente comando?\n");
-			input_consola = readline(">>");	
+			input_consola = readline(">>");
 		}
 	}
 }
-void iniciar_patota(char* comando){
+void iniciar_patota(char *comando)
+{
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
 	//pthread_t new_hilo_tripulante;
-	t_list* lista_mensajes=list_create(), *mensajes_respuesta= list_create();
+	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
 	Tripulante_disc trip_hilo;
 
-	char* string_tareas;
-	char* string_posiciones = string_new();
-	char** list;
+	char *string_tareas;
+	char *string_posiciones = string_new();
+	char **list;
 
-	list=string_split(comando, " ");
-	string_tareas=leer_tareas_txt(list[2]);//leemos las tareas y las traemos como un solo string
+	list = string_split(comando, " ");
+	string_tareas = leer_tareas_txt(list[2]); //leemos las tareas y las traemos como un solo string
 
-	int cantidad_trip=atoi(list[1]);
+	int cantidad_trip = atoi(list[1]);
 	printf("\ncantidad tripulantes: %i", cantidad_trip);
-	for(int i=0; i<cantidad_trip;i++){//string con todas las posiciones
-		
-		if(sizeof(list)>i+1 && list[i+3] != NULL)
+	for (int i = 0; i < cantidad_trip; i++)
+	{ //string con todas las posiciones
+
+		if (sizeof(list) > i + 1 && list[i + 3] != NULL)
 		{
-			string_append_with_format(&string_posiciones, "%s;", list[i+3]);
+			string_append_with_format(&string_posiciones, "%s;", list[i + 3]);
 		}
-		else {
+		else
+		{
 			string_append(&string_posiciones, "0|0;");
 		}
 	}
 
-	list_add(lista_mensajes,string_tareas);
-	list_add(lista_mensajes,list[1]);
-	list_add(lista_mensajes,string_posiciones);
-	mensajes_respuesta=iniciar_patota_miram(socket_miram,lista_mensajes);
+	list_add(lista_mensajes, string_tareas);
+	list_add(lista_mensajes, list[1]);
+	list_add(lista_mensajes, string_posiciones);
+	mensajes_respuesta = iniciar_patota_miram(socket_miram, lista_mensajes);
 
-	char* patota_id=list_get(mensajes_respuesta,0);
-	
+	char *patota_id = list_get(mensajes_respuesta, 0);
+
 	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
 
 	pthread_t hilos_tripulantes[cantidad_trip];
-	
-	for(int i=0; i<cantidad_trip;i++){
-		Tripulante* new_tripulante= malloc(sizeof(Tripulante));
 
-		new_tripulante->id_patota=atoi(patota_id);
+	for (int i = 0; i < cantidad_trip; i++)
+	{
+		Tripulante *new_tripulante = malloc(sizeof(Tripulante));
+
+		new_tripulante->id_patota = atoi(patota_id);
 		new_tripulante->tarea_actual = proxima_tarea;
+		new_tripulante->tripulante_despierto = false;
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
@@ -255,84 +265,93 @@ void iniciar_patota(char* comando){
 		// list_add(new_list, &trip_hilo);
 
 		if (pthread_create(&hilos_tripulantes[i], NULL, inicializar_tripulante,
-				(Tripulante*)new_tripulante) != 0) {
+						   (Tripulante *)new_tripulante) != 0)
+		{
 			printf("Error inicializando tripulante/n");
 		}
 
 		//pthread_join(hilos_tripulantes[i]);
 	}
-	
-	list_destroy(lista_mensajes);	
-	printf ("DONE!");
+
+	list_destroy(lista_mensajes);
+	printf("DONE!");
 }
 
-void vaciar_listas(){
+void vaciar_listas()
+{
 	//! not so sure this will work running...
-	void* list_value;
-	Tripulante_disc* hilo_tripulante;
-	for(int i=0;list_size(new_list)<i;i++){
-		list_value =list_get(new_list, i);
-		hilo_tripulante=(Tripulante_disc*)list_value;
-		pthread_join(hilo_tripulante->id_hilo,NULL); 
+	void *list_value;
+	Tripulante_disc *hilo_tripulante;
+	for (int i = 0; list_size(new_list) < i; i++)
+	{
+		list_value = list_get(new_list, i);
+		hilo_tripulante = (Tripulante_disc *)list_value;
+		pthread_join(hilo_tripulante->id_hilo, NULL);
 	}
 	list_destroy(new_list);
 	printf("Cerro hilo\n");
 }
 
-char* leer_tareas_txt(char* direccion_txt){
+char *leer_tareas_txt(char *direccion_txt)
+{
 	// ejemplo de tarea TAREA PARAMETROS;POS X;POS Y;TIEMPO
-	char* lista_tareas =  string_new();
+	char *lista_tareas = string_new();
 	char line[100];
 
-	FILE* file_tarea=fopen(direccion_txt,"r");
-	if (file_tarea == NULL ) {
-		printf ("Error al abrir el fichero");}
-	while(!feof(file_tarea))
+	FILE *file_tarea = fopen(direccion_txt, "r");
+	if (file_tarea == NULL)
 	{
-		fgets(line,sizeof(line),file_tarea);
-		
+		printf("Error al abrir el fichero");
+	}
+	while (!feof(file_tarea))
+	{
+		fgets(line, sizeof(line), file_tarea);
+
 		string_append_with_format(&lista_tareas, "%s|", line);
 	}
 
 	fclose(file_tarea);
 	return lista_tareas;
-
 }
 
-void tripulante_listo(Tripulante* trip){
+void tripulante_listo(Tripulante *trip)
+{
 	//Se saca tripulante de cola de NEW y se pasa a cola de READY.
 	sem_wait(&mutexNEW);
 	sem_wait(&mutexREADY);
-    list_add(ready_list, list_remove(new_list,0));
+	list_add(ready_list, list_remove(new_list, 0));
 	sem_post(&mutexNEW);
-    sem_post(&mutexREADY);
+	sem_post(&mutexREADY);
 	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 
 	planificar_tripulante(trip);
 }
 
+void iniciar_conexion_miram(char *ip_destino, char *puerto_destino)
+{
 
-void iniciar_conexion_miram(char* ip_destino, char* puerto_destino) {
-
-   int socket = crear_conexion(logger, ip_destino, puerto_destino);
+	int socket = crear_conexion(logger, ip_destino, puerto_destino);
 
 	miLogInfo("Obtuve el socket y vale %d.\n", socket);
 
-	if (socket == -1) {
+	if (socket == -1)
+	{
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
-	socket_miram=socket;	
+	socket_miram = socket;
 }
-void consola_miram(){
+void consola_miram()
+{
 	//iniciamos consola
-	char* opcion_seleccionada;
+	char *opcion_seleccionada;
 	iniciar_consola_miram();
 	opcion_seleccionada = readline(">>");
 
-	while(opcion_invalida_miram(opcion_seleccionada)){
-		printf("\nError! %s no es una opción correcta.\n",opcion_seleccionada);
+	while (opcion_invalida_miram(opcion_seleccionada))
+	{
+		printf("\nError! %s no es una opción correcta.\n", opcion_seleccionada);
 		iniciar_consola_miram();
 		opcion_seleccionada = readline(">>");
 	}
@@ -346,27 +365,31 @@ void consola_miram(){
 	//enviamos accion a socket
 	enviar_accion_seleccionada(operacion_seleccionada, socket_miram);
 }
-void iniciar_conexion_store(char* ip_destino, char* puerto_destino) {
+void iniciar_conexion_store(char *ip_destino, char *puerto_destino)
+{
 
-     //inicia conexion con destino
-    int socket = crear_conexion(logger, ip_destino, puerto_destino);
+	//inicia conexion con destino
+	int socket = crear_conexion(logger, ip_destino, puerto_destino);
 
 	miLogInfo("Obtuve el socket y vale %d.\n", socket);
 
-	if (socket == -1) {
+	if (socket == -1)
+	{
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
-	socket_store=socket;	
+	socket_store = socket;
 }
-void consola_store(){
+void consola_store()
+{
 	//iniciamos consola
-	char* opcion_seleccionada;
+	char *opcion_seleccionada;
 	iniciar_consola_store();
 	opcion_seleccionada = readline(">>");
 
-	while(opcion_invalida_store(opcion_seleccionada)){
-		printf("\nError! %s no es una opción correcta.\n",opcion_seleccionada);
+	while (opcion_invalida_store(opcion_seleccionada))
+	{
+		printf("\nError! %s no es una opción correcta.\n", opcion_seleccionada);
 		iniciar_consola_store();
 		opcion_seleccionada = readline(">>");
 	}
@@ -380,14 +403,16 @@ void consola_store(){
 	//enviamos accion a socket
 	enviar_accion_seleccionada(operacion_seleccionada, socket_store);
 }
-int leer_config(void) {
+int leer_config(void)
+{
 
-	t_config* config;
+	t_config *config;
 	configuracion = malloc(sizeof(Configuracion));
 
 	config = config_create(CONFIG_FILE_PATH);
 
-	if(config==NULL){
+	if (config == NULL)
+	{
 		return EXIT_FAILURE;
 	}
 
@@ -403,12 +428,13 @@ int leer_config(void) {
 	configuracion->quantum = config_get_int_value(config, "QUANTUM");
 	configuracion->duracion_sabotaje = config_get_int_value(config, "DURACION_SABOTAJE");
 	configuracion->retardo_ciclo_cpu = config_get_int_value(config, "RETARDO_CICLO_CPU");
-	
+
 	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
-void iniciar_consola_miram(){
+void iniciar_consola_miram()
+{
 	printf("Mensajes posibles:\n\n");
 	printf("1) Expulsar tripulante\n");
 	printf("2) Iniciar tripulante\n");
@@ -418,7 +444,8 @@ void iniciar_consola_miram(){
 	printf("\nSeleccione el numero correspondiente\n\n");
 }
 
-void iniciar_consola_store(){
+void iniciar_consola_store()
+{
 	printf("Mensajes posibles:\n\n");
 	printf("1) Obtener bitacora\n");
 	printf("2) Iniciar FSCK\n");
@@ -427,124 +454,143 @@ void iniciar_consola_store(){
 	printf("\nSeleccione el numero correspondiente\n\n");
 }
 
-bool opcion_invalida_miram(char* opcion){
-	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0) &&
-			(strncmp(opcion,"3",1)!=0) && (strncmp(opcion,"4",1)!=0) &&
-			(strncmp(opcion,"5",1)!=0));
+bool opcion_invalida_miram(char *opcion)
+{
+	return ((strncmp(opcion, "1", 1) != 0) && (strncmp(opcion, "2", 1) != 0) &&
+			(strncmp(opcion, "3", 1) != 0) && (strncmp(opcion, "4", 1) != 0) &&
+			(strncmp(opcion, "5", 1) != 0));
 }
 
-bool opcion_invalida_store(char* opcion){
-	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0) &&
-			(strncmp(opcion,"3",1)!=0) && (strncmp(opcion,"4",1)!=0));
+bool opcion_invalida_store(char *opcion)
+{
+	return ((strncmp(opcion, "1", 1) != 0) && (strncmp(opcion, "2", 1) != 0) &&
+			(strncmp(opcion, "3", 1) != 0) && (strncmp(opcion, "4", 1) != 0));
 }
 
-bool modulo_invalido(char* opcion){
-	return ((strncmp(opcion,"1",1)!=0) && (strncmp(opcion,"2",1)!=0));
+bool modulo_invalido(char *opcion)
+{
+	return ((strncmp(opcion, "1", 1) != 0) && (strncmp(opcion, "2", 1) != 0));
 }
 
-op_code convertir_codigo_operacion_store(char *codigo){
+op_code convertir_codigo_operacion_store(char *codigo)
+{
 	op_code codigo_operacion;
 
-	if(strncmp(codigo,"1",1)==0){
-		codigo_operacion=OBTENER_BITACORA;
-	}else if(strncmp(codigo,"2",1)==0){
-		codigo_operacion=FSCK;
-	}else if(strncmp(codigo,"3",1)==0){
+	if (strncmp(codigo, "1", 1) == 0)
+	{
+		codigo_operacion = OBTENER_BITACORA;
+	}
+	else if (strncmp(codigo, "2", 1) == 0)
+	{
+		codigo_operacion = FSCK;
+	}
+	else if (strncmp(codigo, "3", 1) == 0)
+	{
 		codigo_operacion = INFORMAR_TAREA;
-	}else if(strncmp(codigo,"4",1)==0){
+	}
+	else if (strncmp(codigo, "4", 1) == 0)
+	{
 		codigo_operacion = PAQUETE;
 	}
 
 	return codigo_operacion;
 }
 
-op_code convertir_codigo_operacion_miram(char *codigo){
+op_code convertir_codigo_operacion_miram(char *codigo)
+{
 	op_code codigo_operacion;
 
-	if(strncmp(codigo,"1",1)==0){
-		codigo_operacion=EXPULSAR_TRIPULANTE;
-	}else if(strncmp(codigo,"2",1)==0){
-		codigo_operacion=INICIAR_TRIPULANTE;
-	}else if(strncmp(codigo,"3",1)==0){
+	if (strncmp(codigo, "1", 1) == 0)
+	{
+		codigo_operacion = EXPULSAR_TRIPULANTE;
+	}
+	else if (strncmp(codigo, "2", 1) == 0)
+	{
+		codigo_operacion = INICIAR_TRIPULANTE;
+	}
+	else if (strncmp(codigo, "3", 1) == 0)
+	{
 		codigo_operacion = INFORMAR_TAREAS_PATOTA;
-	}else if(strncmp(codigo,"4",1)==0){
+	}
+	else if (strncmp(codigo, "4", 1) == 0)
+	{
 		codigo_operacion = MOV_TRIPULANTE;
-	}else if(strncmp(codigo,"5",1)==0){
+	}
+	else if (strncmp(codigo, "5", 1) == 0)
+	{
 		codigo_operacion = TAREA_SIGUIENTE;
 	}
 
 	return codigo_operacion;
 }
 
-void elegir_modulo(){
+void elegir_modulo()
+{
 	printf("Elija el modulo con el que desea comunicarse:\n\n");
 	printf("1) Mi-RAM\n");
 	printf("2) I-Store\n");
 	printf("\nSeleccione el numero correspondiente\n\n");
 }
 
-
-
 Comandos find_enum_consola(char *sval)
 {
-    Comandos result=INICIAR_PATOTA_COM; /* value corresponding to etable[0] */
-    int i=0;
-    for (i=0; comandos_table[i]!=NULL; ++i, ++result)
-        if (0==strcmp(sval, comandos_table[i])) return result;
-    return -1;
+	Comandos result = INICIAR_PATOTA_COM; /* value corresponding to etable[0] */
+	int i = 0;
+	for (i = 0; comandos_table[i] != NULL; ++i, ++result)
+		if (0 == strcmp(sval, comandos_table[i]))
+			return result;
+	return -1;
 }
 
-Tarea* obtener_tarea(char* tarea_str, Tarea* nueva_tarea){
-	char* token;
+Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
+{
+	char *token;
 
 	int cont = 0;
-	char* parametros;
-	char* pos_x;
-	char* pos_y;
-	char* tiempo;
+	char *parametros;
+	char *pos_x;
+	char *pos_y;
+	char *tiempo;
 
 	token = strtok(tarea_str, ";");
 
-	 while( token != NULL ) {
+	while (token != NULL)
+	{
 
-      if(cont == 0){
-		  parametros = token;
-	  }
-	  else if(cont == 1){
-		  pos_x = token;
-	  }
-	  else if(cont == 2){
-		  pos_y = token;
-	  }
-	  else{
-		  tiempo = token;
-	  }
+		if (cont == 0)
+		{
+			parametros = token;
+		}
+		else if (cont == 1)
+		{
+			pos_x = token;
+		}
+		else if (cont == 2)
+		{
+			pos_y = token;
+		}
+		else
+		{
+			tiempo = token;
+		}
 
-      token = strtok(NULL, ";");
+		token = strtok(NULL, ";");
 
-	  cont++;
+		cont++;
 	}
 
 	nueva_tarea->nombre_tarea = strtok(parametros, " ");
-	printf( " nombre tarea: %s\n", nueva_tarea->nombre_tarea );
+	printf(" nombre tarea: %s\n", nueva_tarea->nombre_tarea);
 	nueva_tarea->parametros = strtok(NULL, " ");
-	printf( " parametros: %s\n", nueva_tarea->parametros );
+	printf(" parametros: %s\n", nueva_tarea->parametros);
 	nueva_tarea->pos_x = pos_x;
-	printf( " pos x: %s\n", nueva_tarea->pos_x );
+	printf(" pos x: %s\n", nueva_tarea->pos_x);
 	nueva_tarea->pos_y = pos_y;
-	printf( " pos y: %s\n", nueva_tarea->pos_y );
-	char* tiempo_aux = strtok(tiempo, "|");
+	printf(" pos y: %s\n", nueva_tarea->pos_y);
+	char *tiempo_aux = strtok(tiempo, "|");
 	nueva_tarea->tiempo = atoi(tiempo_aux);
-	printf( " tiempo: %i\n", nueva_tarea->tiempo );
+	printf(" tiempo: %i\n", nueva_tarea->tiempo);
 
 	return nueva_tarea;
-
 }
 
-void iniciar_planificacion(){
-	planificacion_activada = true;
-}
-
-void pausar_planificacion(){
-	planificacion_activada = false;
-}

@@ -145,6 +145,9 @@ void consola()
 	char **list;
 	printf("Hola!\n");
 	printf("Que desea hacer?\n");
+	pthread_t *threadPATOTA;
+	pthread_t *threadINICIAR_PLANIFICACION;
+	pthread_t *threadPAUSAR_PLANIFICACION;
 	//*se podria poner ejemplitos de que puede hacer...
 	while (strcmp(input_consola, "FIN") != 0)
 	{
@@ -165,15 +168,24 @@ void consola()
 			{
 			case INICIAR_PATOTA_COM:
 				printf("Comando es Iniciar patota\n");
-				iniciar_patota(input_consola);
+				if (pthread_create(&threadPATOTA, NULL, (void*) iniciar_patota,
+				(char*)input_consola) != 0) {
+			     printf("Error iniciando patota/n");
+		        }
 				break;
 			case INICIAR_PLANIFICACION_COM:
 				printf("Comando es Iniciar Planificacion\n");
-				iniciar_planificacion();
+				if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
+				NULL) != 0) {
+			     printf("Error iniciando planificacion/n");
+		        }
 				break;
 			case PAUSAR_PLANIFICACION_COM:
 				printf("Comando es Pausar Planificacion\n");
-				pausar_planificacion();
+				if (pthread_create(&threadPAUSAR_PLANIFICACION, NULL, (void*) pausar_planificacion,
+				NULL) != 0) {
+			     printf("Error pausando planificacion/n");
+		        }
 				break;
 			case LISTAR_TRIPULANTE_COM:
 				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");

@@ -42,46 +42,6 @@ int main()
 
 	puerto_discordiador = string_itoa(configuracion->puerto);
 
-	/* 
-		char* modulo;
-		elegir_modulo();
-		modulo = readline(">>");
-
-		while(modulo_invalido(modulo)){
-			printf("\nError! %s no es una opción correcta.\n", modulo);
-			elegir_modulo();
-			modulo = readline(">>");
-		}
-
-		if(strncmp(modulo,"1",1)==0){
-		//Obtención datos para conexion con miram
-		char* ip_miram = configuracion->ip_mi_ram_hq;
-		char* puerto_miram = configuracion->puerto_mi_ram_hq;
-
-		miLogInfo("Conectándose a MiRAM");
-		printf("\nInicia conexion con MIRAM:\n");
-
-		iniciar_conexion_miram(ip_miram, puerto_miram);
-
-		char* ip_store = configuracion->ip_i_mongo_store;
-		char* puerto_store = configuracion->puerto_i_mongo_store;
-
-		miLogInfo("Conectándose a Store");
-		printf("\nInicia conexion con STORE:\n");
-
-		iniciar_conexion_store(ip_store, puerto_store);
-		}
-		else{
-			miLogInfo("\nOpcion invalida\n");
-		}
-
-		if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
-				NULL) != 0) {
-			printf("Error iniciando servidor/n");
-		}
-	
-	 */
-
 	//Obtención datos para conexion con miram
 	char *ip_miram = configuracion->ip_mi_ram_hq;
 	char *puerto_miram = configuracion->puerto_mi_ram_hq;
@@ -96,17 +56,6 @@ int main()
 
 	miLogInfo("Conectándose a Store");
 	printf("\nInicia conexion con STORE:\n");
-
-	//iniciar_conexion_store(ip_store, puerto_store);
-
-	/*
-if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_discordiador,
-			NULL) != 0) {
-		printf("Error iniciando servidor/n");
-	}
-	pthread_join(threadSERVER, NULL);
-	
-*/
 
 	new_list = list_create();
 	execute_list = list_create();
@@ -273,12 +222,6 @@ void iniciar_patota(char *comando)
 		new_tripulante->tripulante_despierto = false;
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
-
-		//*creo hilo y agrego a "new"
-		// pthread_create (&new_hilo_tripulante, NULL, inicializar_tripulante, (void *)&new_tripulante);
-		// trip_hilo.id_hilo =new_hilo_tripulante;
-		// trip_hilo.quantum=0;
-		// list_add(new_list, &trip_hilo);
 
 		if (pthread_create(&hilos_tripulantes[i], NULL, inicializar_tripulante,
 						   (Tripulante *)new_tripulante) != 0)

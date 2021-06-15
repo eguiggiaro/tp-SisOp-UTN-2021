@@ -213,9 +213,11 @@ void iniciar_patota(char *comando)
 
 	pthread_t hilos_tripulantes[cantidad_trip];
 
+	Tripulante *new_tripulante;
+
 	for (int i = 0; i < cantidad_trip; i++)
 	{
-		Tripulante *new_tripulante = malloc(sizeof(Tripulante));
+		new_tripulante = malloc(sizeof(Tripulante));
 
 		new_tripulante->id_patota = atoi(patota_id);
 		new_tripulante->tarea_actual = proxima_tarea;
@@ -228,8 +230,9 @@ void iniciar_patota(char *comando)
 		{
 			printf("Error inicializando tripulante/n");
 		}
-
-		//pthread_join(hilos_tripulantes[i]);
+		else{
+			new_tripulante->id_hilo = &hilos_tripulantes[i]; //le asigno el hilo a cada tripulante
+		}
 	}
 
 	list_destroy(lista_mensajes);
@@ -574,6 +577,41 @@ int planificar() {
 	}
 	sem_post(&mutexEXEC);
 	sem_post(&mutexREADY);
+}
+
+void finalizar_tripulante(Tripulante* trip){
+  //obtengo indice del tripulante en la cola de EXEC
+  int indice;
+  Tripulante* trip_auxiliar;
+
+  for(int i =0; i<list_size(execute_list);i++){
+
+  trip_auxiliar = list_get(execute_list,i);
+
+  if(trip->id_tripulante == trip_auxiliar->id_tripulante){
+    indice = i;
+    }
+  }
+
+  if(indice!=NULL){
+
+  sem_wait(&mutexEXEC); //esta bien?
+  sem_wait(&mutexEXIT);
+  //empieza seccion critica
+  //list_remove() devuelve el tripulante que se elimina de la lista
+  trip_auxiliar = list_remove(execute_list,indice);
+  list_add(exit_list,trip_auxiliar);
+  //finaliza seccion critica
+  sem_post(&mutexEXEC);
+  sem_post(&mutexEXIT);
+
+  trip_auxiliar->estado = finalizado;
+  //libero lugar en la cola de EXEC
+  sem_post(&semaforoEXEC);
+
+  //libero recursos ocupados por el Hilo
+  pthread_detach(&(trip_auxiliar->id_hilo));
+  }
 
 
 }

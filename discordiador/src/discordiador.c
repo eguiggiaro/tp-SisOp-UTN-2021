@@ -23,7 +23,11 @@ int main()
 
 	id_patota = 0;
 	aux_id_tripulante = 0;
-	planificacion_activada = true;
+
+	// La planificación comienza desactivada hasta tanto se inicie
+	planificacion_activada = false;
+
+
 	//enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
@@ -594,3 +598,27 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	return nueva_tarea;
 }
 
+//Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución
+//Hecho por: Emiliano
+int planificar() {
+
+	sem_wait(&mutexEXEC);
+	sem_wait(&mutexREADY);
+
+	Tripulante *tripulante;
+
+	if (list_size(ready_list) > 0)
+	{
+		tripulante = (Tripulante *) list_get(execute_list, 0);
+		list_add(execute_list, tripulante);
+		tripulante->tripulante_despierto = true;
+		sem_post(&tripulante->semaforo_trip);
+	} else {
+		miLogInfo("No existen más tripulantes en la cola de READY");
+		return -1;
+	}
+	sem_post(&mutexEXEC);
+	sem_post(&mutexREADY);
+
+
+}

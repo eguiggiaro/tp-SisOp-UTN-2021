@@ -77,6 +77,7 @@ typedef struct Tripulante{
 	Tarea* tarea_actual;
 	pthread_t* id_hilo;
 	sem_t semaforo_trip; //este semaforo indica si el tripulante puede ejecutar
+	bool tripulante_despierto; //indica cuando está despierto el tripulante, en caso de estar dormido no puede ejecutar
     
 } Tripulante;
 
@@ -90,6 +91,7 @@ t_list* ready_list;
 
 //Semaforos
 sem_t mutexNEW;
+sem_t mutexEXEC;
 sem_t semaforoEXEC;
 sem_t mutexBLOCK;
 sem_t mutexEXIT;

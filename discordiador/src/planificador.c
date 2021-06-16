@@ -49,7 +49,7 @@ void iniciar_planificacion()
         sem_wait(&semaforoEXEC);
 
         if (planificacion_activada) {
-            planificar_tripulante();
+            planificar();
         } else {
             break;
         }

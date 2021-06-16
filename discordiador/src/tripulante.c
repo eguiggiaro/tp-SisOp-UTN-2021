@@ -62,27 +62,6 @@ void *inicializar_tripulante(Tripulante* tripulante){
 return;
 }
 
-void* planificar_tripulante(Tripulante* trip){
-  while(planificacion_activada==true){
-    
-  sem_wait(&semaforoEXEC);
-  sem_wait(&mutexREADY);
-  //tomo proximo tripulante de la cola de READY y lo paso a EXEC
-  list_add(execute_list,list_remove(ready_list,0));
-  sem_post(&mutexREADY);
-  trip->estado = trabajando;
-  miLogInfo("\nSe pasa tripulante a estado EXEC\n");
-
-  //le doy signal al semaforo del tripulante
-  sem_post(&(trip->semaforo_trip));
-
-  printf("\nProxima tarea a ejecutar: %s", (trip->tarea_actual)->nombre_tarea);
-  ejecutar_proxima_tarea_FIFO(trip);
-  }
-
-  return NULL;
-}
-
 void ejecutar_proxima_tarea_FIFO(Tripulante* trip){
 
   char* tarea = (trip->tarea_actual)->nombre_tarea;
@@ -199,6 +178,6 @@ void bloquear_tripulante(Tripulante* trip){
 	trip->estado = bloqueado_io;
 	miLogInfo("\nSe pasa el tripulante a la cola de BLOCK\n");
   }
-  
+
 }
 

@@ -286,8 +286,7 @@ void tripulante_listo(Tripulante *trip)
 	sem_post(&mutexREADY);
 	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
-
-	planificar_tripulante(trip);
+	
 }
 
 void iniciar_conexion_miram(char *ip_destino, char *puerto_destino)
@@ -567,7 +566,7 @@ int planificar() {
 
 	if (list_size(ready_list) > 0)
 	{
-		tripulante = (Tripulante *) list_get(execute_list, 0);
+		tripulante = (Tripulante *) list_get(ready_list, 0); //obtiene primero en cola de READY
 		list_add(execute_list, tripulante);
 		tripulante->tripulante_despierto = true;
 		sem_post(&tripulante->semaforo_trip);

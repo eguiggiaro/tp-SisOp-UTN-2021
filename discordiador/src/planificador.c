@@ -47,6 +47,7 @@ void iniciar_planificacion()
 
     while(1) {
         sem_wait(&semaforoEXEC);
+		sem_wait(&semaforoREADY);
 
         if (planificacion_activada) {
             planificar();
@@ -119,8 +120,8 @@ void desbloquear_tripulante(Tripulante* trip){
 
     list_add(ready_list, list_remove(blocked_io,indice));
 	sem_post(&mutexBLOCK);
-  sem_wait(&mutexREADY);
-
+	sem_post(&mutexREADY);
+	sem_post(&semaforoREADY);
   miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 }
 }

@@ -68,12 +68,13 @@ int main()
 	sem_init(&mutexNEW, 0, 1);
 	sem_init(&mutexREADY, 0, 1);
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
+	sem_init(&semaforoREADY, 0, 0);
 	sem_init(&mutexBLOCK, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
 	sem_init(&mutexEXEC, 0, 1);
-	proxima_tarea = malloc(sizeof(Tarea));
-
+	
 	consola();
+	
 	miLogInfo("Finalizó Discordiador\n");
 	//vaciar_listas();
 	free(configuracion);
@@ -85,7 +86,7 @@ int main()
 	sem_destroy(&mutexBLOCK);
 	sem_destroy(&mutexEXIT);
 	sem_destroy(&mutexEXIT);
-	free(proxima_tarea);
+
 }
 
 void consola()
@@ -177,6 +178,7 @@ void consola()
 		}
 	}
 }
+
 void iniciar_patota(char *comando)
 {
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
@@ -211,7 +213,8 @@ void iniciar_patota(char *comando)
 	mensajes_respuesta = iniciar_patota_miram(socket_miram, lista_mensajes);
 
 	char *patota_id = list_get(mensajes_respuesta, 0);
-
+	
+	Tarea *proxima_tarea = malloc(sizeof(Tarea));
 	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
 
 	pthread_t hilos_tripulantes[cantidad_trip];
@@ -263,18 +266,61 @@ char *leer_tareas_txt(char *direccion_txt)
 	// ejemplo de tarea TAREA PARAMETROS;POS X;POS Y;TIEMPO
 	char *lista_tareas = string_new();
 	char line[100];
+	int index = 0;
 
 	FILE *file_tarea = fopen(direccion_txt, "r");
 	if (file_tarea == NULL)
 	{
 		printf("Error al abrir el fichero");
 	}
+
+	if (!feof(file_tarea))
+	{
+		fgets(line, sizeof(line), file_tarea);
+
+
+		while (line[index] != '\n')
+		{ //string con todas las posiciones
+
+			if (line[index] != '\0')
+			{
+			string_append_with_format(&lista_tareas, "%c", line[index]);
+			index++;
+			} else
+			{
+				break;
+			}
+			
+		}
+
+	index = 0;
+
+	}
+
 	while (!feof(file_tarea))
 	{
 		fgets(line, sizeof(line), file_tarea);
 
-		string_append_with_format(&lista_tareas, "%s|", line);
+		while (line[index] != '\n')
+		{ //string con todas las posiciones
+
+		if(index == 0) {
+			string_append(&lista_tareas,"|");
+		}
+
+		if (line[index] != '\0')
+		{
+			string_append_with_format(&lista_tareas, "%c", line[index]);
+			index++;			
+		}	else {
+			break;
+		}
+
+
+		}
 	}
+
+	string_append(&lista_tareas, "$");
 
 	fclose(file_tarea);
 	return lista_tareas;
@@ -572,6 +618,8 @@ int planificar() {
 	{
 		tripulante = (Tripulante *) list_get(ready_list, 0); //obtiene primero en cola de READY
 		list_add(execute_list, tripulante);
+		list_remove(ready_list, 0);
+		
 		tripulante->tripulante_despierto = true;
 		sem_post(&tripulante->semaforo_trip);
 	} else {
@@ -613,8 +661,8 @@ void finalizar_tripulante(Tripulante* trip){
   sem_post(&semaforoEXEC);
 
   //libero recursos ocupados por el Hilo
-  pthread_detach(&(trip_auxiliar->id_hilo));
-  }
+	pthread_exit(0);
+}
 
 
 }

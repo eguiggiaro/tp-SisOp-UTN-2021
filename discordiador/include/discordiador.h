@@ -93,6 +93,7 @@ t_list* ready_list;
 sem_t mutexNEW;
 sem_t mutexEXEC;
 sem_t semaforoEXEC;
+sem_t semaforoREADY;
 sem_t mutexBLOCK;
 sem_t mutexEXIT;
 sem_t mutexREADY;
@@ -109,7 +110,6 @@ int aux_id_tripulante;
 
 bool planificacion_activada;
 
-Tarea* proxima_tarea;
 
 //Metodos Discordidor
 void iniciar_patota(char* ); //?string? chequer commons

@@ -54,6 +54,8 @@ void *inicializar_tripulante(Tripulante* tripulante){
         miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
 	}
 
+  sem_post(&semaforoREADY);
+
   //3. Una vez que el tripulante esta listo, se llama a comenzar_ejecucion(tripulante)
   comenzar_ejecucion(tripulante);
 
@@ -79,11 +81,19 @@ void pedir_proxima_tarea(Tripulante* un_tripulante){
 
 		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
 		t_list* lista = deserializar_lista_strings(buffer);
-    obtener_tarea(list_get(lista,0),un_tripulante->tarea_actual);
+    char* tareas = list_get(lista,0);
 
+    if (tareas[0] == '$')
+    {
+        un_tripulante->completo_tareas=true;
+
+    } else {
+
+        Tarea* una_tarea = malloc(sizeof(Tarea));
+        obtener_tarea(list_get(lista,0),una_tarea);
+        un_tripulante->tarea_actual = una_tarea;
+    }
         //sem_destroy...
-
-        miLogInfo("Se obtuvo nueva tarea");
 
         list_destroy(lista);
         eliminar_buffer(buffer);

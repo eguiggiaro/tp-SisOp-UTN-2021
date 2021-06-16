@@ -54,12 +54,22 @@ void *inicializar_tripulante(Tripulante* tripulante){
         miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
 	}
 
-  //printf("De responderme q no nos conoce, decodifico nuestas tareas y se las mando\n");
-  //printf("Si nos conoce, me guardo la tarea a realizr para cuando el discordiador me mande a EXEC\n"); 
-  //and others... but you get it
-  //un mutex hasta q estoy en exec?
+  //3. Una vez que el tripulante esta listo, se llama a comenzar_ejecucion(tripulante)
+  comenzar_ejecucion(tripulante);
 
 return;
+}
+
+void ejecutar_proxima_tarea(Tripulante* tripulante){
+  if(strncmp(configuracion->algoritmo,"FIFO",4)==0){
+    ejecutar_proxima_tarea_FIFO(tripulante);
+  }
+  else if(strncmp(configuracion->algoritmo,"RR",2)==0){
+    //ejecutar_proxima_tarea_RR(tripulante);
+  }
+  else{
+    miLogError("\nAlgoritmo no seteado!");
+  }
 }
 
 void ejecutar_proxima_tarea_FIFO(Tripulante* trip){
@@ -97,6 +107,7 @@ void generar_comida_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
+  trip->tarea_actual = NULL;
 }
 
 void generar_oxigeno_FIFO(Tripulante* trip){
@@ -105,6 +116,7 @@ void generar_oxigeno_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+  trip->tarea_actual = NULL;
 }
 
 void consumir_oxigeno_FIFO(Tripulante* trip){
@@ -113,6 +125,7 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+  trip->tarea_actual = NULL;
 }
 
 void consumir_comida_FIFO(Tripulante* trip){
@@ -121,6 +134,7 @@ void consumir_comida_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+  trip->tarea_actual = NULL;
 }
 
 void generar_basura_FIFO(Tripulante* trip){
@@ -129,6 +143,7 @@ void generar_basura_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+  trip->tarea_actual = NULL;
 }
 
 void descartar_basura_FIFO(Tripulante* trip){
@@ -137,6 +152,7 @@ void descartar_basura_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+  trip->tarea_actual = NULL;
 }
 
 void tarea_generica_FIFO(Tripulante* trip){
@@ -145,6 +161,7 @@ void tarea_generica_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
+  trip->tarea_actual = NULL;
 }
 
 void bloquear_tripulante(Tripulante* trip){
@@ -181,3 +198,26 @@ void bloquear_tripulante(Tripulante* trip){
 
 }
 
+void comenzar_ejecucion(Tripulante* tripulante){
+
+  while(1){
+
+    if(tripulante->tripulante_despierto){
+
+      if(tripulante->tarea_actual == NULL){
+        //pedir_proxima_tarea(tripulante); la tarea actual se borra luego de ejecutada
+      }
+
+      if(tripulante->completo_tareas){ //atributo booleano que se setea en TRUE cuando miram informa que no tiene mas para ejecutar
+        finalizar_tripulante(tripulante);
+        break;
+      }
+
+      ejecutar_proxima_tarea(tripulante);
+    }
+    else{
+      wait(tripulante->semaforo_trip);
+    }
+  }
+
+}

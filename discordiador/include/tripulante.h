@@ -32,8 +32,11 @@ void atender_sabotaje();//?
 void decodificar_tarea();
 void execute();//no se me ocurre mejor nombre para cuando esta en EXEC...
 void get_quantum_faltante();//para q el discordiador sepa cuanto le falta antes de sacarlo.
-void* planificar_tripulante(Tripulante*);
 void planificar_con_FIFO(Tripulante*);
+
+void comenzar_ejecucion(Tripulante*);
+
+void ejecutar_proxima_tarea(Tripulante*);
 
 void ejecutar_proxima_tarea_FIFO(Tripulante*); //lee el parametro nombre_tarea de la tarea asignada al tripulante
                                           //y envia al tripulante a realizar la tarea correspondiente

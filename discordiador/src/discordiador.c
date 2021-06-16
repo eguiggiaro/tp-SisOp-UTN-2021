@@ -222,6 +222,7 @@ void iniciar_patota(char *comando)
 		new_tripulante->id_patota = atoi(patota_id);
 		new_tripulante->tarea_actual = proxima_tarea;
 		new_tripulante->tripulante_despierto = false;
+		new_tripulante->completo_tareas = false;
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
@@ -286,7 +287,7 @@ void tripulante_listo(Tripulante *trip)
 	sem_post(&mutexREADY);
 	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
-	
+
 }
 
 void iniciar_conexion_miram(char *ip_destino, char *puerto_destino)

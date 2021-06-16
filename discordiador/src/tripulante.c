@@ -60,6 +60,40 @@ void *inicializar_tripulante(Tripulante* tripulante){
 return;
 }
 
+
+void pedir_proxima_tarea(Tripulante* un_tripulante){
+  
+  //1. Aviso a MIRAM que deseo iniciar, indicando a que patota pertenezco.
+   t_paquete* paquete = crear_paquete(TAREA_SIGUIENTE);
+   t_buffer* buffer;
+   
+   t_list* lista_mensajes = list_create();
+   list_add(lista_mensajes,string_itoa(un_tripulante->id_tripulante));
+   buffer = serializar_lista_strings(lista_mensajes);
+   paquete ->buffer = buffer;
+   enviar_paquete(paquete, socket_miram);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_miram);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
+		t_list* lista = deserializar_lista_strings(buffer);
+    obtener_tarea(list_get(lista,0),un_tripulante->tarea_actual);
+
+        //sem_destroy...
+
+        miLogInfo("Se obtuvo nueva tarea");
+
+        list_destroy(lista);
+        eliminar_buffer(buffer);
+  } else if (codigo_operacion == FAIL){
+        miLogInfo("ERROR: TAREA NO EXISTE \n");
+	}
+
+}
+
+
 void ejecutar_proxima_tarea(Tripulante* tripulante){
   if(strncmp(configuracion->algoritmo,"FIFO",4)==0){
     ejecutar_proxima_tarea_FIFO(tripulante);
@@ -205,7 +239,7 @@ void comenzar_ejecucion(Tripulante* tripulante){
     if(tripulante->tripulante_despierto){
 
       if(tripulante->tarea_actual == NULL){
-        //pedir_proxima_tarea(tripulante); la tarea actual se borra luego de ejecutada
+        pedir_proxima_tarea(tripulante); //la tarea actual se borra luego de ejecutada
       }
 
       if(tripulante->completo_tareas){ //atributo booleano que se setea en TRUE cuando miram informa que no tiene mas para ejecutar

@@ -90,13 +90,16 @@ int main()
 
 void consola()
 {
-	char *input_consola = "INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4";
+	char *input_consola; // = "INICIAR_PATOTA 1 /home/utnso/tareas/tareasPatota5.txt 1|1";
 	char **list;
 	printf("Hola!\n");
 	printf("Que desea hacer?\n");
 	pthread_t *threadPATOTA;
 	pthread_t *threadINICIAR_PLANIFICACION;
 	pthread_t *threadPAUSAR_PLANIFICACION;
+
+	input_consola = readline(">>");
+
 	//*se podria poner ejemplitos de que puede hacer...
 	while (strcmp(input_consola, "FIN") != 0)
 	{
@@ -121,6 +124,7 @@ void consola()
 				(char*)input_consola) != 0) {
 			     printf("Error iniciando patota/n");
 		        }
+				pthread_detach(threadPATOTA);
 				break;
 			case INICIAR_PLANIFICACION_COM:
 				printf("Comando es Iniciar Planificacion\n");
@@ -188,7 +192,6 @@ void iniciar_patota(char *comando)
 	string_tareas = leer_tareas_txt(list[2]); //leemos las tareas y las traemos como un solo string
 
 	int cantidad_trip = atoi(list[1]);
-	printf("\ncantidad tripulantes: %i", cantidad_trip);
 	for (int i = 0; i < cantidad_trip; i++)
 	{ //string con todas las posiciones
 
@@ -202,8 +205,8 @@ void iniciar_patota(char *comando)
 		}
 	}
 
-	list_add(lista_mensajes, string_tareas);
 	list_add(lista_mensajes, list[1]);
+	list_add(lista_mensajes, string_tareas);
 	list_add(lista_mensajes, string_posiciones);
 	mensajes_respuesta = iniciar_patota_miram(socket_miram, lista_mensajes);
 
@@ -542,16 +545,16 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	}
 
 	nueva_tarea->nombre_tarea = strtok(parametros, " ");
-	printf(" nombre tarea: %s\n", nueva_tarea->nombre_tarea);
+	//printf(" nombre tarea: %s\n", nueva_tarea->nombre_tarea);
 	nueva_tarea->parametros = strtok(NULL, " ");
-	printf(" parametros: %s\n", nueva_tarea->parametros);
+	//printf(" parametros: %s\n", nueva_tarea->parametros);
 	nueva_tarea->pos_x = pos_x;
-	printf(" pos x: %s\n", nueva_tarea->pos_x);
+	//printf(" pos x: %s\n", nueva_tarea->pos_x);
 	nueva_tarea->pos_y = pos_y;
-	printf(" pos y: %s\n", nueva_tarea->pos_y);
+	//printf(" pos y: %s\n", nueva_tarea->pos_y);
 	char *tiempo_aux = strtok(tiempo, "|");
 	nueva_tarea->tiempo = atoi(tiempo_aux);
-	printf(" tiempo: %i\n", nueva_tarea->tiempo);
+	//printf(" tiempo: %i\n", nueva_tarea->tiempo);
 
 	return nueva_tarea;
 }

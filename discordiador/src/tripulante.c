@@ -33,7 +33,7 @@ void *inicializar_tripulante(Tripulante* tripulante){
         char** posicion = string_split(list_get(lista,1),"|");
         tripulante->pos_x = atoi(posicion[0]);
         tripulante->pos_y = atoi(posicion[1]);
-	    	tripulante->tarea_actual = list_get(lista,2);
+        obtener_tarea(list_get(lista,2),tripulante->tarea_actual);
         sem_init(&(tripulante->semaforo_trip),0,0);
         //sem_destroy...
 
@@ -216,7 +216,7 @@ void comenzar_ejecucion(Tripulante* tripulante){
       ejecutar_proxima_tarea(tripulante);
     }
     else{
-      wait(tripulante->semaforo_trip);
+      sem_wait(&tripulante->semaforo_trip);
     }
   }
 

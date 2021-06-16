@@ -130,16 +130,18 @@ void subirBlocksAMemoria(){
 
 int buscarYAsignarProximoBloqueLibre(void){
 //Ejemplo de uso: int bloqueLibre = buscarYAsignarProximoBloqueLibre(configuracion->puntoMontaje);
-
+	sem_wait(&sem_bitmap);
 	for(int i=0; i<cantidadBloques; i++){
 		if(bitarray_test_bit(bitmap, i) == 0){
 			bitarray_set_bit(bitmap ,i); //Asigno el bloque libre (pongo en 1 el bit).
 			msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
 
 			miLogInfo("Asignó el bloque %d.", i);	
+			sem_post(&sem_bitmap);
 			return i; //Devuelvo el número de bloque que asigné.		 
 		}
 	}
+	sem_post(&sem_bitmap);
 	/*bitarray_destroy(bitmap);
 	close(archivoSuperbloque);
 	free(pathSuperbloque);
@@ -148,16 +150,19 @@ int buscarYAsignarProximoBloqueLibre(void){
 		perror("Falló al desmapear el Superbloque.");
         exit(1); 
     }*/
+	
 	miLogError("No pudo asignar ningun bloque. El Bitmap estaba lleno!.");
 	return -1;
 }
 
 void liberarBloque(int index){
 //Ejemplo de uso: liberarBloque(nroBloque);
+	sem_wait(&sem_bitmap);
 	bitarray_clean_bit(bitmap, index);
 	miLogInfo("Se liberó el bloque %d", index );
 
 	msync(bitmap, cantidadBloques/8 ,0);
+	sem_post(&sem_bitmap);
 }
 
 
@@ -222,11 +227,12 @@ void escribirBloque(int bloque, int offset, char* escritura){
 	//|----------|----------|----------|----------|----------|
 
 	int desplazamiento = (bloque * tamanioBloque) + offset;
-	
+
+	sem_wait(&sem_bloques);
 	memcpy(punteroBlocks + desplazamiento, escritura, string_length(escritura));
+	sem_post(&sem_bloques);
 }
 
-//TODO: 
 char* leerBloques(t_list* bloques, int size){
 	char* lectura = string_new();
 	char* lecturaAux;
@@ -255,10 +261,12 @@ char* leerBloque(int bloque, int size) {
 	char* lectura = malloc(tamanioBloque);
 	int desplazamiento = bloque * tamanioBloque;
 
+	sem_wait(&sem_bloques);
 	memcpy(lectura, punteroBlocks + desplazamiento, tamanioBloque);
+	
 	miLogInfo("Leyó: %s, del bloque: %d", lectura, bloque);
-
 	lectura = string_substring(lectura, 0, size); // Porque tengo que hacer esto???
+	sem_post(&sem_bloques);
 
 	return lectura;
 }

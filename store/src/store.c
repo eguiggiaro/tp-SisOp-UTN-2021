@@ -100,6 +100,8 @@ void inicializarStore(void){
 
 	leerSuperbloque();
 	subirBlocksAMemoria();
+	inicializarSemaforos();
+
 
 	testRWBlocks();
 
@@ -135,4 +137,9 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 	}*/
 	free(posicion);
 	return listaPosicionesSabotaje;
+}
+
+void inicializarSemaforos(){
+	sem_init(&sem_bitmap, 0, 1);	
+	sem_init(&sem_bloques, 0, 1);
 }

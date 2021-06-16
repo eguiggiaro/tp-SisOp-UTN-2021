@@ -21,6 +21,10 @@ t_bitarray* bitmap;
 //Blocks
 char* punteroBlocks;
 
+//Semáforos
+sem_t sem_bitmap;
+sem_t sem_bloques;
+
 
 /*----------------------------------------------*/
 bool verificarFS(void);

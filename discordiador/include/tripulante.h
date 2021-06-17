@@ -13,16 +13,6 @@
 #include "discordiador.h"//?
 #include "planificador.h"
 
-
-// typedef struct Tarea{
-//     //should i use ponters for all right?
-//     char* tarea_completa;//? - chequear la libreria de strings... 
-//     char* tarea;//chequear la libreria de strings... 
-//     int pos_x;
-//     int pos_y;
-//     int tiempo;
-// } Tarea;
-
 void *inicializar_tripulante(Tripulante* );
 void mover_en_x(Tripulante, int);//siempre es 1... pero a derecha(-1) o izqueirda(+1)
 void mover_en_y(Tripulante, int);//siempre es 1... pero abajo(-1) o arriba(+1)

@@ -217,6 +217,11 @@ void iniciar_patota(char *comando)
 	Tarea *proxima_tarea = malloc(sizeof(Tarea));
 	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
 
+	//si la tarea no tiene parametro, seteamos un 0.
+	if(proxima_tarea->parametros==NULL){
+		proxima_tarea->parametros = "0";
+	}
+
 	pthread_t hilos_tripulantes[cantidad_trip];
 
 	Tripulante *new_tripulante;
@@ -663,6 +668,32 @@ void finalizar_tripulante(Tripulante* trip){
   //libero recursos ocupados por el Hilo
 	pthread_exit(0);
 }
+}
 
+void informar_tarea(int id_tripulante, char* nombre_tarea, char* parametro){
+	t_paquete* paquete = crear_paquete(INFORMAR_TAREA);
+    t_buffer* buffer;
+
+	char* id_auxiliar = string_itoa(id_tripulante);
+
+	t_list* lista_mensajes = list_create();
+	list_add(lista_mensajes,id_auxiliar);
+	list_add(lista_mensajes,nombre_tarea);
+	list_add(lista_mensajes,parametro);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, socket_store);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_store);
+	if (codigo_operacion == OK) {
+		miLogInfo("\nTarea informada correctamente");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR INFORMANDO TAREA. \n");
+	}
+
+	list_destroy(lista_mensajes);
 
 }

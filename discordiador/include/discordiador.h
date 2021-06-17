@@ -122,6 +122,7 @@ Tarea* obtener_tarea(char* tarea_string, Tarea* nueva_tarea); //dado un string c
 void iniciar_planificacion();
 void pausar_planificacion();
 void finalizar_tripulante(Tripulante* trip); //Tripulante pasa de EXEC a EXIT, se liberan sus recursos
+void informar_tarea(int id_tripulante, char* nombre_tarea, char* parametro);
 
 //Metodos Test
 void elegir_modulo();

@@ -7,14 +7,22 @@ void generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	//verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
 
-	leerMetadata(recurso);
+	//leerMetadata(recurso); --> VA EN FILESYSTEM
+
+
 
 	char * cadenaCaracteres = generarCadenaCaracteres(recurso, cantidadCaracteres);
 
 	t_list* listaBloquesOcupados = list_create();
-	listaBloquesOcupados = llenarBloque(2, 2, 2, cadenaCaracteres);
+	
+	if (recurso == OXIGENO){
+		listaBloquesOcupados = llenarBloque(23, 3, 2, cadenaCaracteres);
+	} else {
+		listaBloquesOcupados = llenarBloque(45, 5, 7, cadenaCaracteres);
+	}
+	
 
-	//modificarMetadata(metadata, listaBloquesOcupados);*/
+	//modificarMetadata(metadata, listaBloquesOcupados);*/ --> VA EN FILESYSTEM
     
 
 }
@@ -24,17 +32,19 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
    
     int cantidadBytesLibres = bytesLibresUltimoBloque(size, blockCount);
     int posicionEnCadena = cantidadBytesLibres;
+	t_list* bloquesEscritos = list_create(); 
 
     if(cantidadBytesLibres > 0){
 
         char* cadenaHastaCantidad = truncarCadenaHastaCantidad(cadenaCaracteres, posicionEnCadena);
         escribirBloqueUsado(ultimoBloque, cantidadBytesLibres, cadenaHastaCantidad);
-		posicionEnCadena++;
-    }
-    
-	char* cadenaDesdeCantidad = truncarCadenaDesdeCantidad(cadenaCaracteres, posicionEnCadena); 
 
-    t_list* bloquesEscritos = list_create(); 
+		if(string_length(cadenaHastaCantidad) == string_length(cadenaCaracteres)){
+			return bloquesEscritos;
+		}
+	}
+    
+	char* cadenaDesdeCantidad = truncarCadenaDesdeCantidad(cadenaCaracteres, posicionEnCadena);  
 	bloquesEscritos = escribirBloquesNuevo(cadenaDesdeCantidad);
 
     return bloquesEscritos;

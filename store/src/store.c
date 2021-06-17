@@ -10,23 +10,56 @@ void testRWBlocks(){
 
 	t_list* bloquesTest = list_create();
 	t_list* bloquesTest2 = list_create();
-	char* stringTest = "Test de escritura de bloques.";
-	char* stringTest2 = "Escritura de bloques mas larga para probar como funciona el manejo de memcpy.";
+	//char* stringTest = "Test de escritura de bloques.";
+	//char* stringTest2 = "Escritura de bloques mas larga para probar como funciona el manejo de memcpy.";
 
-	list_add_all(bloquesTest, escribirBloquesNuevo(stringTest));
-	list_add_all(bloquesTest2, escribirBloquesNuevo(stringTest2));
+	//list_add_all(bloquesTest, escribirBloquesNuevo(stringTest));
+	//list_add_all(bloquesTest2, escribirBloquesNuevo(stringTest2));
 	
 	/*	liberarBloque(15);
 	liberarBloque(18);
 	liberarBloque(21);*/
 
-	/*list_add(bloquesTest, 0);
+	list_add(bloquesTest, 0);
 	list_add(bloquesTest, 1);
-	list_add(bloquesTest, 2);*/
+	list_add(bloquesTest, 2);
+	list_add(bloquesTest, 8);
 
-	char* lectura = leerBloques(bloquesTest, string_length(stringTest));
-	char* lectura2 = leerBloques(bloquesTest2, string_length(stringTest2));
+	list_add(bloquesTest2, 3);
+	list_add(bloquesTest2, 4);
+	list_add(bloquesTest2, 5);
+	list_add(bloquesTest2, 6);
+	list_add(bloquesTest2, 7);
+	list_add(bloquesTest2, 9);
+	
 
+
+	char* lectura = leerBloques(bloquesTest, 37);
+	char* lectura2 = leerBloques(bloquesTest2, 52);
+
+}
+
+void crearArchivoTipoConfig(){
+
+	FILE* file = fopen("archivoConfig.cfg", "wb+");
+	
+	if (file == NULL) {
+			return -1;
+	}
+	fclose(file);
+	
+	t_config* configTest = config_create("archivoConfig.cfg");
+	
+	if(configTest==NULL){
+		return EXIT_FAILURE;
+	}
+	
+	config_set_value(configTest, "KEY1", "Algo");
+	config_set_value(configTest, "KEY2", "Algo2");
+	config_set_value(configTest, "KEY3", "Algo3");
+
+	config_save(configTest);
+	config_destroy(configTest);
 }
 
 
@@ -102,10 +135,11 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 	inicializarSemaforos();
 
+	//ejecutarTarea("GENERAR_COMIDA", 7);
+	//ejecutarTarea("GENERAR_OXIGENO", 3);
+	//crearArchivoTipoConfig();
+	//testRWBlocks();
 
-	testRWBlocks();
-
-	//leerArchivosMetadata();
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }
 

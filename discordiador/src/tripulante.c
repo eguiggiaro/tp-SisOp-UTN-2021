@@ -149,78 +149,104 @@ void generar_comida_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Comida.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-  informar_tarea(trip->id_tripulante,tarea,parametro);
 
-  miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
-  trip->tarea_actual = NULL;
+  if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+    miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
+    trip->tarea_actual = NULL;
+  }
+  else{
+    printf("Error informando tarea a STORE.\n");
+  }
+
 }
 
 void generar_oxigeno_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Oxigeno.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-  informar_tarea(trip->id_tripulante,tarea,parametro);
+  
+  if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+    miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+    trip->tarea_actual = NULL;
+  }
+  else{
+    printf("Error informando tarea a STORE.\n");
+  }
 
-  miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
-  trip->tarea_actual = NULL;
 }
 
 void consumir_oxigeno_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Oxigeno.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-  informar_tarea(trip->id_tripulante,tarea,parametro);
 
-  miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
-  trip->tarea_actual = NULL;
+  if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+    miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+    trip->tarea_actual = NULL;
+  }
+  else{
+    printf("Error informando tarea a STORE.\n");
+  }
 }
 
 void consumir_comida_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Comida.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-  informar_tarea(trip->id_tripulante,tarea,parametro);
 
-  miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
-  trip->tarea_actual = NULL;
+  if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+    miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+    trip->tarea_actual = NULL;
+  }
+  else{
+    printf("Error informando tarea a STORE.\n");
+  }
 }
 
 void generar_basura_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Basura.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-  informar_tarea(trip->id_tripulante,tarea,parametro);
 
-  miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
-  trip->tarea_actual = NULL;
+  if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+    miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+    trip->tarea_actual = NULL;
+  }
+  else{
+    printf("Error informando tarea a STORE.\n");
+  }
 }
 
 void descartar_basura_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Basura.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-  informar_tarea(trip->id_tripulante,tarea,parametro);
 
-  miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
-  trip->tarea_actual = NULL;
+  if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+    miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+    trip->tarea_actual = NULL;
+  }
+  else{
+    printf("Error informando tarea a STORE.\n");
+  }
 }
 
 void tarea_generica_FIFO(Tripulante* trip){

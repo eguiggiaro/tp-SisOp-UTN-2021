@@ -670,7 +670,9 @@ void finalizar_tripulante(Tripulante* trip){
 }
 }
 
-void informar_tarea(int id_tripulante, char* nombre_tarea, char* parametro){
+bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
+	bool se_informo = false;
+
 	t_paquete* paquete = crear_paquete(INFORMAR_TAREA);
     t_buffer* buffer;
 
@@ -690,10 +692,12 @@ void informar_tarea(int id_tripulante, char* nombre_tarea, char* parametro){
 	op_code codigo_operacion = recibir_operacion(socket_store);
 	if (codigo_operacion == OK) {
 		miLogInfo("\nTarea informada correctamente");
+		se_informo = true;
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO TAREA. \n");
 	}
 
 	list_destroy(lista_mensajes);
+	return se_informo;
 
 }

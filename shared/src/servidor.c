@@ -36,7 +36,7 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 		int request_fd;
 		request_fd = accept(servidor_fd, (void*) &direccionRequest, &tamanioDireccion);
 		
-		printf("Se conectó un cliente!");
+		printf("Se conectó un cliente!\n");
 
 		while(1){
 

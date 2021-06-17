@@ -181,7 +181,7 @@ void atender_request_miram(Request *request)
 		list_destroy(lista);
 		list_destroy(lista_mensajes);
 		free(request);
-		pthread_mutex_lock(&mutex_patota);
+		pthread_mutex_unlock(&mutex_patota);
 		break;
 
 	case TAREA_SIGUIENTE:
@@ -198,18 +198,10 @@ void atender_request_miram(Request *request)
 
 		char *tarea = proxima_tarea_tripulante(tripulante_id);
 
-		if (tarea[0] == '$')
-		{
-			miLogInfo("ERROR: TRIPULANTE SIN TAREAS \n");
-			paquete_devuelto = crear_paquete(FAIL);
-			list_add(lista_mensajes, "Se produjo un error al obtener tarea del tripulante");
-		}
-		else
-		{
-			miLogInfo("Proxima tarea de tripulante %d enviada \n", tripulante_id);
-			paquete_devuelto = crear_paquete(OK);
-			list_add(lista_mensajes, tarea);
-		}
+		miLogInfo("Proxima tarea de tripulante %d enviada \n", tripulante_id);
+		paquete_devuelto = crear_paquete(OK);
+		list_add(lista_mensajes, tarea);
+
 
 		t_buffer *buffer_respuesta_tareas = serializar_lista_strings(lista_mensajes);
 		paquete_devuelto->buffer = buffer_respuesta_tareas;
@@ -249,6 +241,9 @@ void atender_request_miram(Request *request)
 
 		break;
 	}
+
+		dump_memoria(true);
+
 
 }
 
@@ -521,7 +516,6 @@ char *proxima_tarea_tripulante(int tripulante_id)
 		caracter = proxima_tarea[index];
 		if (caracter == '$')
 		{
-			string_append_with_format(&string_tarea, "%c", caracter);
 			break;
 		}
 
@@ -723,8 +717,8 @@ int main()
 
 	//signal(SIGINT, controlador);
 
-	//pthread_t mapa;
-	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
+	pthread_t mapa;
+	pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
 
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);

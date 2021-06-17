@@ -33,7 +33,7 @@ void *inicializar_tripulante(Tripulante* tripulante){
         char** posicion = string_split(list_get(lista,1),"|");
         tripulante->pos_x = atoi(posicion[0]);
         tripulante->pos_y = atoi(posicion[1]);
-	    	tripulante->tarea_actual = list_get(lista,2);
+        obtener_tarea(list_get(lista,2),tripulante->tarea_actual);
         sem_init(&(tripulante->semaforo_trip),0,0);
         //sem_destroy...
 
@@ -54,33 +54,66 @@ void *inicializar_tripulante(Tripulante* tripulante){
         miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
 	}
 
-  //printf("De responderme q no nos conoce, decodifico nuestas tareas y se las mando\n");
-  //printf("Si nos conoce, me guardo la tarea a realizr para cuando el discordiador me mande a EXEC\n"); 
-  //and others... but you get it
-  //un mutex hasta q estoy en exec?
+  sem_post(&semaforoREADY);
+
+  //3. Una vez que el tripulante esta listo, se llama a comenzar_ejecucion(tripulante)
+  comenzar_ejecucion(tripulante);
 
 return;
 }
 
-void* planificar_tripulante(Tripulante* trip){
-  while(planificacion_activada==true){
-    
-  sem_wait(&semaforoEXEC);
-  sem_wait(&mutexREADY);
-  //tomo proximo tripulante de la cola de READY y lo paso a EXEC
-  list_add(execute_list,list_remove(ready_list,0));
-  sem_post(&mutexREADY);
-  trip->estado = trabajando;
-  miLogInfo("\nSe pasa tripulante a estado EXEC\n");
 
-  //le doy signal al semaforo del tripulante
-  sem_post(&(trip->semaforo_trip));
+void pedir_proxima_tarea(Tripulante* un_tripulante){
+  
+  //1. Aviso a MIRAM que deseo iniciar, indicando a que patota pertenezco.
+   t_paquete* paquete = crear_paquete(TAREA_SIGUIENTE);
+   t_buffer* buffer;
+   
+   t_list* lista_mensajes = list_create();
+   list_add(lista_mensajes,string_itoa(un_tripulante->id_tripulante));
+   buffer = serializar_lista_strings(lista_mensajes);
+   paquete ->buffer = buffer;
+   enviar_paquete(paquete, socket_miram);
 
-  printf("\nProxima tarea a ejecutar: %s", (trip->tarea_actual)->nombre_tarea);
-  ejecutar_proxima_tarea_FIFO(trip);
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_miram);
+	if (codigo_operacion == OK) {
+
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
+		t_list* lista = deserializar_lista_strings(buffer);
+    char* tareas = list_get(lista,0);
+
+    if (tareas[0] == '$')
+    {
+        un_tripulante->completo_tareas=true;
+
+    } else {
+
+        Tarea* una_tarea = malloc(sizeof(Tarea));
+        obtener_tarea(list_get(lista,0),una_tarea);
+        un_tripulante->tarea_actual = una_tarea;
+    }
+        //sem_destroy...
+
+        list_destroy(lista);
+        eliminar_buffer(buffer);
+  } else if (codigo_operacion == FAIL){
+        miLogInfo("ERROR: TAREA NO EXISTE \n");
+	}
+
+}
+
+
+void ejecutar_proxima_tarea(Tripulante* tripulante){
+  if(strncmp(configuracion->algoritmo,"FIFO",4)==0){
+    ejecutar_proxima_tarea_FIFO(tripulante);
   }
-
-  return NULL;
+  else if(strncmp(configuracion->algoritmo,"RR",2)==0){
+    //ejecutar_proxima_tarea_RR(tripulante);
+  }
+  else{
+    miLogError("\nAlgoritmo no seteado!");
+  }
 }
 
 void ejecutar_proxima_tarea_FIFO(Tripulante* trip){
@@ -118,6 +151,7 @@ void generar_comida_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
+  trip->tarea_actual = NULL;
 }
 
 void generar_oxigeno_FIFO(Tripulante* trip){
@@ -126,6 +160,7 @@ void generar_oxigeno_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+  trip->tarea_actual = NULL;
 }
 
 void consumir_oxigeno_FIFO(Tripulante* trip){
@@ -134,6 +169,7 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+  trip->tarea_actual = NULL;
 }
 
 void consumir_comida_FIFO(Tripulante* trip){
@@ -142,6 +178,7 @@ void consumir_comida_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+  trip->tarea_actual = NULL;
 }
 
 void generar_basura_FIFO(Tripulante* trip){
@@ -150,6 +187,7 @@ void generar_basura_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+  trip->tarea_actual = NULL;
 }
 
 void descartar_basura_FIFO(Tripulante* trip){
@@ -158,6 +196,7 @@ void descartar_basura_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+  trip->tarea_actual = NULL;
 }
 
 void tarea_generica_FIFO(Tripulante* trip){
@@ -166,6 +205,7 @@ void tarea_generica_FIFO(Tripulante* trip){
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
+  trip->tarea_actual = NULL;
 }
 
 void bloquear_tripulante(Tripulante* trip){
@@ -199,6 +239,29 @@ void bloquear_tripulante(Tripulante* trip){
 	trip->estado = bloqueado_io;
 	miLogInfo("\nSe pasa el tripulante a la cola de BLOCK\n");
   }
-  
+
 }
 
+void comenzar_ejecucion(Tripulante* tripulante){
+
+  while(1){
+
+    if(tripulante->tripulante_despierto){
+
+      if(tripulante->tarea_actual == NULL){
+        pedir_proxima_tarea(tripulante); //la tarea actual se borra luego de ejecutada
+      }
+
+      if(tripulante->completo_tareas){ //atributo booleano que se setea en TRUE cuando miram informa que no tiene mas para ejecutar
+        finalizar_tripulante(tripulante);
+        break;
+      }
+
+      ejecutar_proxima_tarea(tripulante);
+    }
+    else{
+      sem_wait(&tripulante->semaforo_trip);
+    }
+  }
+
+}

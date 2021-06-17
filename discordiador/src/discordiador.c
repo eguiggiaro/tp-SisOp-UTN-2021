@@ -68,12 +68,13 @@ int main()
 	sem_init(&mutexNEW, 0, 1);
 	sem_init(&mutexREADY, 0, 1);
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
+	sem_init(&semaforoREADY, 0, 0);
 	sem_init(&mutexBLOCK, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
 	sem_init(&mutexEXEC, 0, 1);
-	proxima_tarea = malloc(sizeof(Tarea));
-
+	
 	consola();
+	
 	miLogInfo("Finalizó Discordiador\n");
 	//vaciar_listas();
 	free(configuracion);
@@ -85,18 +86,21 @@ int main()
 	sem_destroy(&mutexBLOCK);
 	sem_destroy(&mutexEXIT);
 	sem_destroy(&mutexEXIT);
-	free(proxima_tarea);
+
 }
 
 void consola()
 {
-	char *input_consola = "INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4";
+	char *input_consola; // = "INICIAR_PATOTA 1 /home/utnso/tareas/tareasPatota5.txt 1|1";
 	char **list;
 	printf("Hola!\n");
 	printf("Que desea hacer?\n");
 	pthread_t *threadPATOTA;
 	pthread_t *threadINICIAR_PLANIFICACION;
 	pthread_t *threadPAUSAR_PLANIFICACION;
+
+	input_consola = readline(">>");
+
 	//*se podria poner ejemplitos de que puede hacer...
 	while (strcmp(input_consola, "FIN") != 0)
 	{
@@ -121,6 +125,7 @@ void consola()
 				(char*)input_consola) != 0) {
 			     printf("Error iniciando patota/n");
 		        }
+				pthread_detach(threadPATOTA);
 				break;
 			case INICIAR_PLANIFICACION_COM:
 				printf("Comando es Iniciar Planificacion\n");
@@ -173,6 +178,7 @@ void consola()
 		}
 	}
 }
+
 void iniciar_patota(char *comando)
 {
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
@@ -188,7 +194,6 @@ void iniciar_patota(char *comando)
 	string_tareas = leer_tareas_txt(list[2]); //leemos las tareas y las traemos como un solo string
 
 	int cantidad_trip = atoi(list[1]);
-	printf("\ncantidad tripulantes: %i", cantidad_trip);
 	for (int i = 0; i < cantidad_trip; i++)
 	{ //string con todas las posiciones
 
@@ -202,13 +207,14 @@ void iniciar_patota(char *comando)
 		}
 	}
 
-	list_add(lista_mensajes, string_tareas);
 	list_add(lista_mensajes, list[1]);
+	list_add(lista_mensajes, string_tareas);
 	list_add(lista_mensajes, string_posiciones);
 	mensajes_respuesta = iniciar_patota_miram(socket_miram, lista_mensajes);
 
 	char *patota_id = list_get(mensajes_respuesta, 0);
-
+	
+	Tarea *proxima_tarea = malloc(sizeof(Tarea));
 	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
 
 	pthread_t hilos_tripulantes[cantidad_trip];
@@ -222,6 +228,7 @@ void iniciar_patota(char *comando)
 		new_tripulante->id_patota = atoi(patota_id);
 		new_tripulante->tarea_actual = proxima_tarea;
 		new_tripulante->tripulante_despierto = false;
+		new_tripulante->completo_tareas = false;
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
@@ -259,18 +266,61 @@ char *leer_tareas_txt(char *direccion_txt)
 	// ejemplo de tarea TAREA PARAMETROS;POS X;POS Y;TIEMPO
 	char *lista_tareas = string_new();
 	char line[100];
+	int index = 0;
 
 	FILE *file_tarea = fopen(direccion_txt, "r");
 	if (file_tarea == NULL)
 	{
 		printf("Error al abrir el fichero");
 	}
+
+	if (!feof(file_tarea))
+	{
+		fgets(line, sizeof(line), file_tarea);
+
+
+		while (line[index] != '\n')
+		{ //string con todas las posiciones
+
+			if (line[index] != '\0')
+			{
+			string_append_with_format(&lista_tareas, "%c", line[index]);
+			index++;
+			} else
+			{
+				break;
+			}
+			
+		}
+
+	index = 0;
+
+	}
+
 	while (!feof(file_tarea))
 	{
 		fgets(line, sizeof(line), file_tarea);
 
-		string_append_with_format(&lista_tareas, "%s|", line);
+		while (line[index] != '\n')
+		{ //string con todas las posiciones
+
+		if(index == 0) {
+			string_append(&lista_tareas,"|");
+		}
+
+		if (line[index] != '\0')
+		{
+			string_append_with_format(&lista_tareas, "%c", line[index]);
+			index++;			
+		}	else {
+			break;
+		}
+
+
+		}
 	}
+
+	string_append(&lista_tareas, "$");
 
 	fclose(file_tarea);
 	return lista_tareas;
@@ -287,7 +337,6 @@ void tripulante_listo(Tripulante *trip)
 	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 
-	planificar_tripulante(trip);
 }
 
 void iniciar_conexion_miram(char *ip_destino, char *puerto_destino)
@@ -542,16 +591,16 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	}
 
 	nueva_tarea->nombre_tarea = strtok(parametros, " ");
-	printf(" nombre tarea: %s\n", nueva_tarea->nombre_tarea);
+	//printf(" nombre tarea: %s\n", nueva_tarea->nombre_tarea);
 	nueva_tarea->parametros = strtok(NULL, " ");
-	printf(" parametros: %s\n", nueva_tarea->parametros);
+	//printf(" parametros: %s\n", nueva_tarea->parametros);
 	nueva_tarea->pos_x = pos_x;
-	printf(" pos x: %s\n", nueva_tarea->pos_x);
+	//printf(" pos x: %s\n", nueva_tarea->pos_x);
 	nueva_tarea->pos_y = pos_y;
-	printf(" pos y: %s\n", nueva_tarea->pos_y);
+	//printf(" pos y: %s\n", nueva_tarea->pos_y);
 	char *tiempo_aux = strtok(tiempo, "|");
 	nueva_tarea->tiempo = atoi(tiempo_aux);
-	printf(" tiempo: %i\n", nueva_tarea->tiempo);
+	//printf(" tiempo: %i\n", nueva_tarea->tiempo);
 
 	return nueva_tarea;
 }
@@ -567,8 +616,10 @@ int planificar() {
 
 	if (list_size(ready_list) > 0)
 	{
-		tripulante = (Tripulante *) list_get(execute_list, 0);
+		tripulante = (Tripulante *) list_get(ready_list, 0); //obtiene primero en cola de READY
 		list_add(execute_list, tripulante);
+		list_remove(ready_list, 0);
+		
 		tripulante->tripulante_despierto = true;
 		sem_post(&tripulante->semaforo_trip);
 	} else {
@@ -610,8 +661,8 @@ void finalizar_tripulante(Tripulante* trip){
   sem_post(&semaforoEXEC);
 
   //libero recursos ocupados por el Hilo
-  pthread_detach(&(trip_auxiliar->id_hilo));
-  }
+	pthread_exit(0);
+}
 
 
 }

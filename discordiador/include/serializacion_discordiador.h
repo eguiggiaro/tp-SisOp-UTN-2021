@@ -14,4 +14,5 @@ void paquete_de_prueba(uint32_t socket);
 void obtener_bitacora(uint32_t socket);
 void iniciar_fsck(uint32_t socket);
 void generar_oxigeno(uint32_t socket);
+t_list* iniciar_patota_miram(uint32_t socket, t_list* lista_mensajes);
 #endif

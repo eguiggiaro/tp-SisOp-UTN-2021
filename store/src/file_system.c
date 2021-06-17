@@ -293,3 +293,47 @@ void finalizarFS(void){
 
 }
 
+//---------------------------------------------------------MANEJO DE METADATA----------------------------------------------------------------------------------
+/*char* obtenerDireccionDeMetadata (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
+
+	char* direccionDeMetadata = string_new();
+	char* nombreMetadata = stringFromRecurso(recurso);
+	char* extencionDeMetadata = ".txt";
+	string_append(&direccionDeMetadata, nombreMetadata);
+	string_append(&direccionDeMetadata, extencionDeMetadata);
+
+	return direccionDeMetadata;
+}
+
+char* stringFromRecurso(tipoRecurso f) //Obtiene un string de acuerdo al enum que le envío
+{
+    static const char *strings[] = { "oxigeno", "comida", "basura"};
+
+    return strings[f];
+}
+
+int leerMetadata(tipoRecurso recurso){
+
+	t_config* meta;
+	metadata = malloc(sizeof(Metadata));
+
+	char * direccionDeMetadata = obtenerDireccionDeMetadata(recurso);	
+
+	meta = config_create(direccionDeMetadata);
+
+	if(meta==NULL){
+		return EXIT_FAILURE;
+	}
+
+	metadata->size = config_get_int_value(meta, "SIZE");
+	metadata->block_count = config_get_int_value(meta, "{BLOCK_COUNT}");
+	metadata->blocks = config_get_string_value(meta, "BLOCKS");
+	metadata->caracter_llenado = config_get_string_value(meta, "CARACTER_LLENADO");
+	//metadata->caracter_llenado = config_get_int_value(meta, "MD5");
+
+	config_destroy(meta);
+	return EXIT_SUCCESS;
+}
+
+
+}*/

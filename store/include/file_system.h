@@ -46,8 +46,11 @@ char* leerBloque(int , int);
 char* leerBloques(t_list*, int);
 
 
-
-
+/*
+char* obtenerDireccionDeMetadata (tipoRecurso recurso);
+char* stringFromRecurso(tipoRecurso f);
+int leerMetadata(tipoRecurso recurso);
+*/
 
 void finalizarFS(void);
 void leerSuperBloqueSinMapear(void);

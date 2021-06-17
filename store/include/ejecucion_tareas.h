@@ -25,9 +25,8 @@ void generarRecursos(tipoRecurso, int);
 t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCaracteres);
 char * generarCadenaCaracteres(tipoRecurso recurso, int cantidad);
 int bytesLibresUltimoBloque(int size, int blockCount);
-void verificarMetadata(tipoRecurso recurso);
 char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int cantidad);
 char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int cantidad);
-char* obtenerDireccionDeMetadata (tipoRecurso recurso);
+int guardarEnBitacora(char* id_tripulante, char* instruccion);
 
 #endif

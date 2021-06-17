@@ -17,10 +17,10 @@ void atender_request_store(Request *request) {
 	t_buffer *buffer_devolucion;
 	int request_fd = request->request_fd;
 	t_list *lista;
-	t_paquete *paquete_devuelto;
 	t_list *lista_mensajes;
 	int resultadoTarea;
 	int resultadoBitacora;
+	char* id_tripulante; 
 
 	switch(codigo_operacion)
 	{	
@@ -29,11 +29,12 @@ void atender_request_store(Request *request) {
 
 			pthread_mutex_lock(&mutex_informartareas);
 			t_buffer* buffer_devolucion_informar_tarea = request->buffer_devolucion;
-			
+			t_paquete *paquete_devuelto_informar_tarea;
+
 			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
 			lista = deserializar_lista_strings(buffer_devolucion);
 
-			char* id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
+			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12
 			char** lista;
 
@@ -48,20 +49,20 @@ void atender_request_store(Request *request) {
 			if (resultadoTarea == -1)
 			{
 				miLogInfo("ERROR: NO SE PUDO REALIZAR LA TAREA \n");
-				paquete_devuelto = crear_paquete(FAIL);
+				paquete_devuelto_informar_tarea = crear_paquete(FAIL);
 				list_add(lista_mensajes, "Se produjo un error intentar realizar la tarea");
 			}
 			else
 			{
 				miLogInfo("TAREA REALIZADA CORRECTAMENTE \n");
 
-				paquete_devuelto = crear_paquete(OK);
+				paquete_devuelto_informar_tarea = crear_paquete(OK);
 				list_add(lista_mensajes, "Se realizó la tarea correctamente");
 			}
 
 			t_buffer *buffer_respuesta_informarTarea = serializar_lista_strings(lista_mensajes);
-			paquete_devuelto->buffer = buffer_respuesta_informarTarea;
-			enviar_paquete(paquete_devuelto, request_fd);
+			paquete_devuelto_informar_tarea->buffer = buffer_respuesta_informarTarea;
+			enviar_paquete(paquete_devuelto_informar_tarea, request_fd);
 			eliminar_buffer(buffer_devolucion_informar_tarea);
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
@@ -69,6 +70,44 @@ void atender_request_store(Request *request) {
 			pthread_mutex_unlock(&mutex_informartareas);
 
 	  	break;
+
+		case INFORMACION_BITACORA:
+
+			pthread_mutex_lock(&mutex_informartareas);
+			t_buffer* buffer_devolucion_informacion_bitacora = request->buffer_devolucion;
+			t_paquete *paquete_devuelto_informacion_bitacora;
+
+			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
+			lista = deserializar_lista_strings(buffer_devolucion);
+
+			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
+			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X
+
+			resultadoTarea = guardarEnBitacora(id_tripulante, instruccionABitacora);
+
+			if (resultadoTarea == -1)
+			{
+				miLogInfo("ERROR: NO SE PUDO REALIZAR LA TAREA \n");
+				paquete_devuelto_informacion_bitacora = crear_paquete(FAIL);
+				list_add(lista_mensajes, "Se produjo un error intentar guardar la instruccion");
+			}
+			else
+			{
+				miLogInfo("TAREA REALIZADA CORRECTAMENTE \n");
+
+				paquete_devuelto_informacion_bitacora = crear_paquete(OK);
+				list_add(lista_mensajes, "Se guardó la instruccion correctamente");
+			}
+			t_buffer *buffer_respuesta_informacion_bitacora = serializar_lista_strings(lista_mensajes);
+			paquete_devuelto_informacion_bitacora->buffer = buffer_respuesta_informacion_bitacora;
+			enviar_paquete(paquete_devuelto_informacion_bitacora, request_fd);
+			eliminar_buffer(buffer_devolucion_informacion_bitacora);
+			list_destroy(lista_mensajes);
+			list_destroy(lista);
+			free(request);
+			pthread_mutex_unlock(&mutex_informartareas);
+
+		break;
 		
 		default:
 			miLogInfo("Me llego operacion: ...\n");
@@ -121,8 +160,8 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 tipoTarea find_enum_consola(char *sval)
 {
 	tipoTarea result=GENERAR_OXIGENO; /* value corresponding to etable[0] */
-  int i=0;
-  for (i=0; tipoTarea_table[i]!=NULL; ++i, ++result)
-    if (0==strcmp(sval, tipoTarea_table[i])) return result;
-  return -1;
+	int i=0;
+	for (i=0; tipoTarea_table[i]!=NULL; ++i, ++result)
+	if (0==strcmp(sval, tipoTarea_table[i])) return result;
+	return -1;
 }

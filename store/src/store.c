@@ -16,10 +16,6 @@ void testRWBlocks(){
 	//list_add_all(bloquesTest, escribirBloquesNuevo(stringTest));
 	//list_add_all(bloquesTest2, escribirBloquesNuevo(stringTest2));
 	
-	/*	liberarBloque(15);
-	liberarBloque(18);
-	liberarBloque(21);*/
-
 	list_add(bloquesTest, 0);
 	list_add(bloquesTest, 1);
 	list_add(bloquesTest, 2);
@@ -32,11 +28,32 @@ void testRWBlocks(){
 	list_add(bloquesTest2, 7);
 	list_add(bloquesTest2, 9);
 	
-
-
 	char* lectura = leerBloques(bloquesTest, 37);
 	char* lectura2 = leerBloques(bloquesTest2, 52);
 
+}
+
+void testLecturaRecurso(){
+	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
+	
+	metadata = leerMetadataRecurso(OXIGENO);
+
+	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
+		int bloque = (int) list_get(metadata->blocks, i);
+		printf("bloque: %i", bloque);
+	}*/
+
+}
+
+void testLecturaBitacora(){
+	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
+	
+	metadata = leerMetadataBitacora(1);
+
+	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
+		int bloque = (int) list_get(metadata->blocks, i);
+		printf("bloque: %i", bloque);
+	}*/
 }
 
 void crearArchivoTipoConfig(){
@@ -134,17 +151,18 @@ void inicializarStore(void){
 	leerSuperbloque();
 	subirBlocksAMemoria();
 	inicializarSemaforos();
-
+	
 	//ejecutarTarea("GENERAR_COMIDA", 7);
 	//ejecutarTarea("GENERAR_OXIGENO", 3);
-	//crearArchivoTipoConfig();
 	//testRWBlocks();
+	testLecturaRecurso();
+	testLecturaBitacora();
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }
 
 
-t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
+/*t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 	
 	char** posicionesSabotaje = string_get_string_as_array(strPosicionesSabotaje);
 	int largo = strlen(strPosicionesSabotaje) - 1;
@@ -165,13 +183,13 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=strlen(strPosicion[1]);
 	}
 	//Test
-	/*for(int i = 0; list_size(listaPosicionesSabotaje) > i; i++){
+	for(int i = 0; list_size(listaPosicionesSabotaje) > i; i++){
 		posicion = (t_pos*) list_get(listaPosicionesSabotaje, i);
 		printf("x:%s, y:%s\n", string_itoa(posicion->x), string_itoa(posicion->y));
-	}*/
+	}
 	free(posicion);
 	return listaPosicionesSabotaje;
-}
+}*/
 
 void inicializarSemaforos(){
 	sem_init(&sem_bitmap, 0, 1);	

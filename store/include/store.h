@@ -46,10 +46,16 @@ typedef enum {
 typedef struct {
 	int size;
 	int block_count;
-	char* blocks;
+	t_list* blocks;
 	char* caracter_llenado;
-	//int md5;
-} Metadata;
+	char* md5;
+} MetadataRecurso;
+
+typedef struct {
+	int size;
+	int block_count;
+	t_list* blocks;	
+} MetadataBitacora;
 
 typedef struct {
 	uint32_t x;
@@ -66,14 +72,16 @@ typedef struct {
 } Configuracion;
 
 Configuracion* configuracion;
-Metadata* metadata;
 
 int leerConfig(void);
 void atender_request_store(Request *request);
 void inicializarParametrosFS(void);
 void inicializarStore(void);
 void inicializarSemaforos(void);
-t_list* obtenerListaSabotaje(char*);
+
+
+
+//t_list* obtenerListaSabotaje(char*);
 
 pthread_mutex_t mutex_informartareas;
 

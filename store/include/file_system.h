@@ -37,7 +37,6 @@ void subirBlocksAMemoria();
 
 int buscarYAsignarProximoBloqueLibre(void);
 void liberarBloque(int);
-int tamanioArchivo(char*);
 int calcularCantBloques(int);
 t_list* escribirBloquesNuevo(char*);
 void escribirBloque(int, int, char*);
@@ -45,14 +44,23 @@ void escribirBloqueUsado(int, int , char*);
 char* leerBloque(int , int);
 char* leerBloques(t_list*, int);
 
-
-/*
-char* obtenerDireccionDeMetadata (tipoRecurso recurso);
-char* stringFromRecurso(tipoRecurso f);
-int leerMetadata(tipoRecurso recurso);
-*/
+MetadataBitacora* leerMetadataBitacora(int);
+MetadataRecurso* leerMetadataRecurso(tipoRecurso);
+char* obtenerDireccionDeMetadataRecurso (tipoRecurso);
+char* obtenerDireccionDeMetadataBitacora (int);
+int modificarMetadataRecurso(MetadataRecurso*, tipoRecurso);
+int modificarMetadataBitacora(MetadataBitacora*, int);
+char* generarMd5(t_list*);
 
 void finalizarFS(void);
+
+/**** SOPORTE ****/
+t_list* listaFromArray(char**);
+int crearMetadata(char*);
+int tamanioArchivo(char*);
+
+
+/**** DEṔRECADAS ****/
 void leerSuperBloqueSinMapear(void);
 
 #endif

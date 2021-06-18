@@ -293,47 +293,165 @@ void finalizarFS(void){
 
 }
 
-//---------------------------------------------------------MANEJO DE METADATA----------------------------------------------------------------------------------
-/*char* obtenerDireccionDeMetadata (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
-
-	char* direccionDeMetadata = string_new();
-	char* nombreMetadata = stringFromRecurso(recurso);
-	char* extencionDeMetadata = ".txt";
-	string_append(&direccionDeMetadata, nombreMetadata);
-	string_append(&direccionDeMetadata, extencionDeMetadata);
-
-	return direccionDeMetadata;
-}
-
-char* stringFromRecurso(tipoRecurso f) //Obtiene un string de acuerdo al enum que le envío
-{
-    static const char *strings[] = { "oxigeno", "comida", "basura"};
-
-    return strings[f];
-}
-
-int leerMetadata(tipoRecurso recurso){
+//------------------------------------MANEJO DE METADATA----------------------------------
+MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 
 	t_config* meta;
-	metadata = malloc(sizeof(Metadata));
+	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
 
-	char * direccionDeMetadata = obtenerDireccionDeMetadata(recurso);	
+	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);	
 
 	meta = config_create(direccionDeMetadata);
 
 	if(meta==NULL){
-		return EXIT_FAILURE;
+		return NULL;
 	}
 
 	metadata->size = config_get_int_value(meta, "SIZE");
-	metadata->block_count = config_get_int_value(meta, "{BLOCK_COUNT}");
-	metadata->blocks = config_get_string_value(meta, "BLOCKS");
+	metadata->block_count = config_get_int_value(meta, "BLOCK_COUNT");
+	metadata->blocks = listaFromArray(config_get_array_value(meta, "BLOCKS"));
 	metadata->caracter_llenado = config_get_string_value(meta, "CARACTER_LLENADO");
-	//metadata->caracter_llenado = config_get_int_value(meta, "MD5");
+	metadata->caracter_llenado = config_get_string_value(meta, "MD5");
 
 	config_destroy(meta);
+	return metadata;
+}
+
+MetadataBitacora* leerMetadataBitacora(int tripulante){
+
+	t_config* meta;
+	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
+
+	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
+
+	meta = config_create(direccionDeMetadata);
+
+	if(meta==NULL){
+		return NULL;
+	}
+
+	metadata->size = config_get_int_value(meta, "SIZE");
+	metadata->block_count = config_get_int_value(meta, "BLOCK_COUNT");
+	metadata->blocks = listaFromArray(config_get_array_value(meta, "BLOCKS"));
+
+	config_destroy(meta);
+	return metadata;
+}
+
+int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
+
+	t_config* metaConfig;
+	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);	
+
+	metaConfig = config_create(direccionDeMetadata);
+
+	if(metaConfig==NULL){
+		//No existe el archivo.
+		if(crearMetadata(direccionDeMetadata)){
+			return EXIT_FAILURE;
+		}		
+	}
+
+	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
+	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
+	config_set_value(metaConfig, "BLOCKS", string_itoa(metadata->blocks));
+	config_set_value(metaConfig, "CARACTER_LLENADO", metadata->caracter_llenado);
+	config_set_value(metaConfig, "MD5", generarMd5(metadata->blocks));
+
+	config_save(metaConfig);
+	config_destroy(metaConfig);
+
 	return EXIT_SUCCESS;
 }
 
+int modificarMetadataBitacora(MetadataBitacora* metadata, int tripulante){
 
+	t_config* metaConfig;
+	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
+
+	metaConfig = config_create(direccionDeMetadata);
+
+	if(metaConfig==NULL){
+		//No existe el archivo.
+		if(crearMetadata(direccionDeMetadata)){
+			return EXIT_FAILURE;
+		}		
+	}
+
+	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
+	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
+	config_set_value(metaConfig, "BLOCKS", string_itoa(metadata->blocks));
+
+	config_save(metaConfig);
+	config_destroy(metaConfig);
+
+	return EXIT_SUCCESS;
+}
+
+int crearMetadata(char* metadataFile){
+	FILE* file = fopen(metadataFile, "w+");
+	
+	if (file == NULL) {
+			return EXIT_FAILURE;
+	}
+	fclose(file);
+	return EXIT_SUCCESS;
+}
+
+char* generarMd5(t_list* bloques){
+	return "Algun md5";
+}
+
+char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
+
+	char* direccionDeMetadata = string_new();
+
+	switch(recurso)
+	{
+		case OXIGENO:
+			direccionDeMetadata = string_from_format("%s/%s", pathFiles, "Oxigeno.ims");
+			break;
+		case COMIDA:
+			direccionDeMetadata = string_from_format("%s/%s", pathFiles, "Comida.ims");
+			break;
+		case BASURA:
+			direccionDeMetadata = string_from_format("%s/%s", pathFiles, "Basura.ims");
+			break;
+		default:
+			miLogInfo("Error: No se reconoce el recurso.\n");
+			direccionDeMetadata = NULL;
+			break;
+	}
+
+	return direccionDeMetadata;
+}
+
+char* obtenerDireccionDeMetadataBitacora (int tripulante){ //Devuelve la direccion de la metadata según el recurso que quiero
+
+	char* direccionDeMetadata = string_new();
+	char* nombreMetadata = string_from_format("%s/%s", pathBitacoras, "Tripulante");
+	char* numeroTripulante = string_itoa(tripulante);
+	char* extensionDeMetadata = ".ims";
+	
+	string_append(&direccionDeMetadata, nombreMetadata);
+	string_append(&direccionDeMetadata, numeroTripulante);
+	string_append(&direccionDeMetadata, extensionDeMetadata);
+		
+	return direccionDeMetadata;
+}
+
+t_list* listaFromArray(char** array){
+	t_list* listaBloques = list_create();
+
+	for(int i = 0; array[i] != NULL; i++){
+		int bloque = atoi(array[i]);
+		list_add(listaBloques,(void*) bloque);
+	}
+	return listaBloques;
+}
+
+/*char* stringFromRecurso(tipoRecurso f){} //Obtiene un string de acuerdo al enum que le envío
+
+    static const char *strings[] = { "oxigeno", "comida", "basura"};
+    return strings[f];
 }*/

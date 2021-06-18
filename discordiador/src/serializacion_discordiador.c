@@ -24,7 +24,7 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 		case MOV_TRIPULANTE:
 			printf("Entre al case de op_code %i.\n", codigo_operacion);
 
-			mover_tripulante(socket);
+			//mover_tripulante(socket);
 
 			break;
 		case TAREA_SIGUIENTE:
@@ -235,50 +235,50 @@ void informar_tareas_patota_test(uint32_t socket){
 	}
 }
 
-void mover_tripulante(uint32_t socket){
-    printf("\nFuncion de MOVER TRIPULANTE");
+// void mover_tripulante(uint32_t socket){
+//     printf("\nFuncion de MOVER TRIPULANTE");
 
-    t_paquete* paquete = crear_paquete(MOV_TRIPULANTE);
-	t_buffer* buffer;
+//     t_paquete* paquete = crear_paquete(MOV_TRIPULANTE);
+// 	t_buffer* buffer;
 
-    char* id_tripulante;
-    printf("\nPor favor, ingrese el ID del tripulante: \n");
-    id_tripulante = readline(">>");
+//     char* id_tripulante;
+//     printf("\nPor favor, ingrese el ID del tripulante: \n");
+//     id_tripulante = readline(">>");
 
-    char* pos_x;
-    printf("\nPor favor, ingrese la posicion X: \n");
-    pos_x = readline(">>");
+//     char* pos_x;
+//     printf("\nPor favor, ingrese la posicion X: \n");
+//     pos_x = readline(">>");
 
-    char* pos_y;
-    printf("\nPor favor, ingrese la posicion Y: \n");
-    pos_y = readline(">>");
+//     char* pos_y;
+//     printf("\nPor favor, ingrese la posicion Y: \n");
+//     pos_y = readline(">>");
 
-    t_list* lista_mensajes = list_create();
-    list_add(lista_mensajes,id_tripulante);
-    list_add(lista_mensajes,pos_x);
-    list_add(lista_mensajes,pos_y);
-    buffer = serializar_lista_strings(lista_mensajes);
-	paquete ->buffer = buffer;
-	enviar_paquete(paquete, socket);
+//     t_list* lista_mensajes = list_create();
+//     list_add(lista_mensajes,id_tripulante);
+//     list_add(lista_mensajes,pos_x);
+//     list_add(lista_mensajes,pos_y);
+//     buffer = serializar_lista_strings(lista_mensajes);
+// 	paquete ->buffer = buffer;
+// 	enviar_paquete(paquete, socket);
 
-	//recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket);
-	if (codigo_operacion == OK) {
+// 	//recibe respuesta de destino
+// 	op_code codigo_operacion = recibir_operacion(socket);
+// 	if (codigo_operacion == OK) {
 
-		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
-		t_list* lista = deserializar_lista_strings(buffer);
+// 		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
+// 		t_list* lista = deserializar_lista_strings(buffer);
 
-		loggear_lista_strings(lista);
+// 		loggear_lista_strings(lista);
 
-		list_destroy(lista);
+// 		list_destroy(lista);
 
-		eliminar_buffer(buffer);
+// 		eliminar_buffer(buffer);
 		
-		miLogInfo("Recibi los mensajes del destino correctamente");
-	} else {
-		miLogInfo("No recibi los mensajes del destino correctamente");
-	}
-}
+// 		miLogInfo("Recibi los mensajes del destino correctamente");
+// 	} else {
+// 		miLogInfo("No recibi los mensajes del destino correctamente");
+// 	}
+// }
 
 void tarea_siguiente(uint32_t socket){
     printf("\nFuncion de TAREA SIGUIENTE");

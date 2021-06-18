@@ -39,4 +39,5 @@ void descartar_basura_FIFO(Tripulante*);
 void tarea_generica_FIFO(Tripulante*); //consiste solo en  llegar a la ubicación y esperar que pase el tiempo solicitado en el estado EXEC
 
 void bloquear_tripulante(Tripulante*);
+void mover_tripulante(Tripulante*);
 #endif

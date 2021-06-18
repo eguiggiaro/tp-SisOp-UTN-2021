@@ -705,3 +705,37 @@ bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
 	return se_informo;
 
 }
+
+void avisar_movimiento_miram(Tripulante* trip, char* eje){
+	t_paquete* paquete = crear_paquete(MOV_TRIPULANTE);
+    t_buffer* buffer;
+
+	char* id_auxiliar = string_itoa(trip->id_tripulante);
+	char* nueva_posicion;
+	if(strncmp(eje,"X",1)==0){
+		nueva_posicion = string_itoa(trip->pos_x);
+	}
+	else{
+		nueva_posicion = string_itoa(trip->pos_y);
+	}
+	//Lista de elementos a enviar a miram: 1. ID del tripulante, 2. Eje, 3. Nueva Posicion
+	t_list* lista_mensajes = list_create();
+	list_add(lista_mensajes,id_auxiliar);
+	list_add(lista_mensajes,eje);
+	list_add(lista_mensajes,nueva_posicion);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, socket_miram);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_store);
+	if (codigo_operacion == OK) {
+		miLogInfo("\nNueva posicion informada a MIRAM correctamente");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR INFORMANDO NUEVA POSICION. \n");
+	}
+
+	list_destroy(lista_mensajes);
+}

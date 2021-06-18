@@ -151,7 +151,8 @@ void generar_comida_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-    miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
+    miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");    
+    mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
@@ -167,9 +168,10 @@ void generar_oxigeno_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Oxigeno.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-  
+
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
+    mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
@@ -188,6 +190,7 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
+    mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
@@ -205,6 +208,7 @@ void consumir_comida_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
+    mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
@@ -222,6 +226,7 @@ void generar_basura_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
+    mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
@@ -239,6 +244,7 @@ void descartar_basura_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
+    mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
@@ -252,6 +258,7 @@ void descartar_basura_FIFO(Tripulante* trip){
 void tarea_generica_FIFO(Tripulante* trip){
   //Moverse a ubicacion.
   miLogInfo("\nComienza ejecucion de TAREA GENERICA");
+  mover_tripulante(trip);
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
@@ -314,4 +321,52 @@ void comenzar_ejecucion(Tripulante* tripulante){
     }
   }
 
+}
+
+void mover_tripulante(Tripulante* trip){
+    //Me muevo desde la posicion actual hasta donde pide la tarea.
+    int distancia_x;
+    int distancia_y;
+    int x_origen = trip->pos_x;
+    int y_origen = trip->pos_y;
+    int x_destino = atoi((trip->tarea_actual)->pos_x);
+    int y_destino = atoi((trip->tarea_actual)->pos_y);
+    
+    //Primero me muevo linealmente en el eje X
+    if(x_origen > x_destino){
+      distancia_x = x_origen - x_destino;
+      for(int i = 0; i<distancia_x; i++){
+        (trip->pos_x)--;
+        avisar_movimiento_miram(trip,"x");
+      }
+    }
+    else if(x_origen < x_destino){
+      distancia_x = x_destino - x_origen;
+      for(int i = 0; i<distancia_x; i++){
+        (trip->pos_x)++;
+        avisar_movimiento_miram(trip,"x");
+      }
+    }
+    else{
+      distancia_x = 0;
+    }
+
+    //Despues hago lo mismo en el eje Y
+    if(y_origen > y_destino){
+      distancia_y = y_origen - y_destino;
+      for(int i = 0; i<distancia_y; i++){
+        (trip->pos_y)--;
+        avisar_movimiento_miram(trip,"y");
+      }
+    }
+    else if(y_origen < y_destino){
+      distancia_y = y_destino - y_origen;
+      for(int i = 0; i<distancia_y; i++){
+        (trip->pos_y)++;
+        avisar_movimiento_miram(trip,"y");
+      }
+    }
+    else{
+      distancia_y = 0;
+    }
 }

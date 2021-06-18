@@ -123,6 +123,7 @@ void iniciar_planificacion();
 void pausar_planificacion();
 void finalizar_tripulante(Tripulante* trip); //Tripulante pasa de EXEC a EXIT, se liberan sus recursos
 bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro);
+void avisar_movimiento_miram(Tripulante* trip, char* eje);
 
 //Metodos Test
 void elegir_modulo();

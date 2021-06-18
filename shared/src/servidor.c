@@ -4,7 +4,7 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 {
 	struct sockaddr_in direccionServidor;
 	struct sockaddr_storage direccionRequest;
-	socklen_t tamanioDireccion;
+	socklen_t tamanioDireccion = sizeof(struct sockaddr_in);
 	int servidor_fd, puerto_app;
 	op_code codigo_operacion;
 	t_buffer* buffer_devolucion;

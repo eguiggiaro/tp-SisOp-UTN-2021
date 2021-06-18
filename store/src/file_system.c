@@ -285,6 +285,8 @@ int tamanioArchivo(char* path){
 void finalizarFS(void){
 	
 	bitarray_destroy(bitmap);
+	sem_destroy(&sem_bitmap);	
+	sem_destroy(&sem_bloques);
 	free(puntoMontaje);    
 	free(pathSuperbloque); 
 	free(pathBlocks);  
@@ -354,7 +356,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 
 	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
 	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
-	config_set_value(metaConfig, "BLOCKS", string_itoa(metadata->blocks));
+	config_set_value(metaConfig, "BLOCKS", stringFromList(metadata->blocks));
 	config_set_value(metaConfig, "CARACTER_LLENADO", metadata->caracter_llenado);
 	config_set_value(metaConfig, "MD5", generarMd5(metadata->blocks));
 
@@ -380,7 +382,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, int tripulante){
 
 	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
 	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
-	config_set_value(metaConfig, "BLOCKS", string_itoa(metadata->blocks));
+	config_set_value(metaConfig, "BLOCKS", stringFromList(metadata->blocks));
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
@@ -448,6 +450,21 @@ t_list* listaFromArray(char** array){
 		list_add(listaBloques,(void*) bloque);
 	}
 	return listaBloques;
+}
+
+char* stringFromList(t_list* lista){
+	char* strLista = string_new();
+
+	string_append(&strLista, "[");
+	string_append(&strLista, string_itoa(list_get(lista, 0)));
+	
+	for(int i=1; i<list_size(lista);i++){
+		string_append(&strLista, ",");
+		string_append(&strLista, string_itoa(list_get(lista, i)));	
+	}
+	string_append(&strLista, "]");
+
+	return strLista;
 }
 
 /*char* stringFromRecurso(tipoRecurso f){} //Obtiene un string de acuerdo al enum que le envío

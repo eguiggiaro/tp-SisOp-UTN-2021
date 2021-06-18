@@ -38,6 +38,8 @@ void testLecturaRecurso(){
 	
 	metadata = leerMetadataRecurso(OXIGENO);
 
+	char* str = stringFromList(metadata->blocks);
+	
 	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
 		int bloque = (int) list_get(metadata->blocks, i);
 		printf("bloque: %i", bloque);
@@ -96,6 +98,8 @@ int main(int argc, char* argv[]) {
 	miLogInfo("Finalizó I-Mongo-Store.");
 	miLogDestroy();
 	free(configuracion);
+
+	finalizarFS();
 
 	return EXIT_SUCCESS;
 }

@@ -57,6 +57,8 @@ int main()
 	miLogInfo("Conectándose a Store");
 	printf("\nInicia conexion con STORE:\n");
 
+	iniciar_conexion_store(ip_store, puerto_store);
+
 	new_list = list_create();
 	execute_list = list_create();
 	blocked_io = list_create();
@@ -677,11 +679,13 @@ bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
     t_buffer* buffer;
 
 	char* id_auxiliar = string_itoa(id_tripulante);
+	char* mensaje_tarea = string_new();
+	string_append(&mensaje_tarea,nombre_tarea);
+	string_append(&mensaje_tarea,parametro);
 
 	t_list* lista_mensajes = list_create();
 	list_add(lista_mensajes,id_auxiliar);
-	list_add(lista_mensajes,nombre_tarea);
-	list_add(lista_mensajes,parametro);
+	list_add(lista_mensajes,mensaje_tarea);
 
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;

@@ -33,7 +33,7 @@ int leer_config(void)
 	configuracion->tamanio_swap = config_get_int_value(config, "TAMANIO_SWAP");
 	configuracion->path_swap = config_get_string_value(config, "PATH_SWAP");
 	configuracion->algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
-	configuracion->algoritmo_busqueda = config_get_string_value(config, "ALGORITMO_BUSQUEDA");
+	configuracion->criterio_seleccion = config_get_string_value(config, "CRITERIO_SELECCION");
 	config_destroy(config);
 	return EXIT_SUCCESS;
 }
@@ -352,9 +352,13 @@ void inicializar_memoria(int tamanio_memoria)
 	contador_tripulantes = 0;
 	tabla_identificadores_grilla = list_create();
 
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		inicializar_segmentacion(tamanio_memoria);
+	} else {
+
+		tamanio_pagina = configuracion->tamanio_pagina;
+		inicializar_paginacion(tamanio_memoria, tamanio_pagina);
 	}
 }
 
@@ -362,9 +366,11 @@ void finalizar_memoria()
 {
 	dump_memoria(true); 
 	
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		finalizar_segmentacion();
+	} else {
+		finalizar_paginacion(tamanio_memoria);
 	}
 
 	free(MEMORIA);
@@ -375,9 +381,11 @@ void finalizar_memoria()
 
 void dump_memoria(bool mostrar_vacios)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		dump_memoria_segmentacion(mostrar_vacios);
+	} else {
+		dump_memoria_paginacion(mostrar_vacios);
 	}
 }
 
@@ -395,60 +403,74 @@ char *obtener_punto_string(char *puntos, int i)
 
 int reservar_memoria(int bytes)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
-		if (configuracion->algoritmo_busqueda = "FF")
+		if (configuracion->criterio_seleccion = "FF")
 		{
 			return reservar_memoria_segmentacion_ff(bytes);
 		}
+	} else {
+		return reservar_memoria_paginacion(bytes);
 	}
 }
 
 int alta_patota(PCB *unPCB)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		return alta_patota_segmentacion(unPCB);
+	} else {
+		return alta_patota_paginacion(unPCB);
 	}
 }
 
 u_int32_t buscar_patota(int PCB_ID)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		return buscar_patota_segmentacion(PCB_ID);
+	} else {
+		return buscar_patota_paginacion(PCB_ID);
 	}
 }
 
 void alta_tripulante(TCB *unTCB, int patota)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		return alta_tripulante_segmentacion(unTCB, patota);
+	} else {
+		return alta_tripulante_paginacion(unTCB, patota);
 	}
 }
 
 void alta_tareas(int PCB_ID, char *tareas)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		return alta_tareas_segmentacion(PCB_ID, tareas);
+	} else {
+		return alta_tareas_paginacion(PCB_ID, tareas);
 	}
 }
 
 u_int32_t buscar_tripulante(int TCB_ID)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		return buscar_tripulante_segmentacion(TCB_ID);
+	} else {
+		return buscar_tripulante_paginacion(TCB_ID);
 	}
 }
 
 u_int32_t buscar_tripulante_no_asignado(int PCB_ID)
 {
-	if (configuracion->esquema_memoria = "SEGMENTACION")
+	if (configuracion->esquema_memoria == "SEGMENTACION")
 	{
 		return buscar_tripulante_no_asignado_segmentacion(PCB_ID);
+	} else {
+		return buscar_tripulante_no_asignado_paginacion(PCB_ID);
 	}
 }
 
@@ -634,7 +656,7 @@ int expulsar_tripulante(int tripulante_id)
 	}
 	else
 	{
-		if (configuracion->esquema_memoria = "SEGMENTACION")
+		if (configuracion->esquema_memoria == "SEGMENTACION")
 		{
 			resultado = expulsar_tripulante_segmentacion(tripulante_id);
 		}
@@ -717,8 +739,8 @@ int main()
 
 	//signal(SIGINT, controlador);
 
-	pthread_t mapa;
-	pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
+	//pthread_t mapa;
+	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
 
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);

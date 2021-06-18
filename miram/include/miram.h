@@ -21,7 +21,7 @@ typedef struct Configuracion
 	int tamanio_swap;
 	char *path_swap;
 	char *algoritmo_reemplazo;
-	char *algoritmo_busqueda;
+	char *criterio_seleccion;
 } Configuracion;
 
 Configuracion *configuracion;
@@ -31,6 +31,7 @@ pthread_t threadMAPA;
 
 char *puerto_miram;
 int tamanio_memoria;
+int tamanio_pagina;
 
 int leer_config(void);
 void atender_request_miram(Request *request);

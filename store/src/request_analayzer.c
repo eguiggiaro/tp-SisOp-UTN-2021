@@ -119,12 +119,13 @@ void atender_request_store(Request *request) {
 int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 		tipoTarea opc = find_enum_consola(tarea);
+		int resultado;
 
 		switch (opc)
 		{
 				case GENERAR_OXIGENO:
 					printf( "Tarea es GENERAR_OXIGENO\n" );
-					generarRecursos(OXIGENO, cantidadRecursos);
+					resultado = generarRecursos(OXIGENO, cantidadRecursos);
 					break;
 
 				case CONSUMIR_OXIGENO:
@@ -133,7 +134,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case GENERAR_COMIDA:
 					printf( "Tarea es GENERAR_COMIDA\n" );
-					generarRecursos(COMIDA, cantidadRecursos);
+					resultado = generarRecursos(COMIDA, cantidadRecursos);
 					break;
 
 				case CONSUMIR_COMIDA:
@@ -142,7 +143,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case GENERAR_BASURA:
 					printf( "Tarea es GENERAR_BASURA\n" );
-					generarRecursos(BASURA, cantidadRecursos);
+					resultado = generarRecursos(BASURA, cantidadRecursos);
 					break;
 
 				case DESECHAR_BASURA:

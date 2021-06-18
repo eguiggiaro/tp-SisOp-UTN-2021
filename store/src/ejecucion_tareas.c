@@ -3,27 +3,35 @@
 #include "store.h"
 
 
-void generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
+int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	//verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
 
-	//leerMetadata(recurso); --> VA EN FILESYSTEM
-
+	MetadataRecurso* metadata = leerMetadataRecurso(recurso);
 
 
 	char * cadenaCaracteres = generarCadenaCaracteres(recurso, cantidadCaracteres);
 
-	t_list* listaBloquesOcupados = list_create();
-	
-	if (recurso == OXIGENO){
-		listaBloquesOcupados = llenarBloque(23, 3, 2, cadenaCaracteres);
-	} else {
-		listaBloquesOcupados = llenarBloque(45, 5, 7, cadenaCaracteres);
-	}
+	int size = metadata->size;
+	int block_count = metadata->block_count;
+	int posicionUltimoBloque = list_size(metadata->blocks)-1;
+	int ultimoBloque = list_get(metadata->blocks, posicionUltimoBloque);
 	
 
-	//modificarMetadata(metadata, listaBloquesOcupados);*/ --> VA EN FILESYSTEM
+	t_list* listaBloquesOcupados = list_create();
+	
+	
+	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, cadenaCaracteres);
+
+	list_add_all(metadata->blocks, listaBloquesOcupados);
+	metadata->size += cantidadCaracteres;
+	metadata->block_count += list_size(listaBloquesOcupados);
+
+	if(!modificarMetadataRecurso(metadata, recurso)){
+		return -1;
+	} 
     
+	return 1;
 
 }
 
@@ -53,33 +61,41 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
 
 char * generarCadenaCaracteres(tipoRecurso recurso, int cantidadCaracteres){
 
-
-    tipoRecurso opc = recurso;
     char * cadenaDeCaracteres;
 	cadenaDeCaracteres = malloc(sizeof (char) * cantidadCaracteres);
 
-		switch (opc)
-		{
-				case OXIGENO:
-					printf( "OXIGENO\n" );
-					cadenaDeCaracteres = string_repeat('O', cantidadCaracteres);
-					break;
+	char caracter = cualEsMiCaracter(recurso); 
+	cadenaDeCaracteres = string_repeat(caracter, cantidadCaracteres);
 
-				case COMIDA:
-					printf( "COMIDA\n" );
-                    cadenaDeCaracteres = string_repeat('C', cantidadCaracteres);
-					break;
-
-				case BASURA:
-					printf( "BASURA\n" );
-					cadenaDeCaracteres = string_repeat('B', cantidadCaracteres);
-					break;
-
-				default:
-					printf( "Error: recurso inexistente\n" );
-					break;
-		}
+		
     return cadenaDeCaracteres;  
+}
+
+char cualEsMiCaracter(tipoRecurso recurso){
+
+	char caracter;
+	switch (recurso)
+	{
+		case OXIGENO:
+			printf( "OXIGENO\n" );
+			caracter = 'O';
+			break;
+
+		case COMIDA:
+			printf( "COMIDA\n" );
+			caracter = 'C';
+			break;
+
+		case BASURA:
+			printf( "BASURA\n" );
+			caracter = 'B';
+			break;
+
+		default:
+			printf( "Error: recurso inexistente\n" );
+			break;
+	}
+	return caracter;
 }
 
 
@@ -106,10 +122,20 @@ char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int posicionEnCadena){
 
 int guardarEnBitacora(char* id_tripulante, char* instruccion){
 
+	MetadataBitacora* metadata = leerMetadataBitacora(id_tripulante);
+
+	int size = metadata->size;
+	int block_count = metadata->block_count;
+	int posicionUltimoBloque = list_size(metadata->blocks)-1;
+	int ultimoBloque = list_get(metadata->blocks, posicionUltimoBloque);
+
+
 	t_list* listaBloquesOcupados = list_create();
-	listaBloquesOcupados = llenarBloque(0, 0, 0, instruccion);
-								//size, blockCount, ultimoBloque, instruccion
-	//modificar metadata del tripulante. 
+	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, instruccion);
+								
+	if(!modificarMetadataBitacora(metadata, id_tripulante)){
+		return -1;
+	} 
 	
 	//si fall{o tengo q devolver -1}
 	return 1;

@@ -159,8 +159,8 @@ void inicializarStore(void){
 	//ejecutarTarea("GENERAR_COMIDA", 7);
 	//ejecutarTarea("GENERAR_OXIGENO", 3);
 	//testRWBlocks();
-	testLecturaRecurso();
-	testLecturaBitacora();
+	//testLecturaRecurso();
+	//testLecturaBitacora();
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }

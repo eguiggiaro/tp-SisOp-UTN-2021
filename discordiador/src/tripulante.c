@@ -331,20 +331,20 @@ void mover_tripulante(Tripulante* trip){
     int y_origen = trip->pos_y;
     int x_destino = atoi((trip->tarea_actual)->pos_x);
     int y_destino = atoi((trip->tarea_actual)->pos_y);
-    
+
     //Primero me muevo linealmente en el eje X
     if(x_origen > x_destino){
       distancia_x = x_origen - x_destino;
       for(int i = 0; i<distancia_x; i++){
         (trip->pos_x)--;
-        avisar_movimiento_miram(trip,"x");
+        avisar_movimiento_miram(trip,"X");
       }
     }
     else if(x_origen < x_destino){
       distancia_x = x_destino - x_origen;
       for(int i = 0; i<distancia_x; i++){
         (trip->pos_x)++;
-        avisar_movimiento_miram(trip,"x");
+        avisar_movimiento_miram(trip,"X");
       }
     }
     else{
@@ -356,14 +356,14 @@ void mover_tripulante(Tripulante* trip){
       distancia_y = y_origen - y_destino;
       for(int i = 0; i<distancia_y; i++){
         (trip->pos_y)--;
-        avisar_movimiento_miram(trip,"y");
+        avisar_movimiento_miram(trip,"Y");
       }
     }
     else if(y_origen < y_destino){
       distancia_y = y_destino - y_origen;
       for(int i = 0; i<distancia_y; i++){
         (trip->pos_y)++;
-        avisar_movimiento_miram(trip,"y");
+        avisar_movimiento_miram(trip,"Y");
       }
     }
     else{

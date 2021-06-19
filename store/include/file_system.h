@@ -53,10 +53,13 @@ char* obtenerDireccionDeMetadataRecurso (tipoRecurso);
 char* obtenerDireccionDeMetadataBitacora (int);
 int modificarMetadataRecurso(MetadataRecurso*, tipoRecurso);
 int modificarMetadataBitacora(MetadataBitacora*, int);
+int crearMetadataRecurso(tipoRecurso);
+//int crearMetadataBitacora(int);
+
 
 /**** SOPORTE ****/
 t_list* listaFromArray(char**);
-int crearMetadata(char*);
+int verificarExistenciaFile(char*);
 int tamanioArchivo(char*);
 char* stringFromList(t_list*);
 char* generarMd5(t_list*); //TODO

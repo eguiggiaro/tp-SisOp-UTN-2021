@@ -299,45 +299,50 @@ void finalizarFS(void){
 //------------------------------------MANEJO DE METADATA----------------------------------
 MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 
-	t_config* meta;
-	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
-
 	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);	
 
-	meta = config_create(direccionDeMetadata);
-
-	if(meta==NULL){
-		return NULL;
+	if(verificarExistenciaFile(direccionDeMetadata)){
+		if(crearMetadataRecurso(recurso)){
+			return NULL;
+		}		
 	}
 
-	metadata->size = config_get_int_value(meta, "SIZE");
-	metadata->block_count = config_get_int_value(meta, "BLOCK_COUNT");
-	metadata->blocks = listaFromArray(config_get_array_value(meta, "BLOCKS"));
-	metadata->caracter_llenado = config_get_string_value(meta, "CARACTER_LLENADO");
-	metadata->md5 = config_get_string_value(meta, "MD5");
+	t_config* metaConfig;
+	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
 
-	config_destroy(meta);
+	metaConfig = config_create(direccionDeMetadata);
+
+	metadata->size = config_get_int_value(metaConfig, "SIZE");
+	metadata->block_count = config_get_int_value(metaConfig, "BLOCK_COUNT");
+	metadata->blocks = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
+	metadata->caracter_llenado = config_get_string_value(metaConfig, "CARACTER_LLENADO");
+	metadata->md5 = config_get_string_value(metaConfig, "MD5");
+
+	config_destroy(metaConfig);
 	return metadata;
 }
 
 MetadataBitacora* leerMetadataBitacora(int tripulante){
 
-	t_config* meta;
-	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
-
 	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
 
-	meta = config_create(direccionDeMetadata);
-
-	if(meta==NULL){
-		return NULL;
+	if(verificarExistenciaFile(direccionDeMetadata)){
+		if(crearMetadataBitacora(tripulante)){
+			return NULL;
+		}		
 	}
 
-	metadata->size = config_get_int_value(meta, "SIZE");
-	metadata->block_count = config_get_int_value(meta, "BLOCK_COUNT");
-	metadata->blocks = listaFromArray(config_get_array_value(meta, "BLOCKS"));
+	t_config* metaConfig;
+	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
 
-	config_destroy(meta);
+	metaConfig = config_create(direccionDeMetadata);
+	
+	metadata->size = config_get_int_value(metaConfig, "SIZE");
+	metadata->block_count = config_get_int_value(metaConfig, "BLOCK_COUNT");
+	metadata->blocks = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
+
+	config_destroy(metaConfig);
+
 	return metadata;
 }
 
@@ -349,10 +354,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig==NULL){
-		//No existe el archivo.
-		if(!crearMetadata(direccionDeMetadata)){
-			return EXIT_FAILURE;
-		}		
+		return EXIT_FAILURE;	
 	}
 
 	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
@@ -376,10 +378,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, int tripulante){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig==NULL){
-		//No existe el archivo.
-		if(!crearMetadata(direccionDeMetadata)){
-			return EXIT_FAILURE;
-		}		
+		return EXIT_FAILURE;	
 	}
 
 	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
@@ -393,35 +392,63 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, int tripulante){
 	return EXIT_SUCCESS;
 }
 
-/*int verificarMetadataRecurso(tipoRecurso recurso){
+int crearMetadataRecurso(tipoRecurso recurso){
 	
-	char * metadataFile = obtenerDireccionDeMetadataRecurso(recurso);
-
-	FILE* file = fopen(metadataFile, "r");
-	
-	if (file == NULL) {
-		file = fopen(metadataFile, "w+");
-		t_list* listaVacia = list_create();
-		MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
-		metadata->size = ;
-		metadata->block_count = 0;
-		metadata->blocks = listaVacia;
-		metadata->caracter_llenado = cualEsMiCaracter(recurso);
-		metadata->md5 = "";
-		return EXIT_FAILURE;
-	}
-	fclose(file);
-	return EXIT_SUCCESS;
-}*/
-
-
-int crearMetadata(char* metadataFile){
-	FILE* file = fopen(metadataFile, "w+");
+	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);
+	FILE* file = fopen(direccionDeMetadata, "w+");
 	
 	if (file == NULL) {
 			return EXIT_FAILURE;
 	}
 	fclose(file);
+	
+	t_config* metaConfig;
+	metaConfig = config_create(direccionDeMetadata);
+
+	if(metaConfig == NULL){
+			return EXIT_FAILURE;	
+	}
+
+	char caracter = cualEsMiCaracter(recurso);
+	char* strCaracter = string_new();
+	strCaracter = string_repeat(caracter, 1);
+	
+	config_set_value(metaConfig, "SIZE", "0");
+	config_set_value(metaConfig, "BLOCK_COUNT", "0");
+	config_set_value(metaConfig, "BLOCKS", "[]");
+	config_set_value(metaConfig, "CARACTER_LLENADO", strCaracter);
+	config_set_value(metaConfig, "MD5_ARCHIVO", "");
+
+	config_save(metaConfig);
+	config_destroy(metaConfig);
+
+	return EXIT_SUCCESS;
+}
+
+int crearMetadataBitacora(int tripulante){
+	
+	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);
+	FILE* file = fopen(direccionDeMetadata, "w+");
+	
+	if (file == NULL) {
+			return EXIT_FAILURE;
+	}
+	fclose(file);
+	
+	t_config* metaConfig;
+	metaConfig = config_create(direccionDeMetadata);
+
+	if(metaConfig == NULL){
+			return EXIT_FAILURE;	
+	}
+	
+	config_set_value(metaConfig, "SIZE", "0");
+	config_set_value(metaConfig, "BLOCK_COUNT", "0");
+	config_set_value(metaConfig, "BLOCKS", "[]");
+
+	config_save(metaConfig);
+	config_destroy(metaConfig);
+
 	return EXIT_SUCCESS;
 }
 
@@ -468,6 +495,18 @@ char* obtenerDireccionDeMetadataBitacora (int tripulante){ //Devuelve la direcci
 	return direccionDeMetadata;
 }
 
+int verificarExistenciaFile(char* path){
+	
+	FILE* file = fopen(path, "r");
+	
+	if (file == NULL) {
+			return EXIT_FAILURE;
+	}
+	fclose(file);
+
+	return EXIT_SUCCESS;
+}
+
 t_list* listaFromArray(char** array){
 	t_list* listaBloques = list_create();
 
@@ -480,16 +519,18 @@ t_list* listaFromArray(char** array){
 
 char* stringFromList(t_list* lista){
 	char* strLista = string_new();
-
 	string_append(&strLista, "[");
-	string_append(&strLista, string_itoa(list_get(lista, 0)));
 	
-	for(int i=1; i<list_size(lista);i++){
-		string_append(&strLista, ",");
-		string_append(&strLista, string_itoa(list_get(lista, i)));	
+	if(string_length(lista) > 0){
+		string_append(&strLista, string_itoa(list_get(lista, 0)));
+		
+		for(int i=1; i<list_size(lista);i++){
+			string_append(&strLista, ",");
+			string_append(&strLista, string_itoa(list_get(lista, i)));	
+		}
 	}
-	string_append(&strLista, "]");
 
+	string_append(&strLista, "]");
 	return strLista;
 }
 

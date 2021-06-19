@@ -6,47 +6,18 @@
 #define CONFIG_FILE_PATH "cfg/store.cfg"
 #define LOG_FILE_PATH "store.log"
 
-void testRWBlocks(){
-
-	t_list* bloquesTest = list_create();
-	t_list* bloquesTest2 = list_create();
-	//char* stringTest = "Test de escritura de bloques.";
-	//char* stringTest2 = "Escritura de bloques mas larga para probar como funciona el manejo de memcpy.";
-
-	//list_add_all(bloquesTest, escribirBloquesNuevo(stringTest));
-	//list_add_all(bloquesTest2, escribirBloquesNuevo(stringTest2));
-	
-	list_add(bloquesTest, 0);
-	list_add(bloquesTest, 1);
-	list_add(bloquesTest, 2);
-	list_add(bloquesTest, 8);
-
-	list_add(bloquesTest2, 3);
-	list_add(bloquesTest2, 4);
-	list_add(bloquesTest2, 5);
-	list_add(bloquesTest2, 6);
-	list_add(bloquesTest2, 7);
-	list_add(bloquesTest2, 9);
-	
-	char* lectura = leerBloques(bloquesTest, 37);
-	char* lectura2 = leerBloques(bloquesTest2, 52);
-
-}
-
 void testLecturaRecurso(){
 	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
 	
 	metadata = leerMetadataRecurso(OXIGENO);
 
 	char* str = stringFromList(metadata->blocks);
-	
+	char* lectura = leerBloques(metadata->blocks, metadata->size);
+
 	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
 		int bloque = (int) list_get(metadata->blocks, i);
 		printf("bloque: %d", bloque);
 	}*/
-	
-	char* lectura = leerBloques(metadata->blocks, metadata->size);
-	
 }
 
 void testLecturaBitacora(){
@@ -55,13 +26,12 @@ void testLecturaBitacora(){
 	metadata = leerMetadataBitacora(1);
 
 	char* str = stringFromList(metadata->blocks);
+	char* lectura = leerBloques(metadata->blocks, metadata->size);
 
 	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
 		int bloque = (int) list_get(metadata->blocks, i);
 		printf("bloque: %d", bloque);
 	}*/
-
-	char* lectura = leerBloques(metadata->blocks, metadata->size);
 }
 
 int main(int argc, char* argv[]) {
@@ -146,8 +116,6 @@ void inicializarStore(void){
 
 	testLecturaRecurso();
 	testLecturaBitacora();
-
-	//testRWBlocks();
 
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));

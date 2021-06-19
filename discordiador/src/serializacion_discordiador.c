@@ -149,7 +149,6 @@ void iniciar_tripulante(uint32_t socket){
 }
 
 t_list* iniciar_patota_miram(uint32_t socket, t_list* lista_mensajes ){
-    printf("\nFuncion de INFORMAR TAREAS PATOTA");
 
     t_paquete* paquete = crear_paquete(INICIAR_PATOTA);
 	t_buffer* buffer;
@@ -176,7 +175,6 @@ t_list* iniciar_patota_miram(uint32_t socket, t_list* lista_mensajes ){
 	}
 }
 void informar_tareas_patota_test(uint32_t socket){
-    printf("\nFuncion de INFORMAR TAREAS PATOTA");
 
     t_paquete* paquete = crear_paquete(INFORMAR_TAREAS_PATOTA);
 	t_buffer* buffer;

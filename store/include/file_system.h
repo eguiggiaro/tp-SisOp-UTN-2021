@@ -54,7 +54,7 @@ char* obtenerDireccionDeMetadataBitacora (int);
 int modificarMetadataRecurso(MetadataRecurso*, tipoRecurso);
 int modificarMetadataBitacora(MetadataBitacora*, int);
 int crearMetadataRecurso(tipoRecurso);
-//int crearMetadataBitacora(int);
+int crearMetadataBitacora(int);
 
 
 /**** SOPORTE ****/

@@ -108,14 +108,14 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 	inicializarSemaforos();
 	
-	ejecutarTarea("GENERAR_OXIGENO", 40);
-	ejecutarTarea("GENERAR_COMIDA", 13);
-	ejecutarTarea("GENERAR_BASURA", 7);
+	// ejecutarTarea("GENERAR_OXIGENO", 40);
+	// ejecutarTarea("GENERAR_COMIDA", 13);
+	// ejecutarTarea("GENERAR_BASURA", 7);
 
-	guardarEnBitacora(1,"Prueba de escritura en la bitacora del tripulante 1.");
+	// guardarEnBitacora(1,"Prueba de escritura en la bitacora del tripulante 1.");
 
-	testLecturaRecurso();
-	testLecturaBitacora();
+	// testLecturaRecurso();
+	// testLecturaBitacora();
 
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));

@@ -84,6 +84,7 @@ void inicializarSemaforos(void);
 //t_list* obtenerListaSabotaje(char*);
 
 pthread_mutex_t mutex_informartareas;
+pthread_mutex_t mutex_informacionBitacora;
 
 
 #endif

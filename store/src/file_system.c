@@ -1,4 +1,5 @@
 #include "file_system.h"
+#include "ejecucion_tareas.h"
 
 
 bool verificarFS(void){
@@ -313,7 +314,7 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 	metadata->block_count = config_get_int_value(meta, "BLOCK_COUNT");
 	metadata->blocks = listaFromArray(config_get_array_value(meta, "BLOCKS"));
 	metadata->caracter_llenado = config_get_string_value(meta, "CARACTER_LLENADO");
-	metadata->caracter_llenado = config_get_string_value(meta, "MD5");
+	metadata->md5 = config_get_string_value(meta, "MD5");
 
 	config_destroy(meta);
 	return metadata;
@@ -343,13 +344,13 @@ MetadataBitacora* leerMetadataBitacora(int tripulante){
 int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 
 	t_config* metaConfig;
-	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);	
-
+	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);
+	
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig==NULL){
 		//No existe el archivo.
-		if(crearMetadata(direccionDeMetadata)){
+		if(!crearMetadata(direccionDeMetadata)){
 			return EXIT_FAILURE;
 		}		
 	}
@@ -358,10 +359,11 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
 	config_set_value(metaConfig, "BLOCKS", stringFromList(metadata->blocks));
 	config_set_value(metaConfig, "CARACTER_LLENADO", metadata->caracter_llenado);
-	config_set_value(metaConfig, "MD5", generarMd5(metadata->blocks));
+	config_set_value(metaConfig, "MD5_ARCHIVO", generarMd5(metadata->blocks));
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
+	free(metadata);
 
 	return EXIT_SUCCESS;
 }
@@ -375,7 +377,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, int tripulante){
 
 	if(metaConfig==NULL){
 		//No existe el archivo.
-		if(crearMetadata(direccionDeMetadata)){
+		if(!crearMetadata(direccionDeMetadata)){
 			return EXIT_FAILURE;
 		}		
 	}
@@ -386,9 +388,32 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, int tripulante){
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
+	free(metadata);
 
 	return EXIT_SUCCESS;
 }
+
+/*int verificarMetadataRecurso(tipoRecurso recurso){
+	
+	char * metadataFile = obtenerDireccionDeMetadataRecurso(recurso);
+
+	FILE* file = fopen(metadataFile, "r");
+	
+	if (file == NULL) {
+		file = fopen(metadataFile, "w+");
+		t_list* listaVacia = list_create();
+		MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
+		metadata->size = ;
+		metadata->block_count = 0;
+		metadata->blocks = listaVacia;
+		metadata->caracter_llenado = cualEsMiCaracter(recurso);
+		metadata->md5 = "";
+		return EXIT_FAILURE;
+	}
+	fclose(file);
+	return EXIT_SUCCESS;
+}*/
+
 
 int crearMetadata(char* metadataFile){
 	FILE* file = fopen(metadataFile, "w+");
@@ -400,8 +425,9 @@ int crearMetadata(char* metadataFile){
 	return EXIT_SUCCESS;
 }
 
+//TODO:
 char* generarMd5(t_list* bloques){
-	return "Algun md5";
+	return "Algun md5"; 
 }
 
 char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
@@ -428,7 +454,7 @@ char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la dir
 	return direccionDeMetadata;
 }
 
-char* obtenerDireccionDeMetadataBitacora (int tripulante){ //Devuelve la direccion de la metadata según el recurso que quiero
+char* obtenerDireccionDeMetadataBitacora (int tripulante){ //Devuelve la direccion de la metadata según el id del tripulante que quiero
 
 	char* direccionDeMetadata = string_new();
 	char* nombreMetadata = string_from_format("%s/%s", pathBitacoras, "Tripulante");

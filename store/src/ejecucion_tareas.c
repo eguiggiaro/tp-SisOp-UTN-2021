@@ -7,27 +7,34 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	//verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
 
-	MetadataRecurso* metadata = leerMetadataRecurso(recurso);
+	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
 
+	char caracter = cualEsMiCaracter(recurso);
+	char * cadenaCaracteres = generarCadenaCaracteres(caracter, cantidadCaracteres);
 
-	char * cadenaCaracteres = generarCadenaCaracteres(recurso, cantidadCaracteres);
-
-	int size = metadata->size;
-	int block_count = metadata->block_count;
-	int posicionUltimoBloque = list_size(metadata->blocks)-1;
-	int ultimoBloque = list_get(metadata->blocks, posicionUltimoBloque);
+	int size = metadataR->size;
+	int block_count = metadataR->block_count;
+	int posicionUltimoBloque = list_size(metadataR->blocks);
+	int ultimoBloque = 0;
 	
-
+	if (posicionUltimoBloque != 0){
+		posicionUltimoBloque--;
+		ultimoBloque = list_get(metadataR->blocks, posicionUltimoBloque);
+	} 
+	 
 	t_list* listaBloquesOcupados = list_create();
 	
 	
 	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, cadenaCaracteres);
 
-	list_add_all(metadata->blocks, listaBloquesOcupados);
-	metadata->size += cantidadCaracteres;
-	metadata->block_count += list_size(listaBloquesOcupados);
+	list_add_all(metadataR->blocks, listaBloquesOcupados);
+	metadataR->size += cantidadCaracteres;
+	metadataR->block_count += list_size(listaBloquesOcupados);
+	metadataR->caracter_llenado = &caracter;
 
-	if(!modificarMetadataRecurso(metadata, recurso)){
+	free(cadenaCaracteres);
+
+	if(modificarMetadataRecurso(metadataR, recurso)){
 		return -1;
 	} 
     
@@ -55,18 +62,17 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
 	char* cadenaDesdeCantidad = truncarCadenaDesdeCantidad(cadenaCaracteres, posicionEnCadena);  
 	bloquesEscritos = escribirBloquesNuevo(cadenaDesdeCantidad);
 
+	
     return bloquesEscritos;
     
 }
 
-char * generarCadenaCaracteres(tipoRecurso recurso, int cantidadCaracteres){
+char * generarCadenaCaracteres(char caracter, int cantidadCaracteres){
 
     char * cadenaDeCaracteres;
 	cadenaDeCaracteres = malloc(sizeof (char) * cantidadCaracteres);
 
-	char caracter = cualEsMiCaracter(recurso); 
 	cadenaDeCaracteres = string_repeat(caracter, cantidadCaracteres);
-
 		
     return cadenaDeCaracteres;  
 }
@@ -126,12 +132,21 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 
 	int size = metadata->size;
 	int block_count = metadata->block_count;
-	int posicionUltimoBloque = list_size(metadata->blocks)-1;
-	int ultimoBloque = list_get(metadata->blocks, posicionUltimoBloque);
+	int posicionUltimoBloque = list_size(metadata->blocks);
+	int ultimoBloque = 0;
+	
+	if (posicionUltimoBloque != 0){
+		posicionUltimoBloque--;
+		ultimoBloque = list_get(metadata->blocks, posicionUltimoBloque);
+	} 
 
 
 	t_list* listaBloquesOcupados = list_create();
 	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, instruccion);
+
+	list_add_all(metadata->blocks, listaBloquesOcupados);
+	metadata->size += string_length(instruccion);
+	metadata->block_count += list_size(listaBloquesOcupados);
 								
 	if(!modificarMetadataBitacora(metadata, id_tripulante)){
 		return -1;

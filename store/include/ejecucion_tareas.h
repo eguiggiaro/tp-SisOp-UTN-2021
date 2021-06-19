@@ -23,7 +23,7 @@
 
 int generarRecursos(tipoRecurso, int);
 t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCaracteres);
-char * generarCadenaCaracteres(tipoRecurso recurso, int cantidad);
+char * generarCadenaCaracteres(char caracter, int cantidad);
 int bytesLibresUltimoBloque(int size, int blockCount);
 char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int cantidad);
 char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int cantidad);

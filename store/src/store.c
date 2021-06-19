@@ -42,9 +42,11 @@ void testLecturaRecurso(){
 	
 	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
 		int bloque = (int) list_get(metadata->blocks, i);
-		printf("bloque: %i", bloque);
+		printf("bloque: %d", bloque);
 	}*/
-
+	
+	char* lectura = leerBloques(metadata->blocks, metadata->size);
+	
 }
 
 void testLecturaBitacora(){
@@ -52,35 +54,15 @@ void testLecturaBitacora(){
 	
 	metadata = leerMetadataBitacora(1);
 
+	char* str = stringFromList(metadata->blocks);
+
 	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
 		int bloque = (int) list_get(metadata->blocks, i);
-		printf("bloque: %i", bloque);
+		printf("bloque: %d", bloque);
 	}*/
+
+	char* lectura = leerBloques(metadata->blocks, metadata->size);
 }
-
-void crearArchivoTipoConfig(){
-
-	FILE* file = fopen("archivoConfig.cfg", "wb+");
-	
-	if (file == NULL) {
-			return -1;
-	}
-	fclose(file);
-	
-	t_config* configTest = config_create("archivoConfig.cfg");
-	
-	if(configTest==NULL){
-		return EXIT_FAILURE;
-	}
-	
-	config_set_value(configTest, "KEY1", "Algo");
-	config_set_value(configTest, "KEY2", "Algo2");
-	config_set_value(configTest, "KEY3", "Algo3");
-
-	config_save(configTest);
-	config_destroy(configTest);
-}
-
 
 int main(int argc, char* argv[]) {
 
@@ -156,11 +138,17 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 	inicializarSemaforos();
 	
-	//ejecutarTarea("GENERAR_COMIDA", 7);
-	//ejecutarTarea("GENERAR_OXIGENO", 3);
+	ejecutarTarea("GENERAR_OXIGENO", 40);
+	ejecutarTarea("GENERAR_COMIDA", 13);
+	ejecutarTarea("GENERAR_BASURA", 7);
+
+	guardarEnBitacora(1,"Prueba de escritura en la bitacora del tripulante 1.");
+
+	testLecturaRecurso();
+	testLecturaBitacora();
+
 	//testRWBlocks();
-	//testLecturaRecurso();
-	//testLecturaBitacora();
+
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }

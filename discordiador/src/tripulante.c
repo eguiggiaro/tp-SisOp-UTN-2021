@@ -151,11 +151,13 @@ void generar_comida_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-    miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");    
+    miLogInfo("\nComienza ejecucion de GENERAR_COMIDA"); 
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");   
     mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
     trip->tarea_actual = NULL;
   }
   else{
@@ -171,10 +173,12 @@ void generar_oxigeno_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
     mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
     trip->tarea_actual = NULL;
   }
   else{
@@ -190,10 +194,12 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
     mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
     trip->tarea_actual = NULL;
   }
   else{
@@ -208,10 +214,12 @@ void consumir_comida_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
     mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
     trip->tarea_actual = NULL;
   }
   else{
@@ -226,10 +234,12 @@ void generar_basura_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
     mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
     trip->tarea_actual = NULL;
   }
   else{
@@ -244,10 +254,12 @@ void descartar_basura_FIFO(Tripulante* trip){
 
   if(tarea_informada(trip->id_tripulante,tarea,parametro)){
     miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
     mover_tripulante(trip);
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
     miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
     trip->tarea_actual = NULL;
   }
   else{
@@ -258,10 +270,12 @@ void descartar_basura_FIFO(Tripulante* trip){
 void tarea_generica_FIFO(Tripulante* trip){
   //Moverse a ubicacion.
   miLogInfo("\nComienza ejecucion de TAREA GENERICA");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
   mover_tripulante(trip);
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
+  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
   trip->tarea_actual = NULL;
 }
 
@@ -332,18 +346,36 @@ void mover_tripulante(Tripulante* trip){
     int x_destino = atoi((trip->tarea_actual)->pos_x);
     int y_destino = atoi((trip->tarea_actual)->pos_y);
 
+    //parametro para enviar a bitacora
+    char* id_trip = string_itoa(trip->id_tripulante);
+
+
     //Primero me muevo linealmente en el eje X
     if(x_origen > x_destino){
       distancia_x = x_origen - x_destino;
       for(int i = 0; i<distancia_x; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "X";
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* x_destino_b = string_itoa((trip->pos_x)-1);
+        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        //realizo movimiento
         (trip->pos_x)--;
+        //aviso a miram
         avisar_movimiento_miram(trip,"X");
       }
     }
     else if(x_origen < x_destino){
       distancia_x = x_destino - x_origen;
       for(int i = 0; i<distancia_x; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "X";
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* x_destino_b = string_itoa((trip->pos_x)+1);
+        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        //realizo movimiento
         (trip->pos_x)++;
+        //aviso a miram
         avisar_movimiento_miram(trip,"X");
       }
     }
@@ -355,14 +387,28 @@ void mover_tripulante(Tripulante* trip){
     if(y_origen > y_destino){
       distancia_y = y_origen - y_destino;
       for(int i = 0; i<distancia_y; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "Y";
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* y_destino_b = string_itoa((trip->pos_y)-1);
+        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        //realizo movimiento
         (trip->pos_y)--;
+        //aviso a miram
         avisar_movimiento_miram(trip,"Y");
       }
     }
     else if(y_origen < y_destino){
       distancia_y = y_destino - y_origen;
       for(int i = 0; i<distancia_y; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "Y";
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* y_destino_b = string_itoa((trip->pos_y)+1);
+        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        //realizo movimiento
         (trip->pos_y)++;
+        //aviso a miram
         avisar_movimiento_miram(trip,"Y");
       }
     }

@@ -34,7 +34,6 @@ int leer_config(void)
 	configuracion->path_swap = config_get_string_value(config, "PATH_SWAP");
 	configuracion->algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
 	configuracion->criterio_seleccion = config_get_string_value(config, "CRITERIO_SELECCION");
-	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
@@ -352,7 +351,7 @@ void inicializar_memoria(int tamanio_memoria)
 	contador_tripulantes = 0;
 	tabla_identificadores_grilla = list_create();
 
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		inicializar_segmentacion(tamanio_memoria);
 	} else {
@@ -366,7 +365,7 @@ void finalizar_memoria()
 {
 	dump_memoria(true); 
 	
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		finalizar_segmentacion();
 	} else {
@@ -381,7 +380,7 @@ void finalizar_memoria()
 
 void dump_memoria(bool mostrar_vacios)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		dump_memoria_segmentacion(mostrar_vacios);
 	} else {
@@ -403,7 +402,7 @@ char *obtener_punto_string(char *puntos, int i)
 
 int reservar_memoria(int bytes)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		if (configuracion->criterio_seleccion = "FF")
 		{
@@ -416,7 +415,7 @@ int reservar_memoria(int bytes)
 
 int alta_patota(PCB *unPCB)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		return alta_patota_segmentacion(unPCB);
 	} else {
@@ -426,7 +425,7 @@ int alta_patota(PCB *unPCB)
 
 u_int32_t buscar_patota(int PCB_ID)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		return buscar_patota_segmentacion(PCB_ID);
 	} else {
@@ -436,7 +435,7 @@ u_int32_t buscar_patota(int PCB_ID)
 
 void alta_tripulante(TCB *unTCB, int patota)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		return alta_tripulante_segmentacion(unTCB, patota);
 	} else {
@@ -446,7 +445,7 @@ void alta_tripulante(TCB *unTCB, int patota)
 
 void alta_tareas(int PCB_ID, char *tareas)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		return alta_tareas_segmentacion(PCB_ID, tareas);
 	} else {
@@ -456,7 +455,7 @@ void alta_tareas(int PCB_ID, char *tareas)
 
 u_int32_t buscar_tripulante(int TCB_ID)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		return buscar_tripulante_segmentacion(TCB_ID);
 	} else {
@@ -466,7 +465,7 @@ u_int32_t buscar_tripulante(int TCB_ID)
 
 u_int32_t buscar_tripulante_no_asignado(int PCB_ID)
 {
-	if (configuracion->esquema_memoria == "SEGMENTACION")
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		return buscar_tripulante_no_asignado_segmentacion(PCB_ID);
 	} else {
@@ -476,6 +475,9 @@ u_int32_t buscar_tripulante_no_asignado(int PCB_ID)
 
 u_int32_t iniciar_tareas(int PCB_ID, char *tareas)
 {
+	
+
+
 	u_int32_t posicion_memoria = reservar_memoria(strlen(tareas));
 
 	if (posicion_memoria == 99)
@@ -561,74 +563,18 @@ char *proxima_tarea_tripulante(int tripulante_id)
 
 int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 {
-	miLogInfo("Iniciando patota \n");
-	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
 
-	if (posicion_memoria == 99)
+
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
-		return -1;
+		
+		iniciar_patota_segmentacion(cantidad_tripulantes, tareas, puntos);
+	} else {
+		//
 	}
 
-	PCB *unPCB = posicion_memoria;
-	// Sincronizar
-	unPCB->PID = contador_patotas++;
-
-	miLogInfo("Iniciando tareas \n");
-
-	posicion_memoria = iniciar_tareas(unPCB->PID, tareas);
-
-	if (posicion_memoria == 99)
-	{
-		return -1;
-	}
-
-	unPCB->Tareas = posicion_memoria;
-
-	//alta patota
-	alta_patota(unPCB);
-
-	miLogInfo("Iniciando tripulantes \n");
-
-	for (int i = 0; i < cantidad_tripulantes; i++)
-	{
-
-		//if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
-		if (inicializar_tripulante(unPCB->PID, obtener_punto_string(puntos, i), unPCB->Tareas) == -1)
-		{
-			return -1;
-		}
-	}
-	return unPCB->PID;
 }
 
-int inicializar_tripulante(int patota, char *unPunto, u_int32_t tareas)
-{
-	u_int32_t posicion_memoria = reservar_memoria(21);
-
-	if (posicion_memoria == 99)
-	{
-		return -1;
-	}
-
-	TCB *miTCB = posicion_memoria;
-
-	//sincronizar
-	miTCB->TID = contador_tripulantes++;
-	miTCB->estado = 'N';
-
-	char **lista_puntos;
-	lista_puntos = string_split(unPunto, "|");
-	miTCB->pos_X = atoi(lista_puntos[0]);
-	miTCB->pos_y = atoi(lista_puntos[1]);
-
-	free(lista_puntos); 
-	//linkear a tareas
-	miTCB->proxima_instruccion = tareas;
-	miTCB->PCB = buscar_patota(patota);
-
-	//alta tripulante
-	alta_tripulante(miTCB, patota);
-}
 
 int iniciar_tripulante(int patota_id)
 {
@@ -656,7 +602,7 @@ int expulsar_tripulante(int tripulante_id)
 	}
 	else
 	{
-		if (configuracion->esquema_memoria == "SEGMENTACION")
+		if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 		{
 			resultado = expulsar_tripulante_segmentacion(tripulante_id);
 		}

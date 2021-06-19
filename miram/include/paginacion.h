@@ -12,6 +12,10 @@
 int contador_frames;
 int contador_frames_libres;
 t_list *tabla_frames;
+t_list *tabla_pcbs;
+t_list *tabla_tareas;
+t_list *tabla_tcbs;
+
 
 typedef enum
 {

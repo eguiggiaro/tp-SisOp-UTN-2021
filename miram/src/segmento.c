@@ -3,6 +3,7 @@
 void dump_memoria_segmentos(bool mostrar_vacios)
 {
 
+
 	printf("--------------------------------------------------------------------\n");
 	printf("Detalle tabla de segmentos\n");
 	printf("--------------------------------------------------------------------\n");
@@ -109,9 +110,12 @@ void dump_memoria_contenido_segmentacion()
 void dump_memoria_segmentacion(bool mostrar_vacios)
 
 {
+	pthread_mutex_lock(&mutex_dump);
 	dump_memoria_segmentos(mostrar_vacios);
 	dump_memoria_contenido_segmentacion();
 	fflush(stdout); 
+	pthread_mutex_unlock(&mutex_dump);
+
 }
 
 //Imprime el segmento
@@ -486,6 +490,81 @@ void inicializar_segmentacion(int tamanio_memoria)
 	//Agrego el segmento vacío a la tabla de segmentos
 	list_add(tabla_segmentos, segmento_aux);
 }
+
+
+int inicializar_tripulante_segmentacion(int patota, char *unPunto, u_int32_t tareas)
+{
+	u_int32_t posicion_memoria = reservar_memoria(21);
+
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+
+	TCB *miTCB = posicion_memoria;
+
+	//sincronizar
+	miTCB->TID = contador_tripulantes++;
+	miTCB->estado = 'N';
+
+	char **lista_puntos;
+	lista_puntos = string_split(unPunto, "|");
+	miTCB->pos_X = atoi(lista_puntos[0]);
+	miTCB->pos_y = atoi(lista_puntos[1]);
+
+	free(lista_puntos); 
+	//linkear a tareas
+	miTCB->proxima_instruccion = tareas;
+	miTCB->PCB = buscar_patota(patota);
+
+	//alta tripulante
+	alta_tripulante(miTCB, patota);
+}
+
+
+int iniciar_patota_segmentacion(int cantidad_tripulantes, char *tareas, char *puntos)
+{
+
+	miLogInfo("Iniciando patota \n");
+	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));
+
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+
+	PCB *unPCB = posicion_memoria;
+	// Sincronizar
+	unPCB->PID = contador_patotas++;
+
+	miLogInfo("Iniciando tareas \n");
+
+	posicion_memoria = iniciar_tareas(unPCB->PID, tareas);
+
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+
+	unPCB->Tareas = posicion_memoria;
+
+	//alta patota
+	alta_patota(unPCB);
+
+	miLogInfo("Iniciando tripulantes \n");
+
+	for (int i = 0; i < cantidad_tripulantes; i++)
+	{
+
+		//if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
+		if (inicializar_tripulante_segmentacion(unPCB->PID, obtener_punto_string(puntos, i), unPCB->Tareas) == -1)
+		{
+			return -1;
+		}
+	}
+	return unPCB->PID;
+}
+
 
 //Finaliza la segmentación
 void finalizar_segmentacion()

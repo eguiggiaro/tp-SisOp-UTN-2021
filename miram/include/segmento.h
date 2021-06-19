@@ -52,5 +52,5 @@ typedef struct
 Segmento* buscar_segmento_por_id(int id_segmento);
 uint32_t buscar_patota_segmentacion(int PID);
 uint32_t buscar_tripulante_segmentacion(int TCB_ID);
-
+pthread_mutex_t mutex_dump;
 #endif

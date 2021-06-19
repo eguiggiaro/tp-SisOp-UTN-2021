@@ -730,11 +730,94 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
     enviar_paquete(paquete, socket_miram);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_store);
+	op_code codigo_operacion = recibir_operacion(socket_miram);
 	if (codigo_operacion == OK) {
 		miLogInfo("\nNueva posicion informada a MIRAM correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA POSICION. \n");
+	}
+
+	list_destroy(lista_mensajes);
+}
+
+void avisar_movimiento_bitacora(char* id_trip, char* eje, char* origen, char* destino){
+	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
+    t_buffer* buffer;
+
+	t_list* lista_mensajes = list_create();
+
+	//Parametros que se envian a Store:
+	list_add(lista_mensajes,id_trip);
+	list_add(lista_mensajes, "DESPLAZAMIENTO"); //accion
+	list_add(lista_mensajes,eje);
+	list_add(lista_mensajes,origen);
+	list_add(lista_mensajes,destino);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, socket_store);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_store);
+	if (codigo_operacion == OK) {
+		miLogInfo("\nNueva desplazamiento informado a bitacora correctamente");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR INFORMANDO NUEVA POSICION A BITACORA. \n");
+	}
+
+	list_destroy(lista_mensajes);
+}
+
+void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre){
+	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
+    t_buffer* buffer;
+
+	t_list* lista_mensajes = list_create();
+
+	//Parametros que se envian a Store:
+	list_add(lista_mensajes,id_trip);
+	list_add(lista_mensajes, "INICIO_TAREA"); //accion
+	list_add(lista_mensajes,tarea_nombre);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, socket_store);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_store);
+	if (codigo_operacion == OK) {
+		miLogInfo("\nNueva tarea informada a bitacora correctamente");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR INFORMANDO NUEVA TAREA A BITACORA. \n");
+	}
+
+	list_destroy(lista_mensajes);
+}
+
+void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre){
+	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
+    t_buffer* buffer;
+
+	t_list* lista_mensajes = list_create();
+
+	//Parametros que se envian a Store:
+	list_add(lista_mensajes,id_trip);
+	list_add(lista_mensajes, "FIN_TAREA"); //accion
+	list_add(lista_mensajes,tarea_nombre);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, socket_store);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_store);
+	if (codigo_operacion == OK) {
+		miLogInfo("\nFin de tarea informado a bitacora correctamente");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR INFORMANDO FIN DE TAREA A BITACORA. \n");
 	}
 
 	list_destroy(lista_mensajes);

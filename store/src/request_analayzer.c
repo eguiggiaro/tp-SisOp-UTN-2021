@@ -14,7 +14,6 @@ const char *tipoTarea_table [] = {
 void atender_request_store(Request *request) {
 
 	op_code codigo_operacion = request->codigo_operacion;
-	t_buffer *buffer_devolucion;
 	int request_fd = request->request_fd;
 	t_list *lista;
 	t_list *lista_mensajes;
@@ -29,19 +28,19 @@ void atender_request_store(Request *request) {
 
 			pthread_mutex_lock(&mutex_informartareas);
 			t_buffer* buffer_devolucion_informar_tarea = request->buffer_devolucion;
-			t_paquete *paquete_devuelto_informar_tarea;
+			t_paquete* paquete_devuelto_informar_tarea;
 
 			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
-			lista = deserializar_lista_strings(buffer_devolucion);
+			lista = deserializar_lista_strings(buffer_devolucion_informar_tarea);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12
-			char** lista;
+			char** listaNueva;
 
-			lista = string_split(informeTarea[1] , " ");//Crea una lista separando la cadena informeTarea[1] por SPACE. Resultado lista[0]= GENERAR_OXIGENO . lista[1] = 12
+			listaNueva = string_split(informeTarea[1] , " ");//Crea una lista separando la cadena informeTarea[1] por SPACE. Resultado lista[0]= GENERAR_OXIGENO . lista[1] = 12
 	
-			char* tarea = list_get(lista,0);//tarea
-			int cantidadRecursos = atoi(list_get(lista,1)); //En el caso de DESCARTAR_BASURA es NULL
+			char* tarea = list_get(listaNueva,0);//tarea
+			int cantidadRecursos = atoi(list_get(listaNueva,1)); //En el caso de DESCARTAR_BASURA es NULL
 
 	 		resultadoTarea = ejecutarTarea(tarea, cantidadRecursos);
 			// resultadoBitacora = guardarEnBitacora(tarea);
@@ -78,7 +77,7 @@ void atender_request_store(Request *request) {
 			t_paquete *paquete_devuelto_informacion_bitacora;
 
 			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
-			lista = deserializar_lista_strings(buffer_devolucion);
+			lista = deserializar_lista_strings(buffer_devolucion_informacion_bitacora);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X

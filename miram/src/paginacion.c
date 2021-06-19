@@ -492,13 +492,56 @@ uint32_t buscar_tripulante_no_asignado_paginacion(int PCB_ID)
     */
 }
 
-//Crea la tabla de segmentos y el primer segmento vacio
+
+
+int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *puntos)
+{
+	/*
+	PCB *unPCB = malloc(sizeof(PCB));
+	// Sincronizar
+	unPCB->PID = contador_patotas++;
+
+	miLogInfo("Iniciando tareas \n");
+
+	posicion_memoria = iniciar_tareas(unPCB->PID, tareas);
+
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+
+	unPCB->Tareas = posicion_memoria;
+
+	//alta patota
+	alta_patota(unPCB);
+
+	miLogInfo("Iniciando tripulantes \n");
+
+	for (int i = 0; i < cantidad_tripulantes; i++)
+	{
+
+		//if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
+		if (inicializar_tripulante_segmentacion(unPCB->PID, obtener_punto_string(puntos, i), unPCB->Tareas) == -1)
+		{
+			return -1;
+		}
+	}
+	
+	
+	return unPCB->PID;
+*/
+}
+
+
 void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina)
 {   
     contador_frames = tamanio_memoria / tamanio_pagina;
     contador_frames_libres = contador_frames;
     Frame* un_frame;
   	tabla_frames = list_create();
+	tabla_pcbs = list_create();
+	tabla_tareas = list_create();
+	tabla_tcbs = list_create();
 
     for (int i= 0; i < contador_frames; i++ )
     {

@@ -209,6 +209,7 @@ void expulsar_tripulante(char *comando)
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(socket_miram);
 	if (codigo_operacion == OK) {
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
 		miLogInfo("\nTripulante expulsado correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR EXPULSANDO TRIPULANTE. \n");

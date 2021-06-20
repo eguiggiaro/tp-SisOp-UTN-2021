@@ -100,6 +100,7 @@ void consola()
 	pthread_t *threadPATOTA;
 	pthread_t *threadINICIAR_PLANIFICACION;
 	pthread_t *threadPAUSAR_PLANIFICACION;
+	pthread_t *threadEXPULSAR_TRIPULANTE;
 
 	input_consola = readline(">>");
 
@@ -147,7 +148,11 @@ void consola()
 				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
 				break;
 			case EXPULSAR_TRIPULANTE_COM:
-				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
+				printf("Comando es Expulsar Tripulante\n");
+				if (pthread_create(&threadEXPULSAR_TRIPULANTE, NULL, (void*) expulsar_tripulante, 
+				(char*)input_consola) != 0) {
+			     printf("Error expulsando tripulante/n");
+		        }
 				break;
 			case OBTENER_BITACORA_COM:
 				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
@@ -180,6 +185,39 @@ void consola()
 		}
 	}
 }
+
+void expulsar_tripulante(char *comando)
+{
+	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
+	char *string_tareas;
+	char *string_posiciones = string_new();
+	char **list;
+
+	list = string_split(comando, " ");
+
+	char* tripulante = list[1]; //leemos el tripulante a expulsar
+
+	list_add(lista_mensajes, tripulante);
+	
+	t_paquete* paquete = crear_paquete(EXPULSAR_TRIPULANTE);
+    t_buffer* buffer;
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+    enviar_paquete(paquete, socket_miram);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_miram);
+	if (codigo_operacion == OK) {
+		miLogInfo("\nTripulante expulsado correctamente");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
+	}
+
+	list_destroy(lista_mensajes);
+}
+
+
 
 void iniciar_patota(char *comando)
 {
@@ -250,7 +288,6 @@ void iniciar_patota(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
-	printf("DONE!");
 }
 
 void vaciar_listas()

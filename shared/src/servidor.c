@@ -27,7 +27,7 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 	while (1)
  	{
 
-		if(listen(servidor_fd, 10) == -1){
+		if(listen(servidor_fd, SOMAXCONN) == -1){
 			perror("fallo el listen");
 		}
 
@@ -123,7 +123,8 @@ int recibir_operacion(int fd_entrada)
 {
 	
 	int cod_op;
-	if(recv(fd_entrada, &cod_op, sizeof(op_code), MSG_WAITALL) != 0)
+	int respuesta = recv(fd_entrada, &cod_op, sizeof(op_code), MSG_WAITALL);
+	if(respuesta != 0)
 		return cod_op;
 	else
 	{

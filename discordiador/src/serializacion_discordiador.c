@@ -68,44 +68,6 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 }
 
 
-
-void expulsar_tripulante(uint32_t socket){
-	printf("\nFuncion de EXPULSAR TRIPULANTE");
-
-    t_paquete* paquete = crear_paquete(EXPULSAR_TRIPULANTE);
-	t_buffer* buffer;
-
-    char* id_tripulante;
-    printf("\nPor favor, ingrese el ID del tripulante a expulsar\n:");
-    id_tripulante = readline(">>");
-    // int id_seleccionado = atoi(id_tripulante);
-	// buffer = serializar_numero(id_seleccionado);
-
-    t_list* lista_mensajes = list_create();
-    list_add(lista_mensajes,id_tripulante);
-    buffer = serializar_lista_strings(lista_mensajes);
-	paquete ->buffer = buffer;
-	enviar_paquete(paquete, socket);
-
-	//recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket);
-	if (codigo_operacion == OK) {
-
-		t_buffer* buffer = recibir_buffer(socket);
-		t_list* lista = deserializar_lista_strings(buffer);
-
-		loggear_lista_strings(lista);
-
-		list_destroy(lista);
-
-		eliminar_buffer(buffer);
-		
-		miLogInfo("Recibi los mensajes del destino correctamente");
-	} else {
-		miLogInfo("No recibi los mensajes del destino correctamente");
-	}
-}
-
 void iniciar_tripulante(uint32_t socket){
     printf("\nFuncion de INICIAR TRIPULANTE");
 

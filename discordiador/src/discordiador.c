@@ -718,11 +718,12 @@ bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
 
 	char* id_auxiliar = string_itoa(id_tripulante);
 	char* mensaje_tarea = string_new();
+	char* espacio = string_new();
+	string_append(&espacio, " ");
 	string_append(&mensaje_tarea,nombre_tarea);
-	char* parametro_aux = string_new();
-	parametro_aux = " ";
-	string_append(&parametro_aux, parametro);
-	string_append(&mensaje_tarea,parametro_aux);
+	string_append(&mensaje_tarea, espacio);
+	string_append(&mensaje_tarea,parametro);
+	printf("%s",mensaje_tarea);
 
 	t_list* lista_mensajes = list_create();
 	list_add(lista_mensajes,id_auxiliar);

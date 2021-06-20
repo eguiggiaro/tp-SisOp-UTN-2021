@@ -56,7 +56,6 @@ int modificarMetadataBitacora(MetadataBitacora*, char*);
 int crearMetadataRecurso(tipoRecurso);
 int crearMetadataBitacora(char*);
 
-
 /**** SOPORTE ****/
 t_list* listaFromArray(char**);
 int verificarExistenciaFile(char*);

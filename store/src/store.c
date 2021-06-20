@@ -117,7 +117,6 @@ void inicializarStore(void){
 	//testLecturaRecurso();
 	testLecturaBitacora();
 
-
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }
 

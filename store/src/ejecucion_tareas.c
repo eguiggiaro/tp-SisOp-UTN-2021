@@ -150,7 +150,7 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 	metadata->size += string_length(instruccion);
 	metadata->block_count += list_size(listaBloquesOcupados);
 								
-	if(!modificarMetadataBitacora(metadata, id_tripulante)){
+	if(modificarMetadataBitacora(metadata, id_tripulante)){
 		return -1;
 	} 
 	

@@ -15,8 +15,8 @@ void atender_request_store(Request *request) {
 
 	op_code codigo_operacion = request->codigo_operacion;
 	int request_fd = request->request_fd;
-	t_list *lista = list_create();
-	t_list *lista_mensajes = list_create();
+	t_list *lista;
+	t_list *lista_mensajes;
 	int resultadoTarea;
 	int resultadoBitacora;
 	char* id_tripulante; 
@@ -33,16 +33,14 @@ void atender_request_store(Request *request) {
 			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
 			lista = deserializar_lista_strings(buffer_devolucion_informar_tarea);
 
-			id_tripulante = list_get(lista,0); //Ej: id_tripulante. 
-			 
-			//t_list* informeTarea = list_create();
+			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12
-
 			char** listaNueva;
-			listaNueva = string_split(informeTarea , " ");//Crea una lista separando la cadena informeTarea[1] por SPACE. Resultado lista[0]= GENERAR_OXIGENO . lista[1] = 12
+
+			listaNueva = string_split(informeTarea[1] , " ");//Crea una lista separando la cadena informeTarea[1] por SPACE. Resultado lista[0]= GENERAR_OXIGENO . lista[1] = 12
 	
-			char* tarea = listaNueva[0];//tarea
-			int cantidadRecursos = atoi(listaNueva[1]); //En el caso de DESCARTAR_BASURA es NULL
+			char* tarea = list_get(listaNueva,0);//tarea
+			int cantidadRecursos = atoi(list_get(listaNueva,1)); //En el caso de DESCARTAR_BASURA es NULL
 
 	 		resultadoTarea = ejecutarTarea(tarea, cantidadRecursos);
 			// resultadoBitacora = guardarEnBitacora(tarea);
@@ -74,7 +72,7 @@ void atender_request_store(Request *request) {
 
 		case INFORMACION_BITACORA:
 
-			pthread_mutex_lock(&mutex_informacionBitacora);
+			pthread_mutex_lock(&mutex_informartareas);
 			t_buffer* buffer_devolucion_informacion_bitacora = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_informacion_bitacora;
 
@@ -88,13 +86,13 @@ void atender_request_store(Request *request) {
 
 			if (resultadoTarea == -1)
 			{
-				miLogInfo("ERROR: NO SE PUDO GUARDAD LA INSTRUCCION \n");
+				miLogInfo("ERROR: NO SE PUDO REALIZAR LA TAREA \n");
 				paquete_devuelto_informacion_bitacora = crear_paquete(FAIL);
 				list_add(lista_mensajes, "Se produjo un error intentar guardar la instruccion");
 			}
 			else
 			{
-				miLogInfo("SE GUARDO LA INSTRUCCION CORRECTAMENTE \n");
+				miLogInfo("TAREA REALIZADA CORRECTAMENTE \n");
 
 				paquete_devuelto_informacion_bitacora = crear_paquete(OK);
 				list_add(lista_mensajes, "Se guardó la instruccion correctamente");
@@ -106,7 +104,7 @@ void atender_request_store(Request *request) {
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
 			free(request);
-			pthread_mutex_unlock(&mutex_informacionBitacora);
+			pthread_mutex_unlock(&mutex_informartareas);
 
 		break;
 		

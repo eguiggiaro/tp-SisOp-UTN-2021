@@ -16,23 +16,42 @@ void crearDirectorio(char* path){
 }
 
 void crearArbolDirectorios(void){
+	
 	DIR* dirMontaje = opendir(puntoMontaje);
 	DIR* dirFiles = opendir(pathFiles);
 	DIR* dirBitacoras = opendir(pathBitacoras);
-
+	
 	if(!dirMontaje){
 		crearDirectorio(puntoMontaje);
 	}
+
 	if(!dirFiles){
-		crearDirectorio(pathFiles);			
+		crearDirectorio(dirFiles);			
+	} else {
+		borrarTodosLosArchivos(pathFiles);
 	}
+
 	if(!dirBitacoras){
 		crearDirectorio(pathBitacoras);
-	} 
+	} else {
+		borrarTodosLosArchivos(dirBitacoras);
+	}
 
 	closedir(dirMontaje);
 	closedir(dirFiles);
 	closedir(dirBitacoras);
+}
+
+void borrarTodosLosArchivos(DIR* directorio){
+
+	/*char* comando = string_new();
+	comando = string_from_format("%s %s/%s", "delete", directorio, "*.*");
+
+	if(system(comando)){
+		printf("No pudo borrar los archivos.");
+		
+	}
+	miLogInfo("Borró todos los archivos del directorio %s", directorio);*/
 }
 
 void crearSuperbloque(void){
@@ -322,7 +341,7 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 	return metadata;
 }
 
-MetadataBitacora* leerMetadataBitacora(int tripulante){
+MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
 	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
 
@@ -336,7 +355,7 @@ MetadataBitacora* leerMetadataBitacora(int tripulante){
 	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
 
 	metaConfig = config_create(direccionDeMetadata);
-	
+
 	metadata->size = config_get_int_value(metaConfig, "SIZE");
 	metadata->block_count = config_get_int_value(metaConfig, "BLOCK_COUNT");
 	metadata->blocks = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
@@ -370,7 +389,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	return EXIT_SUCCESS;
 }
 
-int modificarMetadataBitacora(MetadataBitacora* metadata, int tripulante){
+int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 
 	t_config* metaConfig;
 	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
@@ -425,7 +444,7 @@ int crearMetadataRecurso(tipoRecurso recurso){
 	return EXIT_SUCCESS;
 }
 
-int crearMetadataBitacora(int tripulante){
+int crearMetadataBitacora(char* tripulante){
 	
 	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);
 	FILE* file = fopen(direccionDeMetadata, "w+");
@@ -481,15 +500,15 @@ char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la dir
 	return direccionDeMetadata;
 }
 
-char* obtenerDireccionDeMetadataBitacora (int tripulante){ //Devuelve la direccion de la metadata según el id del tripulante que quiero
+char* obtenerDireccionDeMetadataBitacora (char* tripulante){ //Devuelve la direccion de la metadata según el id del tripulante que quiero
 
 	char* direccionDeMetadata = string_new();
 	char* nombreMetadata = string_from_format("%s/%s", pathBitacoras, "Tripulante");
-	char* numeroTripulante = string_itoa(tripulante);
+	//char* numeroTripulante = string_itoa(tripulante);
 	char* extensionDeMetadata = ".ims";
 	
 	string_append(&direccionDeMetadata, nombreMetadata);
-	string_append(&direccionDeMetadata, numeroTripulante);
+	string_append(&direccionDeMetadata, tripulante);
 	string_append(&direccionDeMetadata, extensionDeMetadata);
 		
 	return direccionDeMetadata;

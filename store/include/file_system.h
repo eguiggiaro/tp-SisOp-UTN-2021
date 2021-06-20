@@ -47,15 +47,14 @@ char* leerBloque(int , int);
 char* leerBloques(t_list*, int);
 
 /**** MANEJO METADATA ****/
-MetadataBitacora* leerMetadataBitacora(int);
+MetadataBitacora* leerMetadataBitacora(char*);
 MetadataRecurso* leerMetadataRecurso(tipoRecurso);
-char* obtenerDireccionDeMetadataRecurso (tipoRecurso);
-char* obtenerDireccionDeMetadataBitacora (int);
+char* obtenerDireccionDeMetadataRecurso(tipoRecurso);
+char* obtenerDireccionDeMetadataBitacora(char*);
 int modificarMetadataRecurso(MetadataRecurso*, tipoRecurso);
-int modificarMetadataBitacora(MetadataBitacora*, int);
+int modificarMetadataBitacora(MetadataBitacora*, char*);
 int crearMetadataRecurso(tipoRecurso);
-int crearMetadataBitacora(int);
-
+int crearMetadataBitacora(char*);
 
 /**** SOPORTE ****/
 t_list* listaFromArray(char**);
@@ -63,6 +62,7 @@ int verificarExistenciaFile(char*);
 int tamanioArchivo(char*);
 char* stringFromList(t_list*);
 char* generarMd5(t_list*); //TODO
+void borrarTodosLosArchivos(DIR*);
 
 
 /**** DEṔRECADAS ****/

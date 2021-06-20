@@ -481,7 +481,9 @@ int leer_config(void)
 	configuracion->puerto_i_mongo_store = strdup(config_get_string_value(config, "PUERTO_I_MONGO_STORE"));
 	configuracion->grado_multitarea = config_get_int_value(config, "GRADO_MULTITAREA");
 	configuracion->algoritmo = strdup(config_get_string_value(config, "ALGORITMO"));
+	if(strncmp(configuracion->algoritmo,"RR",2)==0){
 	configuracion->quantum = config_get_int_value(config, "QUANTUM");
+	}
 	configuracion->duracion_sabotaje = config_get_int_value(config, "DURACION_SABOTAJE");
 	configuracion->retardo_ciclo_cpu = config_get_int_value(config, "RETARDO_CICLO_CPU");
 
@@ -666,6 +668,9 @@ int planificar() {
 		list_remove(ready_list, 0);
 		
 		tripulante->tripulante_despierto = true;
+		if(strncmp(configuracion->algoritmo,"RR",2)==0){
+			tripulante->quantum = configuracion->quantum;
+		}
 		sem_post(&tripulante->semaforo_trip);
 	} else {
 		miLogInfo("No existen más tripulantes en la cola de READY");
@@ -723,7 +728,6 @@ bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
 	string_append(&mensaje_tarea,nombre_tarea);
 	string_append(&mensaje_tarea, espacio);
 	string_append(&mensaje_tarea,parametro);
-	printf("%s",mensaje_tarea);
 
 	t_list* lista_mensajes = list_create();
 	list_add(lista_mensajes,id_auxiliar);

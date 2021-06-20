@@ -23,7 +23,7 @@ void testLecturaRecurso(){
 void testLecturaBitacora(){
 	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
 	
-	metadata = leerMetadataBitacora(1);
+	metadata = leerMetadataBitacora("1");
 
 	char* str = stringFromList(metadata->blocks);
 	char* lectura = leerBloques(metadata->blocks, metadata->size);
@@ -108,13 +108,13 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 	inicializarSemaforos();
 	
-	ejecutarTarea("GENERAR_OXIGENO", 40);
+	/*ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
+	*/
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
 
-	guardarEnBitacora(1,"Prueba de escritura en la bitacora del tripulante 1.");
-
-	testLecturaRecurso();
+	//testLecturaRecurso();
 	testLecturaBitacora();
 
 

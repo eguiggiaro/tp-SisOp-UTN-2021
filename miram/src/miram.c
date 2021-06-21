@@ -4,12 +4,15 @@
 #define CONFIG_FILE_PATH "cfg/miram.cfg"
 #define LOG_FILE_PATH "miram.log"
 
-void controlador(int parametro)
+void compactar_memoria(void)
 {
-	miLogInfo("Finalizando memoria");
-	finalizar_memoria();
-		miLogInfo("Memoria liberada de Miram");
-
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+		{
+			miLogInfo("Compactando!");
+				iniciar_servidor_miram();
+		} else {
+		miLogInfo("No se puede compactar en paginación!");
+	}
 }
 
 // Lee la configuración y la deja disponible
@@ -91,7 +94,7 @@ void atender_request_miram(Request *request)
 		pthread_mutex_unlock(&mutex_expulsion);
 	
 		break;
-
+	
 	case INICIAR_TRIPULANTE:
 		pthread_mutex_lock(&mutex_tripulantes);
 		t_paquete *paquete_devuelto_iniciar_tripulante;
@@ -137,6 +140,40 @@ void atender_request_miram(Request *request)
 		free(proxima_tarea);
 		free(request);
 		pthread_mutex_unlock(&mutex_tripulantes);
+		break;
+
+	case COMPACTACION:
+		//recibo los mensajes
+		lista_mensajes = list_create();
+		t_buffer *buffer_devolucion_compactar = request->buffer_devolucion;
+
+		//recibo los mensajes
+		miLogInfo("Me llego operacion: COMPACTAR \n");
+		lista = deserializar_lista_strings(buffer_devolucion_compactar);
+		resultado = compactar();
+
+		if (resultado == -1)
+		{
+			miLogInfo("ERROR: COMPACTACION CON ERROR \n");
+			paquete_devuelto = crear_paquete(FAIL);
+			list_add(lista_mensajes, "Se produjo un error al compactar");
+		}
+		else
+		{
+			miLogInfo("COMPACTACION OK \n");
+
+			paquete_devuelto = crear_paquete(OK);
+			list_add(lista_mensajes, "OK");
+		}
+
+		t_buffer *buffer_respuesta_compactar = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_respuesta_compactar;
+		enviar_paquete(paquete_devuelto, request_fd);
+		eliminar_buffer(buffer_devolucion_compactar);
+		list_destroy(lista_mensajes);
+		list_destroy(lista);
+		free(request);
+
 		break;
 
 	case INICIAR_PATOTA:
@@ -376,6 +413,17 @@ void finalizar_memoria()
 
 	//nivel_destruir(nivel);
 	//nivel_gui_terminar();
+}
+
+int compactar()
+{
+
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	{
+		return compactar_segmentacion();
+	} else {
+		return -1;
+	}
 }
 
 void dump_memoria(bool mostrar_vacios)
@@ -683,7 +731,7 @@ void *iniciar_funciones_memoria()
 int main()
 {
 
-	//signal(SIGINT, controlador);
+	//signal(SIGINT, compactar_memoria);
 
 	//pthread_t mapa;
 	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);

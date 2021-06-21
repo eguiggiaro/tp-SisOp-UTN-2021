@@ -46,7 +46,8 @@ typedef enum Comandos{
 	EXPULSAR_TRIPULANTE_COM,
 	OBTENER_BITACORA_COM,
 	FIN,
-	TEST_MENSAJES
+	TEST_MENSAJES,
+	COMPACTACION_COM
 }Comandos;
 
 	
@@ -116,6 +117,7 @@ bool planificacion_activada;
 //Metodos Discordidor
 void iniciar_patota(char* ); //?string? chequer commons
 void expulsar_tripulante(char* );
+void compactacion(char* );
 void consola();
 char* leer_tareas_txt(char* direccion_txt);
 void mandar_tareas_miram(char *);

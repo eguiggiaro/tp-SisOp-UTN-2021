@@ -278,6 +278,176 @@ u_int32_t buscar_posicion(int segmento)
 	}
 }
 
+int compactar_segmentacion()
+{
+	t_list_iterator	*list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+	Segmento* segmento1;
+	Segmento* segmento2;
+	contador_segmentos = 0;
+	contador_segmentos_libres = -1;
+
+	if (list_iterator_has_next(list_iterator_segmentos)) {
+		segmento1 = list_iterator_next(list_iterator_segmentos);
+	}
+
+	while (list_iterator_has_next(list_iterator_segmentos))
+		{
+			segmento2 = list_iterator_next(list_iterator_segmentos);
+
+			if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LLENO") == 0) 
+			{
+				compactacion_mover_segmentos(segmento1, segmento2, contador_segmentos, contador_segmentos_libres);
+				contador_segmentos++;
+				contador_segmentos_libres--;
+				segmento1 = segmento2;
+
+			} else {
+				if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LIBRE") == 0) 
+				{
+					compactacion_fusionar_segmentos(segmento1, segmento2);
+				} else {
+						segmento1 = segmento2;
+				}
+			}
+		}
+		list_iterator_destroy(list_iterator_segmentos);
+}
+
+
+void compactacion_fusionar_segmentos(Segmento* segmento1, Segmento* segmento2)
+{
+	
+}
+
+
+void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int segmento_lleno, int segmento_vacio)
+{
+
+	t_list_iterator	*list_iterator_tcb;
+	t_list_iterator	*list_iterator_pcb;
+	t_list_iterator	*list_iterator_tareas;
+
+	TCB_adm* tcb_adm2;
+	PCB_adm* pcb_adm2;
+	Tarea_adm* tarea_adm2;
+	bool encontre_elemento = false;
+	char tipo_encontrado = 'N';
+
+	int segmento_pcb;
+	int segmento_tcb;
+	int segmento_tareas;
+
+	TCB* tcb_auxiliar;
+	PCB* pcb_auxiliar;
+	char* tareas_auxiliar;
+
+	//Segmento2 (que es el lleno)
+	list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
+
+	while (list_iterator_has_next(list_iterator_pcb))
+	{
+		pcb_adm2 = list_iterator_next(list_iterator_pcb);
+
+		if (pcb_adm2->segmento_nro == segmento2->id) {
+			encontre_elemento = true;
+			tipo_encontrado = 'P';
+			break;
+		}
+	}
+
+	list_iterator_destroy(list_iterator_pcb);
+	list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
+
+
+	if (!encontre_elemento) 
+	{
+		while (list_iterator_has_next(list_iterator_tcb))
+		{
+			tcb_adm2 = list_iterator_next(list_iterator_tcb);
+
+			if (tcb_adm2->segmento_nro == segmento2->id) {
+				encontre_elemento = true;
+				tipo_encontrado = 'T';
+				break;
+			}
+		}
+	}
+
+	list_iterator_destroy(list_iterator_tcb);
+	list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
+
+
+	if (!encontre_elemento) 
+	{
+		while (list_iterator_has_next(list_iterator_tareas))
+		{
+			tarea_adm2 = list_iterator_next(list_iterator_tareas);
+
+			if (tarea_adm2->segmento_nro == segmento2->id) {
+				encontre_elemento = true;
+				tipo_encontrado = 'K';
+				break;
+			}
+		}
+	}
+
+	list_iterator_destroy(list_iterator_tareas);
+
+
+	if (tipo_encontrado == 'P')
+	{
+		pcb_auxiliar = segmento2->dir_inicio;
+		
+		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
+		while (list_iterator_has_next(list_iterator_tcb))
+		{
+			tcb_adm2 = list_iterator_next(list_iterator_tcb);
+
+			if (tcb_adm2->PID == pcb_auxiliar->PID) {
+				tcb_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
+			}
+		}
+		list_iterator_destroy(list_iterator_tcb);
+
+		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
+		while (list_iterator_has_next(list_iterator_tareas))
+		{
+			tarea_adm2 = list_iterator_next(list_iterator_tareas);
+
+			if (tarea_adm2->PID == pcb_auxiliar->PID) {
+				tareas_auxiliar = buscar_segmento_por_id(tarea_adm2->segmento_nro);
+			}
+		}
+		list_iterator_destroy(list_iterator_tareas);
+
+		memcpy(segmento1->dir_inicio, pcb_auxiliar, segmento2->desplazamiento);
+
+		tcb_auxiliar->PCB = segmento1->dir_inicio;
+
+
+
+
+
+
+	}
+
+
+
+
+	free(tcb_auxiliar);
+	free(pcb_auxiliar);
+	free(tareas_auxiliar);
+	list_iterator_destroy(list_iterator_tcb);
+	list_iterator_destroy(list_iterator_pcb);
+	list_iterator_destroy(list_iterator_tareas);
+
+
+}
+
+
+
+
+
 void alta_patota_segmentacion(PCB *unPCB)
 {
 	PCB_adm *pcb_adm = malloc(sizeof(PCB_adm));

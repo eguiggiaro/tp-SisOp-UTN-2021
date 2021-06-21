@@ -101,6 +101,7 @@ void consola()
 	pthread_t *threadINICIAR_PLANIFICACION;
 	pthread_t *threadPAUSAR_PLANIFICACION;
 	pthread_t *threadEXPULSAR_TRIPULANTE;
+	pthread_t *threadCOMPACTACION;
 
 	input_consola = readline(">>");
 
@@ -152,6 +153,13 @@ void consola()
 				if (pthread_create(&threadEXPULSAR_TRIPULANTE, NULL, (void*) expulsar_tripulante, 
 				(char*)input_consola) != 0) {
 			     printf("Error expulsando tripulante/n");
+		        }
+				break;
+			case COMPACTACION_COM:
+				printf("Comando es Expulsar Tripulante\n");
+				if (pthread_create(&threadCOMPACTACION, NULL, (void*) compactacion, 
+				(char*)input_consola) != 0) {
+			     printf("Error compactacion/n");
 		        }
 				break;
 			case OBTENER_BITACORA_COM:
@@ -218,7 +226,33 @@ void expulsar_tripulante(char *comando)
 	list_destroy(lista_mensajes);
 }
 
+void compactacion(char *comando)
+{
+	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
+	char *string_tareas;
+	char *string_posiciones = string_new();
+	char **list;
 
+	list_add(lista_mensajes, "COMPACTACION");
+	
+	t_paquete* paquete = crear_paquete(COMPACTACION);
+    t_buffer* buffer;
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+    enviar_paquete(paquete, socket_miram);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_miram);
+	if (codigo_operacion == OK) {
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
+		miLogInfo("\nCompactacion OK");
+	} else if (codigo_operacion == FAIL){
+        miLogError("COMPACTACION CON ERROR. \n");
+	}
+
+	list_destroy(lista_mensajes);
+}
 
 void iniciar_patota(char *comando)
 {

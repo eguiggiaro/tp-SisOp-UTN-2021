@@ -18,6 +18,7 @@ typedef enum
 	FSCK,
 	ALERTA_SABOTAJE,
 	INFORMAR_TAREAS_PATOTA,//Borrar luego
+	COMPACTACION,
     OK = 20,
 	FAIL = 21,
 } op_code;

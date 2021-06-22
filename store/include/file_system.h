@@ -62,7 +62,7 @@ int verificarExistenciaFile(char*);
 int tamanioArchivo(char*);
 char* stringFromList(t_list*);
 char* generarMd5(t_list*); //TODO
-void borrarTodosLosArchivos(DIR*);
+void borrarTodosLosArchivos(char*);
 
 
 /**** DEṔRECADAS ****/

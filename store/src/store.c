@@ -99,6 +99,7 @@ void inicializarStore(void){
 	inicializarParametrosFS();
 
 	if (!verificarFS()){
+		borrarTodosLosArchivos(puntoMontaje);
 		crearArbolDirectorios();
 		crearSuperbloque();
 		crearBlocks();

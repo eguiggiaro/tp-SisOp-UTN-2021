@@ -26,15 +26,11 @@ void crearArbolDirectorios(void){
 	}
 
 	if(!dirFiles){
-		crearDirectorio(dirFiles);			
-	} else {
-		borrarTodosLosArchivos(pathFiles);
-	}
+		crearDirectorio(pathFiles);			
+	} 
 
 	if(!dirBitacoras){
 		crearDirectorio(pathBitacoras);
-	} else {
-		borrarTodosLosArchivos(dirBitacoras);
 	}
 
 	closedir(dirMontaje);
@@ -42,16 +38,18 @@ void crearArbolDirectorios(void){
 	closedir(dirBitacoras);
 }
 
-void borrarTodosLosArchivos(DIR* directorio){
+void borrarTodosLosArchivos(char* path){
 
-	/*char* comando = string_new();
-	comando = string_from_format("%s %s/%s", "delete", directorio, "*.*");
+	char* comando = string_new();
+	comando = string_from_format("%s %s/%s", "rm -r", path, "*");
 
-	if(system(comando)){
-		printf("No pudo borrar los archivos.");
-		
-	}
-	miLogInfo("Borró todos los archivos del directorio %s", directorio);*/
+	int res = system(comando);
+
+	if(!res){
+		miLogInfo("Borró la estructura de file system existente en el punto de montaje %s", path);
+	} else {
+		miLogInfo("No pudo borrar la estructura de file system existente en el punto de montaje %s", path);
+	}	
 }
 
 void crearSuperbloque(void){

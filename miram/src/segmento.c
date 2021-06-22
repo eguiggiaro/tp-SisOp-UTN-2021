@@ -296,13 +296,6 @@ int compactar_segmentacion()
 		{
 			segmento2 = list_iterator_next(list_iterator_segmentos);
 
-			if (borrar_segmento) {
-				
-				list_remove(tabla_segmentos,contador_lista-1);
-				borrar_segmento = false;
-			}
-
-
 			if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"OCUPADO") == 0) 
 			{
 				compactacion_mover_segmentos(segmento1, segmento2, contador_segmentos);
@@ -313,7 +306,8 @@ int compactar_segmentacion()
 				if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LIBRE") == 0) 
 				{
 					compactacion_fusionar_segmentos(segmento1, segmento2);
-					borrar_segmento = true;
+					free(segmento2);
+					list_iterator_remove(list_iterator_segmentos);
 				} else {
 							compactacion_renumerar_lleno(segmento1, contador_segmentos);
 							contador_segmentos++;
@@ -321,6 +315,7 @@ int compactar_segmentacion()
 				}
 				}
 			contador_lista++;
+			dump_memoria_segmentacion(true);
 
 		}
 
@@ -332,7 +327,9 @@ int compactar_segmentacion()
 			compactacion_renumerar_vacio(segmento1, contador_segmentos_libres);
 			contador_segmentos_libres--;
 		}
-		
+
+		list_iterator_destroy(list_iterator_segmentos);
+
 		dump_memoria_segmentacion(true);
 }
 
@@ -522,13 +519,16 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 	
 		//Cambio los segmentos
 
+		segmento2->id = segmento1->id;
+		segmento2->desplazamiento = desplazamiento_final_2;
+		segmento2->estado = "LIBRE";
+		segmento2->dir_inicio = segmento1->dir_inicio + desplazamiento_final_1 + 1;
+
 		segmento1->desplazamiento = desplazamiento_final_1;
 		segmento1->estado = "OCUPADO";
 		segmento1->id = segmento_lleno;
 
-		segmento2->desplazamiento = desplazamiento_final_2;
-		segmento2->estado = "LIBRE";
-		segmento2->dir_inicio = segmento1->dir_inicio + desplazamiento_final_1 + 1;
+
 		
 		//Cambio estructura administrativa
 		pcb_adm2->segmento_nro = segmento_lleno;
@@ -562,13 +562,14 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		memcpy(segmento1->dir_inicio, tcb_auxiliar, segmento2->desplazamiento);
 	
 		//Cambio los segmentos
-		segmento1->desplazamiento = desplazamiento_final_1;
-		segmento1->estado = "OCUPADO";
-		segmento1->id = segmento_lleno;
-
+		segmento2->id = segmento1->id;
 		segmento2->desplazamiento = desplazamiento_final_2;
 		segmento2->estado = "LIBRE";
 		segmento2->dir_inicio = segmento1->dir_inicio + desplazamiento_final_1 + 1;
+
+		segmento1->desplazamiento = desplazamiento_final_1;
+		segmento1->estado = "OCUPADO";
+		segmento1->id = segmento_lleno;
 
 		//Cambio estructura administrativa
 		tcb_adm2->segmento_nro = segmento_lleno;
@@ -600,13 +601,14 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		memcpy(segmento1->dir_inicio, tareas_auxiliar, segmento2->desplazamiento);
 	
 		//Cambio los segmentos
-		segmento1->desplazamiento = desplazamiento_final_1;
-		segmento1->estado = "OCUPADO";
-		segmento1->id = segmento_lleno;
-
+		segmento2->id = segmento1->id;
 		segmento2->desplazamiento = desplazamiento_final_2;
 		segmento2->estado = "LIBRE";
 		segmento2->dir_inicio = segmento1->dir_inicio + desplazamiento_final_1 + 1;
+
+		segmento1->desplazamiento = desplazamiento_final_1;
+		segmento1->estado = "OCUPADO";
+		segmento1->id = segmento_lleno;
 		
 		//Cambio estructura administrativa
 		tarea_adm2->segmento_nro = segmento_lleno;

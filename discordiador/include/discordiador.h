@@ -68,13 +68,11 @@ typedef struct Tripulante_disc{
 } Tripulante_disc;
 
 typedef struct Tripulante{
-    //should i use ponters for all right?
     int id_patota;
     int id_tripulante;
     int pos_x;
     int pos_y;
-    Estados estado;//deberia saber yo mi estado for sakes de semaforos? de ser si, q sea un enum...
-    //char* tarea_actual;//chequear la libreria de strings... 
+    Estados estado;
 	Tarea* tarea_actual;
 	pthread_t* id_hilo;
 	sem_t semaforo_trip; //este semaforo indica si el tripulante puede ejecutar
@@ -82,6 +80,8 @@ typedef struct Tripulante{
     bool completo_tareas;
 	int quantum;
 	int ciclos_restantes; //para saber cuantos ciclos de CPU le faltan para completar una tarea especifica
+	bool realizo_movimientos_tarea; //en caso de interrupcion, para saber donde retomar
+	bool recibio_input_store; //en caso de interrupcion, para saber donde retomar
 } Tripulante;
 
 Configuracion* configuracion;

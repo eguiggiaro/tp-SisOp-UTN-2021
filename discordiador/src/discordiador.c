@@ -310,6 +310,8 @@ void iniciar_patota(char *comando)
 		new_tripulante->tarea_actual = proxima_tarea;
 		new_tripulante->tripulante_despierto = false;
 		new_tripulante->completo_tareas = false;
+		new_tripulante->recibio_input_store = false;
+		new_tripulante->realizo_movimientos_tarea = false;
 		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
 		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 

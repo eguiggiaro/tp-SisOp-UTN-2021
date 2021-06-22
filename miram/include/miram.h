@@ -12,6 +12,7 @@
 #include "estructuras.h"
 #include "servidor.h"
 
+t_config *config;
 typedef struct Configuracion
 {
 	int puerto;

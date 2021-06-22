@@ -18,8 +18,6 @@ void compactar_memoria(void)
 // Lee la configuración y la deja disponible
 int leer_config(void)
 {
-
-	t_config *config;
 	configuracion = malloc(sizeof(Configuracion));
 
 	config = config_create(CONFIG_FILE_PATH);
@@ -29,6 +27,7 @@ int leer_config(void)
 		return EXIT_FAILURE;
 	}
 
+
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
 	configuracion->esquema_memoria = config_get_string_value(config, "ESQUEMA_MEMORIA");
@@ -37,6 +36,7 @@ int leer_config(void)
 	configuracion->path_swap = config_get_string_value(config, "PATH_SWAP");
 	configuracion->algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
 	configuracion->criterio_seleccion = config_get_string_value(config, "CRITERIO_SELECCION");
+	
 	return EXIT_SUCCESS;
 }
 
@@ -90,6 +90,7 @@ void atender_request_miram(Request *request)
 		eliminar_buffer(buffer_devolucion_expulsar);
 		list_destroy(lista_mensajes);
 		list_destroy(lista);
+		//eliminar_paquete(paquete_devuelto);
 		free(request);
 		pthread_mutex_unlock(&mutex_expulsion);
 	
@@ -135,6 +136,7 @@ void atender_request_miram(Request *request)
 		paquete_devuelto_iniciar_tripulante->buffer = buffer_respuesta_iniciar_tripulante;
 		enviar_paquete(paquete_devuelto_iniciar_tripulante, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_tripulante);
+		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
 		list_destroy(lista_mensajes);
 		list_destroy(lista);
 		free(proxima_tarea);
@@ -170,6 +172,7 @@ void atender_request_miram(Request *request)
 		paquete_devuelto->buffer = buffer_respuesta_compactar;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_compactar);
+		//eliminar_paquete(paquete_devuelto);
 		list_destroy(lista_mensajes);
 		list_destroy(lista);
 		free(request);
@@ -214,6 +217,7 @@ void atender_request_miram(Request *request)
 
 		enviar_paquete(paquete_devuelto_iniciar_patota, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_patota);
+		//eliminar_paquete(paquete_devuelto_iniciar_patota);
 		list_destroy(lista);
 		list_destroy(lista_mensajes);
 		free(request);
@@ -267,7 +271,7 @@ void atender_request_miram(Request *request)
 		buffer_devolucion = serializar_lista_strings(lista_mensajes);
 		paquete_devuelto->buffer = buffer_devolucion;
 		enviar_paquete(paquete_devuelto, request_fd);
-		eliminar_paquete(paquete_devuelto);
+		//eliminar_paquete(paquete_devuelto);
 		list_destroy(lista);
 		list_destroy(lista_mensajes);
 		break;
@@ -452,9 +456,11 @@ int reservar_memoria(int bytes)
 {
 	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
-		if (configuracion->criterio_seleccion = "FF")
+		if (strcmp(configuracion->criterio_seleccion,"FF") == 0)
 		{
 			return reservar_memoria_segmentacion_ff(bytes);
+		} else {
+			return reservar_memoria_segmentacion_bf(bytes);
 		}
 	} else {
 		return reservar_memoria_paginacion(bytes);

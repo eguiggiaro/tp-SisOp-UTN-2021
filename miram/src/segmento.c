@@ -127,7 +127,72 @@ void imprimir_segmento(Segmento *segmento_a_imprimir)
 	printf("%d\t%d\t\t%d\t\t%s\n", segmento_a_imprimir->dir_inicio, segmento_a_imprimir->id, segmento_a_imprimir->desplazamiento, segmento_a_imprimir->estado);
 }
 
-//Imprime el segmento, no es muy amigable, MEJORAR!
+u_int32_t reservar_memoria_segmentacion_bf(int bytes)
+{
+	int index = 0;
+	bool encontre_segmento = false;
+	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
+	Segmento *segmento_a_ocupar;
+	Segmento *segmento_auxiliar;
+	Segmento *segmento_nuevo;
+	u_int32_t posicion_reservada;
+	int minimo_desplazamiento = tamanio_memoria_segmentacion;
+
+
+	while (list_iterator_has_next(list_iterator))
+	{
+		segmento_auxiliar = list_iterator_next(list_iterator);
+
+		//Si encuentro un segmento libre donde cabe el espacio a ocupar
+		if ((strcmp(segmento_auxiliar->estado, "LIBRE") == 0) && (segmento_auxiliar->desplazamiento >= bytes) && segmento_auxiliar->desplazamiento < minimo_desplazamiento)
+		{
+			minimo_desplazamiento = segmento_auxiliar->desplazamiento;
+			segmento_a_ocupar = segmento_auxiliar;
+			encontre_segmento = true;
+		}
+		index++;
+
+	}
+	
+	if (segmento_a_ocupar->desplazamiento == bytes)
+
+		{
+			segmento_a_ocupar->id = contador_segmentos++;
+			segmento_a_ocupar->desplazamiento = bytes;
+			segmento_a_ocupar->estado = "OCUPADO";
+			posicion_reservada = segmento_a_ocupar->dir_inicio;
+		}
+	else
+		{
+			//Seteo el nuevo segmento
+			segmento_nuevo = malloc(sizeof(Segmento));
+			segmento_nuevo->id = contador_segmentos++;
+			segmento_nuevo->dir_inicio = segmento_a_ocupar->dir_inicio;
+			segmento_nuevo->desplazamiento = bytes;
+			segmento_nuevo->estado = "OCUPADO";
+
+			//Reduzco el segmento libre
+			segmento_a_ocupar->dir_inicio = (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
+			segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - bytes;
+
+			//Agrego el nuevo segmento a la tabla
+			list_add_in_index(tabla_segmentos, index, segmento_nuevo);
+			posicion_reservada = segmento_nuevo->dir_inicio;
+		}
+	
+	list_iterator_destroy(list_iterator);
+
+	if (encontre_segmento)
+	{
+		return posicion_reservada;
+	}
+	else
+	{
+		return 99; //ERROR
+	}
+}
+
+
 u_int32_t reservar_memoria_segmentacion_ff(int bytes)
 {
 	int index = 0;
@@ -842,6 +907,7 @@ void inicializar_segmentacion(int tamanio_memoria, char* criterio)
 	tabla_segmentos_tareas = list_create();
 	tabla_segmentos_tcb = list_create();
 	criterio_seleccion = criterio;
+	tamanio_memoria_segmentacion = tamanio_memoria;
 
 	//Creo un segmento vacío del tamanio de la memoria
 	Segmento *segmento_aux = malloc(sizeof(Segmento));
@@ -895,9 +961,6 @@ bool segmentos_menor (Segmento* segmento1, Segmento* segmento_mayor)
 
 int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 {
-
-
-
 	t_list_iterator	*list_iterator_segmentos = list_iterator_create(tabla_segmentos);
 	t_list* tabla_segmentos_libres = list_create();
 	Segmento* segmento1;
@@ -933,6 +996,7 @@ int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 				}
 			}
 	}
+
 
 	t_list_iterator	*list_iterator_segmentos_libres = list_iterator_create(tabla_segmentos_libres);
 
@@ -980,6 +1044,7 @@ int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 	list_destroy(tabla_segmentos_libres);
 	list_iterator_destroy(list_iterator_segmentos);
 	list_iterator_destroy(list_iterator_segmentos_libres);
+	free(segmento_aux);
 	
 		if (contador_total_disponible >= contador_total_requerido)
 		{

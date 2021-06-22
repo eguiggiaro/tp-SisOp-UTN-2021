@@ -16,7 +16,8 @@ const char *comandos_table[] = {"INICIAR_PATOTA",
 								"EXPULSAR_TRIPULANTE",
 								"OBTENER_BITACORA",
 								"FIN",
-								"TEST_MENSAJES", NULL};
+								"TEST_MENSAJES",
+								"COMPACTAR", NULL};
 
 int main()
 {

@@ -15,6 +15,7 @@ t_list *tabla_segmentos;
 t_list *tabla_segmentos_pcb;
 t_list *tabla_segmentos_tareas;
 t_list *tabla_segmentos_tcb;
+char* criterio_seleccion;
 
 typedef enum
 {

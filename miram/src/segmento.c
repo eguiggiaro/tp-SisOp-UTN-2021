@@ -285,6 +285,8 @@ int compactar_segmentacion()
 	Segmento* segmento2;
 	contador_segmentos = 0;
 	contador_segmentos_libres = -1;
+	int contador_lista = 0;
+	bool borrar_segmento = false;
 
 	if (list_iterator_has_next(list_iterator_segmentos)) {
 		segmento1 = list_iterator_next(list_iterator_segmentos);
@@ -294,38 +296,131 @@ int compactar_segmentacion()
 		{
 			segmento2 = list_iterator_next(list_iterator_segmentos);
 
-			if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LLENO") == 0) 
+			if (borrar_segmento) {
+				
+				list_remove(tabla_segmentos,contador_lista-1);
+				borrar_segmento = false;
+			}
+
+
+			if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"OCUPADO") == 0) 
 			{
-				compactacion_mover_segmentos(segmento1, segmento2, contador_segmentos, contador_segmentos_libres);
+				compactacion_mover_segmentos(segmento1, segmento2, contador_segmentos);
 				contador_segmentos++;
-				contador_segmentos_libres--;
 				segmento1 = segmento2;
 
 			} else {
 				if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LIBRE") == 0) 
 				{
 					compactacion_fusionar_segmentos(segmento1, segmento2);
+					borrar_segmento = true;
 				} else {
-						segmento1 = segmento2;
+							compactacion_renumerar_lleno(segmento1, contador_segmentos);
+							contador_segmentos++;
+							segmento1 = segmento2;
 				}
-			}
+				}
+			contador_lista++;
+
 		}
-		list_iterator_destroy(list_iterator_segmentos);
+
+		if (strcmp(segmento1->estado,"OCUPADO") == 0) 
+		{
+			compactacion_renumerar_lleno(segmento1, contador_segmentos);
+			contador_segmentos++;
+		} else {
+			compactacion_renumerar_vacio(segmento1, contador_segmentos_libres);
+			contador_segmentos_libres--;
+		}
+		
+		dump_memoria_segmentacion(true);
 }
 
+void compactacion_renumerar_lleno(Segmento* segmento1, int segmento_lleno)
+{
+	t_list_iterator *list_iterator_pcb;
+	t_list_iterator *list_iterator_tcb;
+	t_list_iterator *list_iterator_tareas;
+	PCB_adm* pcb_adm;
+	TCB_adm* tcb_adm;
+	Tarea_adm *tarea_adm;
+	bool encontre_elemento = false;
+
+	list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
+
+	while (list_iterator_has_next(list_iterator_pcb))
+	{
+		pcb_adm = list_iterator_next(list_iterator_pcb);
+
+		if (pcb_adm->segmento_nro == segmento1->id) {
+			pcb_adm->segmento_nro = segmento_lleno;
+			encontre_elemento = true;
+			break;
+		}
+	}
+
+	list_iterator_destroy(list_iterator_pcb);
+	list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
+
+
+	if (!encontre_elemento) 
+	{
+		while (list_iterator_has_next(list_iterator_tcb))
+		{
+			tcb_adm = list_iterator_next(list_iterator_tcb);
+
+			if (tcb_adm->segmento_nro == segmento1->id) {
+				tcb_adm->segmento_nro = segmento_lleno;
+				encontre_elemento = true;
+				break;
+			}
+		}
+	}
+
+	list_iterator_destroy(list_iterator_tcb);
+	list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
+
+
+	if (!encontre_elemento) 
+	{
+		while (list_iterator_has_next(list_iterator_tareas))
+		{
+			tarea_adm = list_iterator_next(list_iterator_tareas);
+
+			if (tarea_adm->segmento_nro == segmento1->id) {
+				tarea_adm->segmento_nro = segmento_lleno;
+				encontre_elemento = true;
+				break;
+			}
+		}
+	}
+
+	list_iterator_destroy(list_iterator_tareas);
+
+	segmento1->id = segmento_lleno;
+}
+
+
+void compactacion_renumerar_vacio(Segmento* segmento1, int segmento_vacio)
+{
+	segmento1->id = segmento_vacio;
+}
 
 void compactacion_fusionar_segmentos(Segmento* segmento1, Segmento* segmento2)
 {
-	
+	segmento1->desplazamiento = (segmento1->desplazamiento) + (segmento2->desplazamiento);
 }
 
 
-void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int segmento_lleno, int segmento_vacio)
+void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int segmento_lleno)
 {
 
 	t_list_iterator	*list_iterator_tcb;
 	t_list_iterator	*list_iterator_pcb;
 	t_list_iterator	*list_iterator_tareas;
+
+	int desplazamiento_final_1;
+	int desplazamiento_final_2;
 
 	TCB_adm* tcb_adm2;
 	PCB_adm* pcb_adm2;
@@ -340,6 +435,11 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 	TCB* tcb_auxiliar;
 	PCB* pcb_auxiliar;
 	char* tareas_auxiliar;
+
+	//Borrar!
+	TCB* tcb_TEST;
+	PCB* pcb_TEST;
+	char* tareas_TEST;
 
 	//Segmento2 (que es el lleno)
 	list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
@@ -399,15 +499,7 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		pcb_auxiliar = segmento2->dir_inicio;
 		
 		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
-		while (list_iterator_has_next(list_iterator_tcb))
-		{
-			tcb_adm2 = list_iterator_next(list_iterator_tcb);
-
-			if (tcb_adm2->PID == pcb_auxiliar->PID) {
-				tcb_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
-			}
-		}
-		list_iterator_destroy(list_iterator_tcb);
+		
 
 		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
 		while (list_iterator_has_next(list_iterator_tareas))
@@ -416,31 +508,129 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 
 			if (tarea_adm2->PID == pcb_auxiliar->PID) {
 				tareas_auxiliar = buscar_segmento_por_id(tarea_adm2->segmento_nro);
+				break;
 			}
 		}
-		list_iterator_destroy(list_iterator_tareas);
+		list_iterator_destroy(list_iterator_tareas);		
+		
+		//muevo el elemento
+		desplazamiento_final_1 = segmento2->desplazamiento;
+		desplazamiento_final_2 = segmento1->desplazamiento;
+
 
 		memcpy(segmento1->dir_inicio, pcb_auxiliar, segmento2->desplazamiento);
+	
+		//Cambio los segmentos
 
-		tcb_auxiliar->PCB = segmento1->dir_inicio;
+		segmento1->desplazamiento = desplazamiento_final_1;
+		segmento1->estado = "OCUPADO";
+		segmento1->id = segmento_lleno;
+
+		segmento2->desplazamiento = desplazamiento_final_2;
+		segmento2->estado = "LIBRE";
+		segmento2->dir_inicio = segmento1->dir_inicio + desplazamiento_final_1 + 1;
+		
+		//Cambio estructura administrativa
+		pcb_adm2->segmento_nro = segmento_lleno;
+		
+		while (list_iterator_has_next(list_iterator_tcb))
+		{
+			tcb_adm2 = list_iterator_next(list_iterator_tcb);
+
+			if (tcb_adm2->PID == pcb_auxiliar->PID) {
+				tcb_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
+
+				//Cambio estructuras memoria
+				tcb_auxiliar->PCB = segmento1->dir_inicio;
+			}
+		}
+		list_iterator_destroy(list_iterator_tcb);
 
 
-
-
-
+		pcb_TEST = segmento1->dir_inicio;
 
 	}
 
+	if (tipo_encontrado == 'T')
+	{
+		tcb_auxiliar = segmento2->dir_inicio;
+		
+		//muevo el elemento
+		desplazamiento_final_1 = segmento2->desplazamiento;
+		desplazamiento_final_2 = segmento1->desplazamiento;
+
+		memcpy(segmento1->dir_inicio, tcb_auxiliar, segmento2->desplazamiento);
+	
+		//Cambio los segmentos
+		segmento1->desplazamiento = desplazamiento_final_1;
+		segmento1->estado = "OCUPADO";
+		segmento1->id = segmento_lleno;
+
+		segmento2->desplazamiento = desplazamiento_final_2;
+		segmento2->estado = "LIBRE";
+		segmento2->dir_inicio = segmento1->dir_inicio + desplazamiento_final_1 + 1;
+
+		//Cambio estructura administrativa
+		tcb_adm2->segmento_nro = segmento_lleno;
+
+		tcb_TEST = segmento1->dir_inicio;
+
+		
+	}
+
+	if (tipo_encontrado == 'K')
+	{
+		tareas_auxiliar = segmento2->dir_inicio;
+
+		list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
+		while (list_iterator_has_next(list_iterator_pcb))
+		{
+			pcb_adm2 = list_iterator_next(list_iterator_pcb);
+
+			if (pcb_adm2->PID == tarea_adm2->PID) {
+				pcb_auxiliar = buscar_segmento_por_id(pcb_adm2->segmento_nro);
+			}
+		}
+		list_iterator_destroy(list_iterator_pcb);
+
+		//muevo el elemento
+		desplazamiento_final_1 = segmento2->desplazamiento;
+		desplazamiento_final_2 = segmento1->desplazamiento;
+
+		memcpy(segmento1->dir_inicio, tareas_auxiliar, segmento2->desplazamiento);
+	
+		//Cambio los segmentos
+		segmento1->desplazamiento = desplazamiento_final_1;
+		segmento1->estado = "OCUPADO";
+		segmento1->id = segmento_lleno;
+
+		segmento2->desplazamiento = desplazamiento_final_2;
+		segmento2->estado = "LIBRE";
+		segmento2->dir_inicio = segmento1->dir_inicio + desplazamiento_final_1 + 1;
+		
+		//Cambio estructura administrativa
+		tarea_adm2->segmento_nro = segmento_lleno;
+
+		//Cambio estructuras memoria
+		pcb_auxiliar->Tareas = tareas_auxiliar;
+
+		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
+		while (list_iterator_has_next(list_iterator_tcb))
+		{
+			tcb_adm2 = list_iterator_next(list_iterator_tcb);
+
+			if (tcb_adm2->PID == pcb_auxiliar->PID) {
+				tcb_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
+
+				tcb_auxiliar->proxima_instruccion = (tcb_auxiliar->proxima_instruccion) - desplazamiento_final_1;
+			}
+		}
+		list_iterator_destroy(list_iterator_tcb);
+
+		tareas_TEST = segmento1->dir_inicio;
 
 
-
-	free(tcb_auxiliar);
-	free(pcb_auxiliar);
-	free(tareas_auxiliar);
-	list_iterator_destroy(list_iterator_tcb);
-	list_iterator_destroy(list_iterator_pcb);
-	list_iterator_destroy(list_iterator_tareas);
-
+	}
 
 }
 
@@ -641,7 +831,7 @@ uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 }
 
 //Crea la tabla de segmentos y el primer segmento vacio
-void inicializar_segmentacion(int tamanio_memoria)
+void inicializar_segmentacion(int tamanio_memoria, char* criterio)
 {
 	contador_segmentos = 0;
 	contador_segmentos_libres = -1;
@@ -649,6 +839,7 @@ void inicializar_segmentacion(int tamanio_memoria)
 	tabla_segmentos_pcb = list_create();
 	tabla_segmentos_tareas = list_create();
 	tabla_segmentos_tcb = list_create();
+	criterio_seleccion = criterio;
 
 	//Creo un segmento vacío del tamanio de la memoria
 	Segmento *segmento_aux = malloc(sizeof(Segmento));
@@ -656,6 +847,7 @@ void inicializar_segmentacion(int tamanio_memoria)
 	segmento_aux->dir_inicio = MEMORIA;
 	segmento_aux->desplazamiento = tamanio_memoria;
 	segmento_aux->estado = "LIBRE";
+
 
 	//Agrego el segmento vacío a la tabla de segmentos
 	list_add(tabla_segmentos, segmento_aux);
@@ -692,8 +884,142 @@ int inicializar_tripulante_segmentacion(int patota, char *unPunto, u_int32_t tar
 }
 
 
+bool segmentos_menor (Segmento* segmento1, Segmento* segmento_mayor)
+{
+	return segmento1->desplazamiento <= segmento_mayor->desplazamiento;
+}
+
+
+
+int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
+{
+
+
+
+	t_list_iterator	*list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+	t_list* tabla_segmentos_libres = list_create();
+	Segmento* segmento1;
+	Segmento* segmento_aux;
+	int contador_total_disponible = 0;
+	int contador_total_requerido;
+	bool ubique_pcb = false;
+	bool ubique_tareas = false;
+	bool ubique_tripulantes = false;
+	int tripulantes_ubicados = 0;
+	bool hay_lugar_total = false;
+	bool hay_lugar_parcial = false;
+	bool salto_de_segmento = false;
+
+	contador_total_requerido = 8 + (21*cantidad_tripulantes) + tareas_tamanio;
+
+	while (list_iterator_has_next(list_iterator_segmentos))
+	{
+			segmento1 = list_iterator_next(list_iterator_segmentos);
+
+			if (strcmp(segmento1->estado,"LIBRE") == 0) 
+			{
+				segmento_aux = malloc(sizeof(Segmento));
+				segmento_aux->id = segmento_aux->id;
+				segmento_aux->desplazamiento = segmento1->desplazamiento;
+
+				contador_total_disponible += segmento1->desplazamiento;
+				if (strcmp(criterio_seleccion,"FF")==0)
+				{
+					list_add(tabla_segmentos_libres,segmento_aux);
+				} else {
+					list_add_sorted(tabla_segmentos_libres,segmento_aux, segmentos_menor);
+				}
+			}
+	}
+
+	t_list_iterator	*list_iterator_segmentos_libres = list_iterator_create(tabla_segmentos_libres);
+
+	while (list_iterator_has_next(list_iterator_segmentos_libres))
+	{
+		segmento1 = list_iterator_next(list_iterator_segmentos_libres);
+
+		if (strcmp(criterio_seleccion,"FF")==0) 
+		{
+			if (!ubique_pcb)
+			{
+				if(segmento1->desplazamiento>= 8)
+				{
+					ubique_pcb = true;
+					segmento1->desplazamiento = segmento1->desplazamiento - 8;
+				}
+			}
+			if (!ubique_tareas && ubique_pcb)
+			{
+				if(segmento1->desplazamiento >= tareas_tamanio)
+				{
+					ubique_tareas = true;
+					segmento1->desplazamiento = segmento1->desplazamiento - tareas_tamanio;
+				}
+			}
+
+			for (int i=0; i < cantidad_tripulantes; i++)
+			{
+				if (!ubique_tripulantes && ubique_pcb && ubique_tareas)
+				{
+					if(segmento1->desplazamiento >= 21)
+					{
+						segmento1->desplazamiento = segmento1->desplazamiento - 21;
+						tripulantes_ubicados++;
+						if (tripulantes_ubicados == cantidad_tripulantes)
+						{
+							ubique_tripulantes = true;
+						}
+					}
+				}				
+			}
+		}
+	}
+
+	list_destroy(tabla_segmentos_libres);
+	list_iterator_destroy(list_iterator_segmentos);
+	list_iterator_destroy(list_iterator_segmentos_libres);
+	
+		if (contador_total_disponible >= contador_total_requerido)
+		{
+			hay_lugar_total = true;
+		}
+
+		if (ubique_pcb && ubique_tareas && ubique_tripulantes)
+		{
+			hay_lugar_parcial = true;
+		}
+
+		if (hay_lugar_total)
+		{
+			if(hay_lugar_parcial)
+			{
+				return 0;
+			} else {
+				return -2;
+			}
+		} else {
+			return -1;
+		}
+}
+
+
+
 int iniciar_patota_segmentacion(int cantidad_tripulantes, char *tareas, char *puntos)
 {
+
+	int resultado_verificador_espacio = verifica_espacio(cantidad_tripulantes, strlen(tareas));
+
+	if (resultado_verificador_espacio == -1)
+	{
+		miLogInfo("No hay más espacio en memoria \n");
+		return -1;
+	}
+
+	if (resultado_verificador_espacio == -2)
+	{
+		miLogInfo("Hay espacio, pero es necesario compactar. Compactando.. \n");
+		compactar_segmentacion();
+	}
 
 	miLogInfo("Iniciando patota \n");
 	u_int32_t posicion_memoria = reservar_memoria(sizeof(PCB));

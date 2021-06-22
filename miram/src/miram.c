@@ -390,7 +390,7 @@ void inicializar_memoria(int tamanio_memoria)
 
 	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
-		inicializar_segmentacion(tamanio_memoria);
+		inicializar_segmentacion(tamanio_memoria, configuracion->criterio_seleccion);
 	} else {
 
 		tamanio_pagina = configuracion->tamanio_pagina;

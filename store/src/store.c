@@ -34,10 +34,32 @@ void testLecturaBitacora(){
 	}*/
 }
 
+void signalHandler(int signal){
+	
+	switch(signal) {
+		case SIGUSR1:
+			miLogInfo("Me llegó la señal %d, atiendo el sabotaje", signal);		
+			break;
+		case SIGINT:
+			miLogInfo("Se forzó el cierre del I-Mongo-Store.");
+			miLogDestroy();
+			finalizarFS();
+			exit(130);	//Control+C
+			break;
+		default:
+			break;
+	}	
+}
+
+
 int main(int argc, char* argv[]) {
 
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
+
+	//Configuro el signal SIGUSR1 para iniciar el sabotaje.
+	signal(SIGUSR1, signalHandler);
+	signal(SIGINT, signalHandler);
 	
 	if(leerConfig()){
 		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
@@ -47,7 +69,7 @@ int main(int argc, char* argv[]) {
 
 	inicializarStore();
 
-	miLogInfo("Finalizó I-Mongo-Store.");
+	miLogInfo("==== Finalizó I-Mongo-Store ====");
 	miLogDestroy();
 	free(configuracion);
 
@@ -94,29 +116,31 @@ void inicializarParametrosFS(void){
 
 void inicializarStore(void){
 	
-	miLogDebug("Inició I-Mongo-Store.");
+	miLogInfo("==== Inició I-Mongo-Store =====");
 	
 	inicializarParametrosFS();
 
 	if (!verificarFS()){
+		miLogInfo("No se encontró un FILE SYSTEM válido, se procede a crearlo con los parámetros default");
 		borrarTodosLosArchivos(puntoMontaje);
 		crearArbolDirectorios();
 		crearSuperbloque();
 		crearBlocks();
+		miLogInfo("FILE SYSTEM creado exitósamente");
 	}
 
 	leerSuperbloque();
 	subirBlocksAMemoria();
 	inicializarSemaforos();
 	
-	/*ejecutarTarea("GENERAR_OXIGENO", 40);
+	/***** TEST LOCAL *****
+	ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
-	*/
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-
-	//testLecturaRecurso();
+	testLecturaRecurso();
 	testLecturaBitacora();
+	*/
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }

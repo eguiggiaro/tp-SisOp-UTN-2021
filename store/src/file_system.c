@@ -10,7 +10,7 @@ void crearDirectorio(char* path){
 
 	if(mkdir(path, 0777) == -1){
 		printf("No se pudo crear el directorio %s.\n", path);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	miLogInfo("Agrego directorio %s.", path);
 }
@@ -49,6 +49,7 @@ void borrarTodosLosArchivos(char* path){
 		miLogInfo("Borró la estructura de file system existente en el punto de montaje %s", path);
 	} else {
 		miLogInfo("No pudo borrar la estructura de file system existente en el punto de montaje %s", path);
+		exit(EXIT_FAILURE);
 	}	
 }
 
@@ -57,7 +58,7 @@ void crearSuperbloque(void){
 	FILE* archivoSuperbloque = fopen(pathSuperbloque, "w+");
 	if(archivoSuperbloque==NULL){
 		miLogInfo("No se pudo crear el archivo de Superbloque.ims.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	fwrite(&tamanioBloque, 1 , sizeof(uint32_t), archivoSuperbloque);
@@ -74,7 +75,7 @@ void crearBlocks(void){
 
 	if(archivoBlocks==NULL){
 		miLogInfo("No se pudo crear el archivo de Blocks.ims.");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	//Dejo el archivo de bloques con el tamaño final que va a tener.
 	if(!ftruncate(fileno(archivoBlocks), tamanioBlocks)){
@@ -142,6 +143,7 @@ void subirBlocksAMemoria(){
 	int tamanioBlocks = cantidadBloques * tamanioBloque;
 	
 	punteroBlocks = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBlocks, 0);
+	miLogInfo("Se subió el archivo Blocks.ims a memoria.");
 
 	close(archivoBlocks);
 }
@@ -154,7 +156,7 @@ int buscarYAsignarProximoBloqueLibre(void){
 			bitarray_set_bit(bitmap ,i); //Asigno el bloque libre (pongo en 1 el bit).
 			msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
 
-			miLogInfo("Asignó el bloque %d.", i);	
+			miLogDebug("Asignó el bloque %d.", i);	
 			sem_post(&sem_bitmap);
 			return i; //Devuelvo el número de bloque que asigné.		 
 		}
@@ -214,7 +216,7 @@ t_list* escribirBloquesNuevo(char* datos){
 	for(int i = 0; i < cantidadBloquesNecesarios; i++) {
 		int bloqueNuevo = buscarYAsignarProximoBloqueLibre();
 		if(bloqueNuevo == -1) {
-			printf("No hay mas lugar en el archivo Blocks.ims");
+			miLogError("No hay mas lugar en el archivo Blocks.ims");
 			return -1;
 		}
 		
@@ -282,7 +284,7 @@ char* leerBloque(int bloque, int size) {
 	sem_wait(&sem_bloques);
 	memcpy(lectura, punteroBlocks + desplazamiento, tamanioBloque);
 	
-	miLogInfo("Leyó: %s, del bloque: %d", lectura, bloque);
+	miLogDebug("Leyó: %s, del bloque: %d", lectura, bloque);
 	lectura = string_substring(lectura, 0, size); // Porque tengo que hacer esto???
 	sem_post(&sem_bloques);
 

@@ -38,6 +38,16 @@ void generar_basura_FIFO(Tripulante*);
 void descartar_basura_FIFO(Tripulante*);
 void tarea_generica_FIFO(Tripulante*); //consiste solo en  llegar a la ubicación y esperar que pase el tiempo solicitado en el estado EXEC
 
+void ejecutar_proxima_tarea_RR(Tripulante*);
+void generar_comida_RR(Tripulante*);
+void generar_oxigeno_RR(Tripulante*);
+void consumir_oxigeno_RR(Tripulante*);
+void consumir_comida_RR(Tripulante*);
+void generar_basura_RR(Tripulante*);
+void descartar_basura_RR(Tripulante*);
+void tarea_generica_RR(Tripulante*);
+void* mover_tripulante_RR(Tripulante*);
+
 void bloquear_tripulante(Tripulante*);
 void mover_tripulante(Tripulante*);
 #endif

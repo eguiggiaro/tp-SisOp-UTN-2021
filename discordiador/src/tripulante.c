@@ -171,7 +171,10 @@ void generar_comida_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
+  //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
+  trip->realizo_movimientos_tarea = false;
+  trip->recibio_input_store = false;
 
 }
 
@@ -201,7 +204,10 @@ void generar_oxigeno_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+  //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
+  trip->realizo_movimientos_tarea = false;
+  trip->recibio_input_store = false;
 
 }
 
@@ -231,7 +237,10 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
+  //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
+  trip->realizo_movimientos_tarea = false;
+  trip->recibio_input_store = false;
 }
 
 void consumir_comida_FIFO(Tripulante* trip){
@@ -260,7 +269,10 @@ void consumir_comida_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
+  //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
+  trip->realizo_movimientos_tarea = false;
+  trip->recibio_input_store = false;
 }
 
 void generar_basura_FIFO(Tripulante* trip){
@@ -290,7 +302,10 @@ void generar_basura_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
+  //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
+  trip->realizo_movimientos_tarea = false;
+  trip->recibio_input_store = false;
 }
 
 void descartar_basura_FIFO(Tripulante* trip){
@@ -319,7 +334,10 @@ void descartar_basura_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
+  //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
+  trip->realizo_movimientos_tarea = false;
+  trip->recibio_input_store = false;
 }
 
 void tarea_generica_FIFO(Tripulante* trip){
@@ -336,7 +354,355 @@ void tarea_generica_FIFO(Tripulante* trip){
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
   miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
+  //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
+  trip->realizo_movimientos_tarea = false;
+  trip->recibio_input_store = false;
+}
+
+void ejecutar_proxima_tarea_RR(Tripulante* trip){
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+
+  if(strncmp(tarea,"GENERAR_COMIDA", string_length(tarea))==0){
+    generar_comida_RR(trip);
+  }
+  else if(strncmp(tarea,"GENERAR_OXIGENO", string_length(tarea))==0){
+    generar_oxigeno_RR(trip);
+  }
+  else if(strncmp(tarea,"CONSUMIR_OXIGENO", string_length(tarea))==0){
+    consumir_oxigeno_RR(trip);
+  }
+  else if(strncmp(tarea," CONSUMIR_COMIDA", string_length(tarea))==0){
+    consumir_comida_RR(trip);
+  }
+  else if(strncmp(tarea,"GENERAR_BASURA", string_length(tarea))==0){
+    generar_basura_RR(trip);
+  }
+  else if(strncmp(tarea,"DESCARTAR_BASURA", string_length(tarea))==0){
+    descartar_basura_RR(trip);
+  }
+  else
+  {
+    tarea_generica_RR(trip);
+  }
+}
+
+void generar_comida_RR(Tripulante* trip){
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+  char* parametro = (trip->tarea_actual)->parametros;
+
+  miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
+  //Antes de empezar a ejecutar verifico que el tripulante posea quantum
+  if(trip->quantum > 0){
+
+    if(!trip->realizo_movimientos_tarea){
+      mover_tripulante_RR(trip);
+      trip->realizo_movimientos_tarea = true;
+    }
+
+    if(trip->quantum > 0){
+    if(!trip->recibio_input_store){
+      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+        miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
+      }
+      else{
+        miLogError("\nError verificando la existencia de Comida.ims");
+      }
+      trip->recibio_input_store = true;
+    }
+
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
+
+    if(trip->quantum >0){
+      for(int i = 0; i<trip->quantum;i++){
+        trip->quantum--;
+      }
+    }
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+    }
+
+  }else{
+    //pasar tripulante de EXEC a READY (caso en que el tripulante no tiene quantum disponible)
+  }
+
+}
+
+void generar_oxigeno_RR(Tripulante* trip){
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+  char* parametro = (trip->tarea_actual)->parametros;
+
+  miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+  //Antes de empezar a ejecutar verifico que el tripulante posea quantum
+  if(trip->quantum > 0){
+
+    if(!trip->realizo_movimientos_tarea){
+      mover_tripulante_RR(trip);
+      trip->realizo_movimientos_tarea = true;
+    }
+
+    if(trip->quantum > 0){
+    if(!trip->recibio_input_store){
+      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+        miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
+      }
+      else{
+        miLogError("\nError verificando la existencia de Oxigeno.ims");
+      }
+      trip->recibio_input_store = true;
+    }
+
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+
+    if(trip->quantum >0){
+      for(int i = 0; i<trip->quantum;i++){
+        trip->quantum--;
+      }
+    }
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+    }
+
+  }else{
+    //pasar tripulante de EXEC a READY (caso en que el tripulante no tiene quantum disponible)
+  }
+
+}
+
+void consumir_oxigeno_RR(Tripulante* trip){
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+  char* parametro = (trip->tarea_actual)->parametros;
+
+  miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
+  //Antes de empezar a ejecutar verifico que el tripulante posea quantum
+  if(trip->quantum > 0){
+
+    if(!trip->realizo_movimientos_tarea){
+      mover_tripulante_RR(trip);
+      trip->realizo_movimientos_tarea = true;
+    }
+
+    if(trip->quantum > 0){
+    if(!trip->recibio_input_store){
+      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+        miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
+      }
+      else{
+        miLogError("\nError verificando la existencia de Oxigeno.ims");
+      }
+      trip->recibio_input_store = true;
+    }
+
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
+
+    if(trip->quantum >0){
+      for(int i = 0; i<trip->quantum;i++){
+        trip->quantum--;
+      }
+    }
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+    }
+
+  }else{
+    //pasar tripulante de EXEC a READY (caso en que el tripulante no tiene quantum disponible)
+  }
+
+}
+
+void consumir_comida_RR(Tripulante* trip){
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+  char* parametro = (trip->tarea_actual)->parametros;
+
+  miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
+  //Antes de empezar a ejecutar verifico que el tripulante posea quantum
+  if(trip->quantum > 0){
+
+    if(!trip->realizo_movimientos_tarea){
+      mover_tripulante_RR(trip);
+      trip->realizo_movimientos_tarea = true;
+    }
+
+    if(trip->quantum > 0){
+    if(!trip->recibio_input_store){
+      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+        miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
+      }
+      else{
+        miLogError("\nError verificando la existencia de Comida.ims");
+      }
+      trip->recibio_input_store = true;
+    }
+
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
+
+    if(trip->quantum >0){
+      for(int i = 0; i<trip->quantum;i++){
+        trip->quantum--;
+      }
+    }
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+    }
+
+  }else{
+    //pasar tripulante de EXEC a READY (caso en que el tripulante no tiene quantum disponible)
+  }
+
+}
+
+void generar_basura_RR(Tripulante* trip){
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+  char* parametro = (trip->tarea_actual)->parametros;
+
+  miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
+  //Antes de empezar a ejecutar verifico que el tripulante posea quantum
+  if(trip->quantum > 0){
+
+    if(!trip->realizo_movimientos_tarea){
+      mover_tripulante_RR(trip);
+      trip->realizo_movimientos_tarea = true;
+    }
+
+    if(trip->quantum > 0){
+    if(!trip->recibio_input_store){
+      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+        miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
+      }
+      else{
+        miLogError("\nError verificando la existencia de Basura.ims");
+      }
+      trip->recibio_input_store = true;
+    }
+
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
+
+    if(trip->quantum >0){
+      for(int i = 0; i<trip->quantum;i++){
+        trip->quantum--;
+      }
+    }
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+    }
+
+  }else{
+    //pasar tripulante de EXEC a READY (caso en que el tripulante no tiene quantum disponible)
+  }
+
+}
+
+void descartar_basura_RR(Tripulante* trip){
+  char* tarea = (trip->tarea_actual)->nombre_tarea;
+  char* parametro = (trip->tarea_actual)->parametros;
+
+  miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
+  //Antes de empezar a ejecutar verifico que el tripulante posea quantum
+  if(trip->quantum > 0){
+
+    if(!trip->realizo_movimientos_tarea){
+      mover_tripulante_RR(trip);
+      trip->realizo_movimientos_tarea = true;
+    }
+
+    if(trip->quantum > 0){
+    if(!trip->recibio_input_store){
+      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+        miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
+      }
+      else{
+        miLogError("\nError verificando la existencia de Basura.ims");
+      }
+      trip->recibio_input_store = true;
+    }
+
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
+
+    if(trip->quantum >0){
+      for(int i = 0; i<trip->quantum;i++){
+        trip->quantum--;
+      }
+    }
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+    }
+
+  }else{
+    //pasar tripulante de EXEC a READY (caso en que el tripulante no tiene quantum disponible)
+  }
+
+}
+
+void tarea_generica_RR(Tripulante* trip){
+  //Moverse a ubicacion.
+  miLogInfo("\nComienza ejecucion de TAREA GENERICA");
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
+
+  //Antes de empezar a ejecutar verifico que el tripulante posea quantum
+  if(trip->quantum > 0){
+
+    if(!trip->realizo_movimientos_tarea){
+      mover_tripulante_RR(trip);
+      trip->realizo_movimientos_tarea = true;
+    }
+
+    if(trip->quantum > 0){
+      int retardo = configuracion->retardo_ciclo_cpu;
+      int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+      miLogInfo("\nFinaliza ejecucion de TAREA_GENERICA");
+      avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
+
+      if(trip->quantum >0){
+        for(int i = 0; i<trip->quantum;i++){
+          trip->quantum--;
+        }
+      }
+      //seteo parametros para proxima tarea
+      trip->tarea_actual = NULL;
+      trip->realizo_movimientos_tarea = false;
+      trip->recibio_input_store = false;
+    }
+
+  }else{
+    //pasar tripulante de EXEC a READY (caso en que el tripulante no tiene quantum disponible)
+  }
+  
 }
 
 void bloquear_tripulante(Tripulante* trip){
@@ -470,6 +836,115 @@ void mover_tripulante(Tripulante* trip){
         (trip->pos_y)++;
         //aviso a miram
         avisar_movimiento_miram(trip,"Y");
+      }
+    }
+    else{
+      distancia_y = 0;
+    }
+}
+
+void* mover_tripulante_RR(Tripulante* trip){
+  //Me muevo desde la posicion actual hasta donde pide la tarea.
+    int distancia_x;
+    int distancia_y;
+    int x_origen = trip->pos_x;
+    int y_origen = trip->pos_y;
+    int x_destino = atoi((trip->tarea_actual)->pos_x);
+    int y_destino = atoi((trip->tarea_actual)->pos_y);
+
+    //parametro para enviar a bitacora
+    char* id_trip = string_itoa(trip->id_tripulante);
+
+
+    //Primero me muevo linealmente en el eje X
+    if(x_origen > x_destino){
+      distancia_x = x_origen - x_destino;
+      for(int i = 0; i<distancia_x; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "X";
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* x_destino_b = string_itoa((trip->pos_x)-1);
+        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        //realizo movimiento
+        (trip->pos_x)--;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"X");
+
+        //se consume una unidad de quantum
+        trip->quantum--;
+
+        if(trip->quantum <= 0){
+          return NULL; //si no me queda quantum salgo del loop y termino funcion
+        }
+
+      }
+    }
+    else if(x_origen < x_destino){
+      distancia_x = x_destino - x_origen;
+      for(int i = 0; i<distancia_x; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "X";
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* x_destino_b = string_itoa((trip->pos_x)+1);
+        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        //realizo movimiento
+        (trip->pos_x)++;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"X");
+
+        //se consume una unidad de quantum
+        trip->quantum--;
+
+        if(trip->quantum <= 0){
+          return NULL; //si no me queda quantum salgo del loop y termino funcion
+        }
+      }
+    }
+    else{
+      distancia_x = 0;
+    }
+
+    //Despues hago lo mismo en el eje Y
+    if(y_origen > y_destino){
+      distancia_y = y_origen - y_destino;
+      for(int i = 0; i<distancia_y; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "Y";
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* y_destino_b = string_itoa((trip->pos_y)-1);
+        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        //realizo movimiento
+        (trip->pos_y)--;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"Y");
+
+        //se consume una unidad de quantum
+        trip->quantum--;
+
+        if(trip->quantum <= 0){
+          return NULL; //si no me queda quantum salgo del loop y termino funcion
+        }
+      }
+    }
+    else if(y_origen < y_destino){
+      distancia_y = y_destino - y_origen;
+      for(int i = 0; i<distancia_y; i++){
+        //resto de parametros para enviar a bitacora
+        char* eje = "Y";
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* y_destino_b = string_itoa((trip->pos_y)+1);
+        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        //realizo movimiento
+        (trip->pos_y)++;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"Y");
+
+        //se consume una unidad de quantum
+        trip->quantum--;
+
+        if(trip->quantum <= 0){
+          return NULL; //si no me queda quantum salgo del loop y termino funcion
+        }
       }
     }
     else{

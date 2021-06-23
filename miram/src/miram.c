@@ -255,25 +255,38 @@ void atender_request_miram(Request *request)
 
 
 	case MOV_TRIPULANTE:
-		//recibo los mensajes
-		miLogInfo("Me llego operacion: MOVER TRIPULANTE \n");
 
-		lista = deserializar_lista_strings(buffer_devolucion);
-		loggear_lista_strings(lista);
-
-		//devuelve una lista de mensajes
-		paquete_devuelto = crear_paquete(OK);
+		pthread_mutex_lock(&mutex_mover);
+		t_buffer *buffer_devolucion_mover = request->buffer_devolucion;
 
 		lista_mensajes = list_create();
-		list_add(lista_mensajes, "hola");
-		list_add(lista_mensajes, "soy miram");
 
-		buffer_devolucion = serializar_lista_strings(lista_mensajes);
-		paquete_devuelto->buffer = buffer_devolucion;
+		//recibo los mensajes
+		miLogInfo("Me llego operacion: MOVER TRIPULANTE \n");
+		lista = deserializar_lista_strings(buffer_devolucion_mover);
+
+		int tripulante_id_a_mover = atoi(list_get(lista, 0));
+		char *eje = list_get(lista, 1);
+		int nueva_posicion = atoi(list_get(lista,2));
+
+		if (strcmp(eje,"X") == 0)
+		{
+			mover_tripulante_en_x(tripulante_id_a_mover, nueva_posicion);
+		} else {
+			mover_tripulante_en_y(tripulante_id_a_mover, nueva_posicion);
+		}
+
+		miLogInfo("Tripulante %d se movio \n", tripulante_id_a_mover);
+		paquete_devuelto = crear_paquete(OK);
+		list_add(lista_mensajes, "OK");
+
+		t_buffer *buffer_respuesta_mover = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_respuesta_mover;
 		enviar_paquete(paquete_devuelto, request_fd);
-		//eliminar_paquete(paquete_devuelto);
-		list_destroy(lista);
+		eliminar_buffer(buffer_devolucion_mover);
 		list_destroy(lista_mensajes);
+		list_destroy(lista);
+		pthread_mutex_unlock(&mutex_mover);
 		break;
 
 	default:
@@ -307,19 +320,21 @@ void crear_personaje_grilla(int tripulante, int pos_x, int pos_y)
 	id_grilla->identificador = identificador;
 
 	list_add(tabla_identificadores_grilla, id_grilla);
-	personaje_crear(nivel, identificador, pos_x, pos_y);
-	nivel_gui_dibujar(nivel);
+//	personaje_crear(nivel, identificador, pos_x, pos_y);
+//	nivel_gui_dibujar(nivel);
 }
 
 //Mueve un tripulante a una dirección destino
-int mover_tripulante(int tripulante, int posicion_x_final, int posicion_y_final)
+int mover_tripulante_en_x(int tripulante, int posicion_x_final)
 {
 	TCB *miTCB = buscar_tripulante(tripulante);
 
-	if (miTCB = 99)
+	if (miTCB == 99)
 	{
 		return -1;
 	}
+
+	miTCB ->pos_X = posicion_x_final;
 
 	char identificador = buscar_tripulante_grilla(tripulante);
 
@@ -328,8 +343,30 @@ int mover_tripulante(int tripulante, int posicion_x_final, int posicion_y_final)
 		return -1;
 	}
 
-	mover_tripulante_grilla(identificador, posicion_x_final - miTCB->pos_X, posicion_y_final - miTCB->pos_y);
+	//mover_tripulante_grilla(identificador, 1,0);
 }
+
+int mover_tripulante_en_y(int tripulante, int posicion_y_final)
+{
+	TCB *miTCB = buscar_tripulante(tripulante);
+
+	if (miTCB = 99)
+	{
+		return -1;
+	}
+
+	miTCB ->pos_y = posicion_y_final;
+
+	char identificador = buscar_tripulante_grilla(tripulante);
+
+	if (identificador == '-')
+	{
+		return -1;
+	}
+
+	//mover_tripulante_grilla(identificador, 0,1);
+}
+
 
 void mover_tripulante_grilla(char identificador, int pos_x, int pos_y)
 {
@@ -337,19 +374,12 @@ void mover_tripulante_grilla(char identificador, int pos_x, int pos_y)
 	int err;
 
 	err = item_desplazar(nivel, identificador, pos_x, pos_y);
-	nivel_gui_dibujar(nivel);
+	//nivel_gui_dibujar(nivel);
 }
 
 //buscar el caracter asignado en la grilla, para el tripulante
 char buscar_tripulante_grilla(int tripulante)
 {
-
-	if (tripulante > contador_patotas)
-	{
-		miLogInfo("El tripulante %d a mover no existe", tripulante);
-		return '-';
-	}
-
 	bool encontre_tripulante = false;
 	char identificador_tripulante;
 	TCB *unTCB;
@@ -489,12 +519,15 @@ u_int32_t buscar_patota(int PCB_ID)
 
 void alta_tripulante(TCB *unTCB, int patota)
 {
+	crear_personaje_grilla(unTCB->TID,unTCB->pos_X, unTCB->pos_y);
 	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
 		return alta_tripulante_segmentacion(unTCB, patota);
 	} else {
 		return alta_tripulante_paginacion(unTCB, patota);
 	}
+
+
 }
 
 void alta_tareas(int PCB_ID, char *tareas)

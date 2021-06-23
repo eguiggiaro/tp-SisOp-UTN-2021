@@ -231,7 +231,7 @@ void atender_request_miram(Request *request)
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
-		miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
+		miLogInfo("Me llego operacion: SIGUIENTE TAREA \n");
 		lista = deserializar_lista_strings(buffer_devolucion_tareas);
 
 		int tripulante_id = atoi(list_get(lista, 0));

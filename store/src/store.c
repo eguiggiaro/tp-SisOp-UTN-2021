@@ -131,13 +131,13 @@ void inicializarStore(void){
 
 	leerSuperbloque();
 	subirBlocksAMemoria();
-	inicializarSemaforos();
-	
+
 	/***** TEST LOCAL *****
 	ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	
 	testLecturaRecurso();
 	testLecturaBitacora();
 	*/
@@ -146,6 +146,9 @@ void inicializarStore(void){
 }
 
 
+void avisarSabotaje(){
+
+}
 /*t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 	
 	char** posicionesSabotaje = string_get_string_as_array(strPosicionesSabotaje);
@@ -175,7 +178,3 @@ void inicializarStore(void){
 	return listaPosicionesSabotaje;
 }*/
 
-void inicializarSemaforos(){
-	sem_init(&sem_bitmap, 0, 1);	
-	sem_init(&sem_bloques, 0, 1);
-}

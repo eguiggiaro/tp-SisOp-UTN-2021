@@ -78,8 +78,6 @@ int leerConfig(void);
 void atender_request_store(Request *request);
 void inicializarParametrosFS(void);
 void inicializarStore(void);
-void inicializarSemaforos(void);
-
 
 
 //t_list* obtenerListaSabotaje(char*);

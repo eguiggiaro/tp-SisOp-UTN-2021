@@ -22,8 +22,8 @@ t_bitarray* bitmap;
 char* punteroBlocks;
 
 //Semáforos
-sem_t sem_bitmap;
-sem_t sem_bloques;
+pthread_mutex_t mutex_bitmap;
+pthread_mutex_t mutex_bloques;
 
 
 /**** MANEJO FILE SYSTEM ****/

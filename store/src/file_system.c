@@ -150,18 +150,20 @@ void subirBlocksAMemoria(){
 
 int buscarYAsignarProximoBloqueLibre(void){
 //Ejemplo de uso: int bloqueLibre = buscarYAsignarProximoBloqueLibre(configuracion->puntoMontaje);
-	sem_wait(&sem_bitmap);
+
+	pthread_mutex_lock(&mutex_bitmap);
 	for(int i=0; i<cantidadBloques; i++){
 		if(bitarray_test_bit(bitmap, i) == 0){
 			bitarray_set_bit(bitmap ,i); //Asigno el bloque libre (pongo en 1 el bit).
 			msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
 
 			miLogDebug("Asignó el bloque %d.", i);	
-			sem_post(&sem_bitmap);
+			pthread_mutex_unlock(&mutex_bitmap);
 			return i; //Devuelvo el número de bloque que asigné.		 
 		}
 	}
-	sem_post(&sem_bitmap);
+	pthread_mutex_unlock(&mutex_bitmap);
+
 	/*bitarray_destroy(bitmap);
 	close(archivoSuperbloque);
 	free(pathSuperbloque);
@@ -177,12 +179,14 @@ int buscarYAsignarProximoBloqueLibre(void){
 
 void liberarBloque(int index){
 //Ejemplo de uso: liberarBloque(nroBloque);
-	sem_wait(&sem_bitmap);
+
+	pthread_mutex_lock(&mutex_bitmap);
+	
 	bitarray_clean_bit(bitmap, index);
 	miLogInfo("Se liberó el bloque %d", index );
-
 	msync(bitmap, cantidadBloques/8 ,0);
-	sem_post(&sem_bitmap);
+	
+	pthread_mutex_unlock(&mutex_bitmap);
 }
 
 
@@ -248,9 +252,9 @@ void escribirBloque(int bloque, int offset, char* escritura){
 
 	int desplazamiento = (bloque * tamanioBloque) + offset;
 
-	sem_wait(&sem_bloques);
+	pthread_mutex_lock(&mutex_bloques);
 	memcpy(punteroBlocks + desplazamiento, escritura, string_length(escritura));
-	sem_post(&sem_bloques);
+	pthread_mutex_unlock(&mutex_bloques);
 }
 
 char* leerBloques(t_list* bloques, int size){
@@ -281,12 +285,13 @@ char* leerBloque(int bloque, int size) {
 	char* lectura = malloc(tamanioBloque);
 	int desplazamiento = bloque * tamanioBloque;
 
-	sem_wait(&sem_bloques);
+	pthread_mutex_lock(&mutex_bloques);
 	memcpy(lectura, punteroBlocks + desplazamiento, tamanioBloque);
 	
 	miLogDebug("Leyó: %s, del bloque: %d", lectura, bloque);
 	lectura = string_substring(lectura, 0, size); // Porque tengo que hacer esto???
-	sem_post(&sem_bloques);
+
+	pthread_mutex_unlock(&mutex_bloques);
 
 	return lectura;
 }
@@ -305,8 +310,7 @@ int tamanioArchivo(char* path){
 void finalizarFS(void){
 	
 	bitarray_destroy(bitmap);
-	sem_destroy(&sem_bitmap);	
-	sem_destroy(&sem_bloques);
+
 	free(puntoMontaje);    
 	free(pathSuperbloque); 
 	free(pathBlocks);  
@@ -322,6 +326,7 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 
 	if(verificarExistenciaFile(direccionDeMetadata)){
 		if(crearMetadataRecurso(recurso)){
+			free(direccionDeMetadata);
 			return NULL;
 		}		
 	}
@@ -338,6 +343,8 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 	metadata->md5 = config_get_string_value(metaConfig, "MD5");
 
 	config_destroy(metaConfig);
+	free(direccionDeMetadata);
+
 	return metadata;
 }
 
@@ -347,6 +354,7 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
 	if(verificarExistenciaFile(direccionDeMetadata)){
 		if(crearMetadataBitacora(tripulante)){
+			free(direccionDeMetadata);
 			return NULL;
 		}		
 	}
@@ -361,6 +369,7 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 	metadata->blocks = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
 
 	config_destroy(metaConfig);
+	free(direccionDeMetadata);
 
 	return metadata;
 }
@@ -373,6 +382,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig==NULL){
+		free(direccionDeMetadata);
 		return EXIT_FAILURE;	
 	}
 
@@ -385,6 +395,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	free(metadata);
+	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
 }
@@ -397,6 +408,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig==NULL){
+		free(direccionDeMetadata);
 		return EXIT_FAILURE;	
 	}
 
@@ -407,6 +419,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	free(metadata);
+	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
 }
@@ -417,7 +430,8 @@ int crearMetadataRecurso(tipoRecurso recurso){
 	FILE* file = fopen(direccionDeMetadata, "w+");
 	
 	if (file == NULL) {
-			return EXIT_FAILURE;
+		free(direccionDeMetadata);
+		return EXIT_FAILURE;
 	}
 	fclose(file);
 	
@@ -425,7 +439,8 @@ int crearMetadataRecurso(tipoRecurso recurso){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig == NULL){
-			return EXIT_FAILURE;	
+		free(direccionDeMetadata);
+		return EXIT_FAILURE;	
 	}
 
 	char caracter = cualEsMiCaracter(recurso);
@@ -440,6 +455,7 @@ int crearMetadataRecurso(tipoRecurso recurso){
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
+	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
 }
@@ -450,7 +466,8 @@ int crearMetadataBitacora(char* tripulante){
 	FILE* file = fopen(direccionDeMetadata, "w+");
 	
 	if (file == NULL) {
-			return EXIT_FAILURE;
+		free(direccionDeMetadata);
+		return EXIT_FAILURE;
 	}
 	fclose(file);
 	
@@ -458,7 +475,8 @@ int crearMetadataBitacora(char* tripulante){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig == NULL){
-			return EXIT_FAILURE;	
+		free(direccionDeMetadata);
+		return EXIT_FAILURE;	
 	}
 	
 	config_set_value(metaConfig, "SIZE", "0");
@@ -467,6 +485,7 @@ int crearMetadataBitacora(char* tripulante){
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
+	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
 }

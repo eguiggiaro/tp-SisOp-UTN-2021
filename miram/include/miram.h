@@ -12,6 +12,7 @@
 #include "estructuras.h"
 #include "servidor.h"
 
+t_config *config;
 typedef struct Configuracion
 {
 	int puerto;
@@ -56,6 +57,6 @@ pthread_mutex_t mutex_tripulantes;
 pthread_mutex_t mutex_tareas;
 pthread_mutex_t mutex_expulsion;
 pthread_mutex_t mutex_patota;
-
+pthread_mutex_t mutex_mover;
 
 #endif

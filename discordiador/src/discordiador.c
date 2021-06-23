@@ -815,6 +815,7 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(socket_miram);
 	if (codigo_operacion == OK) {
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
 		miLogInfo("\nNueva posicion informada a MIRAM correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA POSICION. \n");

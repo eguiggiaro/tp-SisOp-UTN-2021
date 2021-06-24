@@ -34,6 +34,15 @@ void testLecturaBitacora(){
 	}*/
 }
 
+void testMd5(){
+	
+	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
+	
+	metadata = leerMetadataRecurso(OXIGENO);
+
+	char* md5 = generarMd5(metadata->blocks);
+}
+
 void signalHandler(int signal){
 	
 	switch(signal) {
@@ -147,15 +156,18 @@ void inicializarStore(void){
 	leerSuperbloque();
 	subirBlocksAMemoria();
 
-	/***** TEST LOCAL *****
+	/***** START TEST LOCAL *****
 	ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
+	
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
 	
 	testLecturaRecurso();
 	testLecturaBitacora();
-	*/
+	
+	testMd5();
+	/***** END TEST LOCAL ******/
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }

@@ -1,5 +1,6 @@
 #include "file_system.h"
 #include "ejecucion_tareas.h"
+#include "md5.h"
 
 
 bool verificarFS(void){
@@ -405,6 +406,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_destroy(metaConfig);
 	
 	list_destroy(metadata->blocks);
+	free(metadata->md5);
 	free(metadata);
 	free(direccionDeMetadata);
 
@@ -505,7 +507,26 @@ int crearMetadataBitacora(char* tripulante){
 
 //TODO:
 char* generarMd5(t_list* bloques){
-	return "Algun md5"; 
+
+	char* strMd5 = string_new();
+	unsigned char hash[16];
+
+	char* strBloques = stringFromList(bloques);
+
+	MD5_CTX md5;
+	MD5Init(&md5);
+	MD5Update(&md5, strBloques, string_length((char*)strBloques));
+	MD5Final(&md5, hash);
+	
+	for(int i=0; i<16; i++){
+		//printf("%02x",hash[i]);
+		string_append_with_format(&strMd5, "%02x", hash[i]);
+	}
+	//printf(strMd5);
+	string_to_upper(strMd5);
+
+	free(strBloques);
+	return strMd5;
 }
 
 char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero

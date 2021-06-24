@@ -51,6 +51,16 @@ void signalHandler(int signal){
 	}	
 }
 
+void syncPeriodico(void){
+
+    int tamanioBlocks = cantidadBloques * tamanioBloque;
+
+	while(1){
+        sleep(configuracion->tiempoSincro);
+        msync(punteroBlocks, tamanioBlocks, 0); //Fuerzo la actualización del bitmap en el archivo.
+		miLogInfo("Se forzó la sincronizacion del archivo Blocks.ims a disco. La próxima sincronización será dentro de %d segundos.", configuracion->tiempoSincro);
+    }   
+}
 
 int main(int argc, char* argv[]) {
 
@@ -60,6 +70,11 @@ int main(int argc, char* argv[]) {
 	//Configuro el signal SIGUSR1 para iniciar el sabotaje.
 	signal(SIGUSR1, signalHandler);
 	signal(SIGINT, signalHandler);
+
+	//Inicio el thread de msync para bloques periodico.
+	pthread_t th_msync;
+	pthread_create(&th_msync, NULL, &syncPeriodico, NULL);
+
 	
 	if(leerConfig()){
 		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");

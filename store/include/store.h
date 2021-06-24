@@ -78,7 +78,7 @@ int leerConfig(void);
 void atender_request_store(Request *request);
 void inicializarParametrosFS(void);
 void inicializarStore(void);
-
+void syncPeriodico(void);
 
 //t_list* obtenerListaSabotaje(char*);
 

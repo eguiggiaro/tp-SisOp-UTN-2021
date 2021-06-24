@@ -781,10 +781,20 @@ void mover_tripulante(Tripulante* trip){
       distancia_x = x_origen - x_destino;
       for(int i = 0; i<distancia_x; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "X";
         char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
         char* x_destino_b = string_itoa((trip->pos_x)-1);
-        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        char* y_destino_b = y_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)--;
         //aviso a miram
@@ -795,10 +805,20 @@ void mover_tripulante(Tripulante* trip){
       distancia_x = x_destino - x_origen;
       for(int i = 0; i<distancia_x; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "X";
         char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
         char* x_destino_b = string_itoa((trip->pos_x)+1);
-        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        char* y_destino_b = y_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)++;
         //aviso a miram
@@ -814,10 +834,20 @@ void mover_tripulante(Tripulante* trip){
       distancia_y = y_origen - y_destino;
       for(int i = 0; i<distancia_y; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "Y";
+        char* x_origen_b = string_itoa(trip->pos_x);
         char* y_origen_b = string_itoa(trip->pos_y);
         char* y_destino_b = string_itoa((trip->pos_y)-1);
-        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        char* x_destino_b = x_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)--;
         //aviso a miram
@@ -828,10 +858,20 @@ void mover_tripulante(Tripulante* trip){
       distancia_y = y_destino - y_origen;
       for(int i = 0; i<distancia_y; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "Y";
+        char* x_origen_b = string_itoa(trip->pos_x);
         char* y_origen_b = string_itoa(trip->pos_y);
         char* y_destino_b = string_itoa((trip->pos_y)+1);
-        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        char* x_destino_b = x_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)++;
         //aviso a miram
@@ -861,10 +901,20 @@ void* mover_tripulante_RR(Tripulante* trip){
       distancia_x = x_origen - x_destino;
       for(int i = 0; i<distancia_x; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "X";
         char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
         char* x_destino_b = string_itoa((trip->pos_x)-1);
-        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        char* y_destino_b = y_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)--;
         //aviso a miram
@@ -883,10 +933,20 @@ void* mover_tripulante_RR(Tripulante* trip){
       distancia_x = x_destino - x_origen;
       for(int i = 0; i<distancia_x; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "X";
         char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
         char* x_destino_b = string_itoa((trip->pos_x)+1);
-        avisar_movimiento_bitacora(id_trip,eje,x_origen_b,x_destino_b);
+        char* y_destino_b = y_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)++;
         //aviso a miram
@@ -909,10 +969,20 @@ void* mover_tripulante_RR(Tripulante* trip){
       distancia_y = y_origen - y_destino;
       for(int i = 0; i<distancia_y; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "Y";
+        char* x_origen_b = string_itoa(trip->pos_x);
         char* y_origen_b = string_itoa(trip->pos_y);
         char* y_destino_b = string_itoa((trip->pos_y)-1);
-        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        char* x_destino_b = x_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)--;
         //aviso a miram
@@ -930,10 +1000,20 @@ void* mover_tripulante_RR(Tripulante* trip){
       distancia_y = y_destino - y_origen;
       for(int i = 0; i<distancia_y; i++){
         //resto de parametros para enviar a bitacora
-        char* eje = "Y";
+        char* x_origen_b = string_itoa(trip->pos_x);
         char* y_origen_b = string_itoa(trip->pos_y);
         char* y_destino_b = string_itoa((trip->pos_y)+1);
-        avisar_movimiento_bitacora(id_trip,eje,y_origen_b,y_destino_b);
+        char* x_destino_b = x_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)++;
         //aviso a miram

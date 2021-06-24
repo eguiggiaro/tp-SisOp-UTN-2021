@@ -821,18 +821,23 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
 	list_destroy(lista_mensajes);
 }
 
-void avisar_movimiento_bitacora(char* id_trip, char* eje, char* origen, char* destino){
+void avisar_movimiento_bitacora(char* id_trip, char* origen, char* destino){
 	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
     t_buffer* buffer;
 
 	t_list* lista_mensajes = list_create();
 
-	//Parametros que se envian a Store:
+	char* mensaje = string_new();
+	string_append(&mensaje, "Se DESPLAZA el tripulante: ");
+	string_append(&mensaje, id_trip);
+	string_append(&mensaje, " desde: ");
+	string_append(&mensaje, origen);
+	string_append(&mensaje, " hasta: ");
+	string_append(&mensaje, destino);
+
+	//Se envia mensaje a Store:
 	list_add(lista_mensajes,id_trip);
-	list_add(lista_mensajes, "DESPLAZAMIENTO"); //accion
-	list_add(lista_mensajes,eje);
-	list_add(lista_mensajes,origen);
-	list_add(lista_mensajes,destino);
+	list_add(lista_mensajes,mensaje);
 
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;

@@ -379,7 +379,7 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
 	config_destroy(metaConfig);
 	free(direccionDeMetadata);
-	
+
 	return metadata;
 }
 
@@ -404,7 +404,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	
-	//list_destroy(metadata->blocks); // VER
+	list_destroy(metadata->blocks);
 	free(metadata);
 	free(direccionDeMetadata);
 
@@ -429,8 +429,8 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
-	//list_destroy(metadata->blocks); VER
-
+	
+	list_destroy(metadata->blocks);
 	free(metadata);
 	free(direccionDeMetadata);
 
@@ -536,16 +536,13 @@ char* obtenerDireccionDeMetadataBitacora (char* tripulante){ //Devuelve la direc
 
 	char* direccionDeMetadata = string_new();
 	char* nombreMetadata = string_from_format("%s/%s", pathBitacoras, "Tripulante");
-	//char* numeroTripulante = string_itoa(tripulante);
-	char* extensionDeMetadata = ".ims";
 	
 	string_append(&direccionDeMetadata, nombreMetadata);
 	string_append(&direccionDeMetadata, tripulante);
-	string_append(&direccionDeMetadata, extensionDeMetadata);
+	string_append(&direccionDeMetadata, ".ims");
 
 	free(nombreMetadata);
-	free(extensionDeMetadata);
-		
+	
 	return direccionDeMetadata;
 }
 

@@ -508,10 +508,7 @@ int leer_config(void)
 	{
 		return EXIT_FAILURE;
 	}
-
-	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
-	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
 	configuracion->ip_mi_ram_hq = strdup(config_get_string_value(config, "IP_MI_RAM_HQ"));
 	configuracion->puerto_mi_ram_hq = strdup(config_get_string_value(config, "PUERTO_MI_RAM_HQ"));
 	configuracion->ip_i_mongo_store = strdup(config_get_string_value(config, "IP_I_MONGO_STORE"));

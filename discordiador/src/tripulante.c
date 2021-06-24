@@ -109,7 +109,7 @@ void ejecutar_proxima_tarea(Tripulante* tripulante){
     ejecutar_proxima_tarea_FIFO(tripulante);
   }
   else if(strncmp(configuracion->algoritmo,"RR",2)==0){
-    //ejecutar_proxima_tarea_RR(tripulante);
+    ejecutar_proxima_tarea_RR(tripulante);
   }
   else{
     miLogError("\nAlgoritmo no seteado!");

@@ -15,9 +15,7 @@
 #include<semaphore.h>
 
 typedef struct Configuracion{
-	char* puntoMontaje;
 	int puerto;
-	int tiempoSincro;
 	char* ip_mi_ram_hq;
 	int puerto_mi_ram_hq;
 	char* ip_i_mongo_store;

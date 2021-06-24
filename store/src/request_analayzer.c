@@ -68,6 +68,8 @@ void atender_request_store(Request *request) {
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
 			free(request);
+			free(informeTarea);
+			free(tarea);
 			pthread_mutex_unlock(&mutex_informartareas);
 
 	  	break;
@@ -105,7 +107,10 @@ void atender_request_store(Request *request) {
 			eliminar_buffer(buffer_devolucion_informacion_bitacora);
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
+
+			free(instruccionABitacora);
 			free(request);
+	
 			pthread_mutex_unlock(&mutex_informacionBitacora);
 
 		break;

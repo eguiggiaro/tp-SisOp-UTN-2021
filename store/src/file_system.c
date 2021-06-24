@@ -311,6 +311,15 @@ void finalizarFS(void){
 	
 	bitarray_destroy(bitmap);
 
+	/*if (munmap(punteroSuperbloque, tamanioSuperbloque) == -1){ 
+		perror("Falló al desmapear el Superbloque.");
+        exit(1); 
+    }*/
+	if (munmap(punteroBlocks, tamanioBloque * cantidadBloques) == -1){ 
+		perror("Falló al desmapear el Superbloque.");
+        exit(1); 
+    }
+
 	free(puntoMontaje);    
 	free(pathSuperbloque); 
 	free(pathBlocks);  
@@ -370,7 +379,7 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
 	config_destroy(metaConfig);
 	free(direccionDeMetadata);
-
+	
 	return metadata;
 }
 
@@ -394,6 +403,8 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
+	
+	//list_destroy(metadata->blocks); // VER
 	free(metadata);
 	free(direccionDeMetadata);
 
@@ -418,6 +429,8 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
+	//list_destroy(metadata->blocks); VER
+
 	free(metadata);
 	free(direccionDeMetadata);
 
@@ -529,6 +542,9 @@ char* obtenerDireccionDeMetadataBitacora (char* tripulante){ //Devuelve la direc
 	string_append(&direccionDeMetadata, nombreMetadata);
 	string_append(&direccionDeMetadata, tripulante);
 	string_append(&direccionDeMetadata, extensionDeMetadata);
+
+	free(nombreMetadata);
+	free(extensionDeMetadata);
 		
 	return direccionDeMetadata;
 }
@@ -552,6 +568,7 @@ t_list* listaFromArray(char** array){
 		int bloque = atoi(array[i]);
 		list_add(listaBloques,(void*) bloque);
 	}
+	
 	return listaBloques;
 }
 

@@ -5,8 +5,6 @@
 
 int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
-	//verificarMetadata(recurso); //Verifico si existe la metadata del recurso, sino lo creo. Por ej: Oxigeno.ims
-
 	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
 
 	char caracter = cualEsMiCaracter(recurso);
@@ -35,6 +33,7 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	metadataR->caracter_llenado = strCaracter;
 
 	free(cadenaCaracteres);
+	free(strCaracter);
 
 	if(modificarMetadataRecurso(metadataR, recurso)){
 		return -1;
@@ -57,13 +56,16 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
         escribirBloqueUsado(ultimoBloque, cantidadBytesLibres, cadenaHastaCantidad);
 
 		if(string_length(cadenaHastaCantidad) == string_length(cadenaCaracteres)){
+			free(cadenaHastaCantidad);
 			return bloquesEscritos;
 		}
+		free(cadenaHastaCantidad);
 	}
     
 	char* cadenaDesdeCantidad = truncarCadenaDesdeCantidad(cadenaCaracteres, posicionEnCadena);  
 	bloquesEscritos = escribirBloquesNuevo(cadenaDesdeCantidad);
 
+	free(cadenaDesdeCantidad);
 	
     return bloquesEscritos;
     
@@ -149,7 +151,9 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 	list_add_all(metadata->blocks, listaBloquesOcupados);
 	metadata->size += string_length(instruccion);
 	metadata->block_count += list_size(listaBloquesOcupados);
-								
+
+	list_destroy(listaBloquesOcupados);
+
 	if(modificarMetadataBitacora(metadata, id_tripulante)){
 		return -1;
 	} 

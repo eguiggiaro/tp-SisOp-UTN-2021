@@ -532,12 +532,76 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 */
 }
 
+int buscar_frame_libre() {
+
+	Frame* un_frame_libre;
+	bool encontre_frame = false;
+
+	t_list_iterator* list_iterator = list_iterator_create(tabla_frames);
+	
+	while (list_iterator_has_next(list_iterator))
+	{
+		Frame *un_frame = list_iterator_next(list_iterator);
+		if (un_frame->estado = "LIBRE")
+		{
+			un_frame_libre = un_frame;
+			encontre_frame = true;
+			break;
+		}
+	}
+	list_iterator_destroy(list_iterator);
+
+	if (encontre_frame)
+	{
+		return un_frame_libre;
+	} else {
+		return -1;
+	}
+}
+
+int cargar_patota_memoria(char* tareas, int cantidad_tripulantes)
+{
+	int tamanio_alocado = 0;
+	Pagina* una_pagina;
+	PCB_adm* pcb_adm = malloc(sizeof(PCB_adm));
+	pcb_adm->PID = contador_patotas++;
+	pcb_adm->tabla_paginas = list_create();
+
+	//Cargo la patota 
+	while(tamanio_alocado < 8) {
+
+		Frame* un_frame_libre = buscar_frame_libre();
+
+		una_pagina->id_pagina = contador_paginas++;
+		una_pagina->id_frame = un_frame_libre->id_frame;
+		una_pagina->estado = "OCUPADO";
+		
+		list_add(pcb_adm->tabla_paginas, una_pagina);
+		tamanio_alocado += tamanio_pagina_paginacion;
+	}
+
+	//Cargar tareas
+	//Cargar a TCB
+	//Mover a memoria
+
+		//void* pag2 = calloc(2, 1);
+
+		//uint32_t numero = 0x12345678; // es un número en hexadecimal
+
+		//memcpy(pag1,  (void*) &numero     , 2);
+		
+
+}
+
+
 
 void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina)
 {   
     contador_frames = tamanio_memoria / tamanio_pagina;
     contador_frames_libres = contador_frames;
-    Frame* un_frame;
+	contador_paginas = 0;
+    tamanio_pagina_paginacion = tamanio_pagina;
+	Frame* un_frame;
   	tabla_frames = list_create();
 	tabla_pcbs = list_create();
 	tabla_tareas = list_create();

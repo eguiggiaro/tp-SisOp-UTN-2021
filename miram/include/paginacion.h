@@ -11,6 +11,8 @@
 
 int contador_frames;
 int contador_frames_libres;
+int contador_paginas;
+int tamanio_pagina_paginacion;
 t_list *tabla_frames;
 t_list *tabla_pcbs;
 t_list *tabla_tareas;
@@ -40,7 +42,9 @@ typedef struct Pagina
 typedef struct
 {
 	uint32_t PID;
-	t_list tabla_paginas;
+	t_list* tabla_paginas;
+	int pagina_inicio;
+	int offset;
 } PCB_adm;
 
 typedef struct

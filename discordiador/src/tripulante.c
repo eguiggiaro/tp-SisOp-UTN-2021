@@ -42,6 +42,8 @@ void *inicializar_tripulante(Tripulante* tripulante){
         sem_wait(&mutexNEW);
         list_add(new_list, tripulante);
         sem_post(&mutexNEW);
+        //aviso cambio de cola/estado a MIRAM
+        //informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"NEW");
 
 		miLogInfo("Tripulante iniciado correctamente");
 

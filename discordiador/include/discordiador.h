@@ -130,6 +130,7 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje);
 void avisar_movimiento_bitacora(char* id_trip, char* origen, char* destino);
 void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre);
 void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre);
+void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola);
 
 //Metodos Test
 void elegir_modulo();

@@ -19,6 +19,7 @@ typedef enum
 	ALERTA_SABOTAJE,
 	INFORMAR_TAREAS_PATOTA,//Borrar luego
 	COMPACTACION,
+	CAMBIO_COLA,
     OK = 20,
 	FAIL = 21,
 } op_code;

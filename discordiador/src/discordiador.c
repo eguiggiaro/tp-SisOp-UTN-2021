@@ -418,6 +418,8 @@ void tripulante_listo(Tripulante *trip)
 	sem_post(&mutexREADY);
 	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
+	//aviso cambio de cola a MIRAM
+	//informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"READY");
 
 }
 
@@ -700,7 +702,8 @@ int planificar() {
 		tripulante = (Tripulante *) list_get(ready_list, 0); //obtiene primero en cola de READY
 		list_add(execute_list, tripulante);
 		list_remove(ready_list, 0);
-		
+		//aviso cambio de cola a MIRAM
+		//informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
 		tripulante->tripulante_despierto = true;
 		if(strncmp(configuracion->algoritmo,"RR",2)==0){
 			tripulante->quantum = configuracion->quantum;
@@ -743,6 +746,9 @@ void finalizar_tripulante(Tripulante* trip){
   trip_auxiliar->estado = finalizado;
   //libero lugar en la cola de EXEC
   sem_post(&semaforoEXEC);
+
+  //aviso cambio de cola a MIRAM
+  //informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"EXIT");
 
   //libero recursos ocupados por el Hilo
 	pthread_exit(0);
@@ -904,6 +910,32 @@ void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre){
 		miLogInfo("\nFin de tarea informado a bitacora correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO FIN DE TAREA A BITACORA. \n");
+	}
+
+	list_destroy(lista_mensajes);
+}
+
+void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola){
+	t_paquete* paquete = crear_paquete(CAMBIO_COLA);
+    t_buffer* buffer;
+
+	t_list* lista_mensajes = list_create();
+
+	//Parametros que se envian a Miram:
+	list_add(lista_mensajes,id_trip);
+	list_add(lista_mensajes, nueva_cola);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, socket_miram);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_miram);
+	if (codigo_operacion == OK) {
+		miLogInfo("\nCambio de estado/cola informado a miram.");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR INFORMANDO CAMBIO DE ESTADO/COLA A MIRAM. \n");
 	}
 
 	list_destroy(lista_mensajes);

@@ -728,10 +728,12 @@ void bloquear_tripulante(Tripulante* trip){
   //comienza seccion critica
   //list_remove() devuelve el tripulante que se elimina de la lista
   trip_auxiliar = list_remove(execute_list,indice);
-  list_add(exit_list,trip_auxiliar);
+  list_add(blocked_io,trip_auxiliar);
   //finaliza seccion critica
 	sem_post(&mutexBLOCK);
   sem_post(&mutexEXEC);
+  //aviso cambio de estado/cola a MIRAM
+  //informar_cambio_de_cola_miram(string_itoa(trip_auxiliar->id_tripulante),"BLOCK");
 
   //libero un lugar en la cola de EXEC
   sem_post(&semaforoEXEC);

@@ -378,11 +378,13 @@ char *leer_tareas_txt(char *direccion_txt)
 	index = 0;
 
 	}
-
+	
+	index = 0;
 	while (!feof(file_tarea))
 	{
 		fgets(line, sizeof(line), file_tarea);
 
+		index = 0;
 		while (line[index] != '\n')
 		{ //string con todas las posiciones
 

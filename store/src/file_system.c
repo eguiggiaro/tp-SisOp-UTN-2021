@@ -203,6 +203,21 @@ int calcularCantBloques(int size) {
 	return cantidadBloques;
 }
 
+int verificarQueTengoLosBloquesNecesarios(int cantidadBloquesNecesarios){
+	int resultado;
+	int bloquesEncontrados = 0;
+
+	for(int i=0; i<cantidadBloques; i++){
+		if(bitarray_test_bit(bitmap, i) == 0){
+			bloquesEncontrados++;
+		}
+		if(bloquesEncontrados == cantidadBloquesNecesarios){
+			return 1;
+		}
+	}
+	return 0;
+}
+
 // Recibo un bloque incompleto y lo completo.
 void escribirBloqueUsado(int bloque, int cantidadBytesLibres, char* datos){
 
@@ -215,6 +230,13 @@ t_list* escribirBloquesNuevo(char* datos){
 	
 	int cantidadBloquesNecesarios = calcularCantBloques(string_length(datos));
 	int startEscritura = 0;
+	
+	pthread_mutex_lock(&mutex_escribirBloques);
+
+	//Antes de empezar tengo que verificar si tengo lugar para todos los bloques. 
+	if(!verificarQueTengoLosBloquesNecesarios(cantidadBloquesNecesarios)){
+		return -1;
+	}
 	
 	t_list* bloques = list_create();	
 
@@ -242,7 +264,8 @@ t_list* escribirBloquesNuevo(char* datos){
 		startEscritura += tamanioBloque;	
 		free(escritura);
 	}
-	//list_destroy(bloques);
+	
+	pthread_mutex_unlock(&mutex_escribirBloques);
 	return bloques;
 }
 
@@ -406,6 +429,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_destroy(metaConfig);
 	
 	list_destroy(metadata->blocks);
+	free(metadata->caracter_llenado);
 	free(metadata->md5);
 	free(metadata);
 	free(direccionDeMetadata);
@@ -505,7 +529,6 @@ int crearMetadataBitacora(char* tripulante){
 	return EXIT_SUCCESS;
 }
 
-//TODO:
 char* generarMd5(t_list* bloques){
 
 	char* strMd5 = string_new();
@@ -592,18 +615,20 @@ t_list* listaFromArray(char** array){
 
 char* stringFromList(t_list* lista){
 	char* strLista = string_new();
+
 	string_append(&strLista, "[");
 	
-	if(string_length(lista) > 0){
+	if(list_size(lista) > 0){
 		string_append(&strLista, string_itoa(list_get(lista, 0)));
 		
 		for(int i=1; i<list_size(lista);i++){
-			string_append(&strLista, ",");
+			string_append(&strLista, ",");			
 			string_append(&strLista, string_itoa(list_get(lista, i)));	
 		}
 	}
 
 	string_append(&strLista, "]");
+
 	return strLista;
 }
 

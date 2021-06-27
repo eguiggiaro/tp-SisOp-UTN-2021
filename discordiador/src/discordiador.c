@@ -787,6 +787,8 @@ bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
         miLogError("ERROR INFORMANDO TAREA. \n");
 	}
 
+	buffer = (t_buffer*)recibir_buffer(socket_store);
+
 	list_destroy(lista_mensajes);
 	return se_informo;
 
@@ -858,6 +860,8 @@ void avisar_movimiento_bitacora(char* id_trip, char* origen, char* destino){
         miLogError("ERROR INFORMANDO NUEVA POSICION A BITACORA. \n");
 	}
 
+	buffer = (t_buffer*)recibir_buffer(socket_store);
+
 	list_destroy(lista_mensajes);
 }
 
@@ -884,6 +888,8 @@ void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre){
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA TAREA A BITACORA. \n");
 	}
+
+	buffer = (t_buffer*)recibir_buffer(socket_store);
 
 	list_destroy(lista_mensajes);
 }
@@ -912,6 +918,8 @@ void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre){
         miLogError("ERROR INFORMANDO FIN DE TAREA A BITACORA. \n");
 	}
 
+	buffer = (t_buffer*)recibir_buffer(socket_store);
+
 	list_destroy(lista_mensajes);
 }
 
@@ -938,5 +946,6 @@ void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola){
         miLogError("ERROR INFORMANDO CAMBIO DE ESTADO/COLA A MIRAM. \n");
 	}
 
+	buffer = (t_buffer*)recibir_buffer(socket_miram);
 	list_destroy(lista_mensajes);
 }

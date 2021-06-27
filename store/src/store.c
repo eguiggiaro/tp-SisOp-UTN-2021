@@ -47,7 +47,8 @@ void signalHandler(int signal){
 	
 	switch(signal) {
 		case SIGUSR1:
-			miLogInfo("Me llegó la señal %d, atiendo el sabotaje", signal);		
+			miLogInfo("Me llegó la señal %d, atiendo el sabotaje", signal);	
+			atenderSabotaje();	
 			break;
 		case SIGINT:
 			miLogInfo("Se forzó el cierre del I-Mongo-Store.");
@@ -160,7 +161,7 @@ void inicializarStore(void){
 	ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
-	
+
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
 	
 	testLecturaRecurso();
@@ -173,9 +174,13 @@ void inicializarStore(void){
 }
 
 
-void avisarSabotaje(){
-
+void atenderSabotaje(){
+	//Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
+	//Analizar sabotaje en Superbloque
+	//Analizar sabotaje en files
 }
+
+
 /*t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 	
 	char** posicionesSabotaje = string_get_string_as_array(strPosicionesSabotaje);

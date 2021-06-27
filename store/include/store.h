@@ -74,11 +74,12 @@ typedef struct {
 
 Configuracion* configuracion;
 
-int leerConfig(void);
+int leerConfig();
 void atender_request_store(Request *request);
-void inicializarParametrosFS(void);
-void inicializarStore(void);
-void syncPeriodico(void);
+void inicializarParametrosFS();
+void inicializarStore();
+void syncPeriodico();
+void atenderSabotaje();
 
 //t_list* obtenerListaSabotaje(char*);
 

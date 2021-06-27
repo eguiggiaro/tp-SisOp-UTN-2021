@@ -24,20 +24,21 @@ char* punteroBlocks;
 //Semáforos
 pthread_mutex_t mutex_bitmap;
 pthread_mutex_t mutex_bloques;
+pthread_mutex_t mutex_escribirBloques;
 
 
 /**** MANEJO FILE SYSTEM ****/
-bool verificarFS(void);
-void crearSuperbloque(void);
-void crearBlocks(void);
+bool verificarFS();
+void crearSuperbloque();
+void crearBlocks();
 void crearDirectorio(char*);
-void crearArbolDirectorios(void);
-void leerSuperbloque(void);
+void crearArbolDirectorios();
+void leerSuperbloque();
 void subirBlocksAMemoria();
-void finalizarFS(void);
+void finalizarFS();
 
 /**** MANEJO BLOQUES ****/
-int buscarYAsignarProximoBloqueLibre(void);
+int buscarYAsignarProximoBloqueLibre();
 void liberarBloque(int);
 int calcularCantBloques(int);
 t_list* escribirBloquesNuevo(char*);
@@ -45,6 +46,7 @@ void escribirBloque(int, int, char*);
 void escribirBloqueUsado(int, int , char*);
 char* leerBloque(int , int);
 char* leerBloques(t_list*, int);
+int verificarQueTengoLosBloquesNecesarios(int);
 
 /**** MANEJO METADATA ****/
 MetadataBitacora* leerMetadataBitacora(char*);

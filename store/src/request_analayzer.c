@@ -45,7 +45,9 @@ void atender_request_store(Request *request) {
 			int cantidadRecursos = atoi(listaNueva[1]); //En el caso de DESCARTAR_BASURA es NULL
 
 	 		resultadoTarea = ejecutarTarea(tarea, cantidadRecursos);
-			// resultadoBitacora = guardarEnBitacora(tarea);
+			char* mensajeAGuardar = "Comienza ejecucion de tarea ";
+			string_append(&mensajeAGuardar,tarea);
+			resultadoBitacora = guardarEnBitacora(id_tripulante, mensajeAGuardar);
 
 			if (resultadoTarea == -1)
 			{
@@ -68,8 +70,6 @@ void atender_request_store(Request *request) {
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
 			free(request);
-			free(informeTarea);
-			free(tarea);
 			pthread_mutex_unlock(&mutex_informartareas);
 
 	  	break;
@@ -107,11 +107,46 @@ void atender_request_store(Request *request) {
 			eliminar_buffer(buffer_devolucion_informacion_bitacora);
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
-
-			free(instruccionABitacora);
 			free(request);
-	
 			pthread_mutex_unlock(&mutex_informacionBitacora);
+
+		break;
+		
+		case OBTENER_BITACORA:
+
+			pthread_mutex_lock(&mutex_obtenerBitacora);
+			t_buffer* buffer_devolucion_obtener_bitacora = request->buffer_devolucion;
+			t_paquete *paquete_devuelto_obtener_bitacora;
+
+			miLogInfo("Me llego operacion: OBTENER BITACORA \n");
+			lista = deserializar_lista_strings(buffer_devolucion_obtener_bitacora);
+
+			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
+
+			char* bitacora = string_new();
+			bitacora = obtenerBitacora(id_tripulante);
+
+			if (string_is_empty(bitacora))
+			{
+				miLogInfo("ERROR: LA BITACORA DEL TRIPULANTE ESTA VACIA \n");
+				paquete_devuelto_obtener_bitacora = crear_paquete(FAIL);
+				list_add(lista_mensajes, "La bitacora del tripulante esta vacia");
+			}
+			else
+			{
+				miLogInfo("SE ENVIO BITACORA \n");
+
+				paquete_devuelto_obtener_bitacora = crear_paquete(OK);
+				list_add(lista_mensajes, bitacora);
+			}
+			t_buffer* buffer_respuesta_obtener_bitacora = serializar_lista_strings(lista_mensajes);
+			paquete_devuelto_informacion_bitacora->buffer = buffer_respuesta_obtener_bitacora;
+			enviar_paquete(paquete_devuelto_obtener_bitacora, request_fd);
+			eliminar_buffer(buffer_devolucion_obtener_bitacora);
+			list_destroy(lista_mensajes);
+			list_destroy(lista);
+			free(request);
+			pthread_mutex_unlock(&mutex_obtenerBitacora);
 
 		break;
 		
@@ -136,6 +171,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case CONSUMIR_OXIGENO:
 					printf( "Tarea es CONSUMIR_OXIGENO\n" );
+					//resultado;// =c);onsumirRecursos(OXIGENO, cantidadRecursos
 					break;
 
 				case GENERAR_COMIDA:
@@ -145,6 +181,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case CONSUMIR_COMIDA:
 					printf( "Tarea es CONSUMIR_COMIDA\n" );
+				//	resultado;// = consumirRecursos(OXIGENO, cantidadRecursos);
 					break;
 
 				case GENERAR_BASURA:
@@ -154,6 +191,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case DESECHAR_BASURA:
 					printf( "Tarea es DESECHAR_BASURA\n" );
+				//	resultado = desecharRecurso(BASURA);
 					break;
 
 				default:

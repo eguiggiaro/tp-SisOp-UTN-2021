@@ -131,7 +131,7 @@ char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int posicionEnCadena){
 }
 
 int guardarEnBitacora(char* id_tripulante, char* instruccion){
-
+	pthread_mutex_lock(&mutex_guardar_en_bitacora);
 	MetadataBitacora* metadata = leerMetadataBitacora(id_tripulante);
 
 	int size = metadata->size;
@@ -143,7 +143,6 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 		posicionUltimoBloque--;
 		ultimoBloque = list_get(metadata->blocks, posicionUltimoBloque);
 	} 
-
 
 	t_list* listaBloquesOcupados = list_create();
 	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, instruccion);
@@ -157,7 +156,70 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 	if(modificarMetadataBitacora(metadata, id_tripulante)){
 		return -1;
 	} 
-	
+	pthread_mutex_unlock(&mutex_guardar_en_bitacora);
 	//si fall{o tengo q devolver -1}
 	return 1;
 }
+
+char* obtenerBitacora(char* id_tripulante){
+
+	MetadataBitacora* metadataB = malloc(sizeof(MetadataBitacora));
+	
+	metadataB = leerMetadataBitacora(id_tripulante);
+
+	char* lectura = leerBloques(metadataB->blocks, metadataB->size);
+	printf("%s",lectura);
+
+	return lectura;
+	
+}
+
+/*int consumirRecurso(tipoRecurso recurso, int cantidadCaracteres){
+
+	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
+
+	int size = metadataR->size;
+	int block_count = metadataR->block_count;
+	t_list* blocks = metadataR->blocks;
+
+	int posicionUltimoBloque = list_size(blocks);
+	int ultimoBloque = obtenerUltimoBlouque(metadataR, posicionUltimoBloque);
+
+	size -= cantidadCaracteres; //cambio el tamaño del archivo
+
+	int tamanioUltimoBloque = saberTamanioUltimobloque(ultimoBloque);
+	int bloquesEliminados = 0;
+
+	for (bloquesEliminados ; tamanioUltimoBloque <= cantidadCaracteres; bloquesEliminados ++){
+	
+		liberarBloque(ultimoBloque); //se modifica el bitmap
+		cantidadCaracteres -= tamanioBloque;  
+		posicionUltimoBloque --; //modifico el puntero de blocks 
+		block_count --; //resto un bloque al blockCount
+		ultimoBloque = obtenerUltimoBlouque(blocks, posicionUltimoBloque); 
+		tamanioUltimoBloque = saberTamanioUltimobloque();
+
+	}
+
+	blocks = list_take(list_size(blocks)-bloquesEliminados);
+
+}
+
+int obtenerUltimoBlouque(t_list* blocks, int posicionUltimoBloque){
+	if (posicionUltimoBloque != 0){
+		posicionUltimoBloque--;
+		int ultimoBloque = list_get(blocks, posicionUltimoBloque);
+		return ultimoBloque;
+	} 
+	return 0;
+}*/
+
+// enviarAvisoDeSabotaje(char* posicionesSabotaje); AVISO_SABOTAJE [posicionesSabotaje];
+
+/*
+int desecharBasura(){
+	
+	//liberarBloque(ultimoBloque);
+	//borrarArchivoBasura();
+}
+*/

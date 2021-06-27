@@ -85,6 +85,7 @@ void atenderSabotaje();
 
 pthread_mutex_t mutex_informartareas;
 pthread_mutex_t mutex_informacionBitacora;
+pthread_mutex_t mutex_guardar_en_bitacora;
 
 
 #endif

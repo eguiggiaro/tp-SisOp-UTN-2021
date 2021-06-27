@@ -693,7 +693,7 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 //Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución
 //Hecho por: Emiliano
 int planificar() {
-
+	sem_wait(&semaforoEXEC);
 	sem_wait(&mutexEXEC);
 	sem_wait(&mutexREADY);
 
@@ -704,6 +704,7 @@ int planificar() {
 		tripulante = (Tripulante *) list_get(ready_list, 0); //obtiene primero en cola de READY
 		list_add(execute_list, tripulante);
 		list_remove(ready_list, 0);
+		miLogInfo("\nEl tripulante: %d pasa de READY a EXEC",tripulante->id_tripulante);
 		//aviso cambio de cola a MIRAM
 		//informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
 		tripulante->tripulante_despierto = true;
@@ -875,8 +876,10 @@ void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre){
 
 	//Parametros que se envian a Store:
 	list_add(lista_mensajes,id_trip);
-	list_add(lista_mensajes, "INICIO_TAREA"); //accion
-	list_add(lista_mensajes,tarea_nombre);
+	char* mensaje = string_new();
+	string_append(&mensaje, "INICIO_TAREA ");
+	string_append(&mensaje, tarea_nombre);
+	list_add(lista_mensajes, mensaje);
 
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
@@ -904,8 +907,10 @@ void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre){
 
 	//Parametros que se envian a Store:
 	list_add(lista_mensajes,id_trip);
-	list_add(lista_mensajes, "FIN_TAREA"); //accion
-	list_add(lista_mensajes,tarea_nombre);
+	char* mensaje = string_new();
+	string_append(&mensaje, "FIN_TAREA ");
+	string_append(&mensaje, tarea_nombre);
+	list_add(lista_mensajes, mensaje);
 
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
@@ -950,4 +955,49 @@ void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola){
 
 	buffer = (t_buffer*)recibir_buffer(socket_miram);
 	list_destroy(lista_mensajes);
+}
+
+void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
+  int indice;
+  Tripulante* trip_auxiliar;
+  bool tripulante_encontrado = false;
+
+  for(int i =0; i<list_size(execute_list);i++){
+
+  trip_auxiliar = list_get(execute_list,i);
+
+  if(trip->id_tripulante == trip_auxiliar->id_tripulante){
+    indice = i;
+	tripulante_encontrado = true;
+    }
+  }
+
+  if(tripulante_encontrado){
+
+  sem_wait(&mutexEXEC); //esta bien?
+  sem_wait(&mutexREADY);
+  //empieza seccion critica
+  //list_remove() devuelve el tripulante que se elimina de la lista
+  trip_auxiliar = list_remove(execute_list,indice);
+  list_add(ready_list,trip_auxiliar);
+  miLogInfo("\nEl tripulante: %d pasa de EXEC a READY",trip->id_tripulante);
+  if(strncmp(configuracion->algoritmo,"RR",2)==0){
+	trip->quantum = configuracion->quantum;
+  }
+  trip->tripulante_despierto = false;
+  //finaliza seccion critica
+  sem_post(&mutexEXEC);
+  sem_post(&mutexREADY);
+
+  trip_auxiliar->estado = listo;
+  //aviso cambio de cola a MIRAM
+  //informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"EXIT");
+
+  //libero lugar en la cola de EXEC
+  sem_post(&semaforoEXEC);
+
+  //al liberarse un espacio en la cola de EXEC, replanifico 
+  planificar();
+  }
+
 }

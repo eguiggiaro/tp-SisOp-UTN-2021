@@ -66,7 +66,7 @@ return;
 
 
 void pedir_proxima_tarea(Tripulante* un_tripulante){
-  
+  miLogInfo("\nSe pide a MIRAM la proxima tarea del tripulante %d",un_tripulante->id_tripulante);
   //1. Aviso a MIRAM que deseo iniciar, indicando a que patota pertenezco.
    t_paquete* paquete = crear_paquete(TAREA_SIGUIENTE);
    t_buffer* buffer;
@@ -151,7 +151,7 @@ void generar_comida_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
+  miLogInfo("\nComienza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
 
   if(!trip->realizo_movimientos_tarea){
@@ -171,7 +171,7 @@ void generar_comida_FIFO(Tripulante* trip){
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
+  miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
   //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
@@ -184,7 +184,7 @@ void generar_oxigeno_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
+  miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
 
   if(!trip->realizo_movimientos_tarea){
@@ -204,7 +204,7 @@ void generar_oxigeno_FIFO(Tripulante* trip){
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+  miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
   //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
@@ -217,7 +217,7 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
+  miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
 
   if(!trip->realizo_movimientos_tarea){
@@ -237,7 +237,7 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+  miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
   //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
@@ -249,7 +249,7 @@ void consumir_comida_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
- miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
+ miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
 
   if(!trip->realizo_movimientos_tarea){
@@ -269,7 +269,7 @@ void consumir_comida_FIFO(Tripulante* trip){
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+  miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
   //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
@@ -282,7 +282,7 @@ void generar_basura_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
+  miLogInfo("\nComienza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
 
   if(!trip->realizo_movimientos_tarea){
@@ -302,7 +302,7 @@ void generar_basura_FIFO(Tripulante* trip){
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+  miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
   //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
@@ -314,7 +314,7 @@ void descartar_basura_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
+  miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
 
   if(!trip->realizo_movimientos_tarea){
@@ -334,7 +334,7 @@ void descartar_basura_FIFO(Tripulante* trip){
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+  miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
   avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
   //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
@@ -344,8 +344,9 @@ void descartar_basura_FIFO(Tripulante* trip){
 
 void tarea_generica_FIFO(Tripulante* trip){
   //Moverse a ubicacion.
-  miLogInfo("\nComienza ejecucion de TAREA GENERICA");
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
+  char* nombre_tarea = (trip->tarea_actual)->nombre_tarea;
+  miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
@@ -354,8 +355,8 @@ void tarea_generica_FIFO(Tripulante* trip){
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de TAREA GENERICA");
-  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
+  miLogInfo("\nFinaliza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
+  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
   //seteo parametros para proxima tarea
   trip->tarea_actual = NULL;
   trip->realizo_movimientos_tarea = false;
@@ -393,7 +394,7 @@ void generar_comida_RR(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de GENERAR_COMIDA");
+  miLogInfo("\nComienza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
   //Antes de empezar a ejecutar verifico que el tripulante posea quantum
   if(trip->quantum > 0){
@@ -416,7 +417,7 @@ void generar_comida_RR(Tripulante* trip){
 
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA");
+    miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
     avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
 
     if(trip->quantum >0){
@@ -440,7 +441,7 @@ void generar_oxigeno_RR(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO");
+  miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
   //Antes de empezar a ejecutar verifico que el tripulante posea quantum
   if(trip->quantum > 0){
@@ -463,7 +464,7 @@ void generar_oxigeno_RR(Tripulante* trip){
 
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO");
+    miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
     avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
 
     if(trip->quantum >0){
@@ -487,7 +488,7 @@ void consumir_oxigeno_RR(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO");
+  miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
   //Antes de empezar a ejecutar verifico que el tripulante posea quantum
   if(trip->quantum > 0){
@@ -510,7 +511,7 @@ void consumir_oxigeno_RR(Tripulante* trip){
 
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO");
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
     avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
 
     if(trip->quantum >0){
@@ -534,7 +535,7 @@ void consumir_comida_RR(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA");
+  miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
   //Antes de empezar a ejecutar verifico que el tripulante posea quantum
   if(trip->quantum > 0){
@@ -557,7 +558,7 @@ void consumir_comida_RR(Tripulante* trip){
 
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA");
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
     avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
 
     if(trip->quantum >0){
@@ -581,7 +582,7 @@ void generar_basura_RR(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de GENERAR_BASURA");
+  miLogInfo("\nComienza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
   //Antes de empezar a ejecutar verifico que el tripulante posea quantum
   if(trip->quantum > 0){
@@ -604,7 +605,7 @@ void generar_basura_RR(Tripulante* trip){
 
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA");
+    miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
     avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
 
     if(trip->quantum >0){
@@ -628,7 +629,7 @@ void descartar_basura_RR(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
 
-  miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA");
+  miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
   //Antes de empezar a ejecutar verifico que el tripulante posea quantum
   if(trip->quantum > 0){
@@ -651,7 +652,7 @@ void descartar_basura_RR(Tripulante* trip){
 
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA");
+    miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
     avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
 
     if(trip->quantum >0){
@@ -673,8 +674,9 @@ void descartar_basura_RR(Tripulante* trip){
 
 void tarea_generica_RR(Tripulante* trip){
   //Moverse a ubicacion.
-  miLogInfo("\nComienza ejecucion de TAREA GENERICA");
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
+  char* nombre_tarea = (trip->tarea_actual)->nombre_tarea;
+  miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
+  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
 
   //Antes de empezar a ejecutar verifico que el tripulante posea quantum
   if(trip->quantum > 0){
@@ -687,8 +689,8 @@ void tarea_generica_RR(Tripulante* trip){
     if(trip->quantum > 0){
       int retardo = configuracion->retardo_ciclo_cpu;
       int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-      miLogInfo("\nFinaliza ejecucion de TAREA_GENERICA");
-      avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"TAREA_GENERICA");
+      miLogInfo("\nFinaliza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
+      avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
 
       if(trip->quantum >0){
         for(int i = 0; i<trip->quantum;i++){
@@ -799,6 +801,7 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)--;
         //aviso a miram
@@ -823,6 +826,7 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)++;
         //aviso a miram
@@ -852,6 +856,7 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)--;
         //aviso a miram
@@ -876,6 +881,7 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)++;
         //aviso a miram
@@ -919,6 +925,7 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)--;
         //aviso a miram
@@ -951,6 +958,7 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)++;
         //aviso a miram
@@ -987,6 +995,7 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)--;
         //aviso a miram
@@ -1018,6 +1027,7 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino, y_destino_b);
 
         avisar_movimiento_bitacora(id_trip,origen,destino);
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)++;
         //aviso a miram

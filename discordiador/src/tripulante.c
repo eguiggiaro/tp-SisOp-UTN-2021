@@ -88,6 +88,7 @@ void pedir_proxima_tarea(Tripulante* un_tripulante){
     if (tareas[0] == '$')
     {
         un_tripulante->completo_tareas=true;
+        miLogInfo("\nEl tripulante: %d finalizo todas sus tareas.",un_tripulante->id_tripulante);
 
     } else {
 
@@ -800,8 +801,8 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)--;
         //aviso a miram
@@ -825,8 +826,8 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)++;
         //aviso a miram
@@ -855,8 +856,8 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)--;
         //aviso a miram
@@ -880,8 +881,8 @@ void mover_tripulante(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)++;
         //aviso a miram
@@ -924,8 +925,8 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)--;
         //aviso a miram
@@ -957,8 +958,8 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)++;
         //aviso a miram
@@ -994,8 +995,8 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)--;
         //aviso a miram
@@ -1026,8 +1027,8 @@ void* mover_tripulante_RR(Tripulante* trip){
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        avisar_movimiento_bitacora(id_trip,origen,destino);
         miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)++;
         //aviso a miram

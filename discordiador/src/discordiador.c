@@ -375,7 +375,7 @@ char *leer_tareas_txt(char *direccion_txt)
 			
 		}
 
-	index = 0;
+	    index = 0;
 
 	}
 	
@@ -857,7 +857,7 @@ void avisar_movimiento_bitacora(char* id_trip, char* origen, char* destino){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("\nNueva desplazamiento informado a bitacora correctamente");
+		miLogInfo("\nNuevo desplazamiento informado a bitacora correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA POSICION A BITACORA. \n");
 	}

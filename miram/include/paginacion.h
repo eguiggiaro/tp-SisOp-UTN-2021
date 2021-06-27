@@ -30,6 +30,7 @@ typedef struct Frame
 	int id_frame;
 	uint32_t dir_inicio;
 	char *estado;
+	int id_pagina;
 } Frame;
 
 typedef struct Pagina
@@ -43,20 +44,22 @@ typedef struct
 {
 	uint32_t PID;
 	t_list* tabla_paginas;
-	int pagina_inicio;
-	int offset;
+	int pagina_inicio_pcb;
+	int cantidad_paginas_pcb;
+	int pagina_inicio_tareas;
+	int cantidad_paginas_tareas;
+	int offset_tareas;
+	t_list* tabla_TCB_admin;
 } PCB_adm;
 
 typedef struct
 {
 	uint32_t TID;
-	uint32_t PID;
+	int pagina_inicio;
+	int offset;
+	int cantidad_paginas;
 } TCB_adm;
 
-typedef struct
-{
-	uint32_t PID;
-} Tarea_adm;
 
 pthread_mutex_t mutex_dump;
 #endif

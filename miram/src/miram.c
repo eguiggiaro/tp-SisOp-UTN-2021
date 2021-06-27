@@ -61,24 +61,23 @@ void atender_request_miram(Request *request)
 		pthread_mutex_lock(&mutex_expulsion);
 		t_buffer *buffer_devolucion_expulsar = request->buffer_devolucion;
 		lista_mensajes = list_create();
-
 		//recibo los mensajes
-		miLogInfo("Me llego operacion: EXPULSAR TRIPULANTE \n");
 		lista = deserializar_lista_strings(buffer_devolucion_expulsar);
 
 		int tripulante_expulsion = atoi(list_get(lista, 0));
 
+		miLogInfo("Me llego operacion: Expulsar tripulante %d\n",tripulante_expulsion);
 		resultado = expulsar_tripulante(tripulante_expulsion);
 
 		if (resultado == -1)
 		{
-			miLogInfo("ERROR: TRIPULANTE NO EXPULSADO \n");
+			miLogInfo("ERROR: TRIPULANTE %d NO EXPULSADO \n",tripulante_expulsion);
 			paquete_devuelto = crear_paquete(FAIL);
 			list_add(lista_mensajes, "Se produjo un error al expulsar el tripulante");
 		}
 		else
 		{
-			miLogInfo("TRIPULANTE EXPULSADO CORRECTAMENTE \n");
+			miLogInfo("TRIPULANTE %d EXPULSADO CORRECTAMENTE \n", tripulante_expulsion);
 
 			paquete_devuelto = crear_paquete(OK);
 			list_add(lista_mensajes, string_itoa(tripulante_expulsion));
@@ -103,11 +102,10 @@ void atender_request_miram(Request *request)
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
-		miLogInfo("Me llego operacion: INICIAR TRIPULANTE \n");
 		lista = deserializar_lista_strings(buffer_devolucion_iniciar_tripulante);
 
 		int PATOTA_ID = atoi(list_get(lista, 0));
-
+		miLogInfo("Me llego operacion: INICIAR TRIPULANTE PATOTA %d\n", PATOTA_ID);
 		resultado = iniciar_tripulante(PATOTA_ID);
 
 		char *posicion;
@@ -121,7 +119,7 @@ void atender_request_miram(Request *request)
 		}
 		else
 		{
-			miLogInfo("TRIPULANTE INICIADO CORRECTAMENTE \n");
+			miLogInfo("TRIPULANTE %d INICIADO CORRECTAMENTE \n",resultado);
 
 			posicion = buscar_posicion_tripulante(resultado);
 			proxima_tarea = proxima_tarea_tripulante(resultado);
@@ -204,7 +202,7 @@ void atender_request_miram(Request *request)
 		}
 		else
 		{
-			miLogInfo("PATOTA INICIADA CORRECTAMENTE \n");
+			miLogInfo("PATOTA %d INICIADA CORRECTAMENTE \n", resultado);
 
 			paquete_devuelto_iniciar_patota = crear_paquete(OK);
 			list_add(lista_mensajes, string_itoa(resultado));
@@ -231,10 +229,10 @@ void atender_request_miram(Request *request)
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
-		miLogInfo("Me llego operacion: SIGUIENTE TAREA \n");
 		lista = deserializar_lista_strings(buffer_devolucion_tareas);
 
 		int tripulante_id = atoi(list_get(lista, 0));
+		miLogInfo("Me llego operacion: SIGUIENTE TAREA de tripulante %d\n",tripulante_id);
 
 		char *tarea = proxima_tarea_tripulante(tripulante_id);
 
@@ -262,10 +260,11 @@ void atender_request_miram(Request *request)
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
-		miLogInfo("Me llego operacion: MOVER TRIPULANTE \n");
 		lista = deserializar_lista_strings(buffer_devolucion_mover);
 
 		int tripulante_id_a_mover = atoi(list_get(lista, 0));
+		miLogInfo("Me llego operacion: MOVER de tripulante %d\n", tripulante_id_a_mover);
+
 		char *eje = list_get(lista, 1);
 		int nueva_posicion = atoi(list_get(lista,2));
 
@@ -654,10 +653,9 @@ int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 
 	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
-		
 		iniciar_patota_segmentacion(cantidad_tripulantes, tareas, puntos);
 	} else {
-		//
+		iniciar_patota_paginacion(cantidad_tripulantes, tareas, puntos);
 	}
 
 }

@@ -1,18 +1,17 @@
 #include "paginacion.h"
 
-void dump_memoria_frames(bool mostrar_vacios)
+void dump_memoria_paginacion_frames(bool mostrar_vacios)
 {
-
 
 	printf("--------------------------------------------------------------------\n");
 	printf("Detalle tabla de frames\n");
 	printf("--------------------------------------------------------------------\n");
-	printf("Dir Inicio\tId frame\tEstado\n");
+	printf("Dir Inicio\tId frame\t Pagina\tEstado\tPatota\n");
 	t_list_iterator *list_iterator = list_iterator_create(tabla_frames);
 	while (list_iterator_has_next(list_iterator))
 	{
 		Frame *un_frame = list_iterator_next(list_iterator);
-    		imprimir_frame(un_frame);
+		imprimir_frame(un_frame);
 	}
 
 	printf("--------------------------------------------------------------------\n");
@@ -24,113 +23,76 @@ void dump_memoria_frames(bool mostrar_vacios)
 void imprimir_frame(Frame *un_frame)
 
 {
-	printf("%d\t%d\t%s\n", un_frame->dir_inicio, un_frame->id_frame, un_frame->estado);
-}
+	t_list_iterator *list_iterator_pcbs = list_iterator_create(tabla_pcbs);
+	t_list_iterator *list_iterator_paginas;
+	PCB_adm *un_pcb_adm;
+	Pagina *una_pagina;
+	bool encontre_patota = false;
+	char *pagina_a_mostrar;
+	char *patota_a_mostrar;
 
-
-void dump_memoria_contenido_paginacion()
-{
-
-/*
-	printf("Detalle memoria\n");
-	printf("--------------------------------------------------------------------\n");
-	printf("Patota Id\t# Segmento\t  Tipo\t   Inicio\tTamaño\n");
-
-	t_list_iterator *list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
-	t_list_iterator *list_iterator_tareas;
-	t_list_iterator *list_iterator_tcb;
-
-
-	PCB_adm* pcbadm;
-	Tarea_adm* tareadm;
-	TCB_adm* tcbadm;
-	int patota, segmento, tipo, inicio, tamanio;
-	Segmento* un_segmento;
-	PCB* pcb;
-	TCB* tcb;
-
-	char* tareas;
-
-	while (list_iterator_has_next(list_iterator_pcb))
+	if (strcmp(un_frame->estado, "OCUPADO") == 0)
 	{
-		pcbadm = list_iterator_next(list_iterator_pcb);
-		patota = pcbadm->PID;
-		segmento = pcbadm->segmento_nro;
-		tipo = "PCB";
-		un_segmento = buscar_segmento_por_id(segmento);
-		inicio = un_segmento->dir_inicio;
-		tamanio = un_segmento->desplazamiento;
-		pcb = buscar_patota_segmentacion(pcbadm->PID);
-
-		printf("%9d\t%10d\t%6s\t%p\t%5db\n", patota, segmento, tipo,pcb,tamanio);
-
-		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
-
-		while (list_iterator_has_next(list_iterator_tareas))
+		while (list_iterator_has_next(list_iterator_pcbs))
 		{
-			tareadm = list_iterator_next(list_iterator_tareas);
+			un_pcb_adm = list_iterator_next(list_iterator_pcbs);
 
-			if (tareadm->PID == pcbadm->PID)
+			list_iterator_paginas = list_iterator_create(un_pcb_adm->tabla_paginas);
+
+			while (list_iterator_has_next(list_iterator_paginas))
 			{
-				segmento = tareadm->segmento_nro;
-				tipo = "Tareas";
-				un_segmento = buscar_segmento_por_id(segmento);
-				inicio = un_segmento->dir_inicio;
-				tamanio = un_segmento->desplazamiento;
-				tareas = pcb->Tareas;
+				una_pagina = list_iterator_next(list_iterator_paginas);
+				if (una_pagina->id_frame == un_frame->id_frame)
+				{
+					encontre_patota = true;
+					break;
+				}
 
-				printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tareas,tamanio);
-				break;
+				if (encontre_patota)
+				{
+					break;
+				}
 			}
+			list_iterator_destroy(list_iterator_paginas);
 		}
-		list_iterator_destroy(list_iterator_tareas);
-
-		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
-
-		while (list_iterator_has_next(list_iterator_tcb))
-			{
-				tcbadm = list_iterator_next(list_iterator_tcb);
-
-					if (tcbadm->PID == pcbadm->PID)
-					{
-						segmento = tcbadm->segmento_nro;
-						tipo = "  TCB";
-						un_segmento = buscar_segmento_por_id(segmento);
-						inicio = un_segmento->dir_inicio;
-						tamanio = un_segmento->desplazamiento;
-						tcb = buscar_tripulante_segmentacion(tcbadm->TID);
-
-						printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tcb,tamanio);
-					}
-			}
-		list_iterator_destroy(list_iterator_tcb);
-
+	}
+	if (encontre_patota)
+	{
+		patota_a_mostrar = string_itoa(un_pcb_adm->PID);
+	}
+	else
+	{
+		patota_a_mostrar = "-";
 	}
 
-	printf("--------------------------------------------------------------------\n");
-	list_iterator_destroy(list_iterator_pcb);
-*/
+	if (un_frame->id_pagina == -1)
+	{
+		pagina_a_mostrar = "-";
+	}
+	else
+	{
+		pagina_a_mostrar = string_itoa(una_pagina->id_pagina);
+		
+	}
+	list_iterator_destroy(list_iterator_pcbs);
+
+
+	printf("%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, un_frame->estado, patota_a_mostrar);
 }
-
-
 
 //Muestra el contenido de la memoria
 void dump_memoria_paginacion(bool mostrar_vacios)
-
 {
 	pthread_mutex_lock(&mutex_dump);
-	dump_memoria_frames(mostrar_vacios);
-	//dump_memoria_contenido_paginacion();
-	fflush(stdout); 
+	dump_memoria_paginacion_frames(mostrar_vacios);
+	fflush(stdout);
 	pthread_mutex_unlock(&mutex_dump);
 }
-
-
 
 //Reserva memoria
 u_int32_t reservar_memoria_paginacion(int bytes)
 {
-/*
+	/*
 	int index = 0;
 	bool encontre_segmento = false;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
@@ -193,7 +155,7 @@ u_int32_t reservar_memoria_paginacion(int bytes)
 
 int buscar_pagina(u_int32_t posicion_memoria)
 {
-    /*
+	/*
 	bool encontre_segmento = false;
 	int segmento_encontrado;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
@@ -223,9 +185,9 @@ int buscar_pagina(u_int32_t posicion_memoria)
     */
 }
 
-Pagina* buscar_pagina_por_id(int id_segmento)
+Pagina *buscar_pagina_por_id(int id_segmento)
 {
-    /*
+	/*
 	bool encontre_segmento = false;
 	Segmento* segmento_encontrado;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
@@ -256,7 +218,7 @@ Pagina* buscar_pagina_por_id(int id_segmento)
 
 u_int32_t buscar_posicion_paginacion(int segmento)
 {
-    /*
+	/*
 	bool encontre_posicion = false;
 	u_int32_t posicion_encontrada;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
@@ -288,7 +250,7 @@ u_int32_t buscar_posicion_paginacion(int segmento)
 
 void alta_patota_paginacion(PCB *unPCB)
 {
-    /*
+	/*
 	PCB_adm *pcb_adm = malloc(sizeof(PCB_adm));
 	pcb_adm->PID = unPCB->PID;
 	pcb_adm->segmento_nro = buscar_segmento(unPCB);
@@ -298,7 +260,7 @@ void alta_patota_paginacion(PCB *unPCB)
 
 uint32_t buscar_patota_paginacion(int PID)
 {
-    /*
+	/*
 	bool encontre_patota = false;
 	u_int32_t posicion_patota;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos_pcb);
@@ -330,7 +292,7 @@ uint32_t buscar_patota_paginacion(int PID)
 
 void alta_tripulante_paginacion(TCB *unTCB, int patota)
 {
-    /*
+	/*
 	TCB_adm *tcb_adm = malloc(sizeof(TCB_adm));
 	tcb_adm->TID = unTCB->TID;
 	tcb_adm->PID = patota;
@@ -341,7 +303,7 @@ void alta_tripulante_paginacion(TCB *unTCB, int patota)
 
 void alta_tareas_paginacion(int PCB_ID, char *tareas)
 {
-    /*
+	/*
 	Tarea_adm *tareas_adm = malloc(sizeof(Tarea_adm));
 	tareas_adm->PID = PCB_ID;
 	tareas_adm->segmento_nro = buscar_segmento(tareas);
@@ -351,7 +313,7 @@ void alta_tareas_paginacion(int PCB_ID, char *tareas)
 
 uint32_t buscar_tripulante_paginacion(int TCB_ID)
 {
-    /*
+	/*
 	bool encontre_tripulante = false;
 	u_int32_t posicion_tripulante;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos_tcb);
@@ -383,7 +345,7 @@ uint32_t buscar_tripulante_paginacion(int TCB_ID)
 
 int expulsar_tripulante_paginacion(int tripulante_id)
 {
-    /*
+	/*
 	Segmento *segmento;
 	bool elimine_segmento = false;
 	bool elimine_tripulante = false;
@@ -447,7 +409,7 @@ int expulsar_tripulante_paginacion(int tripulante_id)
 
 uint32_t buscar_tripulante_no_asignado_paginacion(int PCB_ID)
 {
-    /*
+	/*
 	if (PCB_ID > contador_patotas)
 	{
 		miLogInfo("La patota %d aún no ha sido iniciada", PCB_ID);
@@ -493,56 +455,19 @@ uint32_t buscar_tripulante_no_asignado_paginacion(int PCB_ID)
 }
 
 
-
-int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *puntos)
+Frame *buscar_frame_libre()
 {
-	/*
-	PCB *unPCB = malloc(sizeof(PCB));
-	// Sincronizar
-	unPCB->PID = contador_patotas++;
 
-	miLogInfo("Iniciando tareas \n");
-
-	posicion_memoria = iniciar_tareas(unPCB->PID, tareas);
-
-	if (posicion_memoria == 99)
-	{
-		return -1;
-	}
-
-	unPCB->Tareas = posicion_memoria;
-
-	//alta patota
-	alta_patota(unPCB);
-
-	miLogInfo("Iniciando tripulantes \n");
-
-	for (int i = 0; i < cantidad_tripulantes; i++)
-	{
-
-		//if (inicializar_tripulante(unPCB->PID, puntos[i], unPCB->Tareas) == -1)
-		if (inicializar_tripulante_segmentacion(unPCB->PID, obtener_punto_string(puntos, i), unPCB->Tareas) == -1)
-		{
-			return -1;
-		}
-	}
-	
-	
-	return unPCB->PID;
-*/
-}
-
-int buscar_frame_libre() {
-
-	Frame* un_frame_libre;
+	Frame *un_frame_libre;
+	Frame *un_frame;
 	bool encontre_frame = false;
 
-	t_list_iterator* list_iterator = list_iterator_create(tabla_frames);
-	
+	t_list_iterator *list_iterator = list_iterator_create(tabla_frames);
+
 	while (list_iterator_has_next(list_iterator))
 	{
-		Frame *un_frame = list_iterator_next(list_iterator);
-		if (un_frame->estado = "LIBRE")
+		un_frame = list_iterator_next(list_iterator);
+		if (strcmp(un_frame->estado, "LIBRE") == 0)
 		{
 			un_frame_libre = un_frame;
 			encontre_frame = true;
@@ -554,69 +479,395 @@ int buscar_frame_libre() {
 	if (encontre_frame)
 	{
 		return un_frame_libre;
-	} else {
+	}
+	else
+	{
 		return -1;
 	}
 }
 
-int cargar_patota_memoria(char* tareas, int cantidad_tripulantes)
+Frame *buscar_frame(int id_frame)
+{
+
+	Frame *un_frame;
+	bool encontre_frame = false;
+
+	t_list_iterator *list_iterator = list_iterator_create(tabla_frames);
+
+	while (list_iterator_has_next(list_iterator))
+	{
+		un_frame = list_iterator_next(list_iterator);
+		if (un_frame->id_frame == id_frame)
+		{
+			encontre_frame = true;
+			break;
+		}
+	}
+	list_iterator_destroy(list_iterator);
+
+	if (encontre_frame)
+	{
+		return un_frame;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+int guardar_pagina_en_frame(int id_frame, void *pagina, int id_pagina)
+{
+
+	Frame *un_frame;
+	bool encontre_frame = false;
+
+	t_list_iterator *list_iterator = list_iterator_create(tabla_frames);
+
+	while (list_iterator_has_next(list_iterator))
+	{
+		un_frame = list_iterator_next(list_iterator);
+
+		if (un_frame->id_frame == id_frame)
+		{
+			memcpy(un_frame->dir_inicio, pagina, tamanio_pagina_paginacion);
+			encontre_frame = true;
+			un_frame->estado = "OCUPADO";
+			un_frame->id_pagina = id_pagina;
+			break;
+		}
+	}
+	list_iterator_destroy(list_iterator);
+	dump_memoria_paginacion(true);
+
+	if (encontre_frame)
+	{
+		return 1;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+int guardar_patota(PCB *un_pcb, PCB_adm *un_pcb_adm)
+{
+
+	int cantidad_paginas = un_pcb_adm->cantidad_paginas_pcb;
+	Pagina *una_pagina;
+	Frame *un_frame;
+
+	for (int i = 0; i < cantidad_paginas; i++)
+	{
+		una_pagina = list_get(un_pcb_adm->tabla_paginas, i);
+		un_frame = buscar_frame(una_pagina->id_frame);
+		if (i + 1 == cantidad_paginas)
+		{
+			memcpy(un_frame->dir_inicio, (void *)un_pcb, tamanio_pagina_paginacion - un_pcb_adm->offset_tareas);
+		}
+		else
+		{
+			memcpy(un_frame->dir_inicio, (void *)un_pcb, tamanio_pagina_paginacion);
+		}
+	}
+}
+
+int iniciar_patota_paginacion( int cantidad_tripulantes, char *tareas, char *puntos)
 {
 	int tamanio_alocado = 0;
-	Pagina* una_pagina;
-	PCB_adm* pcb_adm = malloc(sizeof(PCB_adm));
+	Pagina *una_pagina;
+	PCB_adm *pcb_adm = malloc(sizeof(PCB_adm));
 	pcb_adm->PID = contador_patotas++;
 	pcb_adm->tabla_paginas = list_create();
+	pcb_adm->cantidad_paginas_pcb = 0;
+	pcb_adm->cantidad_paginas_tareas = 0;
 
-	//Cargo la patota 
-	while(tamanio_alocado < 8) {
+	int tamanio_pcb = 8;
+	int tamanio_tareas = strlen(tareas);
+	int tamanio_tcb = 21;
 
-		Frame* un_frame_libre = buscar_frame_libre();
+	void *pagina = malloc(tamanio_pagina_paginacion);
+	PCB *un_pcb = malloc(sizeof(PCB));
+	TCB *un_tcb;
+	TCB_adm *un_tcb_adm;
 
+	Frame *un_frame_libre;
+	int offset;
+	char **lista_puntos;
+
+	bool ubique_tareas = false;
+	bool liberar_pagina = false;
+	bool ubique_tripulante = false;
+
+	char *un_punto;
+
+	un_pcb->PID = contador_patotas++;
+
+	//Cargo la patota
+	while (tamanio_alocado < tamanio_pcb)
+	{
+		//CUIDADOOOO ESTA PRIMER APARTE VA EN UN IF AFUEREA
+
+		un_frame_libre = buscar_frame_libre();
+		una_pagina = malloc(sizeof(Pagina));
 		una_pagina->id_pagina = contador_paginas++;
 		una_pagina->id_frame = un_frame_libre->id_frame;
 		una_pagina->estado = "OCUPADO";
-		
+		pcb_adm->cantidad_paginas_pcb++;
+		pcb_adm->pagina_inicio_pcb = una_pagina->id_pagina;
+		list_add(tabla_pcbs, pcb_adm);
 		list_add(pcb_adm->tabla_paginas, una_pagina);
-		tamanio_alocado += tamanio_pagina_paginacion;
+
+		if ((tamanio_pcb - tamanio_alocado) <= tamanio_pagina_paginacion)
+		{
+			if ((tamanio_pcb - tamanio_alocado) == tamanio_pagina_paginacion)
+			{
+				offset = 0;
+				liberar_pagina = true;
+			}
+			else
+			{
+				offset = tamanio_pagina_paginacion - (tamanio_pagina_paginacion - (tamanio_pcb - tamanio_alocado)) + 1;
+			}
+			memcpy(pagina, (void *)un_pcb + tamanio_alocado, tamanio_pcb - tamanio_alocado);
+			tamanio_alocado = tamanio_pcb;
+		}
+		else
+		{
+			tamanio_alocado += tamanio_pagina_paginacion;
+			memcpy(pagina, (void *)un_pcb + tamanio_alocado, tamanio_pagina_paginacion);
+			liberar_pagina = true;
+		}
+
+		guardar_pagina_en_frame(una_pagina->id_frame, pagina, una_pagina->id_pagina);
+		if (liberar_pagina)
+		{
+			free(pagina);
+			pagina = malloc(tamanio_pagina_paginacion);
+			liberar_pagina = false;
+		}
 	}
 
-	//Cargar tareas
-	//Cargar a TCB
-	//Mover a memoria
+	liberar_pagina = false;
+	tamanio_alocado = 0;
+	pcb_adm->offset_tareas = offset;
+	//Cargo las tareas
 
-		//void* pag2 = calloc(2, 1);
+	if (offset > 0)
+	{
+		pcb_adm->pagina_inicio_tareas = una_pagina->id_pagina;
 
-		//uint32_t numero = 0x12345678; // es un número en hexadecimal
+		if ((tamanio_tareas) <= (tamanio_pagina_paginacion - offset + 1))
+		{
+			memcpy(pagina + offset, (void *)tareas + tamanio_alocado, tamanio_tareas);
+			if ((tamanio_tareas) == (tamanio_pagina_paginacion - offset + 1))
+			{
+				offset = 0;
+				liberar_pagina = true;
+			}
+			else
+			{
+				offset = offset + (tamanio_tareas);
+			}
+			tamanio_alocado = tamanio_tareas;
+			ubique_tareas = true;
+			pcb_adm->cantidad_paginas_tareas++;
+		}
+		else
+		{
+			tamanio_alocado += tamanio_pagina_paginacion;
+			memcpy(pagina + offset, (void *)tareas, tamanio_pagina_paginacion - offset + 1);
+			liberar_pagina = true;
+			pcb_adm->cantidad_paginas_tareas++;
+		}
+		guardar_pagina_en_frame(una_pagina->id_frame, pagina, una_pagina->id_pagina);
+		if (liberar_pagina)
+		{
+			free(pagina);
+			pagina = malloc(tamanio_pagina_paginacion);
+			liberar_pagina = false;
+		}
+	}
 
-		//memcpy(pag1,  (void*) &numero     , 2);
-		
+	if (!ubique_tareas)
+	{
 
+		while (tamanio_alocado < tamanio_tareas)
+		{
+
+			un_frame_libre = buscar_frame_libre();
+			una_pagina = malloc(sizeof(Pagina));
+			una_pagina->id_pagina = contador_paginas++;
+			una_pagina->id_frame = un_frame_libre->id_frame;
+			una_pagina->estado = "OCUPADO";
+			list_add(pcb_adm->tabla_paginas, una_pagina);
+			pcb_adm->cantidad_paginas_tareas++;
+
+			if ((tamanio_tareas - tamanio_alocado) <= tamanio_pagina_paginacion)
+			{
+				if ((tamanio_tareas - tamanio_alocado) == tamanio_pagina_paginacion)
+				{
+					offset = 0;
+					liberar_pagina = true;
+				}
+				else
+				{
+					offset = tamanio_pagina_paginacion - (tamanio_tareas - tamanio_alocado) + 1;
+				}
+				memcpy(pagina, (void *)tareas + tamanio_alocado, tamanio_tareas - tamanio_alocado);
+				tamanio_alocado = tamanio_tareas;
+			}
+			else
+			{
+				tamanio_alocado += tamanio_pagina_paginacion;
+				memcpy(pagina, (void *)tareas + tamanio_alocado, tamanio_pagina_paginacion);
+				liberar_pagina = true;
+			}
+
+			guardar_pagina_en_frame(una_pagina->id_frame, pagina, una_pagina->id_pagina);
+			if (liberar_pagina)
+			{
+				free(pagina);
+				pagina = malloc(tamanio_pagina_paginacion);
+				liberar_pagina = false;
+			}
+		}
+	}
+
+	un_pcb->Tareas = pcb_adm->pagina_inicio_tareas;
+	guardar_patota(un_pcb, pcb_adm);
+	liberar_pagina = false;
+	tamanio_alocado = 0;
+
+	// Cargo tripulantes
+
+	for (int i = 0; i < cantidad_tripulantes; i++)
+
+	{
+		un_tcb_adm = malloc(sizeof(TCB_adm));
+		un_tcb_adm->TID = contador_patotas++;
+		un_tcb_adm->cantidad_paginas = 0;
+
+		un_tcb = malloc(sizeof(TCB));
+		un_tcb->estado = 'N';
+		un_tcb->PCB = pcb_adm->pagina_inicio_pcb;
+
+		un_punto = obtener_punto_string(puntos, i);
+		lista_puntos = string_split(un_punto, "|");
+		un_tcb->pos_X = atoi(lista_puntos[0]);
+		un_tcb->pos_y = atoi(lista_puntos[1]);
+		free(lista_puntos);
+
+		un_tcb->proxima_instruccion = 1;
+
+		if (offset > 0)
+		{
+			un_tcb_adm->pagina_inicio = una_pagina->id_pagina;
+			un_tcb_adm->offset = offset;
+			un_tcb_adm->cantidad_paginas++;
+			list_add(pcb_adm->tabla_TCB_admin, un_tcb_adm);
+
+			if ((tamanio_tcb) <= (tamanio_pagina_paginacion - offset + 1))
+			{
+				memcpy(pagina + offset, (void *)un_tcb + tamanio_alocado, tamanio_tcb);
+				if ((tamanio_tcb) == (tamanio_pagina_paginacion - offset + 1))
+				{
+					offset = 0;
+					liberar_pagina = true;
+				}
+				else
+				{
+					offset = offset + (tamanio_tcb);
+				}
+				tamanio_alocado = tamanio_tcb;
+				ubique_tripulante = true;
+			}
+			else
+			{
+				tamanio_alocado += tamanio_pagina_paginacion;
+				memcpy(pagina + offset, (void *)un_tcb, tamanio_pagina_paginacion - offset + 1);
+				liberar_pagina = true;
+			}
+			guardar_pagina_en_frame(una_pagina->id_frame, pagina, una_pagina->id_pagina);
+			if (liberar_pagina)
+			{
+				free(pagina);
+				pagina = malloc(tamanio_pagina_paginacion);
+				liberar_pagina = false;
+			}
+		}
+
+		if (!ubique_tripulante)
+		{
+
+			while (tamanio_alocado < tamanio_tcb)
+			{
+
+				un_frame_libre = buscar_frame_libre();
+				una_pagina = malloc(sizeof(Pagina));
+				una_pagina->id_pagina = contador_paginas++;
+				una_pagina->id_frame = un_frame_libre->id_frame;
+				una_pagina->estado = "OCUPADO";
+				list_add(pcb_adm->tabla_paginas, una_pagina);
+
+				if ((tamanio_tcb - tamanio_alocado) <= tamanio_pagina_paginacion)
+				{
+					if ((tamanio_tcb - tamanio_alocado) == tamanio_pagina_paginacion)
+					{
+						offset = 0;
+						liberar_pagina = true;
+					}
+					else
+					{
+						offset = tamanio_pagina_paginacion - (tamanio_tcb - tamanio_alocado) + 1;
+					}
+					memcpy(pagina, (void *)un_tcb + tamanio_alocado, tamanio_tcb - tamanio_alocado);
+					tamanio_alocado = tamanio_tcb;
+				}
+				else
+				{
+					tamanio_alocado += tamanio_pagina_paginacion;
+					memcpy(pagina, (void *)un_tcb + tamanio_alocado, tamanio_pagina_paginacion);
+					liberar_pagina = true;
+				}
+
+				guardar_pagina_en_frame(una_pagina->id_frame, pagina, una_pagina->id_pagina);
+				if (liberar_pagina)
+				{
+					free(pagina);
+					pagina = malloc(tamanio_pagina_paginacion);
+					liberar_pagina = false;
+				}
+			}
+		}
+
+		tamanio_alocado = 0;
+		liberar_pagina = false;
+	}
+
+	return pcb_adm->PID;
 }
 
-
-
 void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina)
-{   
-    contador_frames = tamanio_memoria / tamanio_pagina;
-    contador_frames_libres = contador_frames;
+{
+	contador_frames = tamanio_memoria / tamanio_pagina;
+	contador_frames_libres = contador_frames;
 	contador_paginas = 0;
-    tamanio_pagina_paginacion = tamanio_pagina;
-	Frame* un_frame;
-  	tabla_frames = list_create();
+	tamanio_pagina_paginacion = tamanio_pagina;
+	Frame *un_frame;
+	tabla_frames = list_create();
 	tabla_pcbs = list_create();
 	tabla_tareas = list_create();
 	tabla_tcbs = list_create();
 
-    for (int i= 0; i < contador_frames; i++ )
-    {
-        un_frame = malloc(sizeof(Frame));
-        un_frame->id_frame = i+1;
-        un_frame->estado = "LIBRE";
-        un_frame->dir_inicio = MEMORIA + (i * tamanio_pagina);
-        list_add(tabla_frames, un_frame);
-    }
-    
-
+	for (int i = 0; i < contador_frames; i++)
+	{
+		un_frame = malloc(sizeof(Frame));
+		un_frame->id_frame = i + 1;
+		un_frame->estado = "LIBRE";
+		un_frame->dir_inicio = MEMORIA + (i * tamanio_pagina);
+		un_frame->id_pagina = -1;
+		list_add(tabla_frames, un_frame);
+	}
 }
 
 //Finaliza la segmentación

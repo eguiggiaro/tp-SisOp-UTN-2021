@@ -48,8 +48,8 @@ typedef struct {
 	int size;
 	int block_count;
 	t_list* blocks;
-	char* caracter_llenado;
-	char* md5;
+	char caracter_llenado;
+	char md5[32];
 } MetadataRecurso;
 
 typedef struct {

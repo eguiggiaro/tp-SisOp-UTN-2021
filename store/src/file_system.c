@@ -302,7 +302,7 @@ char* leerBloque(int bloque, int size) {
 //------------------------------------MANEJO DE METADATA----------------------------------
 MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 
-	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);	
+	char* direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);	
 
 	if(verificarExistenciaFile(direccionDeMetadata)){
 		if(crearMetadataRecurso(recurso)){
@@ -311,7 +311,7 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 		}		
 	}
 
-	t_config* metaConfig;
+	t_config* metaConfig = malloc(sizeof(MetadataRecurso));
 	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
 
 	metaConfig = config_create(direccionDeMetadata);
@@ -319,8 +319,8 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 	metadata->size = config_get_int_value(metaConfig, "SIZE");
 	metadata->block_count = config_get_int_value(metaConfig, "BLOCK_COUNT");
 	metadata->blocks = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
-	metadata->caracter_llenado = config_get_string_value(metaConfig, "CARACTER_LLENADO");
-	metadata->md5 = config_get_string_value(metaConfig, "MD5");
+	metadata->caracter_llenado = *config_get_string_value(metaConfig, "CARACTER_LLENADO");
+	strcpy(metadata->md5, config_get_string_value(metaConfig, "MD5_ARCHIVO"));
 
 	config_destroy(metaConfig);
 	free(direccionDeMetadata);
@@ -330,7 +330,7 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 
 MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
-	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
+	char* direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
 
 	if(verificarExistenciaFile(direccionDeMetadata)){
 		if(crearMetadataBitacora(tripulante)){
@@ -339,7 +339,7 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 		}		
 	}
 
-	t_config* metaConfig;
+	t_config* metaConfig = malloc(sizeof(MetadataBitacora));
 	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
 
 	metaConfig = config_create(direccionDeMetadata);
@@ -356,8 +356,8 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
 int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 
-	t_config* metaConfig;
-	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);
+	t_config* metaConfig = malloc(sizeof(MetadataRecurso));
+	char* direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);
 	
 	metaConfig = config_create(direccionDeMetadata);
 
@@ -369,15 +369,15 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
 	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
 	config_set_value(metaConfig, "BLOCKS", stringFromList(metadata->blocks));
-	config_set_value(metaConfig, "CARACTER_LLENADO", metadata->caracter_llenado);
+	config_set_value(metaConfig, "CARACTER_LLENADO", string_substring_until(&metadata->caracter_llenado,1));
 	config_set_value(metaConfig, "MD5_ARCHIVO", generarMd5(metadata->blocks, metadata->size));
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	
 	list_destroy(metadata->blocks);
-	free(metadata->caracter_llenado);
-	free(metadata->md5);
+	//free(metadata->caracter_llenado);
+	//free(metadata->md5);
 	free(metadata);
 	free(direccionDeMetadata);
 
@@ -386,8 +386,8 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 
 int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 
-	t_config* metaConfig;
-	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
+	t_config* metaConfig = malloc(sizeof(MetadataBitacora));
+	char* direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
 
 	metaConfig = config_create(direccionDeMetadata);
 
@@ -412,7 +412,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 
 int crearMetadataRecurso(tipoRecurso recurso){
 	
-	char * direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);
+	char* direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);
 	FILE* file = fopen(direccionDeMetadata, "w+");
 	
 	if (file == NULL) {
@@ -421,7 +421,7 @@ int crearMetadataRecurso(tipoRecurso recurso){
 	}
 	fclose(file);
 	
-	t_config* metaConfig;
+	t_config* metaConfig = malloc(sizeof(MetadataRecurso));
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig == NULL){
@@ -448,7 +448,7 @@ int crearMetadataRecurso(tipoRecurso recurso){
 
 int crearMetadataBitacora(char* tripulante){
 	
-	char * direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);
+	char* direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);
 	FILE* file = fopen(direccionDeMetadata, "w+");
 	
 	if (file == NULL) {
@@ -457,7 +457,7 @@ int crearMetadataBitacora(char* tripulante){
 	}
 	fclose(file);
 	
-	t_config* metaConfig;
+	t_config* metaConfig = malloc(sizeof(MetadataBitacora));
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig == NULL){

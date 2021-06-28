@@ -158,9 +158,9 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 
 	/***** START TEST LOCAL *****
-	ejecutarTarea("GENERAR_OXIGENO", 40);
+	*/ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_OXIGENO", 24);
-	ejecutarTarea("GENERAR_COMIDA", 13);
+	/*ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
 	
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");

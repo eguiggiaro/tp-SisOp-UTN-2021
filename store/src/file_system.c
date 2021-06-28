@@ -560,14 +560,73 @@ int repararCantidadBloques(int tamanioBlocksActual){
 
 int verificarBitmap(){
 	//Se debe garantizar que los bloques libres y ocupados marcados en el bitmap sean los que dicen ser. 
+	t_list* bloquesOcupados = list_create();
+	int cantidadArchivosBitacoras = cantidadArchivosEnDirectorio(pathBitacoras);
 	
-	return 0;
+	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
+	//Levanto todos los bloques en uso de las metadatas de bitacoras.
+	for(int i=0; i<cantidadArchivosBitacoras; i++){
+		char* numeroTripulante = string_itoa(i);
+		metadata = leerMetadataBitacora(numeroTripulante);
+		list_add_all(bloquesOcupados, metadata->blocks);
+	}
+	
+	t_list* recursos = verificarQueArchivosDeRecursosHay();
+	
+	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	//Levanto todos los bloques en uso de las metadatas de recursos.
+	for(int i=0; i<list_size(recursos); i++){
+		metadataR = leerMetadataRecurso((tipoRecurso)list_get(recursos,i));
+		list_add_all(bloquesOcupados, metadataR->blocks);
+	}
+
+	if (repararBitmap(bloquesOcupados)){
+		miLogError("No pudo reparar el bitmap del Superbloque.");
+		return EXIT_FAILURE;
+	}
+
+	list_destroy(metadata->blocks);
+	list_destroy(metadataR->blocks);
+	list_destroy(bloquesOcupados);
+	free(metadata);
+	free(metadataR);
+	return EXIT_SUCCESS;
 }
 
-int repararBitmap(){
+int repararBitmap(t_list* bloques){
 	//Reparación: corregir el bitmap con lo que se halle en la metadata de los archivos.
+	//char* lista = stringFromList(bloques);	
 
-	return 0;
+	pthread_mutex_lock(&mutex_bitmap);
+	//Primero recorro toda la lista de bloques ocupados según los metadata, y si no estan en 1 los pongo en 1 (ocupados).
+	for(int i=0; i<list_size(bloques); i++){
+		int bloque = list_get(bloques, i);
+
+		if(bitarray_test_bit(bitmap, bloque) == 0){
+			bitarray_set_bit(bitmap, bloque); 		 //Marco el bloque como usado si no estaba en 1.
+			msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
+
+			miLogDebug("Seteo el bloque %d en 1, porque hubo un sabotaje en ese bloque.", bloque);				
+		} 
+	}
+	//Despues recorro todos los otros bloques y corroboro que esten en 0 (libres).
+	for(int i=0; i<cantidadBloques; i++){
+		 int _estaEnLaLista(int b) {
+            return b == i;
+        }
+
+		if(!list_any_satisfy(bloques, (void*) _estaEnLaLista)){					
+			if(bitarray_test_bit(bitmap, i) == 1){
+				bitarray_clean_bit(bitmap, i); 		 //Marco el bloque como libre si no estaba en 0.
+				msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
+			
+				miLogDebug("Seteo el bloque %d en 0, porque hubo un sabotaje en ese bloque.", i);				
+			}
+		}
+	}
+	pthread_mutex_unlock(&mutex_bitmap);
+
+	return EXIT_SUCCESS;
 }
 
 int verificarSizeEnFile(){
@@ -698,4 +757,47 @@ void borrarTodosLosArchivos(char* path){
 		miLogInfo("No pudo borrar la estructura de file system existente en el punto de montaje %s", path);
 		exit(EXIT_FAILURE);
 	}	
+}
+
+int cantidadArchivosEnDirectorio(char* path){
+	int cantidad = 0;
+	
+	DIR * directorio;
+	struct dirent * entry;
+
+	directorio = opendir(path); 
+
+	while ((entry = readdir(directorio)) != NULL) {
+		if (entry->d_type == DT_REG) { /* If the entry is a regular file */
+				cantidad++;
+		}
+	}
+	closedir(directorio);
+
+	return cantidad;
+}
+
+t_list* verificarQueArchivosDeRecursosHay(){
+
+	char* direccionDeMetadataOxigeno = string_from_format("%s/%s", pathFiles, "Oxigeno.ims");
+	char* direccionDeMetadataComida = string_from_format("%s/%s", pathFiles, "Comida.ims");
+	char* direccionDeMetadataBasura = string_from_format("%s/%s", pathFiles, "Basura.ims");
+
+	t_list* recursos = list_create();
+
+	FILE* fOxigeno = fopen(direccionDeMetadataOxigeno, "r");
+	if(fOxigeno!=NULL){
+		list_add(recursos, OXIGENO);
+	}
+	FILE* fComida = fopen(direccionDeMetadataComida, "r");
+	if(fComida!=NULL){
+		list_add(recursos, COMIDA);
+	}
+	FILE* fBasura = fopen(direccionDeMetadataBasura, "r");
+	if(fBasura!=NULL){
+		list_add(recursos, BASURA);
+	}
+
+	return recursos;
+
 }

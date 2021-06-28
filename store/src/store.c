@@ -158,19 +158,19 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 
 	/***** START TEST LOCAL *****
-	*/ejecutarTarea("GENERAR_OXIGENO", 40);
+	ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_OXIGENO", 24);
-	/*ejecutarTarea("GENERAR_COMIDA", 13);
+	ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
 	
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("2","Prueba de escritura en la bitacora del tripulante 2.");
+	guardarEnBitacora("3","Prueba de escritura en la bitacora del tripulante 3.");
+	guardarEnBitacora("4","Prueba de escritura en la bitacora del tripulante 4.");
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("0","Prueba de escritura en la bitacora del tripulante 0.");
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-
+	/*
 	char* lectura = obtenerBitacora("1");
 	/*
 	testLecturaRecurso();
@@ -180,6 +180,7 @@ void inicializarStore(void){
 	
 	//Sabotajes:
 	verificarCantidadBloques();
+	verificarBitmap();*/
 	
 	/***** END TEST LOCAL ******/
 

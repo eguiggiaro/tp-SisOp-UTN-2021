@@ -86,7 +86,7 @@ void leerSuperbloque(void){
 	int archivoSuperbloque = open(pathSuperbloque, O_RDWR);
 	int tamanioSuperbloque = cantidadBloques/8 + sizeof(uint32_t) * 2;
 
-	char* punteroSuperbloque = mmap(NULL, tamanioSuperbloque, PROT_READ | PROT_WRITE, MAP_SHARED, archivoSuperbloque, 0);
+	punteroSuperbloque = mmap(NULL, tamanioSuperbloque, PROT_READ | PROT_WRITE, MAP_SHARED, archivoSuperbloque, 0);
 	char* punteroBitmap = punteroSuperbloque + sizeof(uint32_t) * 2;
 
 	memcpy(&tamanioBloque, punteroSuperbloque, sizeof(uint32_t));
@@ -517,14 +517,45 @@ char* obtenerDireccionDeMetadataBitacora (char* tripulante){ //Devuelve la direc
 /********** PROTOCOLO SABOTAJE **********/
 int verificarCantidadBloques(){
 	//Se debe garantizar que la cantidad de bloques que hay en el sistema sea igual a la cantidad que dice haber en el superbloque. 
-	
-	return 0;
+	int tamanioBlocksActual = tamanioArchivo(pathBlocks);
+
+	if(tamanioBlocksActual != tamanioBloque * cantidadBloques){
+		if(repararCantidadBloques(tamanioBlocksActual)){
+			miLogError("No pudo reparar el Superbloque por error en cantiudad de bloques.");
+			return EXIT_FAILURE;
+		}
+	}
+	return EXIT_SUCCESS;
 }
 
-int repararCantidadBloques(){
+int repararCantidadBloques(int tamanioBlocksActual){
 	//Reparación: sobreescribir “cantidad de bloques” del superbloque con la cantidad de bloques real en el disco.
+	uint32_t cantidadBloquesActual = tamanioBlocksActual / tamanioBloque;
+	int resto = tamanioBlocksActual % tamanioBloque; //Para saber si esta completo.
+	
+	if(resto != 0){
+		cantidadBloquesActual++; // No estaba completo -> agrego un bloque mas para el bloque incompleto.
+	}
+	//Actualizando el puntero.
+	int tamanioSuperbloqueActual = cantidadBloquesActual/8 + sizeof(uint32_t) * 2;
+	
+	memcpy(punteroSuperbloque + sizeof(uint32_t), &cantidadBloquesActual, sizeof(uint32_t));
+	msync(punteroSuperbloque, tamanioSuperbloqueActual, 0);
 
-	return 0;
+	cantidadBloques = cantidadBloquesActual;
+
+	//Actualizando directamente el archivo.
+	/*FILE* archivoSuperbloque = fopen(pathSuperbloque, "rb+");
+	if(archivoSuperbloque==NULL){
+		miLogError("No se pudo abrir el archivo de Superbloque.ims para actualizar la cantidad de bloques.");
+		exit(EXIT_FAILURE);
+	}
+
+    fseek(archivoSuperbloque, sizeof(uint32_t), SEEK_SET);
+ 	fwrite(&cantidadBloquesActual, 1 , sizeof(uint32_t), archivoSuperbloque);			
+	fclose(archivoSuperbloque);
+	*/
+	return EXIT_SUCCESS;
 }
 
 int verificarBitmap(){

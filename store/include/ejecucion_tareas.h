@@ -29,5 +29,6 @@ char * truncarCadenaDesdeCantidad(char* cadenaCaracteres, int cantidad);
 char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int cantidad);
 int guardarEnBitacora(char* id_tripulante, char* instruccion);
 char cualEsMiCaracter(tipoRecurso recurso);
+char* obtenerBitacora(char* id_tripulante);
 
 #endif

@@ -85,7 +85,7 @@ void atender_request_store(Request *request) {
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X
-
+			
 			resultadoTarea = guardarEnBitacora(id_tripulante, instruccionABitacora);
 
 			if (resultadoTarea == -1)

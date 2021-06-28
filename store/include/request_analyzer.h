@@ -19,7 +19,10 @@
 #include "paquete.h"
 #include "store.h"
 
+
+void atender_request_store(Request *request);
 tipoTarea find_enum_consola(char*);
+int ejecutarTarea(char* tarea, int cantidadRecursos);
 
 
 #endif

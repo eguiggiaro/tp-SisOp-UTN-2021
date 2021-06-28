@@ -33,7 +33,6 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	metadataR->caracter_llenado = strCaracter;
 
 	free(cadenaCaracteres);
-	free(strCaracter);
 
 	if(modificarMetadataRecurso(metadataR, recurso)){
 		return -1;

@@ -2,7 +2,7 @@
 #include "ejecucion_tareas.h"
 #include "md5.h"
 
-
+/********** MANEJO FILE SYSTEM **********/
 bool verificarFS(void){
 		return !(fopen(pathSuperbloque, "r") == NULL || fopen(pathBlocks, "r") == NULL);
 }
@@ -37,21 +37,6 @@ void crearArbolDirectorios(void){
 	closedir(dirMontaje);
 	closedir(dirFiles);
 	closedir(dirBitacoras);
-}
-
-void borrarTodosLosArchivos(char* path){
-
-	char* comando = string_new();
-	comando = string_from_format("%s %s/%s", "rm -r", path, "*");
-
-	int res = system(comando);
-
-	if(!res){
-		miLogInfo("Borró la estructura de file system existente en el punto de montaje %s", path);
-	} else {
-		miLogInfo("No pudo borrar la estructura de file system existente en el punto de montaje %s", path);
-		exit(EXIT_FAILURE);
-	}	
 }
 
 void crearSuperbloque(void){
@@ -116,29 +101,6 @@ void leerSuperbloque(void){
 	close(archivoSuperbloque);
 }
 
-void leerSuperBloqueSinMapear(void){
-	FILE* archivoSuperbloque = fopen(pathSuperbloque, "r");
-	uint32_t* buffer = malloc(sizeof(uint32_t));
-	
-	fseek(archivoSuperbloque, 0, SEEK_SET);
-	fread(buffer, sizeof(uint32_t), 1, archivoSuperbloque);
-	tamanioBloque = *buffer;
-
-	fseek(archivoSuperbloque, 0, SEEK_CUR);
-	fread(buffer, sizeof(uint32_t), 1, archivoSuperbloque);
-	cantidadBloques = *buffer;
-
-	//Cargar el bitmap en un bitarray.
-	/*char* bufferBitmap = malloc(cantidadBloques/8);
-	fseek(archivoSuperbloque, 0, SEEK_CUR);
-	fread(bufferBitmap, cantidadBloques/8, 1, archivoSuperbloque);
-	bitmap = bitarray_create_with_mode(bufferBitmap, cantidadBloques/8, MSB_FIRST);
-	
-	free(bufferBitmap);*/
-	free(buffer);
-	fclose(archivoSuperbloque);
-}
-
 void subirBlocksAMemoria(){
 	int archivoBlocks = open(pathBlocks, O_RDWR);
 	int tamanioBlocks = cantidadBloques * tamanioBloque;
@@ -149,6 +111,22 @@ void subirBlocksAMemoria(){
 	close(archivoBlocks);
 }
 
+void finalizarFS(void){
+	
+	bitarray_destroy(bitmap);
+	if (munmap(punteroBlocks, tamanioBloque * cantidadBloques) == -1){ 
+		perror("Falló al desmapear el Superbloque.");
+        exit(1); 
+    }
+
+	free(puntoMontaje);    
+	free(pathSuperbloque); 
+	free(pathBlocks);  
+	free(pathFiles);
+	free(pathBitacoras);
+}
+
+/********** MANEJO BLOQUES **********/
 int buscarYAsignarProximoBloqueLibre(void){
 //Ejemplo de uso: int bloqueLibre = buscarYAsignarProximoBloqueLibre(configuracion->puntoMontaje);
 
@@ -189,7 +167,6 @@ void liberarBloque(int index){
 	
 	pthread_mutex_unlock(&mutex_bitmap);
 }
-
 
 int calcularCantBloques(int size) {
 
@@ -235,6 +212,7 @@ t_list* escribirBloquesNuevo(char* datos){
 
 	//Antes de empezar tengo que verificar si tengo lugar para todos los bloques. 
 	if(!verificarQueTengoLosBloquesNecesarios(cantidadBloquesNecesarios)){
+		miLogInfo("No hay mas lugar en el archivo Blocks.ims");
 		return -1;
 	}
 	
@@ -269,9 +247,7 @@ t_list* escribirBloquesNuevo(char* datos){
 	return bloques;
 }
 
-
 void escribirBloque(int bloque, int offset, char* escritura){
-	
 	//|----------|----------|----------|----------|----------|
 
 	int desplazamiento = (bloque * tamanioBloque) + offset;
@@ -318,38 +294,6 @@ char* leerBloque(int bloque, int size) {
 	pthread_mutex_unlock(&mutex_bloques);
 
 	return lectura;
-}
-
-int tamanioArchivo(char* path){
-
-	FILE* fd = fopen(path, "rb");
-	fseek(fd, 0, SEEK_END);
-	int tamanio = ftell(fd);
-	fclose(fd);
-
-	return tamanio;
-}
-
-
-void finalizarFS(void){
-	
-	bitarray_destroy(bitmap);
-
-	/*if (munmap(punteroSuperbloque, tamanioSuperbloque) == -1){ 
-		perror("Falló al desmapear el Superbloque.");
-        exit(1); 
-    }*/
-	if (munmap(punteroBlocks, tamanioBloque * cantidadBloques) == -1){ 
-		perror("Falló al desmapear el Superbloque.");
-        exit(1); 
-    }
-
-	free(puntoMontaje);    
-	free(pathSuperbloque); 
-	free(pathBlocks);  
-	free(pathFiles);
-	free(pathBitacoras);
-
 }
 
 //------------------------------------MANEJO DE METADATA----------------------------------
@@ -529,29 +473,6 @@ int crearMetadataBitacora(char* tripulante){
 	return EXIT_SUCCESS;
 }
 
-char* generarMd5(t_list* bloques){
-
-	char* strMd5 = string_new();
-	unsigned char hash[16];
-
-	char* strBloques = stringFromList(bloques);
-
-	MD5_CTX md5;
-	MD5Init(&md5);
-	MD5Update(&md5, strBloques, string_length((char*)strBloques));
-	MD5Final(&md5, hash);
-	
-	for(int i=0; i<16; i++){
-		//printf("%02x",hash[i]);
-		string_append_with_format(&strMd5, "%02x", hash[i]);
-	}
-	//printf(strMd5);
-	string_to_upper(strMd5);
-
-	free(strBloques);
-	return strMd5;
-}
-
 char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
 
 	char* direccionDeMetadata = string_new();
@@ -590,6 +511,70 @@ char* obtenerDireccionDeMetadataBitacora (char* tripulante){ //Devuelve la direc
 	return direccionDeMetadata;
 }
 
+/********** PROTOCOLO SABOTAJE **********/
+int verificarCantidadBloques(){
+	//Se debe garantizar que la cantidad de bloques que hay en el sistema sea igual a la cantidad que dice haber en el superbloque. 
+	
+	return 0;
+}
+
+int repararCantidadBloques(){
+	//Reparación: sobreescribir “cantidad de bloques” del superbloque con la cantidad de bloques real en el disco.
+
+	return 0;
+}
+
+int verificarBitmap(){
+	//Se debe garantizar que los bloques libres y ocupados marcados en el bitmap sean los que dicen ser. 
+	
+	return 0;
+}
+
+int repararBitmap(){
+	//Reparación: corregir el bitmap con lo que se halle en la metadata de los archivos.
+
+	return 0;
+}
+
+int verificarSizeEnFile(){
+	//Se debe asegurar que el tamaño del archivo sea el correcto, validando con el contenido de sus bloques. 
+	
+	return 0;
+}
+
+int repararSizeEnFile(){
+	//Reparación: Asumir correcto lo encontrado en los bloques.
+
+	return 0;
+}
+
+int verificarBlockCount(){
+	//Al encontrar una diferencia entre estos dos se debe restaurar la consistencia. 
+	
+	return 0;
+}
+
+int repararBlockCount(){
+	//Reparación: Actualizar el valor de Block_count en base a lo que está en la lista de Blocks.
+
+	return 0;
+}
+
+int verificarBlocks(){
+	//Se debe validar que los números de bloques en la lista sean válidos dentro del FS. 
+	
+	return 0;
+}
+
+int repararBlocks(){
+	//Reparación: Restaurar archivo -> Tomar como referencia el size del archivo y el caracter de llenado e ir llenando los bloques 
+	//hasta completar el size del archivo, en caso de que falten bloques, los mismos se deberán agregar al final del mismo.
+
+	return 0;
+}
+
+
+/********** SOPORTE **********/
 int verificarExistenciaFile(char* path){
 	
 	FILE* file = fopen(path, "r");
@@ -632,8 +617,50 @@ char* stringFromList(t_list* lista){
 	return strLista;
 }
 
-/*char* stringFromRecurso(tipoRecurso f){} //Obtiene un string de acuerdo al enum que le envío
+char* generarMd5(t_list* bloques){
 
-    static const char *strings[] = { "oxigeno", "comida", "basura"};
-    return strings[f];
-}*/
+	char* strMd5 = string_new();
+	unsigned char hash[16];
+
+	char* strBloques = stringFromList(bloques);
+
+	MD5_CTX md5;
+	MD5Init(&md5);
+	MD5Update(&md5, strBloques, string_length((char*)strBloques));
+	MD5Final(&md5, hash);
+	
+	for(int i=0; i<16; i++){
+		//printf("%02x",hash[i]);
+		string_append_with_format(&strMd5, "%02x", hash[i]);
+	}
+	//printf(strMd5);
+	string_to_upper(strMd5);
+
+	free(strBloques);
+	return strMd5;
+}
+
+int tamanioArchivo(char* path){
+
+	FILE* fd = fopen(path, "rb");
+	fseek(fd, 0, SEEK_END);
+	int tamanio = ftell(fd);
+	fclose(fd);
+
+	return tamanio;
+}
+
+void borrarTodosLosArchivos(char* path){
+
+	char* comando = string_new();
+	comando = string_from_format("%s %s/%s", "rm -r", path, "*");
+
+	int res = system(comando);
+
+	if(!res){
+		miLogInfo("Borró la estructura de file system existente en el punto de montaje %s", path);
+	} else {
+		miLogInfo("No pudo borrar la estructura de file system existente en el punto de montaje %s", path);
+		exit(EXIT_FAILURE);
+	}	
+}

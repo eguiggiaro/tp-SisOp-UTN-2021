@@ -166,7 +166,7 @@ void inicializarStore(void){
 	
 	testLecturaRecurso();
 	testLecturaBitacora();
-	
+
 	testMd5();
 	/***** END TEST LOCAL ******/
 
@@ -176,8 +176,16 @@ void inicializarStore(void){
 
 void atenderSabotaje(){
 	//Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
+	//enviarAvisoDeSabotaje(configuracion->posicionesSabotaje);
+
 	//Analizar sabotaje en Superbloque
+	verificarCantidadBloques();
+	verificarBitmap();
+
 	//Analizar sabotaje en files
+	verificarSizeEnFile();
+	verificarBlockCount();
+	verificarBlocks();	
 }
 
 

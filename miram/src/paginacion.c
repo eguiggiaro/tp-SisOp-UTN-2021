@@ -68,6 +68,10 @@ void imprimir_frame(Frame *un_frame)
 				}
 			}
 			list_iterator_destroy(list_iterator_paginas);
+			if (encontre_patota)
+				{
+					break;
+				}
 		}
 	}
 	if (encontre_patota)
@@ -303,16 +307,6 @@ uint32_t buscar_patota_paginacion(int PID)
     */
 }
 
-void alta_tripulante_paginacion(TCB *unTCB, int patota)
-{
-	/*
-	TCB_adm *tcb_adm = malloc(sizeof(TCB_adm));
-	tcb_adm->TID = unTCB->TID;
-	tcb_adm->PID = patota;
-	tcb_adm->segmento_nro = buscar_segmento(unTCB);
-	list_add(tabla_segmentos_tcb, tcb_adm);
-    */
-}
 
 void alta_tareas_paginacion(int PCB_ID, char *tareas)
 {
@@ -419,6 +413,115 @@ int expulsar_tripulante_paginacion(int tripulante_id)
 	}
     */
 }
+
+PCB_adm* buscar_patota_tripulante(int tripulante_id)
+{
+	t_list_iterator *iterador_pcbs = list_iterator_create(tabla_pcbs);
+	t_list_iterator *iterador_tcbs;
+	PCB_adm* pcb_adm;
+	TCB_adm* tcb_adm;
+	bool encontre_patota = false;
+
+	while (list_iterator_has_next(iterador_pcbs))
+	{
+		pcb_adm = list_iterator_next(iterador_pcbs);
+
+		iterador_tcbs = list_iterator_create(pcb_adm->tabla_TCB_admin);
+
+		while (list_iterator_has_next(iterador_tcbs))
+
+		{
+			tcb_adm = list_iterator_next(iterador_tcbs);
+			if (tcb_adm->TID == tripulante_id)
+			{
+				encontre_patota = true;
+				break;
+			}
+
+		}
+
+		list_iterator_destroy(iterador_tcbs);
+
+		if (encontre_patota)
+		{
+			break;
+		}
+
+	}
+	list_iterator_destroy(iterador_pcbs);
+
+	return pcb_adm;
+
+}
+
+
+char *buscar_posicion_tripulante_paginacion(int tripulante_id)
+{
+
+	TCB *unTCB = buscar_tcb_por_id(tripulante_id);
+
+	char *posicion_tripulante;
+
+	posicion_tripulante = string_itoa(unTCB->pos_X);
+	string_append(&posicion_tripulante, "|");
+	string_append(&posicion_tripulante, string_itoa(unTCB->pos_y));
+
+	return posicion_tripulante;
+}
+
+char *proxima_tarea_tripulante_paginacion(int tripulante_id)
+{
+	TCB *unTCB = buscar_tcb_por_id(tripulante_id);
+	int index = 0;
+	char* string_tarea = string_new();
+	int contador_tareas = 0;
+	char caracter;
+	PCB_adm* pcb_adm = buscar_patota_tripulante(tripulante_id);
+	char* tareas = buscar_tareas(pcb_adm->PID);
+
+	if (unTCB->proxima_instruccion == 99)
+	{
+		return "$";
+	}
+
+	while (1)
+	{
+		caracter = tareas[index];
+
+		if (caracter == '$')
+		{
+			unTCB->proxima_instruccion = 99;
+			break;
+		}
+
+		if (caracter == '|')
+		{
+			if(contador_tareas == unTCB->proxima_instruccion)
+			{
+				unTCB->proxima_instruccion++;
+				break;
+			} 
+			else 
+			{
+				free(string_tarea);
+				string_tarea = string_new();
+				contador_tareas++;
+
+			}
+		}
+		else
+		{
+			string_append_with_format(&string_tarea, "%c", caracter);
+		}
+
+		index++;
+	}
+
+	guardar_tripulante(unTCB, pcb_adm);
+
+	return string_tarea;
+}
+
 
 Frame *buscar_frame_libre()
 {
@@ -551,6 +654,8 @@ int guardar_patota(PCB *un_pcb, PCB_adm *un_pcb_adm)
 	int cantidad_paginas = un_pcb_adm->cantidad_paginas_pcb;
 	Pagina *una_pagina;
 	Frame *un_frame;
+	int tamanio_alocado = 0;
+	int tamanio_pcb = 8;
 
 	for (int i = 0; i < cantidad_paginas; i++)
 	{
@@ -558,14 +663,82 @@ int guardar_patota(PCB *un_pcb, PCB_adm *un_pcb_adm)
 		un_frame = buscar_frame(una_pagina->id_frame);
 		if (i + 1 == cantidad_paginas)
 		{
-			memcpy(un_frame->dir_inicio, (void *)un_pcb, 8);
+			memcpy(un_frame->dir_inicio, (void *)un_pcb, tamanio_pcb - tamanio_alocado);
+			tamanio_alocado = tamanio_pcb;
 		}
 		else
 		{
 			memcpy(un_frame->dir_inicio, (void *)un_pcb, tamanio_pagina_paginacion);
+			tamanio_alocado += tamanio_pagina_paginacion;
 		}
 	}
 }
+
+int guardar_tripulante(TCB *un_tcb, PCB_adm*  un_pcb_adm)
+{
+	TCB_adm* un_tcb_adm;
+	t_list_iterator* iterador_tripulantes = list_iterator_create(un_pcb_adm->tabla_TCB_admin);
+
+	while(list_iterator_has_next(iterador_tripulantes))
+	{
+		un_tcb_adm = list_iterator_next(iterador_tripulantes);
+		if (un_tcb_adm->TID == un_tcb->TID)
+		{
+			break;
+		}
+	}
+
+	list_iterator_destroy(iterador_tripulantes);
+
+	int cantidad_paginas = un_tcb_adm->cantidad_paginas;
+	int una_pagina;
+	int tamanio_alocado = 0;
+	int tamanio_tcb = 21;
+	int tamanio_a_guardar = 0;
+	int tamanio_guardado = 0;
+	int limite_buffer = 0;
+	int offset = un_tcb_adm->offset;
+
+	Frame *un_frame = buscar_frame_por_pagina(un_tcb_adm->pagina_inicio);
+	una_pagina =  un_tcb_adm->pagina_inicio;
+
+	for (int i=0; i < cantidad_paginas; i++)
+	{
+
+		if (i==0)
+		{
+			if (tamanio_pagina_paginacion - offset > tamanio_tcb - tamanio_guardado)
+			{
+				tamanio_a_guardar = tamanio_tcb - tamanio_guardado;
+				tamanio_guardado += tamanio_a_guardar;
+			} else {
+				tamanio_a_guardar = tamanio_pagina_paginacion - offset;
+				tamanio_guardado += tamanio_a_guardar;
+			}
+
+			memcpy(un_frame->dir_inicio + offset, (void*) un_tcb + limite_buffer, tamanio_a_guardar);
+			limite_buffer = tamanio_a_guardar;
+
+		} else {
+			if (tamanio_pagina_paginacion > tamanio_tcb - tamanio_guardado)
+			{
+				tamanio_a_guardar = tamanio_tcb - tamanio_guardado;
+				tamanio_guardado += tamanio_a_guardar;
+			} else {
+				tamanio_a_guardar = tamanio_pagina_paginacion;
+				tamanio_guardado += tamanio_a_guardar;
+			}
+
+			memcpy(un_frame->dir_inicio, (void*) un_tcb + limite_buffer, tamanio_a_guardar);
+
+			limite_buffer = tamanio_guardado;
+		}
+		una_pagina = siguiente_pagina(una_pagina, un_pcb_adm);
+		un_frame = buscar_frame_por_pagina(una_pagina);
+
+	}
+}
+
 
 PCB_adm *buscar_patota_adm(int patota_id)
 {
@@ -656,7 +829,7 @@ TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
 				tamanio_a_recuperar = tamanio_tcb - tamanio_recuperado;
 				tamanio_recuperado += tamanio_a_recuperar;
 			} else {
-				tamanio_a_recuperar += tamanio_pagina_paginacion - offset;
+				tamanio_a_recuperar = tamanio_pagina_paginacion - offset;
 				tamanio_recuperado += tamanio_a_recuperar;
 			}
 
@@ -688,6 +861,51 @@ TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
 	return tcb_retorno;
 }
 
+
+TCB *buscar_tcb_por_id(int tripulante_id)
+{
+	PCB_adm* pcb_adm;
+	TCB_adm* tcb_adm;
+	int tripulante_posicion = 0;
+	bool encontre_tripulante = false;
+
+	t_list_iterator* iterador_patotas = list_iterator_create(tabla_pcbs);
+	t_list_iterator* iterador_tripulantes;
+
+	while(list_iterator_has_next(iterador_patotas))
+	{
+		pcb_adm = list_iterator_next(iterador_patotas);
+		
+		iterador_tripulantes = list_iterator_create(pcb_adm->tabla_TCB_admin);
+		
+		while(list_iterator_has_next(iterador_tripulantes))
+		{
+			tcb_adm = list_iterator_next(iterador_tripulantes);
+			if (tcb_adm->TID == tripulante_id) 
+			{
+				encontre_tripulante = true;
+				break;
+			}
+
+			tripulante_posicion++;
+		}
+
+		list_iterator_destroy(iterador_tripulantes);
+
+		if (encontre_tripulante)
+		{
+			break;
+		}
+		tripulante_posicion = 0;
+	}
+
+	list_iterator_destroy(iterador_patotas);
+
+	return buscar_tcb(pcb_adm, tripulante_posicion);
+}
+
+
+
 PCB *buscar_PCB(PCB_adm *pcb_adm)
 {
 	int cantidad_paginas = pcb_adm->cantidad_paginas_pcb;
@@ -711,7 +929,7 @@ PCB *buscar_PCB(PCB_adm *pcb_adm)
 				tamanio_a_recuperar = tamanio_pcb - tamanio_recuperado;
 				tamanio_recuperado += tamanio_a_recuperar;
 			} else {
-				tamanio_a_recuperar += tamanio_pagina_paginacion - offset;
+				tamanio_a_recuperar = tamanio_pagina_paginacion - offset;
 				tamanio_recuperado += tamanio_a_recuperar;
 			}
 
@@ -743,8 +961,23 @@ PCB *buscar_PCB(PCB_adm *pcb_adm)
 	return un_PCB;
 }
 
-char *buscar_tareas(PCB_adm *pcb_adm)
+char *buscar_tareas(int patota_id)
 {
+	PCB_adm* pcb_adm;
+	t_list_iterator* iterador_patotas = list_iterator_create(tabla_pcbs);
+
+	while (list_iterator_has_next(iterador_patotas))
+	{
+		pcb_adm = list_iterator_next(iterador_patotas);
+
+		if (pcb_adm->PID == patota_id) 
+		{
+			break;
+		}
+	}
+
+	list_iterator_destroy(iterador_patotas);
+
 	int cantidad_paginas = pcb_adm->cantidad_paginas_tareas;
 	int pagina = pcb_adm->pagina_inicio_tareas;
 	int offset = pcb_adm->offset_tareas;
@@ -766,7 +999,7 @@ char *buscar_tareas(PCB_adm *pcb_adm)
 				tamanio_a_recuperar = tamanio_tareas - tamanio_recuperado;
 				tamanio_recuperado += tamanio_a_recuperar;
 			} else {
-				tamanio_a_recuperar += tamanio_pagina_paginacion - offset;
+				tamanio_a_recuperar = tamanio_pagina_paginacion - offset;
 				tamanio_recuperado += tamanio_a_recuperar;
 			}
 
@@ -798,18 +1031,67 @@ char *buscar_tareas(PCB_adm *pcb_adm)
 	return tareas;
 }
 
-int iniciar_tripulante_paginacion(patota_id)
+
+//Mueve un tripulante a una dirección destino
+int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool mapa)
+{
+	TCB *miTCB = buscar_tcb_por_id(tripulante);
+	PCB_adm* pcb_adm = buscar_patota_tripulante(tripulante);
+
+	miTCB->pos_X = posicion_x_final;
+
+	guardar_tripulante(miTCB, pcb_adm);
+
+	if (mapa){
+	char identificador = buscar_tripulante_grilla(tripulante);
+
+	if (identificador == '-')
+	{
+		return -1;
+	}
+
+	mover_tripulante_grilla(identificador, 1,0);
+	}
+}
+
+int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool mapa)
+{
+	TCB *miTCB = buscar_tcb_por_id(tripulante);
+	PCB_adm* pcb_adm = buscar_patota_tripulante(tripulante);
+
+	miTCB->pos_y = posicion_y_final;
+
+	guardar_tripulante(miTCB, pcb_adm);
+
+	if (mapa){
+	char identificador = buscar_tripulante_grilla(tripulante);
+
+	if (identificador == '-')
+	{
+		return -1;
+	}
+
+	mover_tripulante_grilla(identificador, 0,1);
+	}
+}
+
+
+int iniciar_tripulante_paginacion(int patota_id, bool mapa)
 {
 	PCB_adm *pcb_adm = buscar_patota_adm(patota_id);
 	TCB *un_tcb = buscar_tcb(pcb_adm, pcb_adm->tripulantes_iniciados);
 
 	un_tcb->estado = 'R';
 
-	//guardar_tripulante
+	guardar_tripulante(un_tcb, pcb_adm);
 
 	pcb_adm->tripulantes_iniciados++;
 
-	return 1;
+	if (mapa) {
+		crear_personaje_grilla(un_tcb->TID, un_tcb->pos_X, un_tcb->pos_y);
+	}
+
+	return un_tcb->TID;
 }
 
 int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *puntos)
@@ -817,8 +1099,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	int tamanio_alocado = 0;
 	Pagina *una_pagina;
 	PCB_adm *pcb_adm = malloc(sizeof(PCB_adm));
-	pcb_adm->PID = contador_patotas;
-	contador_patotas++;
+	pcb_adm->PID = contador_patotas++;
 	pcb_adm->tabla_paginas = list_create();
 	pcb_adm->tabla_TCB_admin = list_create();
 	pcb_adm->cantidad_paginas_pcb = 0;
@@ -848,10 +1129,54 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	char *un_punto;
 	char *aux;
 
-	un_pcb->PID = contador_patotas++;
+	un_pcb->PID = pcb_adm->PID;
 
 
+	un_frame_libre = buscar_frame_libre();
+	una_pagina = malloc(sizeof(Pagina));
+	una_pagina->id_frame = un_frame_libre->id_frame;
+	una_pagina->estado = "OCUPADO";
+	pcb_adm->cantidad_paginas_pcb++;
+	una_pagina->contenido = list_create();
+	contenido = string_new();
+	aux = string_itoa(un_pcb->PID);
+	string_append(&contenido, "P");
+	string_append(&contenido, aux);
+	list_add(una_pagina->contenido, contenido);
+	una_pagina->id_pagina = contador_paginas++;
+	pcb_adm->pagina_inicio_pcb = una_pagina->id_pagina;
 
+	list_add(tabla_pcbs, pcb_adm);
+	list_add(pcb_adm->tabla_paginas, una_pagina);
+
+	if ((tamanio_pcb) <= tamanio_pagina_paginacion)
+	{
+		if ((tamanio_pcb) == tamanio_pagina_paginacion)
+			{
+				offset = 0;
+				liberar_pagina = true;
+			}
+			else
+			{
+				offset = tamanio_pagina_paginacion - (tamanio_pagina_paginacion - (tamanio_pcb));
+			}
+			memcpy(pagina, (void *)un_pcb, tamanio_pcb);
+			tamanio_alocado = tamanio_pcb;
+		}
+		else
+		{
+			memcpy(pagina, (void *)un_pcb, tamanio_pagina_paginacion);
+			liberar_pagina = true;
+			tamanio_alocado += tamanio_pagina_paginacion;
+		}
+
+		guardar_pagina_en_frame(una_pagina->id_frame, pagina, una_pagina->id_pagina);
+		if (liberar_pagina)
+		{
+			free(pagina);
+			pagina = calloc(1,tamanio_pagina_paginacion);
+			liberar_pagina = false;
+		}
 
 	//Cargo la patota
 	while (tamanio_alocado < tamanio_pcb)
@@ -863,7 +1188,6 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		una_pagina->id_frame = un_frame_libre->id_frame;
 		una_pagina->estado = "OCUPADO";
 		pcb_adm->cantidad_paginas_pcb++;
-		pcb_adm->pagina_inicio_pcb = una_pagina->id_pagina;
 		una_pagina->contenido = list_create();
 		contenido = string_new();
 		aux = string_itoa(un_pcb->PID);
@@ -871,8 +1195,6 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		string_append(&contenido, aux);
 		list_add(una_pagina->contenido, contenido);
 		una_pagina->id_pagina = contador_paginas++;
-
-		list_add(tabla_pcbs, pcb_adm);
 		list_add(pcb_adm->tabla_paginas, una_pagina);
 
 		if ((tamanio_pcb - tamanio_alocado) <= tamanio_pagina_paginacion)
@@ -891,8 +1213,8 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		}
 		else
 		{
-			tamanio_alocado += tamanio_pagina_paginacion;
 			memcpy(pagina, (void *)un_pcb + tamanio_alocado, tamanio_pagina_paginacion);
+			tamanio_alocado += tamanio_pagina_paginacion;
 			liberar_pagina = true;
 		}
 
@@ -908,6 +1230,11 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	liberar_pagina = false;
 	tamanio_alocado = 0;
 	pcb_adm->offset_tareas = offset;
+
+
+	char* aux6 = MEMORIA + 8;
+
+
 	//Cargo las tareas
 
 	if (offset > 0)
@@ -972,6 +1299,10 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 			list_add(una_pagina->contenido, contenido);
 			list_add(pcb_adm->tabla_paginas, una_pagina);
 			pcb_adm->cantidad_paginas_tareas++;
+			if (tamanio_alocado == 0)
+			{
+				pcb_adm->pagina_inicio_tareas = una_pagina->id_pagina;
+			}
 
 			if ((tamanio_tareas - tamanio_alocado) <= tamanio_pagina_paginacion)
 			{
@@ -1032,7 +1363,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		un_tcb->pos_y = atoi(lista_puntos[1]);
 		free(lista_puntos);
 
-		un_tcb->proxima_instruccion = 1;
+		un_tcb->proxima_instruccion = 0;
 
 		if (offset > 0)
 		{
@@ -1141,7 +1472,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 
 		PCB* TEST_PCB = buscar_PCB(pcb_adm);
 
-		char *TEST_TAREAS = buscar_tareas(pcb_adm);
+		char *TEST_TAREAS = buscar_tareas(pcb_adm->PID);
 
 		TCB* TEST_TCB = buscar_tcb(pcb_adm,0);
 		TCB* TEST_TCB1 = buscar_tcb(pcb_adm,1);
@@ -1153,7 +1484,7 @@ void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina)
 {
 	contador_frames = tamanio_memoria / tamanio_pagina;
 	contador_frames_libres = contador_frames;
-	contador_paginas = 0;
+	contador_paginas = 1;
 	tamanio_pagina_paginacion = tamanio_pagina;
 	Frame *un_frame;
 	tabla_frames = list_create();

@@ -313,6 +313,77 @@ Segmento* buscar_segmento_por_id(int id_segmento)
 	}
 }
 
+
+char *buscar_posicion_tripulante_segmentacion(int tripulante_id)
+{
+
+	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
+
+	if (posicion_memoria == 99)
+	{
+		return "";
+	}
+
+	TCB *unTCB = posicion_memoria;
+	char *posicion_tripulante;
+
+	posicion_tripulante = string_itoa(unTCB->pos_X);
+	string_append(&posicion_tripulante, "|");
+	string_append(&posicion_tripulante, string_itoa(unTCB->pos_y));
+
+	return posicion_tripulante;
+}
+
+char *proxima_tarea_tripulante_segmentacion(int tripulante_id)
+{
+
+	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
+
+	if (posicion_memoria == 99)
+	{
+		return "";
+	}
+
+	TCB *unTCB = posicion_memoria;
+
+	char *proxima_tarea = unTCB->proxima_instruccion;
+
+	if (proxima_tarea[0] == '$')
+	{
+		return proxima_tarea;
+	}
+
+	int index = 0;
+	char *string_tarea = string_new();
+	char caracter;
+
+	while (1)
+	{ //string con todas las posiciones
+		caracter = proxima_tarea[index];
+		if (caracter == '$')
+		{
+			break;
+		}
+
+		if (caracter == '|')
+		{
+			string_append_with_format(&string_tarea, "%c", caracter);
+			index++;
+			break;
+		}
+		else
+		{
+			string_append_with_format(&string_tarea, "%c", caracter);
+			index++;
+		}
+	}
+
+	unTCB->proxima_instruccion = unTCB->proxima_instruccion + index;
+
+	return string_tarea;
+}
+
+
 u_int32_t buscar_posicion(int segmento)
 {
 	bool encontre_posicion = false;
@@ -503,6 +574,8 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 	PCB* pcb_TEST;
 	char* tareas_TEST;
 
+	Segmento* segmento_auxiliar;
+
 	//Segmento2 (que es el lleno)
 	list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
 
@@ -569,7 +642,8 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 			tarea_adm2 = list_iterator_next(list_iterator_tareas);
 
 			if (tarea_adm2->PID == pcb_auxiliar->PID) {
-				tareas_auxiliar = buscar_segmento_por_id(tarea_adm2->segmento_nro);
+				segmento_auxiliar = buscar_segmento_por_id(tarea_adm2->segmento_nro);
+				tareas_auxiliar = segmento_auxiliar->dir_inicio;
 				break;
 			}
 		}
@@ -603,8 +677,8 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 			tcb_adm2 = list_iterator_next(list_iterator_tcb);
 
 			if (tcb_adm2->PID == pcb_auxiliar->PID) {
-				tcb_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
-
+				segmento_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
+				segmento_auxiliar = segmento_auxiliar->dir_inicio;
 				//Cambio estructuras memoria
 				tcb_auxiliar->PCB = segmento1->dir_inicio;
 			}
@@ -654,7 +728,9 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 			pcb_adm2 = list_iterator_next(list_iterator_pcb);
 
 			if (pcb_adm2->PID == tarea_adm2->PID) {
-				pcb_auxiliar = buscar_segmento_por_id(pcb_adm2->segmento_nro);
+				segmento_auxiliar = buscar_segmento_por_id(pcb_adm2->segmento_nro);
+				pcb_auxiliar = segmento_auxiliar->dir_inicio;
+				
 			}
 		}
 		list_iterator_destroy(list_iterator_pcb);
@@ -687,7 +763,8 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 			tcb_adm2 = list_iterator_next(list_iterator_tcb);
 
 			if (tcb_adm2->PID == pcb_auxiliar->PID) {
-				tcb_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
+				segmento_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
+				tcb_auxiliar = segmento_auxiliar->dir_inicio;
 
 				tcb_auxiliar->proxima_instruccion = (tcb_auxiliar->proxima_instruccion) - desplazamiento_final_1;
 			}
@@ -852,6 +929,53 @@ int expulsar_tripulante_segmentacion(int tripulante_id)
 	}
 }
 
+//Mueve un tripulante a una dirección destino
+int mover_tripulante_en_x_segmentacion(int tripulante, int posicion_x_final, bool mapa)
+{
+	TCB *miTCB = buscar_tripulante(tripulante);
+
+	if (miTCB == 99)
+	{
+		return -1;
+	}
+
+	miTCB->pos_X = posicion_x_final;
+	if (mapa){
+	char identificador = buscar_tripulante_grilla(tripulante);
+
+	if (identificador == '-')
+	{
+		return -1;
+	}
+
+	mover_tripulante_grilla(identificador, 1,0);
+	}
+}
+
+int mover_tripulante_en_y_segmentacion(int tripulante, int posicion_y_final, bool mapa)
+{
+	TCB *miTCB = buscar_tripulante(tripulante);
+
+	if (miTCB == 99)
+	{
+		return -1;
+	}
+
+	miTCB->pos_y = posicion_y_final;
+
+	if (mapa){
+	char identificador = buscar_tripulante_grilla(tripulante);
+
+	if (identificador == '-')
+	{
+		return -1;
+	}
+
+	mover_tripulante_grilla(identificador, 0,1);
+	}
+}
+
+
 uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 {
 	if (PCB_ID > contador_patotas)
@@ -898,7 +1022,7 @@ uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 }
 
 
-int iniciar_tripulante_segmentacion(int patota_id)
+int iniciar_tripulante_segmentacion(int patota_id, bool mapa)
 {
 	u_int32_t posicion_memoria = buscar_tripulante_no_asignado_segmentacion(patota_id);
 
@@ -909,6 +1033,10 @@ int iniciar_tripulante_segmentacion(int patota_id)
 
 	TCB *unTCB = posicion_memoria;
 	unTCB->estado = 'R';
+
+	if (mapa) {
+		crear_personaje_grilla(unTCB->TID, unTCB->pos_X, unTCB->pos_y);
+	}
 
 	return unTCB->TID;
 }
@@ -966,7 +1094,7 @@ int inicializar_tripulante_segmentacion(int patota, char *unPunto, u_int32_t tar
 	miTCB->PCB = buscar_patota(patota);
 
 	//alta tripulante
-	alta_tripulante(miTCB, patota);
+	alta_tripulante_segmentacion(miTCB, patota);
 }
 
 

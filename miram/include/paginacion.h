@@ -63,6 +63,7 @@ typedef struct
 	int cantidad_paginas;
 } TCB_adm;
 
-
+char *buscar_tareas(int patota_id);
+TCB *buscar_tcb_por_id(int tripulante_id);
 pthread_mutex_t mutex_dump;
 #endif

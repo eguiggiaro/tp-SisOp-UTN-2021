@@ -17,6 +17,24 @@ void compactar_memoria(void)
 	}
 }
 
+void signalHandler(int signal){
+	
+	switch(signal) {
+		case SIGUSR1:
+			miLogInfo("Me llegó la señal %d, inicio compactación", signal);	
+			compactar();	
+			break;
+		case SIGINT:
+			miLogInfo("Se forzó el cierre MiRam.");
+			miLogDestroy();
+			finalizar_memoria();
+			exit(130);	//Control+C
+			break;
+		default:
+			break;
+	}	
+}
+
 // Lee la configuración y la deja disponible
 int leer_config(void)
 {
@@ -325,44 +343,38 @@ void crear_personaje_grilla(int tripulante, int pos_x, int pos_y)
 //Mueve un tripulante a una dirección destino
 int mover_tripulante_en_x(int tripulante, int posicion_x_final)
 {
-	TCB *miTCB = buscar_tripulante(tripulante);
-
-	if (miTCB == 99)
+	bool mapa = false;
+	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
 	{
-		return -1;
+		mapa = true;
 	}
 
-	miTCB->pos_X = posicion_x_final;
-
-	char identificador = buscar_tripulante_grilla(tripulante);
-
-	if (identificador == '-')
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		return -1;
+		mover_tripulante_en_x_segmentacion(tripulante, posicion_x_final, mapa);
 	}
-
-	mover_tripulante_grilla(identificador, 1,0);
+	else
+	{
+		mover_tripulante_en_x_paginacion(tripulante, posicion_x_final, mapa);
+	}
 }
 
 int mover_tripulante_en_y(int tripulante, int posicion_y_final)
 {
-	TCB *miTCB = buscar_tripulante(tripulante);
-
-	if (miTCB == 99)
+	bool mapa = false;
+	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
 	{
-		return -1;
+		mapa = true;
 	}
 
-	miTCB->pos_y = posicion_y_final;
-
-	char identificador = buscar_tripulante_grilla(tripulante);
-
-	if (identificador == '-')
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		return -1;
+		mover_tripulante_en_y_segmentacion(tripulante, posicion_y_final, mapa);
 	}
-
-	mover_tripulante_grilla(identificador, 0,1);
+	else
+	{
+		mover_tripulante_en_y_paginacion(tripulante, posicion_y_final, mapa);
+	}
 }
 
 void mover_tripulante_grilla(char identificador, int pos_x, int pos_y)
@@ -465,16 +477,16 @@ int compactar()
 
 void dump_memoria(bool mostrar_vacios)
 {
-	if (strcmp(configuracion->mapa,"HABILITADO") != 0)
+	if (strcmp(configuracion->mapa, "HABILITADO") != 0)
 	{
-	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
-	{
-		dump_memoria_segmentacion(mostrar_vacios);
-	}
-	else
-	{
-		dump_memoria_paginacion(mostrar_vacios);
-	}
+		if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
+		{
+			dump_memoria_segmentacion(mostrar_vacios);
+		}
+		else
+		{
+			dump_memoria_paginacion(mostrar_vacios);
+		}
 	}
 }
 
@@ -532,23 +544,6 @@ u_int32_t buscar_patota(int PCB_ID)
 	}
 }
 
-void alta_tripulante(TCB *unTCB, int patota)
-{
-	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
-	{
-		crear_personaje_grilla(unTCB->TID, unTCB->pos_X, unTCB->pos_y);
-	}
-
-	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
-	{
-		return alta_tripulante_segmentacion(unTCB, patota);
-	}
-	else
-	{
-		return alta_tripulante_paginacion(unTCB, patota);
-	}
-}
-
 void alta_tareas(int PCB_ID, char *tareas)
 {
 	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
@@ -590,73 +585,30 @@ u_int32_t iniciar_tareas(int PCB_ID, char *tareas)
 	return posicion_memoria;
 }
 
-char *buscar_posicion_tripulante(int tripulante_id)
-{
-
-	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
-
-	if (posicion_memoria == 99)
-	{
-		return "";
-	}
-
-	TCB *unTCB = posicion_memoria;
-	char *posicion_tripulante;
-
-	posicion_tripulante = string_itoa(unTCB->pos_X);
-	string_append(&posicion_tripulante, "|");
-	string_append(&posicion_tripulante, string_itoa(unTCB->pos_y));
-
-	return posicion_tripulante;
-}
-
 char *proxima_tarea_tripulante(int tripulante_id)
 {
 
-	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
-
-	if (posicion_memoria == 99)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		return "";
+		proxima_tarea_tripulante_segmentacion(tripulante_id);
 	}
-
-	TCB *unTCB = posicion_memoria;
-
-	char *proxima_tarea = unTCB->proxima_instruccion;
-
-	if (proxima_tarea[0] == '$')
+	else
 	{
-		return proxima_tarea;
+		proxima_tarea_tripulante_paginacion(tripulante_id);
 	}
+}
 
-	int index = 0;
-	char *string_tarea = string_new();
-	char caracter;
+char *buscar_posicion_tripulante(int tripulante_id)
+{
 
-	while (1)
-	{ //string con todas las posiciones
-		caracter = proxima_tarea[index];
-		if (caracter == '$')
-		{
-			break;
-		}
-
-		if (caracter == '|')
-		{
-			string_append_with_format(&string_tarea, "%c", caracter);
-			index++;
-			break;
-		}
-		else
-		{
-			string_append_with_format(&string_tarea, "%c", caracter);
-			index++;
-		}
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
+	{
+		buscar_posicion_tripulante_segmentacion(tripulante_id);
 	}
-
-	unTCB->proxima_instruccion = unTCB->proxima_instruccion + index;
-
-	return string_tarea;
+	else
+	{
+		buscar_posicion_tripulante_paginacion(tripulante_id);
+	}
 }
 
 int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
@@ -674,13 +626,19 @@ int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 
 int iniciar_tripulante(int patota_id)
 {
+	bool mapa = false;
+	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
+	{
+		mapa = true;
+	}
+
 	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		iniciar_tripulante_segmentacion(patota_id);
+		iniciar_tripulante_segmentacion(patota_id, mapa);
 	}
 	else
 	{
-		iniciar_tripulante_paginacion(patota_id);
+		iniciar_tripulante_paginacion(patota_id, mapa);
 	}
 }
 
@@ -702,64 +660,6 @@ int expulsar_tripulante(int tripulante_id)
 	}
 }
 
-void hacer_memoria(int tamanio_memoria)
-{
-
-	char *puntos = "1|2;3|4";
-	char *tareas = "HACER_ALGO 5;5;6;8|HACER_OTRACOSA;5;6;8$";
-
-	char *puntos2 = "1|2";
-	char *tareas2 = "HACER_ALGO 5;5;6;8$";
-
-	int IDPATOTA = iniciar_patota(2, tareas, puntos);
-	dump_memoria(true);
-
-	int tripulante1 = iniciar_tripulante(IDPATOTA);
-	int tripulante2 = iniciar_tripulante(IDPATOTA);
-
-	dump_memoria(true);
-
-	miLogInfo(proxima_tarea_tripulante(tripulante1));
-	miLogInfo(proxima_tarea_tripulante(tripulante1));
-	miLogInfo(proxima_tarea_tripulante(tripulante1));
-	miLogInfo(proxima_tarea_tripulante(tripulante2));
-
-	dump_memoria(true);
-
-	expulsar_tripulante(tripulante1);
-
-	dump_memoria(true);
-
-	int IDPATOTA2 = iniciar_patota(1, tareas2, puntos2);
-	int tripulante3 = iniciar_tripulante(IDPATOTA2);
-
-	dump_memoria(true);
-
-	//SERVICIOS A CONSTRUIR
-	// 1- NUEVO ELEMENTO:
-	// 2- Crear un segmento
-	// 3- Eliminar un segmento
-	// ¡cómo sé que llegué al final de la memoria?
-
-	// si direccion es mayor a base + limite o menor a base, error
-
-	// list_add(t_list *self, void *data) {
-	//void list_iterate(t_list* self, void(*closure)(void*)) {
-	//void* list_find(t_list *self, bool(*condition)(void*)) {
-
-	//static t_link_element* list_find_element(t_list *self, bool(*cutting_condition)(t_link_element*, int)) {
-	//	t_link_element* element = self->head;
-	//	int index = 0;
-
-	//	while(!cutting_condition(element, index)) {
-	//		element = element->next;
-	//		index++;
-	//	}
-
-	//	return element;
-	//}
-}
-
 void *iniciar_servidor_miram()
 {
 	levantar_servidor(atender_request_miram, puerto_miram);
@@ -775,11 +675,9 @@ void *iniciar_funciones_memoria()
 
 int main()
 {
-
-	//signal(SIGINT, compactar_memoria);
-
-	;
-
+	//Signal para atender la compactación
+	signal(SIGUSR1, signalHandler);
+	
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició MiRAM.");

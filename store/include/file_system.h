@@ -63,7 +63,7 @@ t_list* listaFromArray(char**);
 int verificarExistenciaFile(char*);
 int tamanioArchivo(char*);
 char* stringFromList(t_list*);
-char* generarMd5(t_list*); //TODO
+char* generarMd5(t_list*, int); //TODO
 void borrarTodosLosArchivos(char*);
 
 

@@ -40,7 +40,7 @@ void testMd5(){
 	
 	metadata = leerMetadataRecurso(OXIGENO);
 
-	char* md5 = generarMd5(metadata->blocks);
+	char* md5 = generarMd5(metadata->blocks, metadata->size);
 }
 
 void signalHandler(int signal){
@@ -159,11 +159,20 @@ void inicializarStore(void){
 
 	/***** START TEST LOCAL *****
 	ejecutarTarea("GENERAR_OXIGENO", 40);
+	ejecutarTarea("GENERAR_OXIGENO", 24);
 	ejecutarTarea("GENERAR_COMIDA", 13);
 	ejecutarTarea("GENERAR_BASURA", 7);
-
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
 	
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
+
+	char* lectura = obtenerBitacora("1");
+	/*
 	testLecturaRecurso();
 	testLecturaBitacora();
 

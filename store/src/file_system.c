@@ -41,7 +41,7 @@ void crearArbolDirectorios(void){
 
 void crearSuperbloque(void){
 	
-	FILE* archivoSuperbloque = fopen(pathSuperbloque, "w+");
+	FILE* archivoSuperbloque = fopen(pathSuperbloque, "wb+");
 	if(archivoSuperbloque==NULL){
 		miLogInfo("No se pudo crear el archivo de Superbloque.ims.");
 		exit(EXIT_FAILURE);
@@ -184,14 +184,17 @@ int verificarQueTengoLosBloquesNecesarios(int cantidadBloquesNecesarios){
 	int resultado;
 	int bloquesEncontrados = 0;
 
+	pthread_mutex_lock(&mutex_bitmap);
 	for(int i=0; i<cantidadBloques; i++){
 		if(bitarray_test_bit(bitmap, i) == 0){
 			bloquesEncontrados++;
 		}
 		if(bloquesEncontrados == cantidadBloquesNecesarios){
+			pthread_mutex_unlock(&mutex_bitmap);
 			return 1;
 		}
 	}
+	pthread_mutex_unlock(&mutex_bitmap);
 	return 0;
 }
 
@@ -367,7 +370,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
 	config_set_value(metaConfig, "BLOCKS", stringFromList(metadata->blocks));
 	config_set_value(metaConfig, "CARACTER_LLENADO", metadata->caracter_llenado);
-	config_set_value(metaConfig, "MD5_ARCHIVO", generarMd5(metadata->blocks));
+	config_set_value(metaConfig, "MD5_ARCHIVO", generarMd5(metadata->blocks, metadata->size));
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
@@ -617,16 +620,17 @@ char* stringFromList(t_list* lista){
 	return strLista;
 }
 
-char* generarMd5(t_list* bloques){
+char* generarMd5(t_list* bloques, int size){
 
 	char* strMd5 = string_new();
 	unsigned char hash[16];
 
-	char* strBloques = stringFromList(bloques);
+	//char* strBloques = stringFromList(bloques);
+	char* lectura = leerBloques(bloques, size);
 
 	MD5_CTX md5;
 	MD5Init(&md5);
-	MD5Update(&md5, strBloques, string_length((char*)strBloques));
+	MD5Update(&md5, lectura, string_length(lectura));
 	MD5Final(&md5, hash);
 	
 	for(int i=0; i<16; i++){
@@ -636,7 +640,7 @@ char* generarMd5(t_list* bloques){
 	//printf(strMd5);
 	string_to_upper(strMd5);
 
-	free(strBloques);
+	free(lectura);
 	return strMd5;
 }
 

@@ -45,8 +45,9 @@ void atender_request_store(Request *request) {
 			int cantidadRecursos = atoi(listaNueva[1]); //En el caso de DESCARTAR_BASURA es NULL
 
 	 		resultadoTarea = ejecutarTarea(tarea, cantidadRecursos);
-			char* mensajeAGuardar = "Comienza ejecucion de tarea ";
-			string_append(&mensajeAGuardar,tarea);
+			char* mensajeAGuardar = string_new();
+			string_append(&mensajeAGuardar, "Comienza ejecucion tarea ");
+			string_append(&mensajeAGuardar, tarea);
 			resultadoBitacora = guardarEnBitacora(id_tripulante, mensajeAGuardar);
 
 			if (resultadoTarea == -1)

@@ -897,6 +897,24 @@ uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 	}
 }
 
+
+int iniciar_tripulante_segmentacion(int patota_id)
+{
+	u_int32_t posicion_memoria = buscar_tripulante_no_asignado_segmentacion(patota_id);
+
+	if (posicion_memoria == 99)
+	{
+		return -1;
+	}
+
+	TCB *unTCB = posicion_memoria;
+	unTCB->estado = 'R';
+
+	return unTCB->TID;
+}
+
+
+
 //Crea la tabla de segmentos y el primer segmento vacio
 void inicializar_segmentacion(int tamanio_memoria, char* criterio)
 {

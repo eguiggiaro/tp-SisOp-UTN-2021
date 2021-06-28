@@ -38,6 +38,7 @@ typedef struct Pagina
 	int id_pagina;
 	int id_frame;
 	char *estado;
+	t_list* contenido;
 } Pagina;
 
 typedef struct
@@ -49,7 +50,9 @@ typedef struct
 	int pagina_inicio_tareas;
 	int cantidad_paginas_tareas;
 	int offset_tareas;
+	int tamanio_tareas;
 	t_list* tabla_TCB_admin;
+	int tripulantes_iniciados;
 } PCB_adm;
 
 typedef struct

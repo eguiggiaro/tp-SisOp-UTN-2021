@@ -549,15 +549,7 @@ u_int32_t buscar_tripulante(int TCB_ID)
 	}
 }
 
-u_int32_t buscar_tripulante_no_asignado(int PCB_ID)
-{
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
-	{
-		return buscar_tripulante_no_asignado_segmentacion(PCB_ID);
-	} else {
-		return buscar_tripulante_no_asignado_paginacion(PCB_ID);
-	}
-}
+
 
 u_int32_t iniciar_tareas(int PCB_ID, char *tareas)
 {
@@ -660,21 +652,20 @@ int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 
 }
 
-
 int iniciar_tripulante(int patota_id)
 {
-	u_int32_t posicion_memoria = buscar_tripulante_no_asignado(patota_id);
-
-	if (posicion_memoria == 99)
+	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
 	{
-		return -1;
+		iniciar_tripulante_segmentacion(patota_id);
+	} else {
+		iniciar_tripulante_paginacion(patota_id);
 	}
 
-	TCB *unTCB = posicion_memoria;
-	unTCB->estado = 'R';
-
-	return unTCB->TID;
 }
+
+
+
+
 
 int expulsar_tripulante(int tripulante_id)
 {

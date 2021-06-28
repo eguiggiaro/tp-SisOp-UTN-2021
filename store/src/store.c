@@ -177,6 +177,10 @@ void inicializarStore(void){
 	testLecturaBitacora();
 
 	testMd5();
+	
+	//Sabotajes:
+	verificarCantidadBloques();
+	
 	/***** END TEST LOCAL ******/
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));

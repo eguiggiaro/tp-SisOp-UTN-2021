@@ -14,6 +14,7 @@ char* pathFiles;
 char* pathBitacoras;
 
 //Superbloque
+char* punteroSuperbloque;
 uint32_t tamanioBloque; 
 uint32_t cantidadBloques;
 t_bitarray* bitmap;
@@ -57,6 +58,13 @@ int modificarMetadataRecurso(MetadataRecurso*, tipoRecurso);
 int modificarMetadataBitacora(MetadataBitacora*, char*);
 int crearMetadataRecurso(tipoRecurso);
 int crearMetadataBitacora(char*);
+
+/********** PROTOCOLO SABOTAJE **********/
+int verificarCantidadBloques();
+int verificarBitmap();
+int verificarSizeEnFile();
+int verificarBlockCount();
+int verificarBlocks();
 
 /**** SOPORTE ****/
 t_list* listaFromArray(char**);

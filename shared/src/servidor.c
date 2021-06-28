@@ -31,12 +31,13 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 			perror("fallo el listen");
 		}
 
-		printf("(Esperando conexiones en Direccion: %i, Puerto: %i ) \n",INADDR_ANY,puerto_app);
+		//printf("(Esperando conexiones en Direccion: %i, Puerto: %i ) \n",INADDR_ANY,puerto_app);
 
 		int request_fd;
 		request_fd = accept(servidor_fd, (void*) &direccionRequest, &tamanioDireccion);
 		
-		printf("Se conectó un cliente!\n");
+		//printf("Se conectó un cliente!\n");
+		miLogInfo("Se conectó un cliente\n");
 
 		while(1){
 

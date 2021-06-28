@@ -6,11 +6,13 @@
 
 void compactar_memoria(void)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
-		{
-			miLogInfo("Compactando!");
-				iniciar_servidor_miram();
-		} else {
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
+	{
+		miLogInfo("Compactando!");
+		iniciar_servidor_miram();
+	}
+	else
+	{
 		miLogInfo("No se puede compactar en paginación!");
 	}
 }
@@ -27,7 +29,6 @@ int leer_config(void)
 		return EXIT_FAILURE;
 	}
 
-
 	configuracion->puerto = config_get_int_value(config, "PUERTO");
 	configuracion->tamanio_memoria = config_get_int_value(config, "TAMANIO_MEMORIA");
 	configuracion->esquema_memoria = config_get_string_value(config, "ESQUEMA_MEMORIA");
@@ -36,7 +37,8 @@ int leer_config(void)
 	configuracion->path_swap = config_get_string_value(config, "PATH_SWAP");
 	configuracion->algoritmo_reemplazo = config_get_string_value(config, "ALGORITMO_REEMPLAZO");
 	configuracion->criterio_seleccion = config_get_string_value(config, "CRITERIO_SELECCION");
-	
+	configuracion->mapa = config_get_string_value(config, "MAPA");
+
 	return EXIT_SUCCESS;
 }
 
@@ -66,12 +68,12 @@ void atender_request_miram(Request *request)
 
 		int tripulante_expulsion = atoi(list_get(lista, 0));
 
-		miLogInfo("Me llego operacion: Expulsar tripulante %d\n",tripulante_expulsion);
+		miLogInfo("Me llego operacion: Expulsar tripulante %d\n", tripulante_expulsion);
 		resultado = expulsar_tripulante(tripulante_expulsion);
 
 		if (resultado == -1)
 		{
-			miLogInfo("ERROR: TRIPULANTE %d NO EXPULSADO \n",tripulante_expulsion);
+			miLogInfo("ERROR: TRIPULANTE %d NO EXPULSADO \n", tripulante_expulsion);
 			paquete_devuelto = crear_paquete(FAIL);
 			list_add(lista_mensajes, "Se produjo un error al expulsar el tripulante");
 		}
@@ -92,9 +94,9 @@ void atender_request_miram(Request *request)
 		//eliminar_paquete(paquete_devuelto);
 		free(request);
 		pthread_mutex_unlock(&mutex_expulsion);
-	
+
 		break;
-	
+
 	case INICIAR_TRIPULANTE:
 		pthread_mutex_lock(&mutex_tripulantes);
 		t_paquete *paquete_devuelto_iniciar_tripulante;
@@ -119,7 +121,7 @@ void atender_request_miram(Request *request)
 		}
 		else
 		{
-			miLogInfo("TRIPULANTE %d INICIADO CORRECTAMENTE \n",resultado);
+			miLogInfo("TRIPULANTE %d INICIADO CORRECTAMENTE \n", resultado);
 
 			posicion = buscar_posicion_tripulante(resultado);
 			proxima_tarea = proxima_tarea_tripulante(resultado);
@@ -232,14 +234,13 @@ void atender_request_miram(Request *request)
 		lista = deserializar_lista_strings(buffer_devolucion_tareas);
 
 		int tripulante_id = atoi(list_get(lista, 0));
-		miLogInfo("Me llego operacion: SIGUIENTE TAREA de tripulante %d\n",tripulante_id);
+		miLogInfo("Me llego operacion: SIGUIENTE TAREA de tripulante %d\n", tripulante_id);
 
 		char *tarea = proxima_tarea_tripulante(tripulante_id);
 
 		miLogInfo("Proxima tarea de tripulante %d enviada \n", tripulante_id);
 		paquete_devuelto = crear_paquete(OK);
 		list_add(lista_mensajes, tarea);
-
 
 		t_buffer *buffer_respuesta_tareas = serializar_lista_strings(lista_mensajes);
 		paquete_devuelto->buffer = buffer_respuesta_tareas;
@@ -250,7 +251,6 @@ void atender_request_miram(Request *request)
 		free(request);
 		pthread_mutex_unlock(&mutex_tareas);
 		break;
-
 
 	case MOV_TRIPULANTE:
 
@@ -266,12 +266,14 @@ void atender_request_miram(Request *request)
 		miLogInfo("Me llego operacion: MOVER de tripulante %d\n", tripulante_id_a_mover);
 
 		char *eje = list_get(lista, 1);
-		int nueva_posicion = atoi(list_get(lista,2));
+		int nueva_posicion = atoi(list_get(lista, 2));
 
-		if (strcmp(eje,"X") == 0)
+		if (strcmp(eje, "X") == 0)
 		{
 			mover_tripulante_en_x(tripulante_id_a_mover, nueva_posicion);
-		} else {
+		}
+		else
+		{
 			mover_tripulante_en_y(tripulante_id_a_mover, nueva_posicion);
 		}
 
@@ -294,15 +296,12 @@ void atender_request_miram(Request *request)
 		break;
 	}
 
-		dump_memoria(true);
-
-
+	dump_memoria(true);
 }
 
 // Crea la grilla inicial y la muestra en pantalla
 void crear_grilla(void)
 {
-
 	int err;
 	nivel_gui_inicializar();
 	nivel_gui_get_area_nivel(&cols, &rows);
@@ -319,8 +318,8 @@ void crear_personaje_grilla(int tripulante, int pos_x, int pos_y)
 	id_grilla->identificador = identificador;
 
 	list_add(tabla_identificadores_grilla, id_grilla);
-//	personaje_crear(nivel, identificador, pos_x, pos_y);
-//	nivel_gui_dibujar(nivel);
+	personaje_crear(nivel, identificador, pos_x, pos_y);
+	nivel_gui_dibujar(nivel);
 }
 
 //Mueve un tripulante a una dirección destino
@@ -333,7 +332,7 @@ int mover_tripulante_en_x(int tripulante, int posicion_x_final)
 		return -1;
 	}
 
-	miTCB ->pos_X = posicion_x_final;
+	miTCB->pos_X = posicion_x_final;
 
 	char identificador = buscar_tripulante_grilla(tripulante);
 
@@ -342,19 +341,19 @@ int mover_tripulante_en_x(int tripulante, int posicion_x_final)
 		return -1;
 	}
 
-	//mover_tripulante_grilla(identificador, 1,0);
+	mover_tripulante_grilla(identificador, 1,0);
 }
 
 int mover_tripulante_en_y(int tripulante, int posicion_y_final)
 {
 	TCB *miTCB = buscar_tripulante(tripulante);
 
-	if (miTCB = 99)
+	if (miTCB == 99)
 	{
 		return -1;
 	}
 
-	miTCB ->pos_y = posicion_y_final;
+	miTCB->pos_y = posicion_y_final;
 
 	char identificador = buscar_tripulante_grilla(tripulante);
 
@@ -363,9 +362,8 @@ int mover_tripulante_en_y(int tripulante, int posicion_y_final)
 		return -1;
 	}
 
-	//mover_tripulante_grilla(identificador, 0,1);
+	mover_tripulante_grilla(identificador, 0,1);
 }
-
 
 void mover_tripulante_grilla(char identificador, int pos_x, int pos_y)
 {
@@ -373,7 +371,7 @@ void mover_tripulante_grilla(char identificador, int pos_x, int pos_y)
 	int err;
 
 	err = item_desplazar(nivel, identificador, pos_x, pos_y);
-	//nivel_gui_dibujar(nivel);
+	nivel_gui_dibujar(nivel);
 }
 
 //buscar el caracter asignado en la grilla, para el tripulante
@@ -415,16 +413,18 @@ void inicializar_memoria(int tamanio_memoria)
 {
 	MEMORIA = malloc(tamanio_memoria);
 
-	miLogInfo("Inicia MEMORIA, primera direccion %p",MEMORIA);
+	miLogInfo("Inicia MEMORIA, primera direccion %p", MEMORIA);
 
 	contador_patotas = 0;
 	contador_tripulantes = 0;
 	tabla_identificadores_grilla = list_create();
 
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		inicializar_segmentacion(tamanio_memoria, configuracion->criterio_seleccion);
-	} else {
+	}
+	else
+	{
 
 		tamanio_pagina = configuracion->tamanio_pagina;
 		inicializar_paginacion(tamanio_memoria, tamanio_pagina);
@@ -433,12 +433,14 @@ void inicializar_memoria(int tamanio_memoria)
 
 void finalizar_memoria()
 {
-	dump_memoria(true); 
-	
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	dump_memoria(true);
+
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		finalizar_segmentacion();
-	} else {
+	}
+	else
+	{
 		finalizar_paginacion(tamanio_memoria);
 	}
 
@@ -451,21 +453,28 @@ void finalizar_memoria()
 int compactar()
 {
 
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		return compactar_segmentacion();
-	} else {
+	}
+	else
+	{
 		return -1;
 	}
 }
 
 void dump_memoria(bool mostrar_vacios)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->mapa,"HABILITADO") != 0)
+	{
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		dump_memoria_segmentacion(mostrar_vacios);
-	} else {
+	}
+	else
+	{
 		dump_memoria_paginacion(mostrar_vacios);
+	}
 	}
 }
 
@@ -475,86 +484,97 @@ char *obtener_punto_string(char *puntos, int i)
 	lista_puntos = string_split(puntos, ";");
 	char *string_punto = strdup(lista_puntos[i]);
 
-
-    string_iterate_lines(lista_puntos, (void*) free);
+	string_iterate_lines(lista_puntos, (void *)free);
 	free(lista_puntos);
 	return string_punto;
 }
 
 int reservar_memoria(int bytes)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		if (strcmp(configuracion->criterio_seleccion,"FF") == 0)
+		if (strcmp(configuracion->criterio_seleccion, "FF") == 0)
 		{
 			return reservar_memoria_segmentacion_ff(bytes);
-		} else {
+		}
+		else
+		{
 			return reservar_memoria_segmentacion_bf(bytes);
 		}
-	} else {
+	}
+	else
+	{
 		return reservar_memoria_paginacion(bytes);
 	}
 }
 
 int alta_patota(PCB *unPCB)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		return alta_patota_segmentacion(unPCB);
-	} else {
+	}
+	else
+	{
 		return alta_patota_paginacion(unPCB);
 	}
 }
 
 u_int32_t buscar_patota(int PCB_ID)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		return buscar_patota_segmentacion(PCB_ID);
-	} else {
+	}
+	else
+	{
 		return buscar_patota_paginacion(PCB_ID);
 	}
 }
 
 void alta_tripulante(TCB *unTCB, int patota)
 {
-	crear_personaje_grilla(unTCB->TID,unTCB->pos_X, unTCB->pos_y);
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
 	{
-		return alta_tripulante_segmentacion(unTCB, patota);
-	} else {
-		return alta_tripulante_paginacion(unTCB, patota);
+		crear_personaje_grilla(unTCB->TID, unTCB->pos_X, unTCB->pos_y);
 	}
 
-
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
+	{
+		return alta_tripulante_segmentacion(unTCB, patota);
+	}
+	else
+	{
+		return alta_tripulante_paginacion(unTCB, patota);
+	}
 }
 
 void alta_tareas(int PCB_ID, char *tareas)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		return alta_tareas_segmentacion(PCB_ID, tareas);
-	} else {
+	}
+	else
+	{
 		return alta_tareas_paginacion(PCB_ID, tareas);
 	}
 }
 
 u_int32_t buscar_tripulante(int TCB_ID)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		return buscar_tripulante_segmentacion(TCB_ID);
-	} else {
+	}
+	else
+	{
 		return buscar_tripulante_paginacion(TCB_ID);
 	}
 }
 
-
-
 u_int32_t iniciar_tareas(int PCB_ID, char *tareas)
 {
-	
-
 
 	u_int32_t posicion_memoria = reservar_memoria(strlen(tareas));
 
@@ -642,30 +662,27 @@ char *proxima_tarea_tripulante(int tripulante_id)
 int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 {
 
-
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		iniciar_patota_segmentacion(cantidad_tripulantes, tareas, puntos);
-	} else {
+	}
+	else
+	{
 		iniciar_patota_paginacion(cantidad_tripulantes, tareas, puntos);
 	}
-
 }
 
 int iniciar_tripulante(int patota_id)
 {
-	if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
 		iniciar_tripulante_segmentacion(patota_id);
-	} else {
+	}
+	else
+	{
 		iniciar_tripulante_paginacion(patota_id);
 	}
-
 }
-
-
-
-
 
 int expulsar_tripulante(int tripulante_id)
 {
@@ -678,7 +695,7 @@ int expulsar_tripulante(int tripulante_id)
 	}
 	else
 	{
-		if (strcmp(configuracion->esquema_memoria,"SEGMENTACION") == 0)
+		if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 		{
 			resultado = expulsar_tripulante_segmentacion(tripulante_id);
 		}
@@ -761,11 +778,10 @@ int main()
 
 	//signal(SIGINT, compactar_memoria);
 
-	//pthread_t mapa;
-	//pthread_create(&mapa, NULL, (void*)crear_grilla, NULL);
+	;
 
 	//Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, true, LOG_LEVEL_INFO);
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició MiRAM.");
 
 	if (leer_config())
@@ -778,31 +794,25 @@ int main()
 	tamanio_memoria = configuracion->tamanio_memoria;
 
 	puerto_miram = string_itoa(configuracion->puerto);
+
 	iniciar_funciones_memoria();
 
-	iniciar_servidor_miram();
-
-	//hacer_memoria(1000);
-	/*
-	if (pthread_create(&threadSERVER, NULL, (void*) iniciar_servidor_miram,
-			NULL) != 0) {
+	if (pthread_create(&threadSERVER, NULL, (void *)iniciar_servidor_miram,
+					   NULL) != 0)
+	{
 		printf("Error iniciando servidor/n");
 	}
 
-	if (pthread_create(&threadMAPA, NULL, (void*) crear_grilla,
-			NULL) != 0) {
-		printf("Error creando grilla/n");
+	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
+	{
+		if (pthread_create(&threadMAPA, NULL, (void *)crear_grilla,
+						   NULL) != 0)
+		{
+			printf("Error creando grilla/n");
+		}
 	}
-
-	if (pthread_create(&threadMEMORIA, NULL, (void*) iniciar_funciones_memoria,
-			NULL) != 0) {
-		printf("Error iniciando memoria/n");
-	}
-*/
-
-	//pthread_join(threadSERVER, NULL);
-	//pthread_join(threadMAPA, NULL);
-	//pthread_join(threadMEMORIA, NULL);
+	pthread_join(threadSERVER, NULL);
+	pthread_join(threadMAPA, NULL);
 
 	miLogInfo("Finalizó MiRAM");
 	free(configuracion);

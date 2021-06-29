@@ -664,14 +664,35 @@ int repararSizeEnFile(MetadataRecurso* metadata, tipoRecurso recurso, int tamani
 
 int verificarBlockCount(){
 	//Al encontrar una diferencia entre estos dos se debe restaurar la consistencia. 
-	
-	return 0;
+	t_list* recursos = verificarQueArchivosDeRecursosHay();
+
+	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	//Levanto todos los bloques en uso de las metadatas de recursos.
+	for(int i=0; i<list_size(recursos); i++){
+		tipoRecurso recurso = (tipoRecurso)list_get(recursos,i);
+		metadataR = leerMetadataRecurso(recurso);
+		if(metadataR->block_count != list_size(metadataR->blocks)){
+			if(repararBlockCount(metadataR, recurso)){
+				miLogError("No pudo reparar el block count del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+				return EXIT_FAILURE;
+			}
+		}
+	}
+
+
+	return EXIT_SUCCESS;
 }
 
-int repararBlockCount(){
+int repararBlockCount(MetadataRecurso* metadata, tipoRecurso recurso){
 	//Reparación: Actualizar el valor de Block_count en base a lo que está en la lista de Blocks.
+	metadata->block_count = list_size(metadata->blocks);
 
-	return 0;
+	if(modificarMetadataRecurso(metadata, recurso)){
+		miLogError("No pudo actualizar la metadata del archivo al corregir el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 int verificarBlocks(){

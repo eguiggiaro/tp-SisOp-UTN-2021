@@ -181,7 +181,8 @@ void inicializarStore(void){
 	//Sabotajes:
 	verificarCantidadBloques();
 	verificarBitmap();
-	verificarSizeEnFile();*/
+	verificarSizeEnFile();
+	verificarBlockCount();*/
 	
 	/***** END TEST LOCAL ******/
 

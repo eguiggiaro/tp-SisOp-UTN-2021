@@ -157,7 +157,7 @@ void inicializarStore(void){
 	leerSuperbloque();
 	subirBlocksAMemoria();
 
-	/***** START TEST LOCAL *****
+	/***** START TEST LOCAL *****//*
 	ejecutarTarea("GENERAR_OXIGENO", 40);
 	ejecutarTarea("GENERAR_OXIGENO", 24);
 	ejecutarTarea("GENERAR_COMIDA", 13);
@@ -180,7 +180,8 @@ void inicializarStore(void){
 	
 	//Sabotajes:
 	verificarCantidadBloques();
-	verificarBitmap();*/
+	verificarBitmap();
+	verificarSizeEnFile();*/
 	
 	/***** END TEST LOCAL ******/
 

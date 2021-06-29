@@ -572,7 +572,7 @@ int verificarBitmap(){
 	}
 	
 	t_list* recursos = verificarQueArchivosDeRecursosHay();
-	
+
 	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
 	//Levanto todos los bloques en uso de las metadatas de recursos.
 	for(int i=0; i<list_size(recursos); i++){
@@ -631,14 +631,35 @@ int repararBitmap(t_list* bloques){
 
 int verificarSizeEnFile(){
 	//Se debe asegurar que el tamaño del archivo sea el correcto, validando con el contenido de sus bloques. 
+	t_list* recursos = verificarQueArchivosDeRecursosHay();
+
+	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	//Levanto todos los bloques en uso de las metadatas de recursos.
+	for(int i=0; i<list_size(recursos); i++){
+		tipoRecurso recurso = (tipoRecurso)list_get(recursos,i);
+		metadataR = leerMetadataRecurso(recurso);
+		int ultimoBloque = list_get(metadataR->blocks,metadataR->block_count - 1);
+		int tamanioRealArchivo = (metadataR->block_count - 1) * tamanioBloque + tamanioOcupadoRecursoEnBloque(ultimoBloque, recurso);
+		if(metadataR->size != tamanioRealArchivo){
+			if(repararSizeEnFile(metadataR, recurso, tamanioRealArchivo)){
+				miLogError("No pudo reparar el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+				return EXIT_FAILURE;
+			}
+		}
+	}
 	
-	return 0;
+	return EXIT_SUCCESS;
 }
 
-int repararSizeEnFile(){
+int repararSizeEnFile(MetadataRecurso* metadata, tipoRecurso recurso, int tamanioReal){
 	//Reparación: Asumir correcto lo encontrado en los bloques.
+	metadata->size = tamanioReal;
+	if(modificarMetadataRecurso(metadata, recurso)){
+		miLogError("No pudo actualizar la metadata del archivo al corregir el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+		return EXIT_FAILURE;
+	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int verificarBlockCount(){
@@ -800,4 +821,21 @@ t_list* verificarQueArchivosDeRecursosHay(){
 
 	return recursos;
 
+}
+
+int tamanioOcupadoRecursoEnBloque(int bloque, tipoRecurso recurso){
+	int posicionUltimoCaracter = 0;
+	char caracter = cualEsMiCaracter(recurso);
+
+	char* contenidoUltimoBloque = leerBloque(bloque, tamanioBloque);
+	int tamanioContenido = string_length(contenidoUltimoBloque);
+
+	for(int i=0; i<tamanioBloque; i++){
+		if(contenidoUltimoBloque[i] != caracter){
+			posicionUltimoCaracter = i;
+			break;
+		}
+	}
+
+	return posicionUltimoCaracter;
 }

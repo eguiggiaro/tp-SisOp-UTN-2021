@@ -153,7 +153,7 @@ void generar_comida_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
   miLogInfo("\nComienza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
+  //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
@@ -186,7 +186,7 @@ void generar_oxigeno_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
   miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+  //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
@@ -219,7 +219,7 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
   miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
+  //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
@@ -251,7 +251,7 @@ void consumir_comida_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
  miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
+  //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
@@ -284,7 +284,7 @@ void generar_basura_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
   miLogInfo("\nComienza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
+  //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
@@ -316,7 +316,7 @@ void descartar_basura_FIFO(Tripulante* trip){
   char* parametro = (trip->tarea_actual)->parametros;
 
   miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
+  //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
@@ -347,11 +347,11 @@ void tarea_generica_FIFO(Tripulante* trip){
   //Moverse a ubicacion.
   char* nombre_tarea = (trip->tarea_actual)->nombre_tarea;
   miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
-  avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
     trip->realizo_movimientos_tarea = true;
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
   }
 
   int retardo = configuracion->retardo_ciclo_cpu;
@@ -398,7 +398,7 @@ void generar_comida_RR(Tripulante* trip){
     char* parametro = (trip->tarea_actual)->parametros;
 
     miLogInfo("\nComienza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
-    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
+    //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
       trip->realizo_movimientos_tarea = true;
@@ -445,7 +445,7 @@ void generar_oxigeno_RR(Tripulante* trip){
     char* parametro = (trip->tarea_actual)->parametros;
 
    miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-   avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
       trip->realizo_movimientos_tarea = true;
@@ -492,7 +492,7 @@ void consumir_oxigeno_RR(Tripulante* trip){
     char* parametro = (trip->tarea_actual)->parametros;
 
     miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
+    //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
       trip->realizo_movimientos_tarea = true;
@@ -539,7 +539,7 @@ void consumir_comida_RR(Tripulante* trip){
     char* parametro = (trip->tarea_actual)->parametros;
 
     miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
-    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
+    //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
       trip->realizo_movimientos_tarea = true;
@@ -586,7 +586,7 @@ void generar_basura_RR(Tripulante* trip){
     char* parametro = (trip->tarea_actual)->parametros;
 
     miLogInfo("\nComienza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
-    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
+    //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
       trip->realizo_movimientos_tarea = true;
@@ -632,7 +632,7 @@ void descartar_basura_RR(Tripulante* trip){
     char* tarea = (trip->tarea_actual)->nombre_tarea;
     char* parametro = (trip->tarea_actual)->parametros;
     miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
-    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
+    //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
 
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
@@ -679,11 +679,11 @@ void tarea_generica_RR(Tripulante* trip){
     //Moverse a ubicacion.
     char* nombre_tarea = (trip->tarea_actual)->nombre_tarea;
     miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
-    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
 
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
     }
+    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
 
     if(trip->quantum >0){
       for(int i = 0; i<trip->quantum;i++){

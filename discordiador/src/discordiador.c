@@ -877,7 +877,7 @@ void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre){
 	//Parametros que se envian a Store:
 	list_add(lista_mensajes,id_trip);
 	char* mensaje = string_new();
-	string_append(&mensaje, "INICIO_TAREA ");
+	string_append(&mensaje, "Comienza ejecucion de tarea: ");
 	string_append(&mensaje, tarea_nombre);
 	list_add(lista_mensajes, mensaje);
 
@@ -908,7 +908,7 @@ void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre){
 	//Parametros que se envian a Store:
 	list_add(lista_mensajes,id_trip);
 	char* mensaje = string_new();
-	string_append(&mensaje, "FIN_TAREA ");
+	string_append(&mensaje, "Finaliza ejecucion de tarea: ");
 	string_append(&mensaje, tarea_nombre);
 	list_add(lista_mensajes, mensaje);
 

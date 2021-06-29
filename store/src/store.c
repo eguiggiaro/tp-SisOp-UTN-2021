@@ -159,9 +159,9 @@ void inicializarStore(void){
 
 	/***** START TEST LOCAL *****//*
 	ejecutarTarea("GENERAR_OXIGENO", 40);
-	ejecutarTarea("GENERAR_OXIGENO", 24);
 	ejecutarTarea("GENERAR_COMIDA", 13);
-	ejecutarTarea("GENERAR_BASURA", 7);
+	ejecutarTarea("GENERAR_OXIGENO", 24);
+	ejecutarTarea("GENERAR_BASURA", 7);/*
 	
 	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
 	guardarEnBitacora("2","Prueba de escritura en la bitacora del tripulante 2.");
@@ -182,7 +182,9 @@ void inicializarStore(void){
 	verificarCantidadBloques();
 	verificarBitmap();
 	verificarSizeEnFile();
-	verificarBlockCount();*/
+	verificarBlockCount();
+	verificarBlocks();*/
+	
 	
 	/***** END TEST LOCAL ******/
 

@@ -582,6 +582,11 @@ int verificarBitmap(){
 
 	if (repararBitmap(bloquesOcupados)){
 		miLogError("No pudo reparar el bitmap del Superbloque.");
+		list_destroy(metadata->blocks);
+		list_destroy(metadataR->blocks);
+		list_destroy(bloquesOcupados);
+		free(metadata);
+		free(metadataR);
 		return EXIT_FAILURE;
 	}
 
@@ -643,11 +648,17 @@ int verificarSizeEnFile(){
 		if(metadataR->size != tamanioRealArchivo){
 			if(repararSizeEnFile(metadataR, recurso, tamanioRealArchivo)){
 				miLogError("No pudo reparar el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+				list_destroy(metadataR->blocks);
+				list_destroy(recursos);
+				free(metadataR);				
 				return EXIT_FAILURE;
 			}
 		}
 	}
 	
+	list_destroy(metadataR->blocks);
+	list_destroy(recursos);
+	free(metadataR);
 	return EXIT_SUCCESS;
 }
 
@@ -674,12 +685,17 @@ int verificarBlockCount(){
 		if(metadataR->block_count != list_size(metadataR->blocks)){
 			if(repararBlockCount(metadataR, recurso)){
 				miLogError("No pudo reparar el block count del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+				list_destroy(metadataR->blocks);
+				list_destroy(recursos);
+				free(metadataR);				
 				return EXIT_FAILURE;
 			}
 		}
 	}
 
-
+	list_destroy(metadataR->blocks);
+	list_destroy(recursos);
+	free(metadataR);
 	return EXIT_SUCCESS;
 }
 
@@ -697,15 +713,65 @@ int repararBlockCount(MetadataRecurso* metadata, tipoRecurso recurso){
 
 int verificarBlocks(){
 	//Se debe validar que los números de bloques en la lista sean válidos dentro del FS. 
-	
-	return 0;
+	t_list* recursos = verificarQueArchivosDeRecursosHay();
+
+	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	//Levanto todos los bloques en uso de las metadatas de recursos.
+	for(int i=0; i<list_size(recursos); i++){
+		tipoRecurso recurso = (tipoRecurso)list_get(recursos,i);
+		metadataR = leerMetadataRecurso(recurso);
+		if(!compararMd5(metadataR)){
+			if(repararBlocks(metadataR, recurso)){
+				miLogError("No pudo reparar los bloques del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+				list_destroy(metadataR->blocks);
+				list_destroy(recursos);
+				free(metadataR);
+				return EXIT_FAILURE;
+			}
+		}
+	}
+
+	list_destroy(metadataR->blocks);
+	list_destroy(recursos);
+	free(metadataR);
+	return EXIT_SUCCESS;
 }
 
-int repararBlocks(){
+int repararBlocks(MetadataRecurso* metadata, tipoRecurso recurso){
 	//Reparación: Restaurar archivo -> Tomar como referencia el size del archivo y el caracter de llenado e ir llenando los bloques 
-	//hasta completar el size del archivo, en caso de que falten bloques, los mismos se deberán agregar al final del mismo.
+	//hasta completar el size del archivo. En caso de que falten bloques, los mismos se deberán agregar al final del mismo.
+	char caracter = metadata->caracter_llenado;
+	int cantidadBytesAEscribir = metadata->size;
+	char* escrituraCompleta = string_repeat(caracter, tamanioBloque);
 
-	return 0;
+	for(int i=0; i<list_size(metadata->blocks);i++){
+		int bloque = list_get(metadata->blocks, i);
+		if(cantidadBytesAEscribir >= tamanioBloque){
+			escribirBloque(bloque, 0, escrituraCompleta);
+			cantidadBytesAEscribir -= tamanioBloque;
+		} else {
+			escribirBloque(bloque, 0, string_substring_until(escrituraCompleta, cantidadBytesAEscribir));
+			cantidadBytesAEscribir = 0;
+		}
+	}
+
+	//Si todavia quedan caracteres para escribir, los escribo en bloques nuevos y actualizo la metadata del recurso.
+	if(cantidadBytesAEscribir > 0){
+		t_list* nuevosBloques = list_create();
+		nuevosBloques = escribirBloquesNuevo(string_substring_from(escrituraCompleta, cantidadBytesAEscribir));
+		list_add_all(metadata->blocks, nuevosBloques);
+
+		list_destroy(nuevosBloques);
+	}
+
+	//msync(punteroBlocks, cantidadBloques*tamanioBloque, 0);
+
+	if(modificarMetadataRecurso(metadata, recurso)){
+		miLogError("No pudo actualizar la metadata del archivo al corregir la lista de bloques del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
+		return EXIT_FAILURE;
+	}
+	
+	return EXIT_SUCCESS;
 }
 
 
@@ -859,4 +925,11 @@ int tamanioOcupadoRecursoEnBloque(int bloque, tipoRecurso recurso){
 	}
 
 	return posicionUltimoCaracter;
+}
+
+bool compararMd5(MetadataRecurso* metadata){
+
+	char* md5SegunBloques = generarMd5(metadata->blocks, metadata->size);
+	
+	return string_equals_ignore_case(md5SegunBloques, metadata->md5);
 }

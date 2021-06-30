@@ -75,6 +75,8 @@ char* generarMd5(t_list*, int);
 void borrarTodosLosArchivos(char*);
 int cantidadArchivosEnDirectorio(char*);
 t_list* verificarQueArchivosDeRecursosHay();
+int tamanioOcupadoRecursoEnBloque(int, tipoRecurso);
+bool compararMd5(MetadataRecurso*);
 
 
 /**** DEṔRECADAS ****/

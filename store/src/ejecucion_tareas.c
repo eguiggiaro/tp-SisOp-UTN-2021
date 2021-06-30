@@ -174,7 +174,7 @@ char* obtenerBitacora(char* id_tripulante){
 	
 }
 
-/*int consumirRecurso(tipoRecurso recurso, int cantidadCaracteres){
+int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
 
@@ -182,12 +182,18 @@ char* obtenerBitacora(char* id_tripulante){
 	int block_count = metadataR->block_count;
 	t_list* blocks = metadataR->blocks;
 
+	int cantidadBytesLibres = bytesLibresUltimoBloque(size, block_count);
+	int tamanioUltimoBloque = saberTamanioUltimobloque(cantidadBytesLibres);
 	int posicionUltimoBloque = list_size(blocks);
-	int ultimoBloque = obtenerUltimoBlouque(metadataR, posicionUltimoBloque);
+	int ultimoBloque = obtenerUltimoBloque(metadataR, posicionUltimoBloque);
 
-	size -= cantidadCaracteres; //cambio el tamaño del archivo
+	if(size <= cantidadCaracteres){
+		liberarBloque(ultimoBloque);
+	//	borrarArchivo();
+		return 1;
+	}
+	
 
-	int tamanioUltimoBloque = saberTamanioUltimobloque(ultimoBloque);
 	int bloquesEliminados = 0;
 
 	for (bloquesEliminados ; tamanioUltimoBloque <= cantidadCaracteres; bloquesEliminados ++){
@@ -196,30 +202,51 @@ char* obtenerBitacora(char* id_tripulante){
 		cantidadCaracteres -= tamanioBloque;  
 		posicionUltimoBloque --; //modifico el puntero de blocks 
 		block_count --; //resto un bloque al blockCount
-		ultimoBloque = obtenerUltimoBlouque(blocks, posicionUltimoBloque); 
-		tamanioUltimoBloque = saberTamanioUltimobloque();
+		ultimoBloque = obtenerUltimoBloque(blocks, posicionUltimoBloque); 
+		tamanioUltimoBloque = saberTamanioUltimobloque(cantidadBytesLibres);
 
 	}
 
-	blocks = list_take(list_size(blocks)-bloquesEliminados);
+	blocks = list_take(blocks, list_size(blocks)-bloquesEliminados);
 
+	metadataR->size = size;
+	metadataR->block_count = block_count;
+	metadataR->blocks = blocks;
+
+	if(modificarMetadataRecurso(metadataR, recurso)){
+		return -1;
+	} 
+return 1;
 }
 
-int obtenerUltimoBlouque(t_list* blocks, int posicionUltimoBloque){
+int obtenerUltimoBloque(t_list* blocks, int posicionUltimoBloque){
 	if (posicionUltimoBloque != 0){
 		posicionUltimoBloque--;
-		int ultimoBloque = list_get(blocks, posicionUltimoBloque);
+		int ultimoBloque = posicionUltimoBloque;
 		return ultimoBloque;
 	} 
 	return 0;
-}*/
+}
+
+int saberTamanioUltimobloque(int cantidadBytesLibres){
+	return tamanioBloque - cantidadBytesLibres;
+}
+
+
+int desecharRecurso(tipoRecurso recurso){
+
+	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
+	t_list* blocks = metadataR->blocks;
+	int posicionUltimoBloque = list_size(blocks);
+	int ultimoBloque = obtenerUltimoBloque(metadataR, posicionUltimoBloque);
+
+	while(ultimoBloque >= 0){
+		liberarBloque(ultimoBloque);
+		ultimoBloque--;
+	}
+
+	//borrarArchivo();
+	return 1;
+}
 
 // enviarAvisoDeSabotaje(char* posicionesSabotaje); AVISO_SABOTAJE [posicionesSabotaje];
-
-/*
-int desecharBasura(){
-	
-	//liberarBloque(ultimoBloque);
-	//borrarArchivoBasura();
-}
-*/

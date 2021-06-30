@@ -172,7 +172,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case CONSUMIR_OXIGENO:
 					printf( "Tarea es CONSUMIR_OXIGENO\n" );
-					//resultado;// =c);onsumirRecursos(OXIGENO, cantidadRecursos
+					resultado = consumirRecursos(OXIGENO, cantidadRecursos);
 					break;
 
 				case GENERAR_COMIDA:
@@ -182,7 +182,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case CONSUMIR_COMIDA:
 					printf( "Tarea es CONSUMIR_COMIDA\n" );
-				//	resultado;// = consumirRecursos(OXIGENO, cantidadRecursos);
+					resultado = consumirRecursos(OXIGENO, cantidadRecursos);
 					break;
 
 				case GENERAR_BASURA:
@@ -192,7 +192,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case DESECHAR_BASURA:
 					printf( "Tarea es DESECHAR_BASURA\n" );
-				//	resultado = desecharRecurso(BASURA);
+					resultado = desecharRecurso(BASURA);
 					break;
 
 				default:

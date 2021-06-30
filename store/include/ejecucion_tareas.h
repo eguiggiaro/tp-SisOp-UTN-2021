@@ -31,4 +31,8 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion);
 char cualEsMiCaracter(tipoRecurso recurso);
 char* obtenerBitacora(char* id_tripulante);
 
+int consumirRecurso(tipoRecurso recurso, int cantidadCaracteres);
+int obtenerUltimoBloque(t_list* blocks, int posicionUltimoBloque);
+int saberTamanioUltimobloque(int cantidadBytesLibres);
+int desecharBasura(tipoRecurso recurso);
 #endif

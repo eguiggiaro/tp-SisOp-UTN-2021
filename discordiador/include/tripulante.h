@@ -48,6 +48,6 @@ void descartar_basura_RR(Tripulante*);
 void tarea_generica_RR(Tripulante*);
 void* mover_tripulante_RR(Tripulante*);
 
-void bloquear_tripulante(Tripulante*);
+void bloquear_tripulante_io(Tripulante*);
 void mover_tripulante(Tripulante*);
 #endif

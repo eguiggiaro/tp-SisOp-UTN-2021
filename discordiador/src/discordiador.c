@@ -65,6 +65,7 @@ int main()
 	blocked_io = list_create();
 	exit_list = list_create();
 	ready_list = list_create();
+	blocked_em = list_create();
 
 	//inicializo semaforos
 	//OJO! los semaforos mutex deben usar la biblioteca pthread
@@ -73,6 +74,7 @@ int main()
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
 	sem_init(&semaforoREADY, 0, 0);
 	sem_init(&mutexBLOCK, 0, 1);
+	sem_init(&mutexBLOCK_EM, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
 	sem_init(&mutexEXEC, 0, 1);
 	
@@ -87,6 +89,7 @@ int main()
 	sem_destroy(&mutexREADY);
 	sem_destroy(&semaforoEXEC);
 	sem_destroy(&mutexBLOCK);
+	sem_destroy(&mutexBLOCK_EM);
 	sem_destroy(&mutexEXIT);
 	sem_destroy(&mutexEXIT);
 
@@ -693,7 +696,6 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 //Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución
 //Hecho por: Emiliano
 int planificar() {
-	sem_wait(&semaforoEXEC);
 	sem_wait(&mutexEXEC);
 	sem_wait(&mutexREADY);
 
@@ -707,6 +709,7 @@ int planificar() {
 		miLogInfo("\nEl tripulante: %d pasa de READY a EXEC",tripulante->id_tripulante);
 		//aviso cambio de cola a MIRAM
 		//informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
+		tripulante->estado = trabajando;
 		tripulante->tripulante_despierto = true;
 		if(strncmp(configuracion->algoritmo,"RR",2)==0){
 			tripulante->quantum = configuracion->quantum;
@@ -724,6 +727,7 @@ void finalizar_tripulante(Tripulante* trip){
   //obtengo indice del tripulante en la cola de EXEC
   int indice;
   Tripulante* trip_auxiliar;
+  bool tripulante_encontrado = false;
 
   for(int i =0; i<list_size(execute_list);i++){
 
@@ -731,10 +735,11 @@ void finalizar_tripulante(Tripulante* trip){
 
   if(trip->id_tripulante == trip_auxiliar->id_tripulante){
     indice = i;
+	tripulante_encontrado = true;
     }
   }
 
-  if(indice!=NULL){
+  if(tripulante_encontrado){
 
   sem_wait(&mutexEXEC); //esta bien?
   sem_wait(&mutexEXIT);
@@ -984,6 +989,7 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   if(strncmp(configuracion->algoritmo,"RR",2)==0){
 	trip->quantum = configuracion->quantum;
   }
+  trip->estado = listo;
   trip->tripulante_despierto = false;
   //finaliza seccion critica
   sem_post(&mutexEXEC);

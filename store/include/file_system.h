@@ -58,7 +58,7 @@ int modificarMetadataRecurso(MetadataRecurso*, tipoRecurso);
 int modificarMetadataBitacora(MetadataBitacora*, char*);
 int crearMetadataRecurso(tipoRecurso);
 int crearMetadataBitacora(char*);
-int desecharBasura();
+int eliminarArchivoBasura();
 
 /********** PROTOCOLO SABOTAJE **********/
 int verificarCantidadBloques();

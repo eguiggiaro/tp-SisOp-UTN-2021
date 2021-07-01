@@ -189,10 +189,13 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	if(size <= cantidadCaracteres){
 		liberarBloque(ultimoBloque);
-	//	borrarArchivo();
+		size = 0;
+		block_count = 0;
+	 	list_clean(blocks);
 		return 1;
 	}
 	
+	size -= cantidadCaracteres; 
 
 	int bloquesEliminados = 0;
 
@@ -245,8 +248,11 @@ int desecharRecurso(tipoRecurso recurso){
 		ultimoBloque--;
 	}
 
-	//borrarArchivo();
+	int resultado = eliminarArchivoBasura();
 	return 1;
 }
+/*
+enviarAvisoDeSabotaje(char* posicionesSabotaje){
+	AVISO_SABOTAJE [posicionesSabotaje];
 
-// enviarAvisoDeSabotaje(char* posicionesSabotaje); AVISO_SABOTAJE [posicionesSabotaje];
+}*/

@@ -155,7 +155,7 @@ void inicializarStore(void){
 
 	leerSuperbloque();
 	subirBlocksAMemoria();
-	inicializarPosicionesSabotaje();
+	//inicializarPosicionesSabotaje();
 
 	/***** START TEST LOCAL *****//*
 	ejecutarTarea("GENERAR_OXIGENO", 40);

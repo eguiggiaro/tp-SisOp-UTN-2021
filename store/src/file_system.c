@@ -514,7 +514,7 @@ char* obtenerDireccionDeMetadataBitacora (char* tripulante){ //Devuelve la direc
 	return direccionDeMetadata;
 }
 
-int desecharBasura(){
+int eliminarArchivoBasura(){
 
 	char* archivoBasura = string_from_format("%s/%s", pathFiles, "Basura.ims");
 

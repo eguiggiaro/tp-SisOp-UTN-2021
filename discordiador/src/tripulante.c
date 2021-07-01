@@ -33,8 +33,10 @@ void *inicializar_tripulante(Tripulante* tripulante){
         char** posicion = string_split(list_get(lista,1),"|");
         tripulante->pos_x = atoi(posicion[0]);
         tripulante->pos_y = atoi(posicion[1]);
+        tripulante->aviso_inicio_tarea_store = false;
         obtener_tarea(list_get(lista,2),tripulante->tarea_actual);
         sem_init(&(tripulante->semaforo_trip),0,0);
+        list_add(tripulantes_totales, tripulante);
         //sem_destroy...
 
         miLogInfo("Se pasa el tripulante a la cola de NEW");
@@ -151,7 +153,7 @@ void ejecutar_proxima_tarea_FIFO(Tripulante* trip){
 void generar_comida_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
-
+  int retardo = configuracion->retardo_ciclo_cpu;
   miLogInfo("\nComienza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
 
@@ -161,29 +163,43 @@ void generar_comida_FIFO(Tripulante* trip){
   }
 
   if(!trip->recibio_input_store){
+    //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+    bloquear_tripulante_io(trip);
     if(tarea_informada(trip->id_tripulante,tarea,parametro)){
       miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
     }
     else{
       miLogError("\nError verificando la existencia de Comida.ims");
     }
+    //Consume un ciclo de CPU
+    (trip->tarea_actual)->tiempo--;
+    int ciclos_cpu = sleep(retardo*(1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    //Se desbloquea
+    desbloquear_tripulante_io(trip);
+
     trip->recibio_input_store = true;
   }
 
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
-  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
-  //seteo parametros para proxima tarea
-  trip->tarea_actual = NULL;
-  trip->realizo_movimientos_tarea = false;
-  trip->recibio_input_store = false;
+  sem_wait(&trip->semaforo_trip);
+
+  if(trip->estado == trabajando){
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+  }
 
 }
 
 void generar_oxigeno_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
+  int retardo = configuracion->retardo_ciclo_cpu;
 
   miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
@@ -194,29 +210,43 @@ void generar_oxigeno_FIFO(Tripulante* trip){
   }
 
   if(!trip->recibio_input_store){
+    //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+    bloquear_tripulante_io(trip);
     if(tarea_informada(trip->id_tripulante,tarea,parametro)){
       miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
     }
     else{
       miLogError("\nError verificando la existencia de Oxigeno.ims");
     }
+    //Consume un ciclo de CPU
+    (trip->tarea_actual)->tiempo--;
+    int ciclos_cpu = sleep(retardo*(1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    //Se desbloquea
+    desbloquear_tripulante_io(trip);
+
     trip->recibio_input_store = true;
   }
 
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
-  //seteo parametros para proxima tarea
-  trip->tarea_actual = NULL;
-  trip->realizo_movimientos_tarea = false;
-  trip->recibio_input_store = false;
+  sem_wait(&trip->semaforo_trip);
+
+  if(trip->estado == trabajando){
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+  }
 
 }
 
 void consumir_oxigeno_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
+  int retardo = configuracion->retardo_ciclo_cpu;
 
   miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
@@ -227,30 +257,44 @@ void consumir_oxigeno_FIFO(Tripulante* trip){
   }
 
   if(!trip->recibio_input_store){
+    //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+    bloquear_tripulante_io(trip);
     if(tarea_informada(trip->id_tripulante,tarea,parametro)){
       miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
     }
     else{
       miLogError("\nError verificando la existencia de Oxigeno.ims");
     }
+    //Consume un ciclo de CPU
+    (trip->tarea_actual)->tiempo--;
+    int ciclos_cpu = sleep(retardo*(1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    //Se desbloquea
+    desbloquear_tripulante_io(trip);
+
     trip->recibio_input_store = true;
   }
 
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
-  //seteo parametros para proxima tarea
-  trip->tarea_actual = NULL;
-  trip->realizo_movimientos_tarea = false;
-  trip->recibio_input_store = false;
+  sem_wait(&trip->semaforo_trip);
+
+  if(trip->estado == trabajando){
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+  }
 }
 
 void consumir_comida_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
+  int retardo = configuracion->retardo_ciclo_cpu;
 
- miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
+  miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
 
   if(!trip->realizo_movimientos_tarea){
@@ -259,29 +303,43 @@ void consumir_comida_FIFO(Tripulante* trip){
   }
 
   if(!trip->recibio_input_store){
+    //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+    bloquear_tripulante_io(trip);
     if(tarea_informada(trip->id_tripulante,tarea,parametro)){
       miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
     }
     else{
       miLogError("\nError verificando la existencia de Comida.ims");
     }
+    //Consume un ciclo de CPU
+    (trip->tarea_actual)->tiempo--;
+    int ciclos_cpu = sleep(retardo*(1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    //Se desbloquea
+    desbloquear_tripulante_io(trip);
+
     trip->recibio_input_store = true;
   }
 
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
-  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
-  //seteo parametros para proxima tarea
-  trip->tarea_actual = NULL;
-  trip->realizo_movimientos_tarea = false;
-  trip->recibio_input_store = false;
+  sem_wait(&trip->semaforo_trip);
+
+  if(trip->estado == trabajando){
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+  }
 }
 
 void generar_basura_FIFO(Tripulante* trip){
   //Le informo la tarea a STORE para verificar la existencia del archivo Basura.ims
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
+  int retardo = configuracion->retardo_ciclo_cpu;
 
   miLogInfo("\nComienza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
@@ -292,28 +350,42 @@ void generar_basura_FIFO(Tripulante* trip){
   }
 
   if(!trip->recibio_input_store){
+    //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+    bloquear_tripulante_io(trip);
     if(tarea_informada(trip->id_tripulante,tarea,parametro)){
       miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
     }
     else{
       miLogError("\nError verificando la existencia de Basura.ims");
     }
+    //Consume un ciclo de CPU
+    (trip->tarea_actual)->tiempo--;
+    int ciclos_cpu = sleep(retardo*(1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    //Se desbloquea
+    desbloquear_tripulante_io(trip);
+
     trip->recibio_input_store = true;
   }
 
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
-  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
-  //seteo parametros para proxima tarea
-  trip->tarea_actual = NULL;
-  trip->realizo_movimientos_tarea = false;
-  trip->recibio_input_store = false;
+  sem_wait(&trip->semaforo_trip);
+
+  if(trip->estado == trabajando){
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+  }
 }
 
 void descartar_basura_FIFO(Tripulante* trip){
   char* tarea = (trip->tarea_actual)->nombre_tarea;
   char* parametro = (trip->tarea_actual)->parametros;
+  int retardo = configuracion->retardo_ciclo_cpu;
 
   miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
@@ -324,33 +396,46 @@ void descartar_basura_FIFO(Tripulante* trip){
   }
 
   if(!trip->recibio_input_store){
+    //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+    bloquear_tripulante_io(trip);
     if(tarea_informada(trip->id_tripulante,tarea,parametro)){
       miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
     }
     else{
       miLogError("\nError verificando la existencia de Basura.ims");
     }
+    //Consume un ciclo de CPU
+    (trip->tarea_actual)->tiempo--;
+    int ciclos_cpu = sleep(retardo*(1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    //Se desbloquea
+    desbloquear_tripulante_io(trip);
+
     trip->recibio_input_store = true;
   }
 
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-  miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
-  avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
-  //seteo parametros para proxima tarea
-  trip->tarea_actual = NULL;
-  trip->realizo_movimientos_tarea = false;
-  trip->recibio_input_store = false;
+  sem_wait(&trip->semaforo_trip);
+
+  if(trip->estado == trabajando){
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+    miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
+    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
+    //seteo parametros para proxima tarea
+    trip->tarea_actual = NULL;
+    trip->realizo_movimientos_tarea = false;
+    trip->recibio_input_store = false;
+  }
 }
 
 void tarea_generica_FIFO(Tripulante* trip){
   //Moverse a ubicacion.
   char* nombre_tarea = (trip->tarea_actual)->nombre_tarea;
-  miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
     trip->realizo_movimientos_tarea = true;
+    miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
     avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
   }
 
@@ -396,6 +481,7 @@ void generar_comida_RR(Tripulante* trip){
   if(trip->quantum > 0){
     char* tarea = (trip->tarea_actual)->nombre_tarea;
     char* parametro = (trip->tarea_actual)->parametros;
+    int retardo = configuracion->retardo_ciclo_cpu;
 
     miLogInfo("\nComienza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
     //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
@@ -405,30 +491,46 @@ void generar_comida_RR(Tripulante* trip){
     }
 
     if(trip->quantum > 0){
-    if(!trip->recibio_input_store){
-      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-        miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
-      }
-      else{
-        miLogError("\nError verificando la existencia de Comida.ims");
-      }
-      trip->recibio_input_store = true;
-    }
+      if(!trip->recibio_input_store){
+        //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+        bloquear_tripulante_io(trip);
+        if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+          miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
+        } 
+        else{
+          miLogError("\nError verificando la existencia de Comida.ims");
+        }
+        //Consume un ciclo de CPU
+        (trip->tarea_actual)->tiempo--;
+        int ciclos_cpu = sleep(retardo*(1));
+        miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+        //Se desbloquea
+        desbloquear_tripulante_io(trip);
 
-    int retardo = configuracion->retardo_ciclo_cpu;
-    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
-    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
-
-    if(trip->quantum >0){
-      for(int i = 0; i<trip->quantum;i++){
-        trip->quantum--;
+        trip->recibio_input_store = true;
       }
-    }
-    //seteo parametros para proxima tarea
-    trip->tarea_actual = NULL;
-    trip->realizo_movimientos_tarea = false;
-    trip->recibio_input_store = false;
+
+      sem_wait(&trip->semaforo_trip);
+
+      if(trip->estado == trabajando){
+
+        //Consume ciclos de CPU restantes
+        int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+        miLogInfo("\nFinaliza ejecucion de GENERAR_COMIDA para el tripulante: %d", trip->id_tripulante);
+        avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
+
+        //seteo parametros para proxima tarea
+        trip->tarea_actual = NULL;
+        trip->realizo_movimientos_tarea = false;
+        trip->recibio_input_store = false;
+
+        if(trip->quantum >0){
+          for(int i = 0; i<trip->quantum;i++){
+          trip->quantum--;
+          }
+        }
+
+      }
     }
 
   }else{
@@ -443,46 +545,62 @@ void generar_oxigeno_RR(Tripulante* trip){
   if(trip->quantum > 0){
     char* tarea = (trip->tarea_actual)->nombre_tarea;
     char* parametro = (trip->tarea_actual)->parametros;
+    int retardo = configuracion->retardo_ciclo_cpu;
 
-   miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-   //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+    miLogInfo("\nComienza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
+    //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
       trip->realizo_movimientos_tarea = true;
     }
 
     if(trip->quantum > 0){
-    if(!trip->recibio_input_store){
-      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-        miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
-      }
-      else{
-        miLogError("\nError verificando la existencia de Oxigeno.ims");
-      }
-      trip->recibio_input_store = true;
-    }
+      if(!trip->recibio_input_store){
+        //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+        bloquear_tripulante_io(trip);
+        if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+          miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
+        } 
+        else{
+          miLogError("\nError verificando la existencia de Oxigeno.ims");
+        }
+        //Consume un ciclo de CPU
+        (trip->tarea_actual)->tiempo--;
+        int ciclos_cpu = sleep(retardo*(1));
+        miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+        //Se desbloquea
+        desbloquear_tripulante_io(trip);
 
-    int retardo = configuracion->retardo_ciclo_cpu;
-    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
-
-    if(trip->quantum >0){
-      for(int i = 0; i<trip->quantum;i++){
-        trip->quantum--;
+        trip->recibio_input_store = true;
       }
-    }
-    //seteo parametros para proxima tarea
-    trip->tarea_actual = NULL;
-    trip->realizo_movimientos_tarea = false;
-    trip->recibio_input_store = false;
+
+      sem_wait(&trip->semaforo_trip);
+
+      if(trip->estado == trabajando){
+
+        //Consume ciclos de CPU restantes
+        int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+        miLogInfo("\nFinaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d", trip->id_tripulante);
+        avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_OXIGENO");
+
+        //seteo parametros para proxima tarea
+        trip->tarea_actual = NULL;
+        trip->realizo_movimientos_tarea = false;
+        trip->recibio_input_store = false;
+
+        if(trip->quantum >0){
+          for(int i = 0; i<trip->quantum;i++){
+          trip->quantum--;
+          }
+        }
+
+      }
     }
 
   }else{
     miLogInfo("\nEl tripulante: %d se quedo sin quantum",trip->id_tripulante);
     pasar_tripulante_de_exec_a_ready(trip);
   }
-
 }
 
 void consumir_oxigeno_RR(Tripulante* trip){
@@ -490,6 +608,7 @@ void consumir_oxigeno_RR(Tripulante* trip){
   if(trip->quantum > 0){
     char* tarea = (trip->tarea_actual)->nombre_tarea;
     char* parametro = (trip->tarea_actual)->parametros;
+    int retardo = configuracion->retardo_ciclo_cpu;
 
     miLogInfo("\nComienza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
     //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
@@ -499,30 +618,46 @@ void consumir_oxigeno_RR(Tripulante* trip){
     }
 
     if(trip->quantum > 0){
-    if(!trip->recibio_input_store){
-      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-        miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
-      }
-      else{
-        miLogError("\nError verificando la existencia de Oxigeno.ims");
-      }
-      trip->recibio_input_store = true;
-    }
+      if(!trip->recibio_input_store){
+        //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+        bloquear_tripulante_io(trip);
+        if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+          miLogInfo("\nSe verifico la existencia de Oxigeno.ims correctamente");
+        } 
+        else{
+          miLogError("\nError verificando la existencia de Oxigeno.ims");
+        }
+        //Consume un ciclo de CPU
+        (trip->tarea_actual)->tiempo--;
+        int ciclos_cpu = sleep(retardo*(1));
+        miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+        //Se desbloquea
+        desbloquear_tripulante_io(trip);
 
-    int retardo = configuracion->retardo_ciclo_cpu;
-    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
-    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
-
-    if(trip->quantum >0){
-      for(int i = 0; i<trip->quantum;i++){
-        trip->quantum--;
+        trip->recibio_input_store = true;
       }
-    }
-    //seteo parametros para proxima tarea
-    trip->tarea_actual = NULL;
-    trip->realizo_movimientos_tarea = false;
-    trip->recibio_input_store = false;
+
+      sem_wait(&trip->semaforo_trip);
+
+      if(trip->estado == trabajando){
+
+        //Consume ciclos de CPU restantes
+        int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+        miLogInfo("\nFinaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d", trip->id_tripulante);
+        avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_OXIGENO");
+
+        //seteo parametros para proxima tarea
+        trip->tarea_actual = NULL;
+        trip->realizo_movimientos_tarea = false;
+        trip->recibio_input_store = false;
+
+        if(trip->quantum >0){
+          for(int i = 0; i<trip->quantum;i++){
+          trip->quantum--;
+          }
+        }
+
+      }
     }
 
   }else{
@@ -537,6 +672,7 @@ void consumir_comida_RR(Tripulante* trip){
   if(trip->quantum > 0){
     char* tarea = (trip->tarea_actual)->nombre_tarea;
     char* parametro = (trip->tarea_actual)->parametros;
+    int retardo = configuracion->retardo_ciclo_cpu;
 
     miLogInfo("\nComienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
     //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
@@ -546,30 +682,46 @@ void consumir_comida_RR(Tripulante* trip){
     }
 
     if(trip->quantum > 0){
-    if(!trip->recibio_input_store){
-      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-        miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
-      }
-      else{
-        miLogError("\nError verificando la existencia de Comida.ims");
-      }
-      trip->recibio_input_store = true;
-    }
+      if(!trip->recibio_input_store){
+        //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+        bloquear_tripulante_io(trip);
+        if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+          miLogInfo("\nSe verifico la existencia de Comida.ims correctamente");
+        } 
+        else{
+          miLogError("\nError verificando la existencia de Comida.ims");
+        }
+        //Consume un ciclo de CPU
+        (trip->tarea_actual)->tiempo--;
+        int ciclos_cpu = sleep(retardo*(1));
+        miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+        //Se desbloquea
+        desbloquear_tripulante_io(trip);
 
-    int retardo = configuracion->retardo_ciclo_cpu;
-    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
-    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
-
-    if(trip->quantum >0){
-      for(int i = 0; i<trip->quantum;i++){
-        trip->quantum--;
+        trip->recibio_input_store = true;
       }
-    }
-    //seteo parametros para proxima tarea
-    trip->tarea_actual = NULL;
-    trip->realizo_movimientos_tarea = false;
-    trip->recibio_input_store = false;
+
+      sem_wait(&trip->semaforo_trip);
+
+      if(trip->estado == trabajando){
+
+        //Consume ciclos de CPU restantes
+        int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+        miLogInfo("\nFinaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d", trip->id_tripulante);
+        avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"CONSUMIR_COMIDA");
+
+        //seteo parametros para proxima tarea
+        trip->tarea_actual = NULL;
+        trip->realizo_movimientos_tarea = false;
+        trip->recibio_input_store = false;
+
+        if(trip->quantum >0){
+          for(int i = 0; i<trip->quantum;i++){
+          trip->quantum--;
+          }
+        }
+
+      }
     }
 
   }else{
@@ -584,6 +736,7 @@ void generar_basura_RR(Tripulante* trip){
   if(trip->quantum > 0){
     char* tarea = (trip->tarea_actual)->nombre_tarea;
     char* parametro = (trip->tarea_actual)->parametros;
+    int retardo = configuracion->retardo_ciclo_cpu;
 
     miLogInfo("\nComienza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
     //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
@@ -593,30 +746,46 @@ void generar_basura_RR(Tripulante* trip){
     }
 
     if(trip->quantum > 0){
-    if(!trip->recibio_input_store){
-      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-        miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
-      }
-      else{
-        miLogError("\nError verificando la existencia de Basura.ims");
-      }
-      trip->recibio_input_store = true;
-    }
+      if(!trip->recibio_input_store){
+        //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+        bloquear_tripulante_io(trip);
+        if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+          miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
+        } 
+        else{
+          miLogError("\nError verificando la existencia de Basura.ims");
+        }
+        //Consume un ciclo de CPU
+        (trip->tarea_actual)->tiempo--;
+        int ciclos_cpu = sleep(retardo*(1));
+        miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+        //Se desbloquea
+        desbloquear_tripulante_io(trip);
 
-    int retardo = configuracion->retardo_ciclo_cpu;
-    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
-    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
-
-    if(trip->quantum >0){
-      for(int i = 0; i<trip->quantum;i++){
-        trip->quantum--;
+        trip->recibio_input_store = true;
       }
-    }
-    //seteo parametros para proxima tarea
-    trip->tarea_actual = NULL;
-    trip->realizo_movimientos_tarea = false;
-    trip->recibio_input_store = false;
+
+      sem_wait(&trip->semaforo_trip);
+
+      if(trip->estado == trabajando){
+
+        //Consume ciclos de CPU restantes
+        int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+        miLogInfo("\nFinaliza ejecucion de GENERAR_BASURA para el tripulante: %d", trip->id_tripulante);
+        avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_BASURA");
+
+        //seteo parametros para proxima tarea
+        trip->tarea_actual = NULL;
+        trip->realizo_movimientos_tarea = false;
+        trip->recibio_input_store = false;
+
+        if(trip->quantum >0){
+          for(int i = 0; i<trip->quantum;i++){
+          trip->quantum--;
+          }
+        }
+
+      }
     }
 
   }else{
@@ -631,39 +800,56 @@ void descartar_basura_RR(Tripulante* trip){
   if(trip->quantum > 0){
     char* tarea = (trip->tarea_actual)->nombre_tarea;
     char* parametro = (trip->tarea_actual)->parametros;
+    int retardo = configuracion->retardo_ciclo_cpu;
+
     miLogInfo("\nComienza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
     //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
-
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
       trip->realizo_movimientos_tarea = true;
     }
 
     if(trip->quantum > 0){
-    if(!trip->recibio_input_store){
-      if(tarea_informada(trip->id_tripulante,tarea,parametro)){
-        miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
-      }
-      else{
-        miLogError("\nError verificando la existencia de Basura.ims");
-      }
-      trip->recibio_input_store = true;
-    }
+      if(!trip->recibio_input_store){
+        //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
+        bloquear_tripulante_io(trip);
+        if(tarea_informada(trip->id_tripulante,tarea,parametro)){
+          miLogInfo("\nSe verifico la existencia de Basura.ims correctamente");
+        } 
+        else{
+          miLogError("\nError verificando la existencia de Basura.ims");
+        }
+        //Consume un ciclo de CPU
+        (trip->tarea_actual)->tiempo--;
+        int ciclos_cpu = sleep(retardo*(1));
+        miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+        //Se desbloquea
+        desbloquear_tripulante_io(trip);
 
-    int retardo = configuracion->retardo_ciclo_cpu;
-    int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
-    miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
-    avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
-
-    if(trip->quantum >0){
-      for(int i = 0; i<trip->quantum;i++){
-        trip->quantum--;
+        trip->recibio_input_store = true;
       }
-    }
-    //seteo parametros para proxima tarea
-    trip->tarea_actual = NULL;
-    trip->realizo_movimientos_tarea = false;
-    trip->recibio_input_store = false;
+
+      sem_wait(&trip->semaforo_trip);
+
+      if(trip->estado == trabajando){
+
+        //Consume ciclos de CPU restantes
+        int ciclos_cpu = sleep(retardo*((trip->tarea_actual)->tiempo));
+        miLogInfo("\nFinaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d", trip->id_tripulante);
+        avisar_fin_tarea_bitacora(string_itoa(trip->id_tripulante),"DESCARTAR_BASURA");
+
+        //seteo parametros para proxima tarea
+        trip->tarea_actual = NULL;
+        trip->realizo_movimientos_tarea = false;
+        trip->recibio_input_store = false;
+
+        if(trip->quantum >0){
+          for(int i = 0; i<trip->quantum;i++){
+          trip->quantum--;
+          }
+        }
+
+      }
     }
 
   }else{
@@ -683,9 +869,12 @@ void tarea_generica_RR(Tripulante* trip){
     if(!trip->realizo_movimientos_tarea){
       mover_tripulante_RR(trip);
     }
-    avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
 
     if(trip->quantum >0){
+      if(!trip->aviso_inicio_tarea_store){
+        avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
+        trip->aviso_inicio_tarea_store = true;
+      }
       for(int i = 0; i<trip->quantum;i++){
         trip->quantum--;
       }
@@ -698,6 +887,7 @@ void tarea_generica_RR(Tripulante* trip){
       trip->tarea_actual = NULL;
       trip->realizo_movimientos_tarea = false;
       trip->recibio_input_store = false;
+      trip->aviso_inicio_tarea_store = false;
     }
 
   }else{
@@ -707,10 +897,11 @@ void tarea_generica_RR(Tripulante* trip){
   
 }
 
-void bloquear_tripulante(Tripulante* trip){
+void bloquear_tripulante_io(Tripulante* trip){
 
   int indice;
   Tripulante* trip_auxiliar;
+  bool tripulante_encontrado = false;
 
   for(int i =0; i<list_size(execute_list);i++){
 
@@ -718,10 +909,11 @@ void bloquear_tripulante(Tripulante* trip){
 
     if(trip->id_tripulante == trip_auxiliar->id_tripulante){
       indice = i;
+      tripulante_encontrado = true;
     }
   }
 
-  if(indice!=NULL){
+  if(tripulante_encontrado){
   //Se saca tripulante de cola de EXEC y se pasa a cola de BLOCK.
 	sem_wait(&mutexBLOCK);
   sem_wait(&mutexEXEC); //esta bien?
@@ -729,6 +921,7 @@ void bloquear_tripulante(Tripulante* trip){
   //list_remove() devuelve el tripulante que se elimina de la lista
   trip_auxiliar = list_remove(execute_list,indice);
   list_add(blocked_io,trip_auxiliar);
+  trip_auxiliar->estado = bloqueado_io;
   //finaliza seccion critica
 	sem_post(&mutexBLOCK);
   sem_post(&mutexEXEC);
@@ -738,7 +931,10 @@ void bloquear_tripulante(Tripulante* trip){
   //libero un lugar en la cola de EXEC
   sem_post(&semaforoEXEC);
 	trip->estado = bloqueado_io;
-	miLogInfo("\nSe pasa el tripulante a la cola de BLOCK\n");
+  //trip->tripulante_despierto = false;
+	miLogInfo("\nSe pasa al tripulante: %d a la cola de BLOCK IO\n", trip->id_tripulante);
+  //al liberarse un lugar en la cola de EXEC, replanifico:
+  //planificar();
   }
 
 }

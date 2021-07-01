@@ -13,7 +13,7 @@
 #include "paquete.h"
 #include <semaphore.h>
 
-
+void desbloquear_tripulante_io(Tripulante* trip);
 
 
 

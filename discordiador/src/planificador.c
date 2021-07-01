@@ -73,55 +73,33 @@ void pausar_planificacion()
 	sem_wait(&mutexEXIT);
 }
 
-//Descripción: Finaliza tripulante que termino sus tareas
-//Hecho por: Emiliano
-void terminar_tripulante(Tripulante* un_tripulante)
-{
-	un_tripulante->tripulante_despierto = false;
-
-	sem_wait(&mutexEXEC);
-    sem_wait(&mutexEXIT);
-	Tripulante *tripulante_auxiliar;
-
-	for (int i = 0; list_size(execute_list) < i; i++)
-	{
-		tripulante_auxiliar = (Tripulante *) list_get(execute_list, i);
-		if(tripulante_auxiliar->id_tripulante == un_tripulante->id_tripulante)
-        {
-            list_remove(execute_list, i);
-      		list_add(exit_list, tripulante_auxiliar);
-            break;
-        }
-      
-	}
-	sem_post(&mutexEXEC);
-    sem_post(&mutexEXIT);
-	sem_wait(&semaforoEXEC);
-}
-
 //Descripción: Desbloquea tripulante cuyo IO termino
 //Hecho por: Emiliano
 
-void desbloquear_tripulante(Tripulante* trip){
+void desbloquear_tripulante_io(Tripulante* trip){
   int indice;
-	sem_wait(&mutexBLOCK);
-    sem_wait(&mutexREADY);
+  bool tripulante_encontrado = false;
+  Tripulante* trip_auxiliar;
+  sem_wait(&mutexBLOCK);
+  sem_wait(&mutexREADY);
 
   for(int i =0; i<list_size(blocked_io);i++){
-    Tripulante* trip_auxiliar = list_get(blocked_io,i);
+    trip_auxiliar = list_get(blocked_io,i);
     if(trip->id_tripulante == trip_auxiliar->id_tripulante){
       indice = i;
+	  tripulante_encontrado = true;
       break;
     }
   }
 
-  if(indice!=NULL){
+  if(tripulante_encontrado){
   //Se saca tripulante de cola de BLOCK y se pasa a cola de READY.
-
-    list_add(ready_list, list_remove(blocked_io,indice));
+    trip_auxiliar = list_remove(blocked_io,indice);
+    list_add(ready_list, trip_auxiliar);
+	trip_auxiliar->estado = listo;
 	sem_post(&mutexBLOCK);
 	sem_post(&mutexREADY);
 	sem_post(&semaforoREADY);
-  miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
-}
+    miLogInfo("\nSe desbloquea el tripulante: %d y pasa a READY\n", trip->id_tripulante);
+  }
 }

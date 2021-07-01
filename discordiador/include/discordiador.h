@@ -80,6 +80,7 @@ typedef struct Tripulante{
 	int ciclos_restantes; //para saber cuantos ciclos de CPU le faltan para completar una tarea especifica
 	bool realizo_movimientos_tarea; //en caso de interrupcion, para saber donde retomar
 	bool recibio_input_store; //en caso de interrupcion, para saber donde retomar
+	bool aviso_inicio_tarea_store; 
 } Tripulante;
 
 Configuracion* configuracion;
@@ -87,17 +88,24 @@ Configuracion* configuracion;
 t_list * new_list;
 t_list * execute_list;
 t_list * blocked_io;
+t_list* blocked_em;
 t_list* exit_list;
 t_list* ready_list;
+
+t_list* tripulantes_totales;
 
 //Semaforos
 sem_t mutexNEW;
 sem_t mutexEXEC;
-sem_t semaforoEXEC;
+sem_t semaforoEXEC; //semaforo contador para controlar grado de multiprocesamiento
 sem_t semaforoREADY;
-sem_t mutexBLOCK;
+sem_t mutexBLOCK; //aplica para blocked_io
 sem_t mutexEXIT;
 sem_t mutexREADY;
+sem_t mutexBLOCK_EM;
+
+pthread_t threadSERVER_DISC;
+pthread_t threadCONSOLA_DISC;
 
 //Metodos mensajes
 int leer_config(void);

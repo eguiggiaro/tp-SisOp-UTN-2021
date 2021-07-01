@@ -2,6 +2,7 @@
 #include "serializacion_discordiador.h"
 #include "servidor_discordiador.h"
 #include "tripulante.h"
+#include "sabotajes_discordiador.h"
 
 #define MODULE_NAME "Discordiador"
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
@@ -65,6 +66,9 @@ int main()
 	blocked_io = list_create();
 	exit_list = list_create();
 	ready_list = list_create();
+	blocked_em = list_create();
+
+	tripulantes_totales = list_create();
 
 	//inicializo semaforos
 	//OJO! los semaforos mutex deben usar la biblioteca pthread
@@ -73,10 +77,24 @@ int main()
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
 	sem_init(&semaforoREADY, 0, 0);
 	sem_init(&mutexBLOCK, 0, 1);
+	sem_init(&mutexBLOCK_EM, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
 	sem_init(&mutexEXEC, 0, 1);
-	
-	consola();
+
+	if (pthread_create(&threadSERVER_DISC, NULL, (void *)iniciar_servidor_discordiador,
+					   NULL) != 0)
+	{
+		printf("Error iniciando servidor/n");
+	}
+
+	if (pthread_create(&threadCONSOLA_DISC, NULL, (void *)consola,
+					   NULL) != 0)
+	{
+		printf("Error iniciando consola/n");
+	}
+
+	pthread_join(threadSERVER_DISC, NULL);
+	pthread_join(threadCONSOLA_DISC, NULL);
 	
 	miLogInfo("Finalizó Discordiador\n");
 	//vaciar_listas();
@@ -87,6 +105,7 @@ int main()
 	sem_destroy(&mutexREADY);
 	sem_destroy(&semaforoEXEC);
 	sem_destroy(&mutexBLOCK);
+	sem_destroy(&mutexBLOCK_EM);
 	sem_destroy(&mutexEXIT);
 	sem_destroy(&mutexEXIT);
 
@@ -693,7 +712,6 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 //Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución
 //Hecho por: Emiliano
 int planificar() {
-	sem_wait(&semaforoEXEC);
 	sem_wait(&mutexEXEC);
 	sem_wait(&mutexREADY);
 
@@ -707,6 +725,7 @@ int planificar() {
 		miLogInfo("\nEl tripulante: %d pasa de READY a EXEC",tripulante->id_tripulante);
 		//aviso cambio de cola a MIRAM
 		//informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
+		tripulante->estado = trabajando;
 		tripulante->tripulante_despierto = true;
 		if(strncmp(configuracion->algoritmo,"RR",2)==0){
 			tripulante->quantum = configuracion->quantum;
@@ -724,6 +743,7 @@ void finalizar_tripulante(Tripulante* trip){
   //obtengo indice del tripulante en la cola de EXEC
   int indice;
   Tripulante* trip_auxiliar;
+  bool tripulante_encontrado = false;
 
   for(int i =0; i<list_size(execute_list);i++){
 
@@ -731,10 +751,21 @@ void finalizar_tripulante(Tripulante* trip){
 
   if(trip->id_tripulante == trip_auxiliar->id_tripulante){
     indice = i;
+	tripulante_encontrado = true;
     }
   }
 
-  if(indice!=NULL){
+  //Antes de finalizar al tripulante, lo borro de la lista de tripulantes totales
+  for(int i =0; i<list_size(tripulantes_totales);i++){
+
+    Tripulante* tripu = list_get(tripulantes_totales,i);
+
+    if(trip->id_tripulante == tripu->id_tripulante){
+      list_remove(tripulantes_totales, i);
+    }
+  }
+
+  if(tripulante_encontrado){
 
   sem_wait(&mutexEXEC); //esta bien?
   sem_wait(&mutexEXIT);
@@ -984,6 +1015,7 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   if(strncmp(configuracion->algoritmo,"RR",2)==0){
 	trip->quantum = configuracion->quantum;
   }
+  trip->estado = listo;
   trip->tripulante_despierto = false;
   //finaliza seccion critica
   sem_post(&mutexEXEC);

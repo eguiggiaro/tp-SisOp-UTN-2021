@@ -514,6 +514,28 @@ char* obtenerDireccionDeMetadataBitacora (char* tripulante){ //Devuelve la direc
 	return direccionDeMetadata;
 }
 
+int desecharBasura(){
+
+	char* archivoBasura = string_from_format("%s/%s", pathFiles, "Basura.ims");
+
+	FILE* basura = fopen(archivoBasura, "r");
+
+	if (basura == NULL) {
+		free(archivoBasura);
+		miLogError("No se pudo borrar el archivo Basura.ims, ya que el archivo NO EXISTE.");	
+		return EXIT_FAILURE;
+	}
+	fclose(basura);
+
+	if (!remove(archivoBasura)){
+		miLogInfo("Se borró el archivo Basura.ims.");
+		return EXIT_SUCCESS;
+	} else {
+		miLogError("No se pudo borrar el archivo Basura.ims.");	
+		return EXIT_FAILURE;	
+	}	
+}
+
 /********** PROTOCOLO SABOTAJE **********/
 int verificarCantidadBloques(){
 	//Se debe garantizar que la cantidad de bloques que hay en el sistema sea igual a la cantidad que dice haber en el superbloque. 
@@ -933,3 +955,4 @@ bool compararMd5(MetadataRecurso* metadata){
 	
 	return string_equals_ignore_case(md5SegunBloques, metadata->md5);
 }
+

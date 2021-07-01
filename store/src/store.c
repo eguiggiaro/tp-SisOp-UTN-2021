@@ -97,6 +97,7 @@ int main(int argc, char* argv[]) {
 	miLogInfo("==== Finalizó I-Mongo-Store ====");
 	miLogDestroy();
 	free(configuracion);
+	free(posicionesSabotaje);
 
 	finalizarFS();
 
@@ -120,9 +121,7 @@ int leerConfig(void){
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
 	configuracion->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
 	configuracion->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
-	configuracion->posicionesSabotaje = config_get_string_value(config, "POSICIONES_SABOTAJE"); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]
-	
-	//t_list* posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);
+	configuracion->posicionesSabotaje = config_get_string_value(config, "POSICIONES_SABOTAJE"); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]	
 
 	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -156,6 +155,7 @@ void inicializarStore(void){
 
 	leerSuperbloque();
 	subirBlocksAMemoria();
+	inicializarPosicionesSabotaje();
 
 	/***** START TEST LOCAL *****//*
 	ejecutarTarea("GENERAR_OXIGENO", 40);
@@ -184,17 +184,27 @@ void inicializarStore(void){
 	verificarSizeEnFile();
 	verificarBlockCount();
 	verificarBlocks();*/
-	
-	
 	/***** END TEST LOCAL ******/
 
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }
 
+void inicializarPosicionesSabotaje(){
+	t_list* posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);	
+	posicionesSabotaje = malloc(sizeof(PosicionesSabotaje));
+
+	for(int i=0; i<list_size(posiciones); i++){
+		posicionesSabotaje->posicion = (t_pos*) list_get(posiciones, i);
+		posicionesSabotaje->atendida = false;
+	}
+}
 
 void atenderSabotaje(){
 	//Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
-	//enviarAvisoDeSabotaje(configuracion->posicionesSabotaje);
+	notificarSabotajeDiscordiador();
+	
+	//Esperar a que el Discordiador me active el protocolo fsck.
+	
 
 	//Analizar sabotaje en Superbloque
 	verificarCantidadBloques();
@@ -206,8 +216,11 @@ void atenderSabotaje(){
 	verificarBlocks();	
 }
 
+void notificarSabotajeDiscordiador(){
 
-/*t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
+}
+
+t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 	
 	char** posicionesSabotaje = string_get_string_as_array(strPosicionesSabotaje);
 	int largo = strlen(strPosicionesSabotaje) - 1;
@@ -227,12 +240,12 @@ void atenderSabotaje(){
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
 	}
-	//Test
+	/*Test
 	for(int i = 0; list_size(listaPosicionesSabotaje) > i; i++){
 		posicion = (t_pos*) list_get(listaPosicionesSabotaje, i);
 		printf("x:%s, y:%s\n", string_itoa(posicion->x), string_itoa(posicion->y));
-	}
+	}*/
 	free(posicion);
 	return listaPosicionesSabotaje;
-}*/
+}
 

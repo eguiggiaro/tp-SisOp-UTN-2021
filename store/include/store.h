@@ -61,7 +61,14 @@ typedef struct {
 typedef struct {
 	uint32_t x;
 	uint32_t y;
-}t_pos;
+} t_pos;
+
+typedef struct {
+	t_pos* posicion;
+	bool atendida;
+} PosicionesSabotaje;
+
+PosicionesSabotaje* posicionesSabotaje;
 
 typedef struct {
 	char* puntoMontaje;
@@ -78,10 +85,11 @@ int leerConfig();
 void atender_request_store(Request *request);
 void inicializarParametrosFS();
 void inicializarStore();
+void inicializarPosicionesSabojate();
 void syncPeriodico();
 void atenderSabotaje();
-
-//t_list* obtenerListaSabotaje(char*);
+void notificarSabotajeDiscordiador();
+t_list* obtenerListaSabotaje(char*);
 
 pthread_mutex_t mutex_informartareas;
 pthread_mutex_t mutex_informacionBitacora;

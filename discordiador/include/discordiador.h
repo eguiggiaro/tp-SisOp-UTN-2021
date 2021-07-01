@@ -92,6 +92,8 @@ t_list* blocked_em;
 t_list* exit_list;
 t_list* ready_list;
 
+t_list* tripulantes_totales;
+
 //Semaforos
 sem_t mutexNEW;
 sem_t mutexEXEC;

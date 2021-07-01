@@ -68,6 +68,8 @@ int main()
 	ready_list = list_create();
 	blocked_em = list_create();
 
+	tripulantes_totales = list_create();
+
 	//inicializo semaforos
 	//OJO! los semaforos mutex deben usar la biblioteca pthread
 	sem_init(&mutexNEW, 0, 1);
@@ -750,6 +752,16 @@ void finalizar_tripulante(Tripulante* trip){
   if(trip->id_tripulante == trip_auxiliar->id_tripulante){
     indice = i;
 	tripulante_encontrado = true;
+    }
+  }
+
+  //Antes de finalizar al tripulante, lo borro de la lista de tripulantes totales
+  for(int i =0; i<list_size(tripulantes_totales);i++){
+
+    Tripulante* tripu = list_get(tripulantes_totales,i);
+
+    if(trip->id_tripulante == tripu->id_tripulante){
+      list_remove(tripulantes_totales, i);
     }
   }
 

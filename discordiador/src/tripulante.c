@@ -36,6 +36,7 @@ void *inicializar_tripulante(Tripulante* tripulante){
         tripulante->aviso_inicio_tarea_store = false;
         obtener_tarea(list_get(lista,2),tripulante->tarea_actual);
         sem_init(&(tripulante->semaforo_trip),0,0);
+        list_add(tripulantes_totales, tripulante);
         //sem_destroy...
 
         miLogInfo("Se pasa el tripulante a la cola de NEW");

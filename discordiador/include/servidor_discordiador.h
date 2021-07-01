@@ -11,9 +11,9 @@
 #include "discordiador.h"
 #include "servidor.h"
 
-pthread_t threadSERVER;
+// pthread_t threadSERVER;
 
-void* iniciar_servidor_discordiador();
-void atender_request_discordiador(int request_fd);
+// void* iniciar_servidor_discordiador();
+// void atender_request_discordiador(int request_fd);
 
 #endif

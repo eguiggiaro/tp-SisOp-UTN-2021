@@ -2,6 +2,7 @@
 #include "serializacion_discordiador.h"
 #include "servidor_discordiador.h"
 #include "tripulante.h"
+#include "sabotajes_discordiador.h"
 
 #define MODULE_NAME "Discordiador"
 #define CONFIG_FILE_PATH "cfg/discordiador.cfg"
@@ -77,8 +78,21 @@ int main()
 	sem_init(&mutexBLOCK_EM, 0, 1);
 	sem_init(&mutexEXIT, 0, 1);
 	sem_init(&mutexEXEC, 0, 1);
-	
-	consola();
+
+	if (pthread_create(&threadSERVER_DISC, NULL, (void *)iniciar_servidor_discordiador,
+					   NULL) != 0)
+	{
+		printf("Error iniciando servidor/n");
+	}
+
+	if (pthread_create(&threadCONSOLA_DISC, NULL, (void *)consola,
+					   NULL) != 0)
+	{
+		printf("Error iniciando consola/n");
+	}
+
+	pthread_join(threadSERVER_DISC, NULL);
+	pthread_join(threadCONSOLA_DISC, NULL);
 	
 	miLogInfo("Finalizó Discordiador\n");
 	//vaciar_listas();

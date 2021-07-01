@@ -102,6 +102,9 @@ sem_t mutexEXIT;
 sem_t mutexREADY;
 sem_t mutexBLOCK_EM;
 
+pthread_t threadSERVER_DISC;
+pthread_t threadCONSOLA_DISC;
+
 //Metodos mensajes
 int leer_config(void);
 void iniciar_conexion_miram(char* ip_destino, char* puerto_destino);

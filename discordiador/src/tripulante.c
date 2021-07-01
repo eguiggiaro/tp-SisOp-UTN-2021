@@ -430,11 +430,11 @@ void descartar_basura_FIFO(Tripulante* trip){
 void tarea_generica_FIFO(Tripulante* trip){
   //Moverse a ubicacion.
   char* nombre_tarea = (trip->tarea_actual)->nombre_tarea;
-  miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
 
   if(!trip->realizo_movimientos_tarea){
     mover_tripulante(trip);
     trip->realizo_movimientos_tarea = true;
+    miLogInfo("\nComienza ejecucion de: %s para el tripulante: %d",nombre_tarea,trip->id_tripulante);
     avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),nombre_tarea);
   }
 

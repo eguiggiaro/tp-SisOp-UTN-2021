@@ -95,12 +95,13 @@ int main(int argc, char* argv[]) {
 	inicializarStore();
 
 	miLogInfo("==== Finalizó I-Mongo-Store ====");
-	miLogDestroy();
+
+
 	free(configuracion);
-	free(posicionesSabotaje);
-
+	miLogDestroy();
+	list_destroy(posicionesSabotaje);
 	finalizarFS();
-
+	
 	return EXIT_SUCCESS;
 }
 
@@ -121,21 +122,11 @@ int leerConfig(void){
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
 	configuracion->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
 	configuracion->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
-	configuracion->posicionesSabotaje = config_get_string_value(config, "POSICIONES_SABOTAJE"); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]	
+	configuracion->posicionesSabotaje = strdup(config_get_string_value(config, "POSICIONES_SABOTAJE")); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]	
+	configuracion->puertoDiscordiador = config_get_int_value(config, "PUERTO_DISCORDIADOR");
 
 	config_destroy(config);
 	return EXIT_SUCCESS;
-}
-
-void inicializarParametrosFS(void){
-	puntoMontaje = strdup(configuracion->puntoMontaje);
-	pathSuperbloque = string_from_format("%s/%s", puntoMontaje, SUPERBLOQUE_FILE); //ej: /home/utnso/mnt/SuperBloque.ims
-	pathBlocks = string_from_format("%s/%s", puntoMontaje, BLOCKS_FILE);
-	pathFiles = string_from_format("%s/%s", puntoMontaje, "Files");
-	pathBitacoras = string_from_format("%s/%s", puntoMontaje, "Files/Bitacoras");
-
-	tamanioBloque = configuracion->blockSizeDefault;
-	cantidadBloques = configuracion->blocksQtyDefault;
 }
 
 void inicializarStore(void){
@@ -155,53 +146,51 @@ void inicializarStore(void){
 
 	leerSuperbloque();
 	subirBlocksAMemoria();
-	//inicializarPosicionesSabotaje();
+	inicializarPosicionesSabotaje();
 
-	/***** START TEST LOCAL *****//*
-	ejecutarTarea("GENERAR_OXIGENO", 40);
-	ejecutarTarea("GENERAR_COMIDA", 13);
-	ejecutarTarea("GENERAR_OXIGENO", 24);
-	ejecutarTarea("GENERAR_BASURA", 7);/*
 	
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-	guardarEnBitacora("2","Prueba de escritura en la bitacora del tripulante 2.");
-	guardarEnBitacora("3","Prueba de escritura en la bitacora del tripulante 3.");
-	guardarEnBitacora("4","Prueba de escritura en la bitacora del tripulante 4.");
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-	guardarEnBitacora("0","Prueba de escritura en la bitacora del tripulante 0.");
-	guardarEnBitacora("1","Prueba de escritura en la bitacora del tripulante 1.");
-	/*
-	char* lectura = obtenerBitacora("1");
-	/*
-	testLecturaRecurso();
-	testLecturaBitacora();
-
-	testMd5();
-	
-	//Sabotajes:
-	verificarCantidadBloques();
-	verificarBitmap();
-	verificarSizeEnFile();
-	verificarBlockCount();
-	verificarBlocks();*/
-	/***** END TEST LOCAL ******/
-
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
 }
 
-void inicializarPosicionesSabotaje(){
-	t_list* posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);	
-	posicionesSabotaje = malloc(sizeof(PosicionesSabotaje));
+void inicializarParametrosFS(void){
+	puntoMontaje = strdup(configuracion->puntoMontaje);
+	pathSuperbloque = string_from_format("%s/%s", puntoMontaje, SUPERBLOQUE_FILE); //ej: /home/utnso/mnt/SuperBloque.ims
+	pathBlocks = string_from_format("%s/%s", puntoMontaje, BLOCKS_FILE);
+	pathFiles = string_from_format("%s/%s", puntoMontaje, "Files");
+	pathBitacoras = string_from_format("%s/%s", puntoMontaje, "Files/Bitacoras");
 
-	for(int i=0; i<list_size(posiciones); i++){
-		posicionesSabotaje->posicion = (t_pos*) list_get(posiciones, i);
-		posicionesSabotaje->atendida = false;
+	tamanioBloque = configuracion->blockSizeDefault;
+	cantidadBloques = configuracion->blocksQtyDefault;
+}
+
+void inicializarPosicionesSabotaje(){
+	
+	posicionesSabotaje = list_create();
+	
+	t_list* posiciones = list_create();
+	posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);	
+
+	PosicionSabotaje* posicionSabotaje;
+	posicionSabotaje = malloc(sizeof(PosicionSabotaje));
+
+	for(int i = 0; i < list_size(posiciones); i++){
+		posicionSabotaje->posicion = (t_pos*) list_get(posiciones, i);
+		posicionSabotaje->atendida = false;
+		list_add(posicionesSabotaje, posicionSabotaje);
 	}
+	//TEST
+	/*for(int i = 0; i < list_size(posicionesSabotaje); i++){
+		posicionSabotaje = (PosicionSabotaje*) list_get(posicionesSabotaje, i);	
+		printf("x:%s, y:%s\n", string_itoa(posicionSabotaje->posicion->x), string_itoa(posicionSabotaje->posicion->y));
+	}*/
+
+	list_destroy(posiciones);
+	free(posicionSabotaje);	
 }
 
 void atenderSabotaje(){
 	//Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
-	notificarSabotajeDiscordiador();
+	//enviarAvisoDeSabotaje(posicionesSabotaje); //esta en ejecucion_tareas
 	
 	//Esperar a que el Discordiador me active el protocolo fsck.
 	
@@ -240,11 +229,7 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
 	}
-	/*Test
-	for(int i = 0; list_size(listaPosicionesSabotaje) > i; i++){
-		posicion = (t_pos*) list_get(listaPosicionesSabotaje, i);
-		printf("x:%s, y:%s\n", string_itoa(posicion->x), string_itoa(posicion->y));
-	}*/
+
 	free(posicion);
 	return listaPosicionesSabotaje;
 }

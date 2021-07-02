@@ -84,7 +84,6 @@ int main(int argc, char* argv[]) {
 	//Inicio el thread de msync para bloques periodico.
 	pthread_t th_msync;
 	pthread_create(&th_msync, NULL, &syncPeriodico, NULL);
-
 	
 	if(leerConfig()){
 		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
@@ -94,9 +93,8 @@ int main(int argc, char* argv[]) {
 
 	inicializarStore();
 
+
 	miLogInfo("==== Finalizó I-Mongo-Store ====");
-
-
 	free(configuracion);
 	miLogDestroy();
 	list_destroy(posicionesSabotaje);

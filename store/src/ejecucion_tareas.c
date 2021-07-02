@@ -111,7 +111,7 @@ char cualEsMiCaracter(tipoRecurso recurso){
 
 int bytesLibresUltimoBloque(int size, int blockCount){
 
-	int bytesLibres = blockCount * configuracion -> blockSizeDefault - size;
+	int bytesLibres = blockCount * tamanioBloque - size;
 
 	return bytesLibres; 
 } 
@@ -168,10 +168,10 @@ char* obtenerBitacora(char* id_tripulante){
 	metadataB = leerMetadataBitacora(id_tripulante);
 
 	char* lectura = leerBloques(metadataB->blocks, metadataB->size);
-	printf("%s",lectura);
+	//printf("%s",lectura);
 
 	return lectura;
-	
+
 }
 
 int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
@@ -180,7 +180,8 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	int size = metadataR->size;
 	int block_count = metadataR->block_count;
-	t_list* blocks = metadataR->blocks;
+	t_list* blocks = list_create();
+	blocks = metadataR->blocks;
 
 	int cantidadBytesLibres = bytesLibresUltimoBloque(size, block_count);
 	int tamanioUltimoBloque = saberTamanioUltimobloque(cantidadBytesLibres);
@@ -192,43 +193,44 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 		size = 0;
 		block_count = 0;
 	 	list_clean(blocks);
-		return 1;
+
+	} else {
+		size -= cantidadCaracteres; 
+
+		int bloquesEliminados = 0;
+
+		for (bloquesEliminados ; tamanioUltimoBloque <= cantidadCaracteres; bloquesEliminados ++){
+		
+			liberarBloque(ultimoBloque); //se modifica el bitmap
+			cantidadCaracteres -= tamanioBloque;  
+			posicionUltimoBloque --; //modifico el puntero de blocks 
+			block_count --; //resto un bloque al blockCount
+			ultimoBloque = obtenerUltimoBloque(blocks, posicionUltimoBloque); 
+			tamanioUltimoBloque = saberTamanioUltimobloque(cantidadBytesLibres);
+
+		}
+		blocks = list_take(blocks, list_size(blocks)-bloquesEliminados);
 	}
 	
-	size -= cantidadCaracteres; 
-
-	int bloquesEliminados = 0;
-
-	for (bloquesEliminados ; tamanioUltimoBloque <= cantidadCaracteres; bloquesEliminados ++){
-	
-		liberarBloque(ultimoBloque); //se modifica el bitmap
-		cantidadCaracteres -= tamanioBloque;  
-		posicionUltimoBloque --; //modifico el puntero de blocks 
-		block_count --; //resto un bloque al blockCount
-		ultimoBloque = obtenerUltimoBloque(blocks, posicionUltimoBloque); 
-		tamanioUltimoBloque = saberTamanioUltimobloque(cantidadBytesLibres);
-
-	}
-
-	blocks = list_take(blocks, list_size(blocks)-bloquesEliminados);
-
 	metadataR->size = size;
 	metadataR->block_count = block_count;
 	metadataR->blocks = blocks;
-
+	
 	if(modificarMetadataRecurso(metadataR, recurso)){
 		return -1;
 	} 
-return 1;
+
+	return 1;
 }
 
 int obtenerUltimoBloque(t_list* blocks, int posicionUltimoBloque){
+	int ultimoBloque = 0;
+
 	if (posicionUltimoBloque != 0){
 		posicionUltimoBloque--;
-		int ultimoBloque = posicionUltimoBloque;
-		return ultimoBloque;
+		ultimoBloque = list_get(blocks, posicionUltimoBloque);		
 	} 
-	return 0;
+	return ultimoBloque;
 }
 
 int saberTamanioUltimobloque(int cantidadBytesLibres){
@@ -239,16 +241,20 @@ int saberTamanioUltimobloque(int cantidadBytesLibres){
 int desecharRecurso(tipoRecurso recurso){
 
 	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
-	t_list* blocks = metadataR->blocks;
+	t_list* blocks = list_create();
+	blocks = metadataR->blocks;
 	int posicionUltimoBloque = list_size(blocks);
-	int ultimoBloque = obtenerUltimoBloque(metadataR, posicionUltimoBloque);
-
-	while(ultimoBloque >= 0){
+	int ultimoBloque;
+	
+	while(posicionUltimoBloque > 0){
+		ultimoBloque = obtenerUltimoBloque(blocks, posicionUltimoBloque);
 		liberarBloque(ultimoBloque);
-		ultimoBloque--;
+		posicionUltimoBloque--;		
 	}
 
 	int resultado = eliminarArchivoBasura();
+	list_destroy(blocks);
+
 	return 1;
 }
 /*

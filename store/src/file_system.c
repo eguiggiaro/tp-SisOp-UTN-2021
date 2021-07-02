@@ -846,6 +846,10 @@ char* generarMd5(t_list* bloques, int size){
 	unsigned char hash[16];
 
 	//char* strBloques = stringFromList(bloques);
+	if(list_size(bloques) == 0){
+		return "";
+	}
+	
 	char* lectura = leerBloques(bloques, size);
 
 	MD5_CTX md5;

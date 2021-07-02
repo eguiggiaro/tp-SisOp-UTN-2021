@@ -39,15 +39,15 @@ void subirBlocksAMemoria();
 void finalizarFS();
 
 /**** MANEJO BLOQUES ****/
-int buscarYAsignarProximoBloqueLibre();
-void liberarBloque(int);
-int calcularCantBloques(int);
 t_list* escribirBloquesNuevo(char*);
-void escribirBloque(int, int, char*);
-void escribirBloqueUsado(int, int , char*);
+int buscarYAsignarProximoBloqueLibre();
+int calcularCantBloques(int);
+int verificarQueTengoLosBloquesNecesarios(int);
 char* leerBloque(int , int);
 char* leerBloques(t_list*, int);
-int verificarQueTengoLosBloquesNecesarios(int);
+void liberarBloque(int);
+void escribirBloque(int, int, char*);
+void escribirBloqueUsado(int, int , char*);
 
 /**** MANEJO METADATA ****/
 MetadataBitacora* leerMetadataBitacora(char*);
@@ -69,16 +69,15 @@ int verificarBlocks();
 
 /**** SOPORTE ****/
 t_list* listaFromArray(char**);
+t_list* verificarQueArchivosDeRecursosHay();
 int verificarExistenciaFile(char*);
 int tamanioArchivo(char*);
+int cantidadArchivosEnDirectorio(char*);
+int tamanioOcupadoRecursoEnBloque(int, tipoRecurso);
 char* stringFromList(t_list*);
 char* generarMd5(t_list*, int);
-void borrarTodosLosArchivos(char*);
-int cantidadArchivosEnDirectorio(char*);
-t_list* verificarQueArchivosDeRecursosHay();
-int tamanioOcupadoRecursoEnBloque(int, tipoRecurso);
 bool compararMd5(MetadataRecurso*);
-
+void borrarTodosLosArchivos(char*);
 
 /**** DEṔRECADAS ****/
 void leerSuperBloqueSinMapear(void);

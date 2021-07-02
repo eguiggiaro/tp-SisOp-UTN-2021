@@ -77,6 +77,7 @@ typedef struct {
 	char* posicionesSabotaje;
 	uint32_t blockSizeDefault;
 	uint32_t blocksQtyDefault;
+	char* ipDiscordiador;
 	int puertoDiscordiador;
 } Configuracion;
 

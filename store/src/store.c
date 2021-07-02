@@ -121,6 +121,7 @@ int leerConfig(void){
 	configuracion->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
 	configuracion->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
 	configuracion->posicionesSabotaje = strdup(config_get_string_value(config, "POSICIONES_SABOTAJE")); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]	
+	configuracion->ipDiscordiador = strdup(config_get_string_value(config, "IP_DISCORDIADOR"));
 	configuracion->puertoDiscordiador = config_get_int_value(config, "PUERTO_DISCORDIADOR");
 
 	config_destroy(config);

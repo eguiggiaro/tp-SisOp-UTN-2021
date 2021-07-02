@@ -257,8 +257,43 @@ int desecharRecurso(tipoRecurso recurso){
 
 	return 1;
 }
-/*
-enviarAvisoDeSabotaje(char* posicionesSabotaje){
-	AVISO_SABOTAJE [posicionesSabotaje];
 
-}*/
+void enviarAvisoDeSabotaje(t_list* posicionesSabotaje){
+	
+	t_paquete* paquete = crear_paquete(ALERTA_SABOTAJE);
+    t_buffer* buffer;
+
+	t_list* lista_mensajes = list_create();
+
+	char* mensaje = string_new();
+
+	t_pos* primerPosicion = primerPosicionSabotajeSinAtender(posicionesSabotaje);
+	char* strX = string_itoa(primerPosicion->x);
+	char* strY = string_itoa(primerPosicion->y);
+
+	list_add(lista_mensajes, strX);
+	list_add(lista_mensajes, strY);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, socket_discordiador);
+
+    //Aca deberia recibir la activación del protocolo FSCK?
+	
+	list_destroy(lista_mensajes);
+}
+
+t_pos* primerPosicionSabotajeSinAtender(t_list* posiciones){
+	
+	PosicionSabotaje* posicionSabotaje = malloc(sizeof(PosicionSabotaje));
+	t_pos* posicion = malloc(sizeof(t_pos));
+	
+	int _estaDesatendida(PosicionSabotaje* p) {
+            return !(p->atendida);
+    }
+	posicionSabotaje = list_find(posiciones, (void*) _estaDesatendida);
+	posicion = posicionSabotaje->posicion;
+
+	return posicion;
+}

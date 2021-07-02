@@ -116,13 +116,13 @@ int leerConfig(void){
 	}
 
 	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
-	configuracion->puerto = config_get_int_value(config, "PUERTO");
+	configuracion->puerto = strdup(config_get_string_value(config, "PUERTO"));
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
 	configuracion->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
 	configuracion->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
 	configuracion->posicionesSabotaje = strdup(config_get_string_value(config, "POSICIONES_SABOTAJE")); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]	
 	configuracion->ipDiscordiador = strdup(config_get_string_value(config, "IP_DISCORDIADOR"));
-	configuracion->puertoDiscordiador = config_get_int_value(config, "PUERTO_DISCORDIADOR");
+	configuracion->puertoDiscordiador = strdup(config_get_string_value(config, "PUERTO_DISCORDIADOR"));
 
 	config_destroy(config);
 	return EXIT_SUCCESS;
@@ -146,6 +146,7 @@ void inicializarStore(void){
 	leerSuperbloque();
 	subirBlocksAMemoria();
 	inicializarPosicionesSabotaje();
+	iniciarConexionDiscordiador();
 
 	
 	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
@@ -185,6 +186,18 @@ void inicializarPosicionesSabotaje(){
 	}*/
 
 	list_destroy(posiciones);
+}
+
+void iniciarConexionDiscordiador()
+{	//inicia conexion con destino
+	int socket = crear_conexion(logger, configuracion->ipDiscordiador, configuracion->puertoDiscordiador);
+	miLogInfo("Obtuve el socket y vale %d.\n", socket);
+
+	if (socket == -1) {
+		miLogError("No fue posible establecer la conexión del socket solicitado.\n");
+		exit(3);
+	}
+	socket_discordiador = socket;
 }
 
 void atenderSabotaje(){

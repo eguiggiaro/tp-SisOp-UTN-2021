@@ -35,4 +35,6 @@ int consumirRecurso(tipoRecurso recurso, int cantidadCaracteres);
 int obtenerUltimoBloque(t_list* blocks, int posicionUltimoBloque);
 int saberTamanioUltimobloque(int cantidadBytesLibres);
 int desecharRecurso(tipoRecurso recurso);
+t_pos* primerPosicionSabotajeSinAtender(t_list*);
+
 #endif

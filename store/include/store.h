@@ -26,6 +26,8 @@
 //Shared libs
 #include "shared_utils.h"
 #include "servidor.h"
+#include "logger.h"
+#include "paquete.h"
 
 typedef enum { 
 	OXIGENO,
@@ -72,16 +74,17 @@ t_list* posicionesSabotaje;
 
 typedef struct {
 	char* puntoMontaje;
-	int puerto;
+	char* puerto;
 	int tiempoSincro;
 	char* posicionesSabotaje;
 	uint32_t blockSizeDefault;
 	uint32_t blocksQtyDefault;
 	char* ipDiscordiador;
-	int puertoDiscordiador;
+	char* puertoDiscordiador;
 } Configuracion;
 
 Configuracion* configuracion;
+static int socket_discordiador;
 
 int leerConfig();
 void atender_request_store(Request *request);

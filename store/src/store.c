@@ -169,12 +169,13 @@ void inicializarPosicionesSabotaje(){
 	posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);	
 
 	PosicionSabotaje* posicionSabotaje;
-	posicionSabotaje = malloc(sizeof(PosicionSabotaje));
 
 	for(int i = 0; i < list_size(posiciones); i++){
+		posicionSabotaje = malloc(sizeof(PosicionSabotaje));
 		posicionSabotaje->posicion = (t_pos*) list_get(posiciones, i);
 		posicionSabotaje->atendida = false;
-		list_add(posicionesSabotaje, posicionSabotaje);
+
+		list_add(posicionesSabotaje, posicionSabotaje);		
 	}
 	//TEST
 	/*for(int i = 0; i < list_size(posicionesSabotaje); i++){
@@ -183,7 +184,6 @@ void inicializarPosicionesSabotaje(){
 	}*/
 
 	list_destroy(posiciones);
-	free(posicionSabotaje);	
 }
 
 void atenderSabotaje(){
@@ -201,10 +201,6 @@ void atenderSabotaje(){
 	verificarSizeEnFile();
 	verificarBlockCount();
 	verificarBlocks();	
-}
-
-void notificarSabotajeDiscordiador(){
-
 }
 
 t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
@@ -227,8 +223,7 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
 	}
-
-	free(posicion);
+	
 	return listaPosicionesSabotaje;
 }
 

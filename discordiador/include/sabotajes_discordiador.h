@@ -20,6 +20,7 @@ pthread_t threadSABOTAJE;
 void *iniciar_servidor_discordiador();
 void atender_request_discordiador(Request *request);
 void atender_sabotaje(char* posicion);
+double raiz_cuadrada(int numero); //no puedo usar sqrt...
 
 
 

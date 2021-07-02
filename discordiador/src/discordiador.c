@@ -18,6 +18,7 @@ const char *comandos_table[] = {"INICIAR_PATOTA",
 								"OBTENER_BITACORA",
 								"FIN",
 								"TEST_MENSAJES",
+								"ALERTA_SABOTAJE",
 								"COMPACTAR", NULL};
 
 int main()
@@ -93,7 +94,7 @@ int main()
 		printf("Error iniciando consola/n");
 	}
 
-	pthread_join(threadSERVER_DISC, NULL);
+	//pthread_join(threadSERVER_DISC, NULL);
 	pthread_join(threadCONSOLA_DISC, NULL);
 	
 	miLogInfo("Finalizó Discordiador\n");
@@ -185,6 +186,9 @@ void consola()
 			case OBTENER_BITACORA_COM:
 				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
 				break;
+			case ALERTA_SABOTAJE_COM:
+			    atender_sabotaje(input_consola);
+			    break;
 			case TEST_MENSAJES:
 				printf("1. Miram\n");
 				printf("2. Store\n");

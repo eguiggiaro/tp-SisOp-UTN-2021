@@ -445,7 +445,7 @@ void inicializar_memoria(int tamanio_memoria)
 	{
 
 		tamanio_pagina = configuracion->tamanio_pagina;
-		inicializar_paginacion(tamanio_memoria, tamanio_pagina);
+		inicializar_paginacion(tamanio_memoria, tamanio_pagina, configuracion->tamanio_swap, configuracion->path_swap);
 	}
 }
 

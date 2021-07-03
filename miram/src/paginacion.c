@@ -223,242 +223,43 @@ void dump_memoria_paginacion(bool mostrar_vacios)
 u_int32_t reservar_memoria_paginacion(int bytes)
 {
 	/*
-	int index = 0;
-	bool encontre_segmento = false;
-	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
-	Segmento *segmento_a_ocupar;
-	Segmento *segmento_nuevo;
-	u_int32_t posicion_reservada;
-
-	while (list_iterator_has_next(list_iterator))
-	{
-		segmento_a_ocupar = list_iterator_next(list_iterator);
-
-		//Si encuentro un segmento libre donde cabe el espacio a ocupar
-		if ((strcmp(segmento_a_ocupar->estado, "LIBRE") == 0) && (segmento_a_ocupar->desplazamiento >= bytes))
-		{
-			encontre_segmento = true;
-
-			if (segmento_a_ocupar->desplazamiento == bytes)
-
-			{
-				segmento_a_ocupar->id = contador_segmentos++;
-				segmento_a_ocupar->desplazamiento = bytes;
-				segmento_a_ocupar->estado = "OCUPADO";
-				posicion_reservada = segmento_a_ocupar->dir_inicio;
-			}
-			else
-			{
-
-				//Seteo el nuevo segmento
-				segmento_nuevo = malloc(sizeof(Segmento));
-				segmento_nuevo->id = contador_segmentos++;
-				segmento_nuevo->dir_inicio = segmento_a_ocupar->dir_inicio;
-				segmento_nuevo->desplazamiento = bytes;
-				segmento_nuevo->estado = "OCUPADO";
-
-				//Reduzco el segmento libre
-				segmento_a_ocupar->dir_inicio = (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
-				segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - bytes;
-
-				//Agrego el nuevo segmento a la tabla
-				list_add_in_index(tabla_segmentos, index, segmento_nuevo);
-				posicion_reservada = segmento_nuevo->dir_inicio;
-				break;
-			}
-		}
-
-		index++;
-	}
-	list_iterator_destroy(list_iterator);
-
-	if (encontre_segmento)
-	{
-		return posicion_reservada;
-	}
-	else
-	{
-		return 99; //ERROR
-	}
     */
 }
 
 int buscar_pagina(u_int32_t posicion_memoria)
 {
 	/*
-	bool encontre_segmento = false;
-	int segmento_encontrado;
-	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
-	Segmento *segmento_busqueda;
-
-	while (list_iterator_has_next(list_iterator))
-	{
-		segmento_busqueda = list_iterator_next(list_iterator);
-
-		//Si encuentro un segmento libre donde cabe el espacio a ocupar
-		if ((segmento_busqueda->dir_inicio == posicion_memoria))
-		{
-			encontre_segmento = true;
-			segmento_encontrado = segmento_busqueda->id;
-			break;
-		}
-	}
-	list_iterator_destroy(list_iterator);
-	if (encontre_segmento)
-	{
-		return segmento_encontrado;
-	}
-	else
-	{
-		return 99;
-	}
-    */
+   */
 }
 
-Pagina *buscar_pagina_por_id(int id_segmento)
-{
-	/*
-	bool encontre_segmento = false;
-	Segmento* segmento_encontrado;
-	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
-	Segmento *segmento_busqueda;
-
-	while (list_iterator_has_next(list_iterator))
-	{
-		segmento_busqueda = list_iterator_next(list_iterator);
-
-		if ((segmento_busqueda->id == id_segmento))
-		{
-			encontre_segmento = true;
-			segmento_encontrado = segmento_busqueda;
-			break;
-		}
-	}
-	list_iterator_destroy(list_iterator);
-	if (encontre_segmento)
-	{
-		return segmento_encontrado;
-	}
-	else
-	{
-		return 99;
-	}
-    */
-}
 
 u_int32_t buscar_posicion_paginacion(int segmento)
 {
 	/*
-	bool encontre_posicion = false;
-	u_int32_t posicion_encontrada;
-	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
-	Segmento *segmento_busqueda;
-
-	while (list_iterator_has_next(list_iterator))
-	{
-		segmento_busqueda = list_iterator_next(list_iterator);
-
-		//Si encuentro un segmento libre donde cabe el espacio a ocupar
-		if ((segmento_busqueda->id == segmento))
-		{
-			encontre_posicion = true;
-			posicion_encontrada = segmento_busqueda->dir_inicio;
-			break;
-		}
-	}
-	list_iterator_destroy(list_iterator);
-	if (encontre_posicion)
-	{
-		return posicion_encontrada;
-	}
-	else
-	{
-		return 99;
-	}
-    */
+   */
 }
 
 void alta_patota_paginacion(PCB *unPCB)
 {
 	/*
-	PCB_adm *pcb_adm = malloc(sizeof(PCB_adm));
-	pcb_adm->PID = unPCB->PID;
-	pcb_adm->segmento_nro = buscar_segmento(unPCB);
-	list_add(tabla_segmentos_pcb, pcb_adm);
     */
 }
 
 uint32_t buscar_patota_paginacion(int PID)
 {
 	/*
-	bool encontre_patota = false;
-	u_int32_t posicion_patota;
-	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos_pcb);
-	PCB_adm *pcb_adm;
-
-	while (list_iterator_has_next(list_iterator))
-	{
-		pcb_adm = list_iterator_next(list_iterator);
-
-		//Si encuentro un segmento libre donde cabe el espacio a ocupar
-		if (pcb_adm->PID == PID)
-		{
-			encontre_patota = true;
-			posicion_patota = buscar_posicion(pcb_adm->segmento_nro);
-			break;
-		}
-	}
-	list_iterator_destroy(list_iterator);
-	if (encontre_patota)
-	{
-		return posicion_patota;
-	}
-	else
-	{
-		return 99;
-	}
     */
 }
 
 void alta_tareas_paginacion(int PCB_ID, char *tareas)
 {
 	/*
-	Tarea_adm *tareas_adm = malloc(sizeof(Tarea_adm));
-	tareas_adm->PID = PCB_ID;
-	tareas_adm->segmento_nro = buscar_segmento(tareas);
-	list_add(tabla_segmentos_tareas, tareas_adm);
     */
 }
 
 uint32_t buscar_tripulante_paginacion(int TCB_ID)
 {
 	/*
-	bool encontre_tripulante = false;
-	u_int32_t posicion_tripulante;
-	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos_tcb);
-	TCB_adm *tcb_adm;
-
-	while (list_iterator_has_next(list_iterator))
-	{
-		tcb_adm = list_iterator_next(list_iterator);
-
-		//Si encuentro un segmento libre donde cabe el espacio a ocupar
-		if (tcb_adm->TID == TCB_ID)
-		{
-			encontre_tripulante = true;
-			posicion_tripulante = buscar_posicion(tcb_adm->segmento_nro);
-			break;
-		}
-	}
-	list_iterator_destroy(list_iterator);
-	if (encontre_tripulante)
-	{
-		return posicion_tripulante;
-	}
-	else
-	{
-		return 99;
-	}
     */
 }
 
@@ -646,6 +447,7 @@ Frame *buscar_frame_libre()
 		if (strcmp(un_frame->estado, "LIBRE") == 0)
 		{
 			un_frame_libre = un_frame;
+			un_frame_libre->estado = "OCUPADO";
 			encontre_frame = true;
 			break;
 		}
@@ -658,9 +460,76 @@ Frame *buscar_frame_libre()
 	}
 	else
 	{
-		return -1;
+		return hacer_lugar_memoria();
 	}
 }
+
+Frame *hacer_lugar_memoria()
+{
+
+	Frame *un_frame_candidato;
+	Pagina* una_pagina_candidata;
+	Frame *un_frame;
+	bool encontre_frame = false;
+	int minimo_LRU = contador_LRU + 100;
+	Pagina* una_pagina;
+
+	t_list_iterator *list_iterator = list_iterator_create(tabla_frames);
+
+	while (list_iterator_has_next(list_iterator))
+	{
+		un_frame = list_iterator_next(list_iterator);
+		if (strcmp(un_frame->estado, "OCUPADO") == 0)
+		{
+			una_pagina = buscar_pagina_por_id(un_frame->id_pagina);
+
+			if(una_pagina->LRU < minimo_LRU)
+			{
+				un_frame_candidato = un_frame;
+				una_pagina_candidata = una_pagina;
+			}
+		}
+	}
+	list_iterator_destroy(list_iterator);
+
+	llevar_a_swap(un_frame_candidato, una_pagina_candidata);
+
+	una_pagina_candidata->en_memoria = false;
+	una_pagina_candidata->LRU = 0;
+
+	un_frame_candidato->estado = "LIBRE";
+	un_frame_candidato->id_pagina = -1;
+
+	return un_frame_candidato;
+}
+
+void* llevar_a_swap(Frame* un_frame, Pagina* una_pagina)
+{
+	int espacio_a_ocupar;
+	bool encontre_posicion_SWAP = false;
+
+
+	for(int i=0; i<contador_espacios_SWAP; i++){
+		if(bitarray_test_bit(bitmap, i) == 0){
+			bitarray_set_bit(bitmap ,i); //Asigno el bloque libre (pongo en 1 el bit).
+			encontre_posicion_SWAP = true;
+			espacio_a_ocupar = i;
+		}
+	}
+
+	if (encontre_posicion_SWAP) 
+	{
+		fseek(SWAP,tamanio_pagina_paginacion*espacio_a_ocupar,SEEK_SET);
+    	fwrite(un_frame->dir_inicio,tamanio_pagina_paginacion,1,SWAP);	
+	}
+
+	Elemento_SWAP* elemento_swap = malloc(sizeof(Elemento_SWAP));
+	list_add(tabla_elementos_SWAP, elemento_swap);
+
+}
+
+
+
 
 Frame *buscar_frame(int id_frame)
 {
@@ -716,8 +585,37 @@ Frame *buscar_frame_por_pagina(int id_pagina)
 	}
 	else
 	{
-		return -1;
+		return traer_de_SWAP(id_pagina);
 	}
+}
+
+Frame* traer_de_SWAP(int id_pagina)
+{
+	t_list_iterator* iterador_SWAP = list_iterator_create(tabla_elementos_SWAP);
+	Elemento_SWAP* elemento_swap;
+	Pagina* una_pagina;
+	Frame* un_frame;
+
+	while(list_iterator_has_next(iterador_SWAP))
+	{
+		elemento_swap = list_iterator_next(iterador_SWAP);
+
+		if (elemento_swap->id_pagina == id_pagina)
+		{
+			un_frame = buscar_frame_libre();
+			un_frame->id_pagina = id_pagina;
+			una_pagina->id_frame = un_frame;
+			una_pagina->en_memoria = true;
+			una_pagina->estado = "OCUPADO";
+			
+			fseek(SWAP,tamanio_pagina_paginacion*elemento_swap->posicion_SWAP,SEEK_SET);
+			fread(un_frame->dir_inicio,tamanio_pagina_paginacion,1,SWAP);
+		}
+
+	}
+	list_iterator_destroy(iterador_SWAP);
+	return un_frame;
+
 }
 
 int guardar_pagina_en_frame(int id_frame, void *pagina, int id_pagina)
@@ -725,6 +623,7 @@ int guardar_pagina_en_frame(int id_frame, void *pagina, int id_pagina)
 
 	Frame *un_frame;
 	bool encontre_frame = false;
+	Pagina* una_pagina;
 
 	TCB *aux = pagina + 4;
 
@@ -738,8 +637,11 @@ int guardar_pagina_en_frame(int id_frame, void *pagina, int id_pagina)
 		{
 			memcpy(un_frame->dir_inicio, pagina, tamanio_pagina_paginacion);
 			encontre_frame = true;
-			un_frame->estado = "OCUPADO";
 			un_frame->id_pagina = id_pagina;
+
+			una_pagina = buscar_pagina_por_id(un_frame->id_pagina);
+			una_pagina->LRU = contador_LRU++;
+
 			break;
 		}
 	}
@@ -768,7 +670,8 @@ int guardar_patota(PCB *un_pcb, PCB_adm *un_pcb_adm)
 	for (int i = 0; i < cantidad_paginas; i++)
 	{
 		una_pagina = list_get(un_pcb_adm->tabla_paginas, i);
-		un_frame = buscar_frame(una_pagina->id_frame);
+		una_pagina->LRU = contador_LRU++;
+		un_frame = buscar_frame_por_pagina(una_pagina->id_pagina);
 		if (i + 1 == cantidad_paginas)
 		{
 			memcpy(un_frame->dir_inicio, (void *)un_pcb, tamanio_pcb - tamanio_alocado);
@@ -806,12 +709,15 @@ int guardar_tripulante(TCB *un_tcb, PCB_adm *un_pcb_adm)
 	int tamanio_guardado = 0;
 	int limite_buffer = 0;
 	int offset = un_tcb_adm->offset;
+	Pagina* pagina;
 
 	Frame *un_frame = buscar_frame_por_pagina(un_tcb_adm->pagina_inicio);
 	una_pagina = un_tcb_adm->pagina_inicio;
 
 	for (int i = 0; i < cantidad_paginas; i++)
 	{
+		pagina = buscar_pagina_por_id(una_pagina);
+		pagina->LRU = contador_LRU++;
 
 		if (i == 0)
 		{
@@ -929,9 +835,13 @@ TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
 	TCB *tcb_retorno;
 
 	Frame *un_frame = buscar_frame_por_pagina(tcb_adm->pagina_inicio);
+	Pagina* una_pagina;
 
 	for (int i = 0; i < cantidad_paginas; i++)
 	{
+		una_pagina = buscar_pagina_por_id(pagina);
+		una_pagina->LRU = contador_LRU++;
+
 		if (i == 0)
 		{
 			if (tamanio_pagina_paginacion - offset > tamanio_tcb - tamanio_recuperado)
@@ -1028,11 +938,16 @@ PCB *buscar_PCB(PCB_adm *pcb_adm)
 	int tamanio_pcb = 8;
 	int limite_buffer = 0;
 	void *buffer = malloc(tamanio_pcb);
+	Pagina* una_pagina;
 
 	Frame *un_frame = buscar_frame_por_pagina(pagina);
+	
 
 	for (int i = 0; i < cantidad_paginas; i++)
 	{
+		una_pagina = buscar_pagina_por_id(pagina);
+		una_pagina->LRU = contador_LRU++;
+
 		if (i == 0)
 		{
 			if (tamanio_pagina_paginacion - offset > tamanio_pcb - tamanio_recuperado)
@@ -1104,9 +1019,12 @@ char *buscar_tareas(int patota_id)
 	int limite_buffer = 0;
 
 	Frame *un_frame = buscar_frame_por_pagina(pagina);
+	Pagina* una_pagina;
 
 	for (int i = 0; i < cantidad_paginas; i++)
 	{
+		una_pagina = buscar_pagina_por_id(pagina);
+		una_pagina->LRU = contador_LRU++;
 		if (i == 0)
 		{
 			if (tamanio_pagina_paginacion - offset > tamanio_tareas - tamanio_recuperado)
@@ -1214,6 +1132,44 @@ int iniciar_tripulante_paginacion(int patota_id, bool mapa)
 	return un_tcb->TID;
 }
 
+Pagina *buscar_pagina_por_id(int id_pagina)
+
+{
+	t_list_iterator *iterador_pcbs = list_iterator_create(tabla_pcbs);
+	t_list_iterator *iterador_paginas;
+	PCB_adm *pcb_adm;
+	Pagina *una_pagina;
+	bool encontre_pagina = false;
+
+	while (list_iterator_has_next(iterador_pcbs))
+	{
+		pcb_adm = list_iterator_next(iterador_pcbs);
+
+		iterador_paginas = list_iterator_create(pcb_adm->tabla_paginas);
+
+		while (list_iterator_has_next(iterador_paginas))
+		{
+
+			una_pagina = list_iterator_next(iterador_paginas);
+
+			if (una_pagina->id_pagina == id_pagina)
+			{
+				encontre_pagina = true;
+				break;
+			}
+		}
+
+		list_iterator_destroy(iterador_paginas);
+		if (encontre_pagina)
+		{
+			break;
+		}
+	}
+
+	list_iterator_destroy(iterador_pcbs);
+	return una_pagina;
+}
+
 int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *puntos)
 {
 	int tamanio_alocado = 0;
@@ -1253,6 +1209,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 
 	un_frame_libre = buscar_frame_libre();
 	una_pagina = malloc(sizeof(Pagina));
+	una_pagina->en_memoria = true;
 	una_pagina->id_frame = un_frame_libre->id_frame;
 	una_pagina->estado = "OCUPADO";
 	pcb_adm->cantidad_paginas_pcb++;
@@ -1304,6 +1261,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 
 		un_frame_libre = buscar_frame_libre();
 		una_pagina = malloc(sizeof(Pagina));
+		una_pagina->en_memoria = true;
 		una_pagina->id_frame = un_frame_libre->id_frame;
 		una_pagina->estado = "OCUPADO";
 		pcb_adm->cantidad_paginas_pcb++;
@@ -1405,6 +1363,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 
 			un_frame_libre = buscar_frame_libre();
 			una_pagina = malloc(sizeof(Pagina));
+			una_pagina->en_memoria = true;
 			una_pagina->id_pagina = contador_paginas++;
 			una_pagina->id_frame = un_frame_libre->id_frame;
 			una_pagina->estado = "OCUPADO";
@@ -1533,6 +1492,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 
 				un_frame_libre = buscar_frame_libre();
 				una_pagina = malloc(sizeof(Pagina));
+				una_pagina->en_memoria = true;
 				una_pagina->id_pagina = contador_paginas++;
 				una_pagina->id_frame = un_frame_libre->id_frame;
 				una_pagina->estado = "OCUPADO";
@@ -1589,17 +1549,29 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	return pcb_adm->PID;
 }
 
-void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina)
+void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina, int tamanio_SWAP, char *path_SWAP)
 {
 	contador_frames = tamanio_memoria / tamanio_pagina;
 	contador_frames_libres = contador_frames;
 	contador_paginas = 1;
 	tamanio_pagina_paginacion = tamanio_pagina;
+	contador_espacios_SWAP = tamanio_SWAP / tamanio_pagina_paginacion;
 	Frame *un_frame;
 	tabla_frames = list_create();
 	tabla_pcbs = list_create();
 	tabla_tareas = list_create();
 	tabla_tcbs = list_create();
+	contador_LRU = 0;
+	bitmap = calloc(contador_espacios_SWAP, 1);
+
+	void *pagina = malloc(tamanio_pagina_paginacion);
+
+	SWAP = fopen(path_SWAP, "w");
+
+	for (int i = 0; i < contador_espacios_SWAP; i++)
+	{
+		fwrite(&pagina, sizeof(pagina), 1, SWAP);
+	}
 
 	for (int i = 0; i < contador_frames; i++)
 	{

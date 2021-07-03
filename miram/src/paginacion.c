@@ -23,7 +23,7 @@ void dump_memoria_paginacion_frames_archivo(bool mostrar_vacios, FILE *archivoDu
 	fprintf(archivoDump, "-------------------------------------------------------------------------------\n");
 	fprintf(archivoDump, "Detalle tabla de frames\n");
 	fprintf(archivoDump, "-------------------------------------------------------------------------------\n");
-	fprintf(archivoDump, "Dir Inicio\tId frame\tPagina\tLRU\tEstado\tPatota\tContenido\n");
+	fprintf(archivoDump, "Dir Inicio\tId frame\tPagina\tLRU\tCLOCK\tEstado\tPatota\tContenido\n");
 	t_list_iterator *list_iterator = list_iterator_create(tabla_frames);
 	while (list_iterator_has_next(list_iterator))
 	{
@@ -46,7 +46,8 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 	bool encontre_patota = false;
 	char *pagina_a_mostrar;
 	char *patota_a_mostrar;
-	int LRU = 0;
+	int LRU = -1;
+	int clock = -1;
 	char *contenido = string_new();
 	char *auxiliar;
 
@@ -108,10 +109,11 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 	{
 		pagina_a_mostrar = string_itoa(una_pagina->id_pagina);
 		LRU = una_pagina->LRU;
+		clock = una_pagina->clock;
 	}
 	list_iterator_destroy(list_iterator_pcbs);
 
-	fprintf(archivoDump, "%d\t%d\t\t%s\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, un_frame->estado, patota_a_mostrar, contenido);
+	fprintf(archivoDump, "%d\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
 	free(contenido);
 }
 
@@ -121,7 +123,7 @@ void dump_memoria_paginacion_frames(bool mostrar_vacios)
 	printf("-------------------------------------------------------------------------------\n");
 	printf("Detalle tabla de frames\n");
 	printf("-------------------------------------------------------------------------------\n");
-	printf("Dir Inicio\tId frame\tPagina\tLRU\tEstado\tPatota\tContenido\n");
+	printf("Dir Inicio\tId frame\tPagina\tLRU\tCLOCK\tEstado\tPatota\tContenido\n");
 	t_list_iterator *list_iterator = list_iterator_create(tabla_frames);
 	while (list_iterator_has_next(list_iterator))
 	{
@@ -148,7 +150,8 @@ void imprimir_frame(Frame *un_frame)
 	char *patota_a_mostrar;
 	char *contenido = string_new();
 	char *auxiliar;
-	int LRU = 0;
+	int LRU = -1;
+	int clock = -1;
 
 	if (strcmp(un_frame->estado, "OCUPADO") == 0)
 	{
@@ -208,10 +211,11 @@ void imprimir_frame(Frame *un_frame)
 	{
 		pagina_a_mostrar = string_itoa(una_pagina->id_pagina);
 		LRU = una_pagina->LRU;
+		clock = una_pagina->clock;
 	}
 	list_iterator_destroy(list_iterator_pcbs);
 
-	printf("%d\t%d\t\t%s\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, un_frame->estado, patota_a_mostrar, contenido);
+	printf("%d\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU,clock, un_frame->estado, patota_a_mostrar, contenido);
 	free(contenido);
 }
 
@@ -681,7 +685,11 @@ int guardar_pagina_en_frame(int id_frame, void *pagina, int id_pagina)
 			una_pagina = buscar_pagina_por_id(un_frame->id_pagina);
 			una_pagina->LRU = contador_LRU++;
 
-			queue_push(cola_FIFO_clock, una_pagina->id_pagina);
+			if (una_pagina->clock == -1)
+			{
+				queue_push(cola_FIFO_clock, una_pagina->id_pagina);
+				una_pagina->clock = 1;
+			}
 
 			break;
 		}
@@ -1263,7 +1271,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	un_frame_libre = buscar_frame_libre();
 	una_pagina = malloc(sizeof(Pagina));
 	una_pagina->en_memoria = true;
-	una_pagina->clock = 1;
+	una_pagina->clock = -1;
 	una_pagina->id_frame = un_frame_libre->id_frame;
 	una_pagina->estado = "OCUPADO";
 	pcb_adm->cantidad_paginas_pcb++;
@@ -1316,7 +1324,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		un_frame_libre = buscar_frame_libre();
 		una_pagina = malloc(sizeof(Pagina));
 		una_pagina->en_memoria = true;
-		una_pagina->clock = 1;
+		una_pagina->clock = -1;
 		una_pagina->id_frame = un_frame_libre->id_frame;
 		una_pagina->estado = "OCUPADO";
 		pcb_adm->cantidad_paginas_pcb++;
@@ -1419,7 +1427,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 			un_frame_libre = buscar_frame_libre();
 			una_pagina = malloc(sizeof(Pagina));
 			una_pagina->en_memoria = true;
-			una_pagina->clock = 1;
+			una_pagina->clock = -1;
 			una_pagina->id_pagina = contador_paginas++;
 			una_pagina->id_frame = un_frame_libre->id_frame;
 			una_pagina->estado = "OCUPADO";
@@ -1549,7 +1557,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 				un_frame_libre = buscar_frame_libre();
 				una_pagina = malloc(sizeof(Pagina));
 				una_pagina->en_memoria = true;
-				una_pagina->clock = 1;
+				una_pagina->clock = -1;
 				una_pagina->id_pagina = contador_paginas++;
 				una_pagina->id_frame = un_frame_libre->id_frame;
 				una_pagina->estado = "OCUPADO";

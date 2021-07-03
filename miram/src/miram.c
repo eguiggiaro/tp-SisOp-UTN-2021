@@ -141,7 +141,7 @@ void atender_request_miram(Request *request)
 		string_append(&posicion,string_itoa(un_tripulante->pos_y));
 
 		char *proxima_tarea;
-
+		resultado = 1;
 		if (resultado == -1)
 		{
 			miLogInfo("ERROR: TRIPULANTE NO INICIADO \n");
@@ -155,7 +155,7 @@ void atender_request_miram(Request *request)
 			proxima_tarea = proxima_tarea_tripulante(un_tripulante->TID);
 
 			paquete_devuelto_iniciar_tripulante = crear_paquete(OK);
-			list_add(lista_mensajes, string_itoa(resultado));
+			list_add(lista_mensajes, string_itoa(un_tripulante->TID));
 			list_add(lista_mensajes, posicion);
 			list_add(lista_mensajes, proxima_tarea);
 		}

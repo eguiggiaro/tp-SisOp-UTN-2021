@@ -195,6 +195,7 @@ int verificarQueTengoLosBloquesNecesarios(int cantidadBloquesNecesarios){
 		}
 	}
 	pthread_mutex_unlock(&mutex_bitmap);
+
 	return 0;
 }
 

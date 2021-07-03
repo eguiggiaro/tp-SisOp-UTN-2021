@@ -8,11 +8,22 @@ const char *tipoTarea_table [] = {
     "GENERAR_BASURA",
     "CONSUMIR_OXIGENO",
     "CONSUMIR_COMIDA",
-    "DESECHAR_BASURA", 
+    "DESCARTAR_BASURA", 
 	NULL };
 
 void atender_request_store(Request *request) {
 
+	/*pthread_mutex_lock(&lockStore); 
+	while(!puedeEjecutar) { 
+  		pthread_cond_wait(&condStore, &lockStore); // Espero por puedeEjecutar
+	}
+	pthread_mutex_unlock(&lockStore);*/
+
+	if(seContectoElDiscordiador){
+		iniciarConexionDiscordiador();
+		seContectoElDiscordiador = false;
+	}
+		
 	op_code codigo_operacion = request->codigo_operacion;
 	int request_fd = request->request_fd;
 	t_list *lista = list_create();
@@ -30,38 +41,40 @@ void atender_request_store(Request *request) {
 			t_buffer* buffer_devolucion_informar_tarea = request->buffer_devolucion;
 			t_paquete* paquete_devuelto_informar_tarea;
 
-			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
+			miLogDebug("Me llego operacion: INFORMAR_TAREA \n");
 			lista = deserializar_lista_strings(buffer_devolucion_informar_tarea);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante. 
 			 
 			//t_list* informeTarea = list_create();
 			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12
+			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.\n", informeTarea, id_tripulante);
 
 			char** listaNueva;
 			listaNueva = string_split(informeTarea , " ");//Crea una lista separando la cadena informeTarea[1] por SPACE. Resultado lista[0]= GENERAR_OXIGENO . lista[1] = 12
 	
 			char* tarea = listaNueva[0];//tarea
 			int cantidadRecursos = atoi(listaNueva[1]); //En el caso de DESCARTAR_BASURA es NULL
-
+		
 	 		resultadoTarea = ejecutarTarea(tarea, cantidadRecursos);
 			char* mensajeAGuardar = string_new();
 			string_append(&mensajeAGuardar, "Comienza ejecucion tarea ");
 			string_append(&mensajeAGuardar, tarea);
+			string_append(&mensajeAGuardar, "\n");
 			resultadoBitacora = guardarEnBitacora(id_tripulante, mensajeAGuardar);
 
 			if (resultadoTarea == -1)
 			{
-				miLogInfo("ERROR: NO SE PUDO REALIZAR LA TAREA \n");
+				miLogInfo("ERROR: No se pudo realizar la tarea: %s del tripulante: %s \n", informeTarea, id_tripulante);
 				paquete_devuelto_informar_tarea = crear_paquete(FAIL);
 				list_add(lista_mensajes, "Se produjo un error intentar realizar la tarea");
 			}
 			else
 			{
-				miLogInfo("TAREA REALIZADA CORRECTAMENTE \n");
+				miLogInfo("La tarea: %s del tripulante: %s, se realizo correctamente \n", informeTarea, id_tripulante);
 
 				paquete_devuelto_informar_tarea = crear_paquete(OK);
-				list_add(lista_mensajes, "Se realizó la tarea correctamente");
+				list_add(lista_mensajes, "Se realizo la tarea correctamente");
 			}
 
 			t_buffer *buffer_respuesta_informarTarea = serializar_lista_strings(lista_mensajes);
@@ -81,26 +94,28 @@ void atender_request_store(Request *request) {
 			t_buffer* buffer_devolucion_informacion_bitacora = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_informacion_bitacora;
 
-			miLogInfo("Me llego operacion: INFORMAR_TAREA \n");
+			miLogDebug("Me llego operacion: INFORMACION_BITACORA \n");
 			lista = deserializar_lista_strings(buffer_devolucion_informacion_bitacora);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
-			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X
-			
+			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X						
+			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.\n", instruccionABitacora, id_tripulante);
+
+			string_append(&instruccionABitacora, "\n");
 			resultadoTarea = guardarEnBitacora(id_tripulante, instruccionABitacora);
 
 			if (resultadoTarea == -1)
 			{
-				miLogInfo("ERROR: NO SE PUDO GUARDAD LA INSTRUCCION \n");
+				miLogInfo("ERROR: No se pudo guardar la tarea: %s, en la bitacora del tripulante: %s.\n", instruccionABitacora, id_tripulante);
 				paquete_devuelto_informacion_bitacora = crear_paquete(FAIL);
 				list_add(lista_mensajes, "Se produjo un error intentar guardar la instruccion");
 			}
 			else
 			{
-				miLogInfo("SE GUARDO LA INSTRUCCION CORRECTAMENTE \n");
+				miLogInfo("Se guardo la tarea: %s, en la bitacora del tripulante: %s.\n", instruccionABitacora, id_tripulante);
 
 				paquete_devuelto_informacion_bitacora = crear_paquete(OK);
-				list_add(lista_mensajes, "Se guardó la instruccion correctamente");
+				list_add(lista_mensajes, "Se guardó la tarea correctamente");
 			}
 			t_buffer *buffer_respuesta_informacion_bitacora = serializar_lista_strings(lista_mensajes);
 			paquete_devuelto_informacion_bitacora->buffer = buffer_respuesta_informacion_bitacora;
@@ -119,23 +134,24 @@ void atender_request_store(Request *request) {
 			t_buffer* buffer_devolucion_obtener_bitacora = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_obtener_bitacora;
 
-			miLogInfo("Me llego operacion: OBTENER BITACORA \n");
+			miLogDebug("Me llego operacion: OBTENER BITACORA \n");
 			lista = deserializar_lista_strings(buffer_devolucion_obtener_bitacora);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
-
+			miLogInfo("Me solicitaron la bitacora del tripulante: %s.\n", id_tripulante);
+			
 			char* bitacora = string_new();
 			bitacora = obtenerBitacora(id_tripulante);
 
 			if (string_is_empty(bitacora))
 			{
-				miLogInfo("ERROR: LA BITACORA DEL TRIPULANTE ESTA VACIA \n");
+				miLogDebug("ERROR: LA BITACORA DEL TRIPULANTE ESTA VACIA \n");
 				paquete_devuelto_obtener_bitacora = crear_paquete(FAIL);
 				list_add(lista_mensajes, "La bitacora del tripulante esta vacia");
 			}
 			else
 			{
-				miLogInfo("SE ENVIO BITACORA \n");
+				miLogInfo("Se envio la bitacora del tripulante: %s.\n", id_tripulante);
 
 				paquete_devuelto_obtener_bitacora = crear_paquete(OK);
 				list_add(lista_mensajes, bitacora);
@@ -166,32 +182,32 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 		switch (opc)
 		{
 				case GENERAR_OXIGENO:
-					printf( "Tarea es GENERAR_OXIGENO\n" );
+					//printf( "Tarea es GENERAR_OXIGENO\n" );
 					resultado = generarRecursos(OXIGENO, cantidadRecursos);
 					break;
 
 				case CONSUMIR_OXIGENO:
-					printf( "Tarea es CONSUMIR_OXIGENO\n" );
+					//printf( "Tarea es CONSUMIR_OXIGENO\n" );
 					resultado = consumirRecursos(OXIGENO, cantidadRecursos);
 					break;
 
 				case GENERAR_COMIDA:
-					printf( "Tarea es GENERAR_COMIDA\n" );
+					//printf( "Tarea es GENERAR_COMIDA\n" );
 					resultado = generarRecursos(COMIDA, cantidadRecursos);
 					break;
 
 				case CONSUMIR_COMIDA:
-					printf( "Tarea es CONSUMIR_COMIDA\n" );
+					//printf( "Tarea es CONSUMIR_COMIDA\n" );
 					resultado = consumirRecursos(OXIGENO, cantidadRecursos);
 					break;
 
 				case GENERAR_BASURA:
-					printf( "Tarea es GENERAR_BASURA\n" );
+					//printf( "Tarea es GENERAR_BASURA\n" );
 					resultado = generarRecursos(BASURA, cantidadRecursos);
 					break;
 
-				case DESECHAR_BASURA:
-					printf( "Tarea es DESECHAR_BASURA\n" );
+				case DESCARTAR_BASURA:
+					//printf( "Tarea es DESCARTAR_BASURA\n" );
 					resultado = desecharRecurso(BASURA);
 					break;
 

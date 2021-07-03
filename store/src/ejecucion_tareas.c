@@ -19,13 +19,12 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	int ultimoBloque = 0;
 	
 	if (posicionUltimoBloque != 0){
-		posicionUltimoBloque--;
-		ultimoBloque = list_get(metadataR->blocks, posicionUltimoBloque);
+		posicionUltimoBloque--;	
+		ultimoBloque = list_get(metadataR->blocks, posicionUltimoBloque);	
 	} 
-	 
+	
 	t_list* listaBloquesOcupados = list_create();
-	
-	
+		
 	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, cadenaCaracteres);
 
 	list_add_all(metadataR->blocks, listaBloquesOcupados);
@@ -178,6 +177,11 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
 
+	if(metadataR->size == 0){
+		miLogInfo("No se puede consumir mas del recurso.");
+		return -1;
+	}
+
 	int size = metadataR->size;
 	int block_count = metadataR->block_count;
 	t_list* blocks = list_create();
@@ -186,7 +190,7 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	int cantidadBytesLibres = bytesLibresUltimoBloque(size, block_count);
 	int tamanioUltimoBloque = saberTamanioUltimobloque(cantidadBytesLibres);
 	int posicionUltimoBloque = list_size(blocks);
-	int ultimoBloque = obtenerUltimoBloque(metadataR, posicionUltimoBloque);
+	int ultimoBloque = obtenerUltimoBloque(blocks, posicionUltimoBloque);
 
 	if(size <= cantidadCaracteres){
 		liberarBloque(ultimoBloque);
@@ -224,12 +228,11 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 }
 
 int obtenerUltimoBloque(t_list* blocks, int posicionUltimoBloque){
-	int ultimoBloque = 0;
 
-	if (posicionUltimoBloque != 0){
-		posicionUltimoBloque--;
-		ultimoBloque = list_get(blocks, posicionUltimoBloque);		
-	} 
+	int ultimoBloque;
+					
+	ultimoBloque = list_get(blocks, posicionUltimoBloque-1);
+
 	return ultimoBloque;
 }
 
@@ -258,7 +261,7 @@ int desecharRecurso(tipoRecurso recurso){
 	return 1;
 }
 
-void enviarAvisoDeSabotaje(t_list* posicionesSabotaje){
+op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje){
 	
 	t_paquete* paquete = crear_paquete(ALERTA_SABOTAJE);
     t_buffer* buffer;
@@ -280,8 +283,10 @@ void enviarAvisoDeSabotaje(t_list* posicionesSabotaje){
     enviar_paquete(paquete, socket_discordiador);
 
     //Aca deberia recibir la activación del protocolo FSCK?
-	
+	op_code codigo_operacion = recibir_operacion(socket_discordiador);
+		
 	list_destroy(lista_mensajes);
+	return codigo_operacion;
 }
 
 t_pos* primerPosicionSabotajeSinAtender(t_list* posiciones){

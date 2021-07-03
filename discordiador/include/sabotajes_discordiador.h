@@ -21,6 +21,7 @@ void *iniciar_servidor_discordiador();
 void atender_request_discordiador(Request *request);
 void atender_sabotaje(char* posicion);
 double raiz_cuadrada(int numero); //no puedo usar sqrt...
+void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino);
 
 
 

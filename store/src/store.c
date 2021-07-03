@@ -6,43 +6,6 @@
 #define CONFIG_FILE_PATH "cfg/store.cfg"
 #define LOG_FILE_PATH "store.log"
 
-void testLecturaRecurso(){
-	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
-	
-	metadata = leerMetadataRecurso(OXIGENO);
-
-	char* str = stringFromList(metadata->blocks);
-	char* lectura = leerBloques(metadata->blocks, metadata->size);
-
-	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
-		int bloque = (int) list_get(metadata->blocks, i);
-		printf("bloque: %d", bloque);
-	}*/
-}
-
-void testLecturaBitacora(){
-	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
-	
-	metadata = leerMetadataBitacora("1");
-
-	char* str = stringFromList(metadata->blocks);
-	char* lectura = leerBloques(metadata->blocks, metadata->size);
-
-	/*for(int i = 0; list_size(metadata->blocks) > i; i++){
-		int bloque = (int) list_get(metadata->blocks, i);
-		printf("bloque: %d", bloque);
-	}*/
-}
-
-void testMd5(){
-	
-	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
-	
-	metadata = leerMetadataRecurso(OXIGENO);
-
-	char* md5 = generarMd5(metadata->blocks, metadata->size);
-}
-
 void signalHandler(int signal){
 	
 	switch(signal) {
@@ -131,7 +94,9 @@ int leerConfig(void){
 void inicializarStore(void){
 	
 	miLogInfo("==== Inició I-Mongo-Store =====");
-	
+
+	seContectoElDiscordiador = true;
+
 	inicializarParametrosFS();
 
 	if (!verificarFS()){
@@ -146,10 +111,9 @@ void inicializarStore(void){
 	leerSuperbloque();
 	subirBlocksAMemoria();
 	inicializarPosicionesSabotaje();
-	iniciarConexionDiscordiador();
-
 	
-	levantar_servidor(atender_request_store, string_itoa(configuracion->puerto));
+
+	levantar_servidor(atender_request_store, configuracion->puerto);
 }
 
 void inicializarParametrosFS(void){
@@ -201,12 +165,34 @@ void iniciarConexionDiscordiador()
 }
 
 void atenderSabotaje(){
-	//Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
-	//enviarAvisoDeSabotaje(posicionesSabotaje); //esta en ejecucion_tareas
+	//1.Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
+	op_code respuestaDiscordiador = enviarAvisoDeSabotaje(posicionesSabotaje); //esta en ejecucion_tareas
 	
-	//Esperar a que el Discordiador me active el protocolo fsck.
-	
+	//2.Esperar a que el Discordiador me active el protocolo fsck.
+	if (respuestaDiscordiador == FSCK) {
+		miLogInfo("\nSe da inicio al protocolo FSCK");
+	//3.Llamar al protocolo de sabotaje
+		protocoloFsck();
 
+	} else if (respuestaDiscordiador == FAIL){
+        miLogError("ERROR AL ENVIAR EL INICIO DEL PROTOCOLO FSCK. \n");
+	}
+
+	//TODO: Preguntarle a Mau si es necesario esto? para que es?
+	//buffer = (t_buffer*)recibir_buffer(socket_discordiador);
+}
+
+void protocoloFsck(){
+	//Inmediatamente despues que se recibe la llamada de FSCK
+	/*
+	pthread_mutex_lock(&lockStore);
+	puedeEjecutar = 0;
+	pthread_mutex_unlock(&lockStore);
+	*/
+	/* Otra opcion
+	sem_wait(&sem_sabotajeSuperbloque);
+	sem_wait(&sem_sabotajeBloque);
+	*/
 	//Analizar sabotaje en Superbloque
 	verificarCantidadBloques();
 	verificarBitmap();
@@ -215,6 +201,16 @@ void atenderSabotaje(){
 	verificarSizeEnFile();
 	verificarBlockCount();
 	verificarBlocks();	
+	/*
+	sem_signal(&sem_sabotajeSuperbloque);
+	sem_signal(&sem_sabotajeBloque);
+	*/
+	//Inmediatamente despues de que se haya ejecutado el protocolo.	
+	/*
+	pthread_mutex_lock(&lockStore);
+	puedeEjecutar = 1;
+	pthread_cond_signal(&condStore);
+	pthread_mutex_unlock(&lockStore);*/
 }
 
 t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){

@@ -43,7 +43,7 @@ typedef enum {
     GENERAR_BASURA,
     CONSUMIR_OXIGENO,
     CONSUMIR_COMIDA,
-    DESECHAR_BASURA, 
+    DESCARTAR_BASURA, 
 }tipoTarea;
 
 typedef struct {
@@ -68,6 +68,8 @@ typedef struct {
 typedef struct {
 	t_pos* posicion;
 	bool atendida;
+
+
 } PosicionSabotaje;
 
 t_list* posicionesSabotaje;
@@ -85,6 +87,7 @@ typedef struct {
 
 Configuracion* configuracion;
 static int socket_discordiador;
+bool seContectoElDiscordiador;
 
 int leerConfig();
 void atender_request_store(Request *request);
@@ -99,5 +102,14 @@ pthread_mutex_t mutex_informartareas;
 pthread_mutex_t mutex_informacionBitacora;
 pthread_mutex_t mutex_obtenerBitacora;
 pthread_mutex_t mutex_guardar_en_bitacora;
+
+/*PARA DETENER PROCESO MIENTRAS SE ATIENDE EL SABOTAJE*/
+//sem_t sem_sabotajeBloque;
+//sem_t sem_sabotajeSuperbloque;
+/*
+pthread_mutex_t lockStore = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t condStore = PTHREAD_COND_INITIALIZER;
+int puedeEjecutar = 1;
+*/
 
 #endif

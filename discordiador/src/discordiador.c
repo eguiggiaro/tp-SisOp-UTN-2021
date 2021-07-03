@@ -115,7 +115,7 @@ int main()
 void consola()
 {
 	char *input_consola; // = "INICIAR_PATOTA 1 /home/utnso/tareas/tareasPatota5.txt 1|1";
-	char **list;
+	char** list;
 	printf("Hola!\n");
 	printf("Que desea hacer?\n");
 	pthread_t *threadPATOTA;
@@ -130,14 +130,6 @@ void consola()
 	while (strcmp(input_consola, "FIN") != 0)
 	{
 		printf("%s\n", input_consola);
-		if (list == NULL)
-		{
-			//todo: poner algo un poco mas profesional... o no :D
-			printf("Emm... No escribiste nada...");
-			return;
-		}
-		else
-		{
 			//*la primer linea debe ser la tarea. dependiendo esta chequeamos si va a tener mas tokens o no.
 			list = string_split(input_consola, " ");
 
@@ -215,7 +207,6 @@ void consola()
 			printf("Siguiente comando?\n");
 			input_consola = readline(">>");
 		}
-	}
 }
 
 void expulsar_tripulante(char *comando)
@@ -1031,9 +1022,10 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
 
   //libero lugar en la cola de EXEC
   sem_post(&semaforoEXEC);
+  sem_post(&semaforoREADY);
 
   //al liberarse un espacio en la cola de EXEC, replanifico 
-  planificar();
+  //planificar();
   }
 
 }

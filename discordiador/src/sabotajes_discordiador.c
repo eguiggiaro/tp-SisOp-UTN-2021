@@ -6,7 +6,7 @@ void *iniciar_servidor_discordiador(){
 }
 
 void atender_request_discordiador(Request *request){
-    op_code codigo_operacion = request->codigo_operacion;
+  op_code codigo_operacion = request->codigo_operacion;
 	t_buffer *buffer = request->buffer_devolucion;
 	int request_fd = request->request_fd;
 	t_list *lista;

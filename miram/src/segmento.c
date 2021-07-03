@@ -1165,7 +1165,7 @@ uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 }
 
 
-int iniciar_tripulante_segmentacion(int patota_id, bool mapa)
+TCB* iniciar_tripulante_segmentacion(int patota_id, bool mapa)
 {
 	u_int32_t posicion_memoria = buscar_tripulante_no_asignado_segmentacion(patota_id);
 
@@ -1181,7 +1181,7 @@ int iniciar_tripulante_segmentacion(int patota_id, bool mapa)
 		crear_personaje_grilla(unTCB->TID, unTCB->pos_X, unTCB->pos_y);
 	}
 
-	return unTCB->TID;
+	return unTCB;
 }
 
 

@@ -7,6 +7,9 @@
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include "estructuras.h"
+#include <commons/bitarray.h>
+#include <commons/collections/queue.h>
+
 
 
 int contador_frames;
@@ -15,13 +18,15 @@ int contador_paginas;
 int tamanio_pagina_paginacion;
 int contador_LRU;
 int contador_espacios_SWAP;
+char* algoritmo_reemplazo;
 FILE* SWAP;
-void* bitmap;
+t_bitarray* bitmap;
 t_list *tabla_frames;
 t_list *tabla_pcbs;
 t_list *tabla_tareas;
 t_list *tabla_tcbs;
 t_list *tabla_elementos_SWAP;
+t_queue *cola_FIFO_clock;
 
 
 typedef enum
@@ -47,6 +52,7 @@ typedef struct Pagina
 	t_list* contenido;
 	bool en_memoria;
 	int LRU;
+	int clock;
 } Pagina;
 
 typedef struct Elemento_SWAP
@@ -54,7 +60,6 @@ typedef struct Elemento_SWAP
 	int id_pagina;
 	int posicion_SWAP;
 } Elemento_SWAP;
-
 
 typedef struct
 {
@@ -83,7 +88,7 @@ TCB *buscar_tcb_por_id(int tripulante_id);
 Frame *buscar_frame_por_pagina(int id_pagina);
 PCB_adm* buscar_patota_tripulante(int tripulante_id);
 Pagina *buscar_pagina_por_id(int id_pagina);
-Frame* traer_de_SWAP(int id_pagina);
+Frame *traer_de_SWAP(int id_pagina, Frame* un_frame);
 void* llevar_a_swap(Frame* un_frame, Pagina* una_pagina);
 Frame *hacer_lugar_memoria();
 

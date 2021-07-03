@@ -126,15 +126,20 @@ void atender_request_miram(Request *request)
 		t_paquete *paquete_devuelto_iniciar_tripulante;
 		t_buffer *buffer_devolucion_iniciar_tripulante = request->buffer_devolucion;
 		lista_mensajes = list_create();
+		TCB* un_tripulante;
 
 		//recibo los mensajes
 		lista = deserializar_lista_strings(buffer_devolucion_iniciar_tripulante);
 
 		int PATOTA_ID = atoi(list_get(lista, 0));
 		miLogInfo("Me llego operacion: INICIAR TRIPULANTE PATOTA %d\n", PATOTA_ID);
-		resultado = iniciar_tripulante(PATOTA_ID);
+		un_tripulante = iniciar_tripulante(PATOTA_ID);
+		
+		char *posicion = string_new();
+		string_append(&posicion,string_itoa(un_tripulante->pos_X));
+		string_append(&posicion,"|");
+		string_append(&posicion,string_itoa(un_tripulante->pos_y));
 
-		char *posicion;
 		char *proxima_tarea;
 
 		if (resultado == -1)
@@ -145,10 +150,9 @@ void atender_request_miram(Request *request)
 		}
 		else
 		{
-			miLogInfo("TRIPULANTE %d INICIADO CORRECTAMENTE \n", resultado);
+			miLogInfo("TRIPULANTE %d INICIADO CORRECTAMENTE \n", un_tripulante->TID);
 
-			posicion = buscar_posicion_tripulante(resultado);
-			proxima_tarea = proxima_tarea_tripulante(resultado);
+			proxima_tarea = proxima_tarea_tripulante(un_tripulante->TID);
 
 			paquete_devuelto_iniciar_tripulante = crear_paquete(OK);
 			list_add(lista_mensajes, string_itoa(resultado));
@@ -160,6 +164,7 @@ void atender_request_miram(Request *request)
 		paquete_devuelto_iniciar_tripulante->buffer = buffer_respuesta_iniciar_tripulante;
 		enviar_paquete(paquete_devuelto_iniciar_tripulante, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_tripulante);
+		free(posicion);
 		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
 		list_destroy(lista_mensajes);
 		list_destroy(lista);
@@ -443,9 +448,9 @@ void inicializar_memoria(int tamanio_memoria)
 	}
 	else
 	{
-
+		char* algoritmo_reemplazo = configuracion->algoritmo_reemplazo;
 		tamanio_pagina = configuracion->tamanio_pagina;
-		inicializar_paginacion(tamanio_memoria, tamanio_pagina, configuracion->tamanio_swap, configuracion->path_swap);
+		inicializar_paginacion(tamanio_memoria, tamanio_pagina, configuracion->tamanio_swap, configuracion->path_swap, algoritmo_reemplazo);
 	}
 }
 
@@ -643,7 +648,7 @@ int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 	}
 }
 
-int iniciar_tripulante(int patota_id)
+TCB* iniciar_tripulante(int patota_id)
 {
 	bool mapa = false;
 	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
@@ -653,11 +658,11 @@ int iniciar_tripulante(int patota_id)
 
 	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		iniciar_tripulante_segmentacion(patota_id, mapa);
+		return iniciar_tripulante_segmentacion(patota_id, mapa);
 	}
 	else
 	{
-		iniciar_tripulante_paginacion(patota_id, mapa);
+		return iniciar_tripulante_paginacion(patota_id, mapa);
 	}
 }
 
@@ -700,6 +705,7 @@ int main()
 {
 	//Signal para atender la compactación
 	signal(SIGUSR1, signalHandler);
+	signal(SIGUSR2, signalHandler);
 
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);

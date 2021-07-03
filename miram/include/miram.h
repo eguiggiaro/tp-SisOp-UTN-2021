@@ -53,6 +53,7 @@ char *proxima_tarea_tripulante(int tripulante_id);
 char *buscar_posicion_tripulante(int tripulante_id);
 char buscar_tripulante_grilla(int tripulante);
 u_int32_t buscar_tripulante(int TCB_ID);
+TCB* iniciar_tripulante(int patota_id);
 
 pthread_mutex_t mutex_tripulantes;
 pthread_mutex_t mutex_tareas;

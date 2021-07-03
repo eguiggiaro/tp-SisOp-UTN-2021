@@ -284,10 +284,14 @@ void iniciar_patota(char *comando)
 	string_tareas = leer_tareas_txt(list[2]); //leemos las tareas y las traemos como un solo string
 
 	int cantidad_trip = atoi(list[1]);
+
+	int size;
+	for (size = 0; list[size] != NULL; size++);
+
 	for (int i = 0; i < cantidad_trip; i++)
 	{ //string con todas las posiciones
 
-		if ((sizeof(list) - 3) == (i + 1))
+		if ((size - 3) == (i + 1))
 		{
 			string_append_with_format(&string_posiciones, "%s;", list[i + 3]);
 		}
@@ -299,7 +303,7 @@ void iniciar_patota(char *comando)
 
 	list_add(lista_mensajes, list[1]);
 	list_add(lista_mensajes, string_tareas);
-	list_add(lista_mensajes, string_posiciones);
+	list_add(lista_mensajes, string_posiciones);	
 	mensajes_respuesta = iniciar_patota_miram(socket_miram, lista_mensajes);
 
 	char *patota_id = list_get(mensajes_respuesta, 0);

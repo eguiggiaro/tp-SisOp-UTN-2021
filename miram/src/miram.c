@@ -17,22 +17,28 @@ void compactar_memoria(void)
 	}
 }
 
-void signalHandler(int signal){
-	
-	switch(signal) {
-		case SIGUSR1:
-			miLogInfo("Me llegó la señal %d, inicio compactación", signal);	
-			compactar();	
-			break;
-		case SIGINT:
-			miLogInfo("Se forzó el cierre MiRam.");
-			miLogDestroy();
-			finalizar_memoria();
-			exit(130);	//Control+C
-			break;
-		default:
-			break;
-	}	
+void signalHandler(int signal)
+{
+
+	switch (signal)
+	{
+	case SIGUSR1:
+		miLogInfo("Me llegó la señal %d, inicio compactación", signal);
+		compactar();
+		break;
+	case SIGUSR2:
+		miLogInfo("Me llegó la señal %d, inicio dump", signal);
+		dump();
+		break;
+	case SIGINT:
+		miLogInfo("Se forzó el cierre MiRam.");
+		miLogDestroy();
+		finalizar_memoria();
+		exit(130); //Control+C
+		break;
+	default:
+		break;
+	}
 }
 
 // Lee la configuración y la deja disponible
@@ -475,6 +481,19 @@ int compactar()
 	}
 }
 
+int dump()
+{
+
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
+	{
+		return archivo_segmentacion(true);
+	}
+	else
+	{
+		return archivo_paginacion(true);
+	}
+}
+
 void dump_memoria(bool mostrar_vacios)
 {
 	if (strcmp(configuracion->mapa, "HABILITADO") != 0)
@@ -644,19 +663,23 @@ int iniciar_tripulante(int patota_id)
 
 int expulsar_tripulante(int tripulante_id)
 {
-	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
 	int resultado;
 
-	if (posicion_memoria == 99)
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		return -1;
-	}
-	else
-	{
-		if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
+
+		u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
+
+		if (posicion_memoria == 99)
+		{
+			return -1;
+		}
+		else
 		{
 			resultado = expulsar_tripulante_segmentacion(tripulante_id);
 		}
+	} else {
+		resultado = expulsar_tripulante_paginacion(tripulante_id);
 	}
 }
 
@@ -677,7 +700,7 @@ int main()
 {
 	//Signal para atender la compactación
 	signal(SIGUSR1, signalHandler);
-	
+
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició MiRAM.");

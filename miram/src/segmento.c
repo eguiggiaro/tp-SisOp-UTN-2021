@@ -1,5 +1,145 @@
 #include "segmento.h"
 
+void archivo_segmentacion(bool mostrar_vacios)
+
+{
+	pthread_mutex_lock(&mutex_dump);
+
+	char* nombre_archivo = string_new();
+	string_append(&nombre_archivo, "dmp/Dump_");
+	string_append(&nombre_archivo, temporal_get_string_time("%d_%m_%y_%H:%M:%S"));
+	string_append(&nombre_archivo, ".dmp");
+
+	FILE* archivoDump = fopen(nombre_archivo, "w+");
+
+	dump_memoria_segmentos_archivo(mostrar_vacios, archivoDump);
+	dump_memoria_contenido_segmentacion_archivo(archivoDump);	
+	
+	fclose(archivoDump);
+	fflush(stdout); 
+	pthread_mutex_unlock(&mutex_dump);
+
+}
+
+void dump_memoria_segmentos_archivo(bool mostrar_vacios, FILE* archivoDump)
+{
+	
+	fprintf(archivoDump,"--------------------------------------------------------------------\n");
+	fprintf(archivoDump,"Detalle segmentos en memoria\n");
+	fprintf(archivoDump,"--------------------------------------------------------------------\n");
+	fprintf(archivoDump,"Dir Inicio\tId segmento\tDesplazamiento\tEstado\n");
+	
+	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
+	while (list_iterator_has_next(list_iterator))
+	{
+		Segmento *segmento_aux = list_iterator_next(list_iterator);
+
+		//Imprime solo segmentos libres o no, según parámetro de entrada
+		if (mostrar_vacios || (segmento_aux->id) >= 0)
+			imprimir_segmento_archivo(segmento_aux, archivoDump);
+	}
+
+	fprintf(archivoDump,"--------------------------------------------------------------------\n");
+	list_iterator_destroy(list_iterator);
+}
+
+
+
+void dump_memoria_contenido_segmentacion_archivo(FILE* archivoDump)
+{
+
+	fprintf(archivoDump,"Detalle patotas en memoria\n");
+	fprintf(archivoDump,"--------------------------------------------------------------------\n");
+	fprintf(archivoDump,"Patota Id\t# Segmento\t  Tipo\t   Inicio\tTamaño\n");
+
+	t_list_iterator *list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
+	t_list_iterator *list_iterator_tareas;
+	t_list_iterator *list_iterator_tcb;
+
+
+	PCB_adm* pcbadm;
+	Tarea_adm* tareadm;
+	TCB_adm* tcbadm;
+	int patota, segmento, tipo, inicio, tamanio;
+	Segmento* un_segmento;
+	PCB* pcb;
+	TCB* tcb;
+
+	char* tareas;
+
+	while (list_iterator_has_next(list_iterator_pcb))
+	{
+		pcbadm = list_iterator_next(list_iterator_pcb);
+		patota = pcbadm->PID;
+		segmento = pcbadm->segmento_nro;
+		tipo = "PCB";
+		un_segmento = buscar_segmento_por_id(segmento);
+		inicio = un_segmento->dir_inicio;
+		tamanio = un_segmento->desplazamiento;
+		pcb = buscar_patota_segmentacion(pcbadm->PID);
+
+		fprintf(archivoDump,"%9d\t%10d\t%6s\t%p\t%5db\n", patota, segmento, tipo,pcb,tamanio);
+
+		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
+
+		while (list_iterator_has_next(list_iterator_tareas))
+		{
+			tareadm = list_iterator_next(list_iterator_tareas);
+
+			if (tareadm->PID == pcbadm->PID)
+			{
+				segmento = tareadm->segmento_nro;
+				tipo = "Tareas";
+				un_segmento = buscar_segmento_por_id(segmento);
+				inicio = un_segmento->dir_inicio;
+				tamanio = un_segmento->desplazamiento;
+				tareas = pcb->Tareas;
+
+				fprintf(archivoDump,"%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tareas,tamanio);
+				break;
+			}
+		}
+		list_iterator_destroy(list_iterator_tareas);
+
+		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
+
+		while (list_iterator_has_next(list_iterator_tcb))
+			{
+				tcbadm = list_iterator_next(list_iterator_tcb);
+
+					if (tcbadm->PID == pcbadm->PID)
+					{
+						segmento = tcbadm->segmento_nro;
+						tipo = "  TCB";
+						un_segmento = buscar_segmento_por_id(segmento);
+						inicio = un_segmento->dir_inicio;
+						tamanio = un_segmento->desplazamiento;
+						tcb = buscar_tripulante_segmentacion(tcbadm->TID);
+
+						fprintf(archivoDump,"%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tcb,tamanio);
+					}
+			}
+		list_iterator_destroy(list_iterator_tcb);
+
+	}
+
+	fprintf(archivoDump,"--------------------------------------------------------------------\n");
+	list_iterator_destroy(list_iterator_pcb);
+}
+
+void imprimir_segmento_archivo(Segmento *segmento_a_imprimir, FILE* archivoDump)
+
+{
+	fprintf(archivoDump,"%d\t%d\t\t%d\t\t%s\n", segmento_a_imprimir->dir_inicio, segmento_a_imprimir->id, segmento_a_imprimir->desplazamiento, segmento_a_imprimir->estado);
+}
+
+
+
+
+
+
+
+
 void dump_memoria_segmentos(bool mostrar_vacios)
 {
 
@@ -21,6 +161,9 @@ void dump_memoria_segmentos(bool mostrar_vacios)
 	printf("--------------------------------------------------------------------\n");
 	list_iterator_destroy(list_iterator);
 }
+
+
+
 
 void dump_memoria_contenido_segmentacion()
 {

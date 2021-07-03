@@ -87,7 +87,7 @@ typedef struct {
 
 Configuracion* configuracion;
 static int socket_discordiador;
-bool seContectoElDiscordiador;
+bool conexionConDiscordiadorIniciada;
 
 int leerConfig();
 void atender_request_store(Request *request);

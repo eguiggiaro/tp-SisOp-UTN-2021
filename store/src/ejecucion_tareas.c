@@ -7,11 +7,7 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 
 	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
 
-	//char caracter = cualEsMiCaracter(recurso);
 	char * cadenaCaracteres = generarCadenaCaracteres(metadataR->caracter_llenado, cantidadCaracteres);
-	/*char* strCaracter = string_new();
-	strCaracter = string_repeat(caracter, 1);
-	*/
 	
 	int size = metadataR->size;
 	int block_count = metadataR->block_count;
@@ -30,7 +26,6 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	list_add_all(metadataR->blocks, listaBloquesOcupados);
 	metadataR->size += cantidadCaracteres;
 	metadataR->block_count += list_size(listaBloquesOcupados);
-	//metadataR->caracter_llenado = strCaracter;
 
 	free(cadenaCaracteres);
 

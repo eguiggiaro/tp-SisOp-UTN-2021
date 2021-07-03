@@ -13,17 +13,19 @@ const char *tipoTarea_table [] = {
 
 void atender_request_store(Request *request) {
 
+	//Inicio la conexion con el discordiador ante la primer instruccion recibida.
+	if(!conexionConDiscordiadorIniciada){
+		iniciarConexionDiscordiador();
+		conexionConDiscordiadorIniciada = true;
+	}
+
+	//Bloqueo la recepcion de nuevas operaciones cuando el protocolo FSCK esta en proceso.
 	/*pthread_mutex_lock(&lockStore); 
 	while(!puedeEjecutar) { 
   		pthread_cond_wait(&condStore, &lockStore); // Espero por puedeEjecutar
 	}
 	pthread_mutex_unlock(&lockStore);*/
 
-	if(seContectoElDiscordiador){
-		iniciarConexionDiscordiador();
-		seContectoElDiscordiador = false;
-	}
-		
 	op_code codigo_operacion = request->codigo_operacion;
 	int request_fd = request->request_fd;
 	t_list *lista = list_create();
@@ -59,7 +61,7 @@ void atender_request_store(Request *request) {
 	 		resultadoTarea = ejecutarTarea(tarea, cantidadRecursos);
 			char* mensajeAGuardar = string_new();
 			string_append(&mensajeAGuardar, "Comienza ejecucion tarea ");
-			string_append(&mensajeAGuardar, tarea);
+			string_append(&mensajeAGuardar, informeTarea);
 			string_append(&mensajeAGuardar, "\n");
 			resultadoBitacora = guardarEnBitacora(id_tripulante, mensajeAGuardar);
 

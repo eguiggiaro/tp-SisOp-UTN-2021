@@ -95,8 +95,6 @@ void inicializarStore(void){
 	
 	miLogInfo("==== Inició I-Mongo-Store =====");
 
-	seContectoElDiscordiador = true;
-
 	inicializarParametrosFS();
 
 	if (!verificarFS()){
@@ -111,6 +109,12 @@ void inicializarStore(void){
 	leerSuperbloque();
 	subirBlocksAMemoria();
 	inicializarPosicionesSabotaje();
+
+	conexionConDiscordiadorIniciada = false;
+
+	//TEST Obtener bitacora
+	//char* bitacora = obtenerBitacora("0");
+	//printf(bitacora);
 	
 
 	levantar_servidor(atender_request_store, configuracion->puerto);
@@ -155,12 +159,12 @@ void inicializarPosicionesSabotaje(){
 void iniciarConexionDiscordiador()
 {	//inicia conexion con destino
 	int socket = crear_conexion(logger, configuracion->ipDiscordiador, configuracion->puertoDiscordiador);
-	miLogInfo("Obtuve el socket y vale %d.\n", socket);
-
+	
 	if (socket == -1) {
 		miLogError("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
+	miLogInfo("Conexion con discordiador iniciada correctamente. (Socket: %d).\n", socket);
 	socket_discordiador = socket;
 }
 
@@ -175,7 +179,7 @@ void atenderSabotaje(){
 		protocoloFsck();
 
 	} else if (respuestaDiscordiador == FAIL){
-        miLogError("ERROR AL ENVIAR EL INICIO DEL PROTOCOLO FSCK. \n");
+        miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje. \n");
 	}
 
 	//TODO: Preguntarle a Mau si es necesario esto? para que es?
@@ -183,16 +187,13 @@ void atenderSabotaje(){
 }
 
 void protocoloFsck(){
-	//Inmediatamente despues que se recibe la llamada de FSCK
+	//Inmediatamente antes de que se inicie el protocolo FSCK, freno el request_analyzer.
 	/*
 	pthread_mutex_lock(&lockStore);
 	puedeEjecutar = 0;
 	pthread_mutex_unlock(&lockStore);
 	*/
-	/* Otra opcion
-	sem_wait(&sem_sabotajeSuperbloque);
-	sem_wait(&sem_sabotajeBloque);
-	*/
+
 	//Analizar sabotaje en Superbloque
 	verificarCantidadBloques();
 	verificarBitmap();
@@ -201,11 +202,8 @@ void protocoloFsck(){
 	verificarSizeEnFile();
 	verificarBlockCount();
 	verificarBlocks();	
-	/*
-	sem_signal(&sem_sabotajeSuperbloque);
-	sem_signal(&sem_sabotajeBloque);
-	*/
-	//Inmediatamente despues de que se haya ejecutado el protocolo.	
+
+	//Inmediatamente despues de que se haya ejecutado el protocolo, activo el request_analyzer.	
 	/*
 	pthread_mutex_lock(&lockStore);
 	puedeEjecutar = 1;

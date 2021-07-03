@@ -36,6 +36,6 @@ int obtenerUltimoBloque(t_list* blocks, int posicionUltimoBloque);
 int saberTamanioUltimobloque(int cantidadBytesLibres);
 int desecharRecurso(tipoRecurso recurso);
 t_pos* primerPosicionSabotajeSinAtender(t_list*);
-op_code enviarAvisoDeSabotaje(t_list*);
+op_code enviarAvisoDeSabotaje(t_list*, int);
 
 #endif

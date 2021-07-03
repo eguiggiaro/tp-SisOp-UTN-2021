@@ -256,7 +256,7 @@ int desecharRecurso(tipoRecurso recurso){
 	return 1;
 }
 
-op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje){
+op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje, int socket_discordiador){
 	
 	t_paquete* paquete = crear_paquete(ALERTA_SABOTAJE);
     t_buffer* buffer;

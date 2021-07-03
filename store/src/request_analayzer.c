@@ -13,12 +13,6 @@ const char *tipoTarea_table [] = {
 
 void atender_request_store(Request *request) {
 
-	//Inicio la conexion con el discordiador ante la primer instruccion recibida.
-	if(!conexionConDiscordiadorIniciada){
-		iniciarConexionDiscordiador();
-		conexionConDiscordiadorIniciada = true;
-	}
-
 	//Bloqueo la recepcion de nuevas operaciones cuando el protocolo FSCK esta en proceso.
 	/*pthread_mutex_lock(&lockStore); 
 	while(!puedeEjecutar) { 
@@ -43,14 +37,14 @@ void atender_request_store(Request *request) {
 			t_buffer* buffer_devolucion_informar_tarea = request->buffer_devolucion;
 			t_paquete* paquete_devuelto_informar_tarea;
 
-			miLogDebug("Me llego operacion: INFORMAR_TAREA \n");
+			miLogDebug("Me llego operacion: INFORMAR_TAREA.");
 			lista = deserializar_lista_strings(buffer_devolucion_informar_tarea);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante. 
 			 
 			//t_list* informeTarea = list_create();
 			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12
-			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.\n", informeTarea, id_tripulante);
+			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.", informeTarea, id_tripulante);
 
 			char** listaNueva;
 			listaNueva = string_split(informeTarea , " ");//Crea una lista separando la cadena informeTarea[1] por SPACE. Resultado lista[0]= GENERAR_OXIGENO . lista[1] = 12
@@ -67,13 +61,13 @@ void atender_request_store(Request *request) {
 
 			if (resultadoTarea == -1)
 			{
-				miLogInfo("ERROR: No se pudo realizar la tarea: %s del tripulante: %s \n", informeTarea, id_tripulante);
+				miLogInfo("ERROR: No se pudo realizar la tarea: %s del tripulante: %s.", informeTarea, id_tripulante);
 				paquete_devuelto_informar_tarea = crear_paquete(FAIL);
 				list_add(lista_mensajes, "Se produjo un error intentar realizar la tarea");
 			}
 			else
 			{
-				miLogInfo("La tarea: %s del tripulante: %s, se realizo correctamente \n", informeTarea, id_tripulante);
+				miLogInfo("La tarea: %s del tripulante: %s, se realizo correctamente.", informeTarea, id_tripulante);
 
 				paquete_devuelto_informar_tarea = crear_paquete(OK);
 				list_add(lista_mensajes, "Se realizo la tarea correctamente");
@@ -96,25 +90,25 @@ void atender_request_store(Request *request) {
 			t_buffer* buffer_devolucion_informacion_bitacora = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_informacion_bitacora;
 
-			miLogDebug("Me llego operacion: INFORMACION_BITACORA \n");
+			miLogDebug("Me llego operacion: INFORMACION_BITACORA");
 			lista = deserializar_lista_strings(buffer_devolucion_informacion_bitacora);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X						
-			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.\n", instruccionABitacora, id_tripulante);
+			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.", instruccionABitacora, id_tripulante);
 
 			string_append(&instruccionABitacora, "\n");
 			resultadoTarea = guardarEnBitacora(id_tripulante, instruccionABitacora);
 
 			if (resultadoTarea == -1)
 			{
-				miLogInfo("ERROR: No se pudo guardar la tarea: %s, en la bitacora del tripulante: %s.\n", instruccionABitacora, id_tripulante);
+				miLogInfo("ERROR: No se pudo guardar la tarea: %s, en la bitacora del tripulante: %s.", instruccionABitacora, id_tripulante);
 				paquete_devuelto_informacion_bitacora = crear_paquete(FAIL);
 				list_add(lista_mensajes, "Se produjo un error intentar guardar la instruccion");
 			}
 			else
 			{
-				miLogInfo("Se guardo la tarea: %s, en la bitacora del tripulante: %s.\n", instruccionABitacora, id_tripulante);
+				miLogInfo("Se guardo la tarea: %s, en la bitacora del tripulante: %s.", instruccionABitacora, id_tripulante);
 
 				paquete_devuelto_informacion_bitacora = crear_paquete(OK);
 				list_add(lista_mensajes, "Se guardó la tarea correctamente");
@@ -136,24 +130,24 @@ void atender_request_store(Request *request) {
 			t_buffer* buffer_devolucion_obtener_bitacora = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_obtener_bitacora;
 
-			miLogDebug("Me llego operacion: OBTENER BITACORA \n");
+			miLogDebug("Me llego operacion: OBTENER BITACORA");
 			lista = deserializar_lista_strings(buffer_devolucion_obtener_bitacora);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
-			miLogInfo("Me solicitaron la bitacora del tripulante: %s.\n", id_tripulante);
+			miLogInfo("Me solicitaron la bitacora del tripulante: %s.", id_tripulante);
 			
 			char* bitacora = string_new();
 			bitacora = obtenerBitacora(id_tripulante);
 
 			if (string_is_empty(bitacora))
 			{
-				miLogDebug("ERROR: LA BITACORA DEL TRIPULANTE ESTA VACIA \n");
+				miLogDebug("ERROR: LA BITACORA DEL TRIPULANTE ESTA VACIA.");
 				paquete_devuelto_obtener_bitacora = crear_paquete(FAIL);
 				list_add(lista_mensajes, "La bitacora del tripulante esta vacia");
 			}
 			else
 			{
-				miLogInfo("Se envio la bitacora del tripulante: %s.\n", id_tripulante);
+				miLogInfo("Se envio la bitacora del tripulante: %s.", id_tripulante);
 
 				paquete_devuelto_obtener_bitacora = crear_paquete(OK);
 				list_add(lista_mensajes, bitacora);
@@ -170,7 +164,7 @@ void atender_request_store(Request *request) {
 		break;
 		
 		default:
-			miLogInfo("Me llego operacion: ...\n");
+			miLogInfo("Me llego operacion: ...");
 	  	break;
 	}
 }

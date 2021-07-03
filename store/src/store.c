@@ -110,7 +110,7 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 	inicializarPosicionesSabotaje();
 
-	conexionConDiscordiadorIniciada = false;
+	//conexionConDiscordiadorIniciada = false;
 
 	//TEST Obtener bitacora
 	//char* bitacora = obtenerBitacora("0");
@@ -156,7 +156,7 @@ void inicializarPosicionesSabotaje(){
 	list_destroy(posiciones);
 }
 
-void iniciarConexionDiscordiador()
+int iniciarConexionDiscordiador()
 {	//inicia conexion con destino
 	int socket = crear_conexion(logger, configuracion->ipDiscordiador, configuracion->puertoDiscordiador);
 	
@@ -165,25 +165,31 @@ void iniciarConexionDiscordiador()
 		exit(3);
 	}
 	miLogInfo("Conexion con discordiador iniciada correctamente. (Socket: %d).\n", socket);
-	socket_discordiador = socket;
+	//socket_discordiador = socket;
+
+	return socket;
 }
 
 void atenderSabotaje(){
-	//1.Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
-	op_code respuestaDiscordiador = enviarAvisoDeSabotaje(posicionesSabotaje); //esta en ejecucion_tareas
+	//0.Inicio la conexion con el Discordiador.
+	int socket_discordiador = iniciarConexionDiscordiador();
 	
-	//2.Esperar a que el Discordiador me active el protocolo fsck.
-	if (respuestaDiscordiador == FSCK) {
-		miLogInfo("\nSe da inicio al protocolo FSCK");
-	//3.Llamar al protocolo de sabotaje
-		protocoloFsck();
-
+	//1.Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
+	op_code respuestaDiscordiador = enviarAvisoDeSabotaje(posicionesSabotaje, socket_discordiador); 
+	if (respuestaDiscordiador == OK) {
+		miLogInfo("El Discordiador recibio el alerta de sabotaje correctamente.");
 	} else if (respuestaDiscordiador == FAIL){
         miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje. \n");
 	}
 
-	//TODO: Preguntarle a Mau si es necesario esto? para que es?
-	//buffer = (t_buffer*)recibir_buffer(socket_discordiador);
+	//2.Esperar a que el Discordiador me active el protocolo fsck.
+	while(1){
+		//????????????????
+	}
+	
+	//3.Llamar al protocolo de sabotaje
+	miLogInfo("Se da inicio al protocolo FSCK");
+	protocoloFsck();
 }
 
 void protocoloFsck(){

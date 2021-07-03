@@ -71,6 +71,128 @@ double raiz_cuadrada(int numero){
   return root;
 }
 
+void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino){
+    //Me muevo desde la posicion actual hasta donde pide la tarea.
+    int distancia_x;
+    int distancia_y;
+    int x_origen = trip->pos_x;
+    int y_origen = trip->pos_y;
+
+    //parametro para enviar a bitacora
+    char* id_trip = string_itoa(trip->id_tripulante);
+
+
+    //Primero me muevo linealmente en el eje X
+    if(x_origen > x_destino){
+      distancia_x = x_origen - x_destino;
+      for(int i = 0; i<distancia_x; i++){
+        //resto de parametros para enviar a bitacora
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* x_destino_b = string_itoa((trip->pos_x)-1);
+        char* y_destino_b = y_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
+        //realizo movimiento
+        (trip->pos_x)--;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"X");
+      }
+    }
+    else if(x_origen < x_destino){
+      distancia_x = x_destino - x_origen;
+      for(int i = 0; i<distancia_x; i++){
+        //resto de parametros para enviar a bitacora
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* x_destino_b = string_itoa((trip->pos_x)+1);
+        char* y_destino_b = y_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
+        //realizo movimiento
+        (trip->pos_x)++;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"X");
+      }
+    }
+    else{
+      distancia_x = 0;
+    }
+
+    //Despues hago lo mismo en el eje Y
+    if(y_origen > y_destino){
+      distancia_y = y_origen - y_destino;
+      for(int i = 0; i<distancia_y; i++){
+        //resto de parametros para enviar a bitacora
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* y_destino_b = string_itoa((trip->pos_y)-1);
+        char* x_destino_b = x_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
+        //realizo movimiento
+        (trip->pos_y)--;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"Y");
+      }
+    }
+    else if(y_origen < y_destino){
+      distancia_y = y_destino - y_origen;
+      for(int i = 0; i<distancia_y; i++){
+        //resto de parametros para enviar a bitacora
+        char* x_origen_b = string_itoa(trip->pos_x);
+        char* y_origen_b = string_itoa(trip->pos_y);
+        char* y_destino_b = string_itoa((trip->pos_y)+1);
+        char* x_destino_b = x_origen_b;
+        char* origen = string_new();
+        string_append(&origen,x_origen_b);
+        string_append(&origen, "|");
+        string_append(&origen, y_origen_b);
+        char* destino = string_new();
+        string_append(&destino,x_destino_b);
+        string_append(&destino,"|");
+        string_append(&destino, y_destino_b);
+
+        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        avisar_movimiento_bitacora(id_trip,origen,destino);
+        //realizo movimiento
+        (trip->pos_y)++;
+        //aviso a miram
+        avisar_movimiento_miram(trip,"Y");
+      }
+    }
+    else{
+      distancia_y = 0;
+    }
+}
+
 void atender_sabotaje(char* posicion){
     char** array_posicion = string_split(posicion, ",");
     int pos_x = atoi(array_posicion[0]);
@@ -146,4 +268,27 @@ void atender_sabotaje(char* posicion){
     Tripulante* tripulante_elegido = (Tripulante*) list_get_minimum(blocked_io,(void*)tripulante_mas_cercano);
 
     miLogInfo("\nEl tripulante elegido para llevar a cabo el sabotaje es el: %d \n",tripulante_elegido->id_tripulante);
+
+    //3.1 Movemos al tripulante a la cola de block emergencia
+    int indice;
+    bool tripulante_encontrado = false;
+    for(int i =0; i<list_size(blocked_io);i++){
+      Tripulante* trip_aux = list_get(blocked_io,i);
+      if(trip_aux->id_tripulante == tripulante_elegido->id_tripulante){
+        indice = i;
+        tripulante_encontrado = true;
+      }
+    }
+
+    if(tripulante_encontrado){
+      Tripulante* trip_aux = list_remove(blocked_io,indice);
+      list_add(blocked_em, trip_aux);
+      miLogInfo("\nSe pasa a la cola de BLOCK emergencia al tripulante: %d \n",tripulante_elegido->id_tripulante);
+    }
+
+    //4. Movemos al tripulante elegido al punto de sabotaje.
+    mover_tripulante_a_sabotaje(tripulante_elegido, pos_x,pos_y);
+
+    //5. Enviar FCSK a Store con posicion actual del tripulante.
+
 }

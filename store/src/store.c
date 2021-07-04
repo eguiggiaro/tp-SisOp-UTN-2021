@@ -175,19 +175,18 @@ void atenderSabotaje(){
 	op_code respuestaDiscordiador = enviarAvisoDeSabotaje(posicionesSabotaje, socket_discordiador); 
 	if (respuestaDiscordiador == OK) {
 		miLogInfo("El Discordiador recibio el alerta de sabotaje correctamente.");
+		//2.Esperar a que el Discordiador me active el protocolo fsck.
+		pthread_mutex_lock(&mutexEjecucionSabotaje); 
+		while(!esperaSabotaje) { 
+			pthread_cond_wait(&condEjecucionSabotaje, &mutexEjecucionSabotaje); 
+		}
+		pthread_mutex_unlock(&mutexEjecucionSabotaje);
+		
+		//3.Llamar al protocolo de sabotaje	
+		protocoloFsck();
 	} else if (respuestaDiscordiador == FAIL){
         miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje. \n");
 	}
-
-	//2.Esperar a que el Discordiador me active el protocolo fsck.
-	pthread_mutex_lock(&mutexEjecucionSabotaje); 
-	while(!esperaSabotaje) { 
-  		pthread_cond_wait(&condEjecucionSabotaje, &mutexEjecucionSabotaje); 
-	}
-	pthread_mutex_unlock(&mutexEjecucionSabotaje);
-	
-	//3.Llamar al protocolo de sabotaje	
-	protocoloFsck();
 	
 }
 

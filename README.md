@@ -11,7 +11,6 @@ El objetivo del trabajo práctico consiste en desarrollar una solución que perm
 | GUIGGIARO, Emiliano  | [@eguiggiaro](https://github.com/eguiggiaro) |
 | LAURENZI, Mauro   | [@maurolaurenzi](https://github.com/maurolaurenzi) |
 | MANUELE, Ariel  | [@amanuele](https://github.com/amanuele) |
-| VERDÚN, Mailén  | [@Maikyver](https://github.com/Maikyver) |
 
 
 ## Enunciado

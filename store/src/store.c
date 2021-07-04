@@ -110,14 +110,14 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 	inicializarPosicionesSabotaje();
 
-	//conexionConDiscordiadorIniciada = false;
+	//sem_init(&sem_sabotaje, 0, 1);
 
 	//TEST Obtener bitacora
 	//char* bitacora = obtenerBitacora("0");
 	//printf(bitacora);
-	
 
-	levantar_servidor(atender_request_store, configuracion->puerto);
+	levantar_servidor(atender_request_store, configuracion->puerto);	
+
 }
 
 void inicializarParametrosFS(void){
@@ -165,7 +165,6 @@ int iniciarConexionDiscordiador()
 		exit(3);
 	}
 	miLogInfo("Conexion con discordiador iniciada correctamente. (Socket: %d).\n", socket);
-	//socket_discordiador = socket;
 
 	return socket;
 }
@@ -183,38 +182,42 @@ void atenderSabotaje(){
 	}
 
 	//2.Esperar a que el Discordiador me active el protocolo fsck.
-	while(1){
-		//????????????????
-	}
+	//?????????????????
 	
-	//3.Llamar al protocolo de sabotaje
-	miLogInfo("Se da inicio al protocolo FSCK");
+	//3.Llamar al protocolo de sabotaje	
 	protocoloFsck();
+	
 }
 
 void protocoloFsck(){
-	//Inmediatamente antes de que se inicie el protocolo FSCK, freno el request_analyzer.
-	/*
-	pthread_mutex_lock(&lockStore);
-	puedeEjecutar = 0;
-	pthread_mutex_unlock(&lockStore);
-	*/
-
+	
+	miLogInfo("Se da inicio al protocolo FSCK. Todas las transacciones serán deshabilitadas.");
+	
 	//Analizar sabotaje en Superbloque
-	verificarCantidadBloques();
-	verificarBitmap();
+	if(!verificarCantidadBloques()){
+		miLogInfo("Verificacion de cantidad de bloques en el Superbloques.ims finalizada con exito.");
+	}
+
+	if(!verificarBitmap()){
+		miLogInfo("Verificacion del Bitmpa en el Superbloques.ims finalizada con exito.");
+	}
 
 	//Analizar sabotaje en files
-	verificarSizeEnFile();
-	verificarBlockCount();
-	verificarBlocks();	
+	if(!verificarSizeEnFile()){
+		miLogInfo("Verificacion de Size en los Files de Recursos finalizada con exito.");
+	}
 
-	//Inmediatamente despues de que se haya ejecutado el protocolo, activo el request_analyzer.	
-	/*
-	pthread_mutex_lock(&lockStore);
-	puedeEjecutar = 1;
-	pthread_cond_signal(&condStore);
-	pthread_mutex_unlock(&lockStore);*/
+	if(!verificarBlockCount()){
+		miLogInfo("Verificacion de BlockCount en los Files de Recursos finalizada con exito.");
+	}
+
+	if(!verificarBlocks()){
+		miLogInfo("Verificacion de Bloques en los Files de Recursos finalizada con exito.");
+	}
+
+	//sem_post(&sem_sabotaje);
+	miLogInfo("Finalizó el protocolo FSCK. Las transacciones fueron habilitadas con normalidad.");
+
 }
 
 t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){

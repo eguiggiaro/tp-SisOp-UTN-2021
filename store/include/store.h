@@ -102,12 +102,6 @@ pthread_mutex_t mutex_obtenerBitacora;
 pthread_mutex_t mutex_guardar_en_bitacora;
 
 /*PARA DETENER PROCESO MIENTRAS SE ATIENDE EL SABOTAJE*/
-//sem_t sem_sabotajeBloque;
-//sem_t sem_sabotajeSuperbloque;
-/*
-pthread_mutex_t lockStore = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t condStore = PTHREAD_COND_INITIALIZER;
-int puedeEjecutar = 1;
-*/
+//sem_t sem_sabotaje;
 
 #endif

@@ -13,13 +13,6 @@ const char *tipoTarea_table [] = {
 
 void atender_request_store(Request *request) {
 
-	//Bloqueo la recepcion de nuevas operaciones cuando el protocolo FSCK esta en proceso.
-	/*pthread_mutex_lock(&lockStore); 
-	while(!puedeEjecutar) { 
-  		pthread_cond_wait(&condStore, &lockStore); // Espero por puedeEjecutar
-	}
-	pthread_mutex_unlock(&lockStore);*/
-
 	op_code codigo_operacion = request->codigo_operacion;
 	int request_fd = request->request_fd;
 	t_list *lista = list_create();

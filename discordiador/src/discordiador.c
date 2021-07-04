@@ -744,6 +744,26 @@ void finalizar_tripulante(Tripulante* trip){
   Tripulante* trip_auxiliar;
   bool tripulante_encontrado = false;
 
+  t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
+  char* tripulante = string_itoa(trip->id_tripulante);
+  list_add(lista_mensajes, tripulante);
+  t_paquete* paquete = crear_paquete(EXPULSAR_TRIPULANTE);
+  t_buffer* buffer;
+  buffer = serializar_lista_strings(lista_mensajes);
+  paquete ->buffer = buffer;
+  enviar_paquete(paquete, socket_miram);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_miram);
+	if (codigo_operacion == OK) {
+		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
+		miLogInfo("\nTripulante expulsado correctamente");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
+	}
+
+	list_destroy(lista_mensajes);
+
   for(int i =0; i<list_size(execute_list);i++){
 
   trip_auxiliar = list_get(execute_list,i);

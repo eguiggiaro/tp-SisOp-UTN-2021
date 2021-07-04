@@ -254,6 +254,8 @@ void dump_memoria_segmentacion(bool mostrar_vacios)
 
 {
 	pthread_mutex_lock(&mutex_dump);
+	list_sort(tabla_segmentos, segmentos_orden);
+
 	dump_memoria_segmentos(mostrar_vacios);
 	dump_memoria_contenido_segmentacion();
 	fflush(stdout); 
@@ -279,7 +281,7 @@ u_int32_t reservar_memoria_segmentacion_bf(int bytes)
 	Segmento *segmento_auxiliar;
 	Segmento *segmento_nuevo;
 	u_int32_t posicion_reservada;
-	int minimo_desplazamiento = tamanio_memoria_segmentacion;
+	int minimo_desplazamiento = tamanio_memoria_segmentacion +1;
 
 
 	while (list_iterator_has_next(list_iterator))
@@ -1246,6 +1248,12 @@ bool segmentos_menor (Segmento* segmento1, Segmento* segmento_mayor)
 	return segmento1->desplazamiento <= segmento_mayor->desplazamiento;
 }
 
+bool segmentos_orden (Segmento* segmento1, Segmento* segmento_mayor)
+{
+	return segmento1->dir_inicio <= segmento_mayor->dir_inicio;
+}
+
+
 
 
 int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
@@ -1273,7 +1281,7 @@ int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 			if (strcmp(segmento1->estado,"LIBRE") == 0) 
 			{
 				segmento_aux = malloc(sizeof(Segmento));
-				segmento_aux->id = segmento_aux->id;
+				segmento_aux->id = segmento1->id;
 				segmento_aux->desplazamiento = segmento1->desplazamiento;
 
 				contador_total_disponible += segmento1->desplazamiento;
@@ -1293,8 +1301,8 @@ int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 	{
 		segmento1 = list_iterator_next(list_iterator_segmentos_libres);
 
-		if (strcmp(criterio_seleccion,"FF")==0) 
-		{
+	//	if (strcmp(criterio_seleccion,"FF")==0) 
+	//	{
 			if (!ubique_pcb)
 			{
 				if(segmento1->desplazamiento>= 8)
@@ -1327,7 +1335,7 @@ int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 					}
 				}				
 			}
-		}
+	//	}
 	}
 
 	list_destroy(tabla_segmentos_libres);

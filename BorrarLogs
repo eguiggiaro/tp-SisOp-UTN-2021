@@ -1,0 +1,11 @@
+#!/bin/bash
+cd discordiador
+cd cfg
+truncate -s 0 discordiador.log
+cd ..
+cd ..
+cd miram
+truncate -s 0 miram.log
+cd ..
+cd store
+truncate -s 0 store.log

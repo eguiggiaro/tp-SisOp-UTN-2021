@@ -15,8 +15,7 @@ void signalHandler(int signal){
 			break;
 		case SIGINT:
 			miLogInfo("Se forzó el cierre del I-Mongo-Store.");
-			miLogDestroy();
-			finalizarFS();
+			finalizarStore();
 			exit(130);	//Control+C
 			break;
 		default:
@@ -55,13 +54,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	inicializarStore();
-
-
-	miLogInfo("==== Finalizó I-Mongo-Store ====");
-	free(configuracion);
-	miLogDestroy();
-	list_destroy(posicionesSabotaje);
-	finalizarFS();
 	
 	return EXIT_SUCCESS;
 }
@@ -109,9 +101,8 @@ void inicializarStore(void){
 	leerSuperbloque();
 	subirBlocksAMemoria();
 	inicializarPosicionesSabotaje();
-
-	//sem_init(&sem_sabotaje, 0, 1);
-
+	inicializarSemaforos();
+	
 	//TEST Obtener bitacora
 	//char* bitacora = obtenerBitacora("0");
 	//printf(bitacora);
@@ -129,6 +120,13 @@ void inicializarParametrosFS(void){
 
 	tamanioBloque = configuracion->blockSizeDefault;
 	cantidadBloques = configuracion->blocksQtyDefault;
+}
+
+void inicializarSemaforos(){
+	pthread_attr_init(&attrEjecucionSabotaje);
+    pthread_mutex_init(&mutexEjecucionSabotaje, NULL);
+    pthread_cond_init(&condEjecucionSabotaje, NULL);
+	esperaSabotaje = 0;
 }
 
 void inicializarPosicionesSabotaje(){
@@ -182,7 +180,11 @@ void atenderSabotaje(){
 	}
 
 	//2.Esperar a que el Discordiador me active el protocolo fsck.
-	//?????????????????
+	pthread_mutex_lock(&mutexEjecucionSabotaje); 
+	while(!esperaSabotaje) { 
+  		pthread_cond_wait(&condEjecucionSabotaje, &mutexEjecucionSabotaje); 
+	}
+	pthread_mutex_unlock(&mutexEjecucionSabotaje);
 	
 	//3.Llamar al protocolo de sabotaje	
 	protocoloFsck();
@@ -215,9 +217,8 @@ void protocoloFsck(){
 		miLogInfo("Verificacion de Bloques en los Files de Recursos finalizada con exito.");
 	}
 
-	//sem_post(&sem_sabotaje);
 	miLogInfo("Finalizó el protocolo FSCK. Las transacciones fueron habilitadas con normalidad.");
-
+	
 }
 
 t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
@@ -244,3 +245,15 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 	return listaPosicionesSabotaje;
 }
 
+void finalizarStore(){
+	miLogInfo("==== Finalizó I-Mongo-Store ====");
+	
+	list_destroy(posicionesSabotaje);
+	pthread_mutex_destroy(&mutexEjecucionSabotaje);
+	pthread_cond_destroy(&condEjecucionSabotaje);
+	pthread_attr_destroy(&attrEjecucionSabotaje);
+	
+	free(configuracion);
+	miLogDestroy();	
+	finalizarFS();
+}

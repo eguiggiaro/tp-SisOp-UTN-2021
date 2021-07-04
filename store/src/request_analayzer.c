@@ -156,6 +156,13 @@ void atender_request_store(Request *request) {
 
 		break;
 		
+		case FSCK:
+			//Activar el sabotaje	
+			pthread_mutex_lock(&mutexEjecucionSabotaje);
+			esperaSabotaje = 1;
+			pthread_cond_signal(&condEjecucionSabotaje);
+			pthread_mutex_unlock(&mutexEjecucionSabotaje);
+
 		default:
 			miLogInfo("Me llego operacion: ...");
 	  	break;

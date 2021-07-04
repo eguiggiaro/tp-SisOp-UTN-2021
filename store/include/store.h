@@ -92,8 +92,10 @@ void atender_request_store(Request *request);
 void inicializarParametrosFS();
 void inicializarStore();
 void inicializarPosicionesSabotaje();
+void inicializarSemaforos();
 void syncPeriodico();
 void atenderSabotaje();
+void finalizarStore();
 t_list* obtenerListaSabotaje(char*);
 
 pthread_mutex_t mutex_informartareas;
@@ -102,6 +104,9 @@ pthread_mutex_t mutex_obtenerBitacora;
 pthread_mutex_t mutex_guardar_en_bitacora;
 
 /*PARA DETENER PROCESO MIENTRAS SE ATIENDE EL SABOTAJE*/
-//sem_t sem_sabotaje;
+pthread_mutex_t mutexEjecucionSabotaje;// = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t condEjecucionSabotaje;// = PTHREAD_COND_INITIALIZER;
+pthread_attr_t attrEjecucionSabotaje;
+int esperaSabotaje;
 
 #endif

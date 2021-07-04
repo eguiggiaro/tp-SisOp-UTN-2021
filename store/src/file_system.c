@@ -119,6 +119,10 @@ void finalizarFS(void){
         exit(1); 
     }
 
+	pthread_mutex_destroy(&mutex_bitmap);
+	pthread_mutex_destroy(&mutex_bloques);
+	pthread_mutex_destroy(&mutex_escribirBloques);
+	
 	free(puntoMontaje);    
 	free(pathSuperbloque); 
 	free(pathBlocks);  

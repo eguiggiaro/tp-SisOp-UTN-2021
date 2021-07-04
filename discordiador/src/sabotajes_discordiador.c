@@ -193,6 +193,39 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
     }
 }
 
+void enviar_fcsk(int id_tripulante, int pos_x, int pos_y){
+
+	t_paquete* paquete = crear_paquete(FSCK);
+  t_buffer* buffer;
+
+	char* id_auxiliar = string_itoa(id_tripulante);
+  char* pos_x_aux = string_itoa(pos_x);
+  char* pos_y_aux = string_itoa(pos_y);
+
+	t_list* lista_mensajes = list_create();
+	list_add(lista_mensajes,id_auxiliar);
+	list_add(lista_mensajes,pos_x_aux);
+  list_add(lista_mensajes,pos_y_aux);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+  paquete ->buffer = buffer;
+  
+  enviar_paquete(paquete, socket_store);
+
+  //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_store);
+	if (codigo_operacion == OK) {
+		miLogInfo("FCSK informado correctamente\n");
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR INFORMANDO FCSK. \n");
+	}
+
+	buffer = (t_buffer*)recibir_buffer(socket_store);
+
+	list_destroy(lista_mensajes);
+
+}
+
 void atender_sabotaje(char* posicion){
     char** array_posicion = string_split(posicion, ",");
     int pos_x = atoi(array_posicion[0]);
@@ -288,7 +321,10 @@ void atender_sabotaje(char* posicion){
 
     //4. Movemos al tripulante elegido al punto de sabotaje.
     mover_tripulante_a_sabotaje(tripulante_elegido, pos_x,pos_y);
+    miLogInfo("El tripulante: %d llego a la posicion de sabotaje",tripulante_elegido->id_tripulante);
 
     //5. Enviar FCSK a Store con posicion actual del tripulante.
+    enviar_fcsk(tripulante_elegido->id_tripulante, tripulante_elegido->pos_x, tripulante_elegido->pos_y);
+
 
 }

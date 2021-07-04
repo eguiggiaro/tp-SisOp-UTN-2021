@@ -158,6 +158,7 @@ void atender_request_store(Request *request) {
 		
 		case FSCK:
 			//Activar el sabotaje	
+			miLogInfo("Me llego operacion: FSCK");
 			pthread_mutex_lock(&mutexEjecucionSabotaje);
 			esperaSabotaje = 1;
 			pthread_cond_signal(&condEjecucionSabotaje);

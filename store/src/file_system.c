@@ -609,16 +609,17 @@ int verificarBitmap(){
 
 	if (repararBitmap(bloquesOcupados)){
 		miLogError("No pudo reparar el bitmap del Superbloque.");
-		list_destroy(metadata->blocks);
-		list_destroy(metadataR->blocks);
+		if(cantidadArchivosBitacoras > 0) list_destroy(metadata->blocks);
+		if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 		list_destroy(bloquesOcupados);
 		free(metadata);
 		free(metadataR);
 		return EXIT_FAILURE;
 	}
 
-	list_destroy(metadata->blocks);
-	list_destroy(metadataR->blocks);
+	if(cantidadArchivosBitacoras > 0) list_destroy(metadata->blocks);
+	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
+	
 	list_destroy(bloquesOcupados);
 	free(metadata);
 	free(metadataR);
@@ -638,7 +639,7 @@ int repararBitmap(t_list* bloques){
 			bitarray_set_bit(bitmap, bloque); 		 //Marco el bloque como usado si no estaba en 1.
 			msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
 
-			miLogDebug("Seteo el bloque %d en 1, porque hubo un sabotaje en ese bloque.", bloque);				
+			miLogWarning("Seteo el bloque %d en 1, porque hubo un sabotaje en ese bloque.", bloque);				
 		} 
 	}
 	//Despues recorro todos los otros bloques y corroboro que esten en 0 (libres).
@@ -652,7 +653,7 @@ int repararBitmap(t_list* bloques){
 				bitarray_clean_bit(bitmap, i); 		 //Marco el bloque como libre si no estaba en 0.
 				msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
 			
-				miLogDebug("Seteo el bloque %d en 0, porque hubo un sabotaje en ese bloque.", i);				
+				miLogWarning("Seteo el bloque %d en 0, porque hubo un sabotaje en ese bloque.", i);						
 			}
 		}
 	}
@@ -675,7 +676,7 @@ int verificarSizeEnFile(){
 		if(metadataR->size != tamanioRealArchivo){
 			if(repararSizeEnFile(metadataR, recurso, tamanioRealArchivo)){
 				miLogError("No pudo reparar el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
-				list_destroy(metadataR->blocks);
+				if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 				list_destroy(recursos);
 				free(metadataR);				
 				return EXIT_FAILURE;
@@ -683,7 +684,7 @@ int verificarSizeEnFile(){
 		}
 	}
 	
-	list_destroy(metadataR->blocks);
+	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 	list_destroy(recursos);
 	free(metadataR);
 	return EXIT_SUCCESS;
@@ -712,7 +713,7 @@ int verificarBlockCount(){
 		if(metadataR->block_count != list_size(metadataR->blocks)){
 			if(repararBlockCount(metadataR, recurso)){
 				miLogError("No pudo reparar el block count del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
-				list_destroy(metadataR->blocks);
+				if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 				list_destroy(recursos);
 				free(metadataR);				
 				return EXIT_FAILURE;
@@ -720,7 +721,7 @@ int verificarBlockCount(){
 		}
 	}
 
-	list_destroy(metadataR->blocks);
+	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 	list_destroy(recursos);
 	free(metadataR);
 	return EXIT_SUCCESS;
@@ -750,7 +751,7 @@ int verificarBlocks(){
 		if(!compararMd5(metadataR)){
 			if(repararBlocks(metadataR, recurso)){
 				miLogError("No pudo reparar los bloques del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
-				list_destroy(metadataR->blocks);
+				if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 				list_destroy(recursos);
 				free(metadataR);
 				return EXIT_FAILURE;
@@ -758,7 +759,7 @@ int verificarBlocks(){
 		}
 	}
 
-	list_destroy(metadataR->blocks);
+	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 	list_destroy(recursos);
 	free(metadataR);
 	return EXIT_SUCCESS;

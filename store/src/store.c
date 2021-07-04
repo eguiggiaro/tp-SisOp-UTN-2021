@@ -192,7 +192,7 @@ void atenderSabotaje(){
 
 void protocoloFsck(){
 	
-	miLogInfo("Se da inicio al protocolo FSCK. Todas las transacciones serán deshabilitadas.");
+	miLogInfo("Se da inicio al protocolo FSCK.");
 	
 	//Analizar sabotaje en Superbloque
 	if(!verificarCantidadBloques()){
@@ -216,7 +216,7 @@ void protocoloFsck(){
 		miLogInfo("Verificacion de Bloques en los Files de Recursos finalizada con exito.");
 	}
 
-	miLogInfo("Finalizó el protocolo FSCK. Las transacciones fueron habilitadas con normalidad.");
+	miLogInfo("Finalizó el protocolo FSCK.");
 	
 }
 

@@ -184,6 +184,7 @@ void atenderSabotaje(){
 		
 		//3.Llamar al protocolo de sabotaje	
 		protocoloFsck();
+		esperaSabotaje = 0;
 	} else if (respuestaDiscordiador == FAIL){
         miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje. \n");
 	}

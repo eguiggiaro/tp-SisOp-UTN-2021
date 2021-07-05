@@ -88,20 +88,21 @@ void atender_request_store(Request *request) {
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X						
-			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.", instruccionABitacora, id_tripulante);
+			char* instruccionALog = list_get(lista,1);
+			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.", instruccionALog, id_tripulante);
 
 			string_append(&instruccionABitacora, "\n");
 			resultadoTarea = guardarEnBitacora(id_tripulante, instruccionABitacora);
 
 			if (resultadoTarea == -1)
 			{
-				miLogInfo("ERROR: No se pudo guardar la tarea: %s, en la bitacora del tripulante: %s.", instruccionABitacora, id_tripulante);
+				miLogInfo("ERROR: No se pudo guardar la tarea: %s, en la bitacora del tripulante: %s.", instruccionALog, id_tripulante);
 				paquete_devuelto_informacion_bitacora = crear_paquete(FAIL);
 				list_add(lista_mensajes, "Se produjo un error intentar guardar la instruccion");
 			}
 			else
 			{
-				miLogInfo("Se guardo la tarea: %s, en la bitacora del tripulante: %s.", instruccionABitacora, id_tripulante);
+				miLogInfo("Se guardo la tarea: %s, en la bitacora del tripulante: %s.", instruccionALog, id_tripulante);
 
 				paquete_devuelto_informacion_bitacora = crear_paquete(OK);
 				list_add(lista_mensajes, "Se guardó la tarea correctamente");

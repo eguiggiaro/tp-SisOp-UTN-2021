@@ -614,6 +614,37 @@ int compactar_segmentacion()
 		dump_memoria_segmentacion(true);
 }
 
+
+int fusion_segmentos_libres()
+{
+	t_list_iterator	*list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+	Segmento* segmento1;
+	Segmento* segmento2;
+
+	if (list_iterator_has_next(list_iterator_segmentos)) {
+		segmento1 = list_iterator_next(list_iterator_segmentos);
+	}
+
+	while (list_iterator_has_next(list_iterator_segmentos))
+		{
+			segmento2 = list_iterator_next(list_iterator_segmentos);
+
+			if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LIBRE") == 0) 
+			{
+					compactacion_fusionar_segmentos(segmento1, segmento2);
+					free(segmento2);
+					list_iterator_remove(list_iterator_segmentos);
+			} else {
+				segmento1 = segmento2;
+			}
+		}
+
+		list_iterator_destroy(list_iterator_segmentos);
+
+		dump_memoria_segmentacion(true);
+}
+
+
 void compactacion_renumerar_lleno(Segmento* segmento1, int segmento_lleno)
 {
 	t_list_iterator *list_iterator_pcb;
@@ -1063,6 +1094,8 @@ int expulsar_tripulante_segmentacion(int tripulante_id)
 	}
 	list_iterator_destroy(list_iterator_tcb);
 	list_iterator_destroy(list_iterator_segmentos);
+
+	fusion_segmentos_libres();
 
 	if (elimine_tripulante)
 	{

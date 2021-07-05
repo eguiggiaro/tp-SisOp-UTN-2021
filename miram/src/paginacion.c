@@ -418,6 +418,7 @@ char *proxima_tarea_tripulante_paginacion(int tripulante_id)
 			if (contador_tareas == unTCB->proxima_instruccion)
 			{
 				unTCB->proxima_instruccion++;
+				string_append(&string_tarea, "|");
 				break;
 			}
 			else

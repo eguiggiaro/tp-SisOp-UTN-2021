@@ -245,7 +245,7 @@ void atender_sabotaje(char* posicion){
 
     //2.1 Recorro lista de EXEC y los paso a BLOCK_IO
     //TODO: ordenar por ID de menor a mayor
-    sem_wait(&mutexEXEC);
+    pthread_mutex_lock(&mutexEXEC);
     if(list_size(execute_list) > 0){
     for(int i =0; i<list_size(execute_list);i++){
 
@@ -256,10 +256,10 @@ void atender_sabotaje(char* posicion){
       miLogInfo("\nSe pasa de EXEC a BLOCK al tripulante: %d \n",tripu->id_tripulante);
     }
     }
-    sem_post(&mutexEXEC);
+    pthread_mutex_unlock(&mutexEXEC);
 
     //2.2 Recorro lista de READY (deberia chequear si no esta vacia?) y los paso a BLOCK_IO
-    sem_wait(&mutexREADY); 
+    pthread_mutex_lock(&mutexREADY); 
     if(list_size(ready_list)>0){
     for(int i =0; i<list_size(ready_list);i++){
 
@@ -270,10 +270,10 @@ void atender_sabotaje(char* posicion){
       miLogInfo("\nSe pasa de READY a BLOCK al tripulante: %d \n",tripu->id_tripulante);
     }
     }
-    sem_post(&mutexREADY);
+    pthread_mutex_unlock(&mutexREADY);
 
     //2.3 Recorro lista de NEW (deberia chequear si no esta vacia?) y los paso a BLOCK_IO
-    sem_wait(&mutexNEW);
+    pthread_mutex_lock(&mutexNEW);
     if(list_size(new_list)>0){ 
     for(int i =0; i<list_size(new_list);i++){
 
@@ -284,7 +284,7 @@ void atender_sabotaje(char* posicion){
       miLogInfo("\nSe pasa de NEW a BLOCK al tripulante: %d \n",tripu->id_tripulante);
     }
     }
-    sem_post(&mutexNEW);
+    pthread_mutex_unlock(&mutexNEW);
 
     //3. Calculo al tripulante en la posicion mas cercana y lo paso a cola de BLOCK_EMERGENCIA
     void* tripulante_mas_cercano(Tripulante* un_tripu, Tripulante* otro_tripu){

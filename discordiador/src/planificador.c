@@ -4,23 +4,23 @@
 //Hecho por: Emiliano
 void despertar_tripulantes()
 {
-	sem_wait(&mutexEXEC);
+	pthread_mutex_lock(&mutexEXEC);
 	Tripulante *tripulante;
 
 	for (int i = 0; list_size(execute_list) < i; i++)
 	{
 		tripulante = (Tripulante *) list_get(execute_list, i);
 		tripulante->tripulante_despierto = true;
-        sem_post(&tripulante->semaforo_trip);
+        //pthread_mutex_unlock(&tripulante->semaforo_trip);
 	}
-	sem_post(&mutexEXEC);
+	pthread_mutex_unlock(&mutexEXEC);
 }
 
 //Descripción: Duerme los tripulantes despiertos de la cola de ejecución
 //Hecho por: Emiliano
 void dormir_tripulantes()
 {
-	sem_wait(&mutexEXEC);
+	pthread_mutex_lock(&mutexEXEC);
 	Tripulante *tripulante;
 
 	for (int i = 0; list_size(execute_list) < i; i++)
@@ -28,18 +28,18 @@ void dormir_tripulantes()
 		tripulante = (Tripulante *) list_get(execute_list, i);
 		tripulante->tripulante_despierto = false;
 	}
-	sem_post(&mutexEXEC);
+	pthread_mutex_unlock(&mutexEXEC);
 }
 
 //Descripción: Iniciar la planificación del discordiador
 //Hecho por: Emiliano
 void iniciar_planificacion()
 {
-	sem_post(&mutexNEW);
-	sem_post(&mutexREADY);
-	sem_post(&mutexBLOCK);
-	sem_post(&mutexEXEC);
-	sem_post(&mutexEXIT);
+	pthread_mutex_unlock(&mutexNEW);
+	pthread_mutex_unlock(&mutexREADY);
+	pthread_mutex_unlock(&mutexBLOCK);
+	pthread_mutex_unlock(&mutexEXEC);
+	pthread_mutex_unlock(&mutexEXIT);
 
 	despertar_tripulantes();
 
@@ -66,11 +66,11 @@ void pausar_planificacion()
 
     dormir_tripulantes();
 
-	sem_wait(&mutexNEW);
-	sem_wait(&mutexREADY);
-	sem_wait(&mutexBLOCK);
-	sem_wait(&mutexEXEC);
-	sem_wait(&mutexEXIT);
+	pthread_mutex_lock(&mutexNEW);
+	pthread_mutex_lock(&mutexREADY);
+	pthread_mutex_lock(&mutexBLOCK);
+	pthread_mutex_lock(&mutexEXEC);
+	pthread_mutex_lock(&mutexEXIT);
 }
 
 //Descripción: Desbloquea tripulante cuyo IO termino
@@ -80,8 +80,8 @@ void desbloquear_tripulante_io(Tripulante* trip){
   int indice;
   bool tripulante_encontrado = false;
   Tripulante* trip_auxiliar;
-  sem_wait(&mutexBLOCK);
-  sem_wait(&mutexREADY);
+  pthread_mutex_lock(&mutexBLOCK);
+  pthread_mutex_lock(&mutexREADY);
 
   for(int i =0; i<list_size(blocked_io);i++){
     trip_auxiliar = list_get(blocked_io,i);
@@ -97,8 +97,8 @@ void desbloquear_tripulante_io(Tripulante* trip){
     trip_auxiliar = list_remove(blocked_io,indice);
     list_add(ready_list, trip_auxiliar);
 	trip_auxiliar->estado = listo;
-	sem_post(&mutexBLOCK);
-	sem_post(&mutexREADY);
+	pthread_mutex_unlock(&mutexBLOCK);
+	pthread_mutex_unlock(&mutexREADY);
 	sem_post(&semaforoREADY);
     miLogInfo("\nSe desbloquea el tripulante: %d y pasa a READY\n", trip->id_tripulante);
   }

@@ -33,7 +33,7 @@ int main()
 
 	//enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_DEBUG);
 	miLogInfo("Inició Discordiador.");
 
 	if (leer_config())
@@ -52,7 +52,7 @@ int main()
 	miLogInfo("Conectándose a MiRAM");
 	printf("\nInicia conexion con MIRAM:\n");
 
-	iniciar_conexion_miram(ip_miram, puerto_miram);
+	socket_miram = iniciar_conexion_miram(ip_miram, puerto_miram);
 
 	char *ip_store = configuracion->ip_i_mongo_store;
 	char *puerto_store = configuracion->puerto_i_mongo_store;
@@ -60,7 +60,7 @@ int main()
 	miLogInfo("Conectándose a Store");
 	printf("\nInicia conexion con STORE:\n");
 
-	iniciar_conexion_store(ip_store, puerto_store);
+	socket_store = iniciar_conexion_store(ip_store, puerto_store);
 
 	new_list = list_create();
 	execute_list = list_create();
@@ -73,14 +73,12 @@ int main()
 
 	//inicializo semaforos
 	//OJO! los semaforos mutex deben usar la biblioteca pthread
-	sem_init(&mutexNEW, 0, 1);
-	sem_init(&mutexREADY, 0, 1);
+
 	sem_init(&semaforoEXEC, 0, configuracion->grado_multitarea);
 	sem_init(&semaforoREADY, 0, 0);
-	sem_init(&mutexBLOCK, 0, 1);
-	sem_init(&mutexBLOCK_EM, 0, 1);
-	sem_init(&mutexEXIT, 0, 1);
-	sem_init(&mutexEXEC, 0, 1);
+
+
+
 
 	if (pthread_create(&threadSERVER_DISC, NULL, (void *)iniciar_servidor_discordiador,
 					   NULL) != 0)
@@ -215,6 +213,7 @@ void expulsar_tripulante(char *comando)
 	char *string_tareas;
 	char *string_posiciones = string_new();
 	char **list;
+	Tripulante* trip;
 
 	list = string_split(comando, " ");
 
@@ -222,17 +221,27 @@ void expulsar_tripulante(char *comando)
 
 	list_add(lista_mensajes, tripulante);
 	
+	for(int i =0; i<list_size(tripulantes_totales);i++){
+
+    	trip = list_get(tripulantes_totales,i);
+
+		if(strcmp(tripulante,string_itoa(trip->id_tripulante))==0)
+		{
+			break;
+		}
+  	}
+
 	t_paquete* paquete = crear_paquete(EXPULSAR_TRIPULANTE);
     t_buffer* buffer;
 
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
-    enviar_paquete(paquete, socket_miram);
+    enviar_paquete(paquete, trip->socket_miram);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_miram);
+	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
-		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
 		miLogInfo("\nTripulante expulsado correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
@@ -273,6 +282,9 @@ void iniciar_patota(char *comando)
 {
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
 	//pthread_t new_hilo_tripulante;
+
+	miLogDebug("Inicia el INICIAR_PATOTA");
+
 	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
 	Tripulante_disc trip_hilo;
 
@@ -344,6 +356,10 @@ void iniciar_patota(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
+
+	miLogDebug("Finaliza el INICIAR_PATOTA");
+
+	pthread_exit(0);
 }
 
 void vaciar_listas()
@@ -431,11 +447,11 @@ char *leer_tareas_txt(char *direccion_txt)
 void tripulante_listo(Tripulante *trip)
 {
 	//Se saca tripulante de cola de NEW y se pasa a cola de READY.
-	sem_wait(&mutexNEW);
-	sem_wait(&mutexREADY);
+	pthread_mutex_lock(&mutexNEW);
+	pthread_mutex_lock(&mutexREADY);
 	list_add(ready_list, list_remove(new_list, 0));
-	sem_post(&mutexNEW);
-	sem_post(&mutexREADY);
+	pthread_mutex_unlock(&mutexNEW);
+	pthread_mutex_unlock(&mutexREADY);
 	trip->estado = listo;
 	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
 	//aviso cambio de cola a MIRAM
@@ -443,7 +459,7 @@ void tripulante_listo(Tripulante *trip)
 
 }
 
-void iniciar_conexion_miram(char *ip_destino, char *puerto_destino)
+int iniciar_conexion_miram(char *ip_destino, char *puerto_destino)
 {
 
 	int socket = crear_conexion(logger, ip_destino, puerto_destino);
@@ -455,7 +471,7 @@ void iniciar_conexion_miram(char *ip_destino, char *puerto_destino)
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
-	socket_miram = socket;
+	return socket;
 }
 void consola_miram()
 {
@@ -480,7 +496,7 @@ void consola_miram()
 	//enviamos accion a socket
 	enviar_accion_seleccionada(operacion_seleccionada, socket_miram);
 }
-void iniciar_conexion_store(char *ip_destino, char *puerto_destino)
+int iniciar_conexion_store(char *ip_destino, char *puerto_destino)
 {
 
 	//inicia conexion con destino
@@ -493,7 +509,7 @@ void iniciar_conexion_store(char *ip_destino, char *puerto_destino)
 		miLogInfo("No fue posible establecer la conexión del socket solicitado.\n");
 		exit(3);
 	}
-	socket_store = socket;
+	return socket;
 }
 void consola_store()
 {
@@ -711,8 +727,8 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 //Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución
 //Hecho por: Emiliano
 int planificar() {
-	sem_wait(&mutexEXEC);
-	sem_wait(&mutexREADY);
+	pthread_mutex_lock(&mutexEXEC);
+	pthread_mutex_lock(&mutexREADY);
 
 	Tripulante *tripulante;
 
@@ -729,13 +745,13 @@ int planificar() {
 		if(strncmp(configuracion->algoritmo,"RR",2)==0){
 			tripulante->quantum = configuracion->quantum;
 		}
-		sem_post(&tripulante->semaforo_trip);
+		pthread_mutex_unlock(&tripulante->semaforo_trip);
 	} else {
 		miLogInfo("No existen más tripulantes en la cola de READY");
 		return -1;
 	}
-	sem_post(&mutexEXEC);
-	sem_post(&mutexREADY);
+	pthread_mutex_unlock(&mutexEXEC);
+	pthread_mutex_unlock(&mutexREADY);
 }
 
 void finalizar_tripulante(Tripulante* trip){
@@ -751,12 +767,12 @@ void finalizar_tripulante(Tripulante* trip){
   t_buffer* buffer;
   buffer = serializar_lista_strings(lista_mensajes);
   paquete ->buffer = buffer;
-  enviar_paquete(paquete, socket_miram);
+  enviar_paquete(paquete, trip->socket_miram);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_miram);
+	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
-		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
 		miLogInfo("\nTripulante expulsado correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
@@ -764,6 +780,7 @@ void finalizar_tripulante(Tripulante* trip){
 
 	list_destroy(lista_mensajes);
 
+pthread_mutex_lock(&mutexEXEC);
   for(int i =0; i<list_size(execute_list);i++){
 
   trip_auxiliar = list_get(execute_list,i);
@@ -783,18 +800,18 @@ void finalizar_tripulante(Tripulante* trip){
       list_remove(tripulantes_totales, i);
     }
   }
-
+pthread_mutex_unlock(&mutexEXEC);
   if(tripulante_encontrado){
 
-  sem_wait(&mutexEXEC); //esta bien?
-  sem_wait(&mutexEXIT);
+  pthread_mutex_lock(&mutexEXEC); //esta bien?
+  pthread_mutex_lock(&mutexEXIT);
   //empieza seccion critica
   //list_remove() devuelve el tripulante que se elimina de la lista
   trip_auxiliar = list_remove(execute_list,indice);
   list_add(exit_list,trip_auxiliar);
   //finaliza seccion critica
-  sem_post(&mutexEXEC);
-  sem_post(&mutexEXIT);
+  pthread_mutex_unlock(&mutexEXEC);
+  pthread_mutex_unlock(&mutexEXIT);
 
   trip_auxiliar->estado = finalizado;
   //libero lugar en la cola de EXEC
@@ -808,13 +825,13 @@ void finalizar_tripulante(Tripulante* trip){
 }
 }
 
-bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
+bool tarea_informada(Tripulante* tripulante, char* nombre_tarea, char* parametro){
 	bool se_informo = false;
 
 	t_paquete* paquete = crear_paquete(INFORMAR_TAREA);
     t_buffer* buffer;
 
-	char* id_auxiliar = string_itoa(id_tripulante);
+	char* id_auxiliar = string_itoa(tripulante->id_tripulante);
 	char* mensaje_tarea = string_new();
 	char* espacio = string_new();
 	string_append(&espacio, " ");
@@ -829,10 +846,10 @@ bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
   
-    enviar_paquete(paquete, socket_store);
+    enviar_paquete(paquete, tripulante->socket_store);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_store);
+	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
 		miLogInfo("\nTarea informada correctamente");
 		se_informo = true;
@@ -840,7 +857,7 @@ bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro){
         miLogError("ERROR INFORMANDO TAREA. \n");
 	}
 
-	buffer = (t_buffer*)recibir_buffer(socket_store);
+	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
 
 	list_destroy(lista_mensajes);
 	return se_informo;
@@ -868,12 +885,12 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
   
-    enviar_paquete(paquete, socket_miram);
+    enviar_paquete(paquete, trip->socket_miram);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_miram);
+	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
-		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
+		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
 		miLogInfo("\nNueva posicion informada a MIRAM correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA POSICION. \n");
@@ -882,9 +899,10 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
 	list_destroy(lista_mensajes);
 }
 
-void avisar_movimiento_bitacora(char* id_trip, char* origen, char* destino){
+void avisar_movimiento_bitacora(Tripulante* tripulante, char* origen, char* destino){
 	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
     t_buffer* buffer;
+	char* id_trip = string_itoa(tripulante->id_tripulante);
 
 	t_list* lista_mensajes = list_create();
 
@@ -903,27 +921,27 @@ void avisar_movimiento_bitacora(char* id_trip, char* origen, char* destino){
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
   
-    enviar_paquete(paquete, socket_store);
+    enviar_paquete(paquete, tripulante->socket_store);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_store);
+	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
 		miLogInfo("\nNuevo desplazamiento informado a bitacora correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA POSICION A BITACORA. \n");
 	}
 
-	buffer = (t_buffer*)recibir_buffer(socket_store);
+	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
 
 	list_destroy(lista_mensajes);
 }
 
-void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre){
+void avisar_inicio_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
 	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
     t_buffer* buffer;
 
 	t_list* lista_mensajes = list_create();
-
+	char* id_trip = string_itoa(tripulante->id_tripulante); 
 	//Parametros que se envian a Store:
 	list_add(lista_mensajes,id_trip);
 	char* mensaje = string_new();
@@ -934,26 +952,28 @@ void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre){
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
   
-    enviar_paquete(paquete, socket_store);
+    enviar_paquete(paquete, tripulante->socket_store);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_store);
+	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
 		miLogInfo("\nNueva tarea informada a bitacora correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA TAREA A BITACORA. \n");
 	}
 
-	buffer = (t_buffer*)recibir_buffer(socket_store);
+	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
 
 	list_destroy(lista_mensajes);
 }
 
-void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre){
+void avisar_fin_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
 	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
     t_buffer* buffer;
 
 	t_list* lista_mensajes = list_create();
+
+	char* id_trip = string_itoa(tripulante->id_tripulante);
 
 	//Parametros que se envian a Store:
 	list_add(lista_mensajes,id_trip);
@@ -965,17 +985,17 @@ void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre){
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
   
-    enviar_paquete(paquete, socket_store);
+    enviar_paquete(paquete, tripulante->socket_store);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_store);
+	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
 		miLogInfo("\nFin de tarea informado a bitacora correctamente");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO FIN DE TAREA A BITACORA. \n");
 	}
 
-	buffer = (t_buffer*)recibir_buffer(socket_store);
+	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
 
 	list_destroy(lista_mensajes);
 }
@@ -1024,8 +1044,8 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
 
   if(tripulante_encontrado){
 
-  sem_wait(&mutexEXEC); //esta bien?
-  sem_wait(&mutexREADY);
+  pthread_mutex_lock(&mutexEXEC); //esta bien?
+  pthread_mutex_lock(&mutexREADY);
   //empieza seccion critica
   //list_remove() devuelve el tripulante que se elimina de la lista
   trip_auxiliar = list_remove(execute_list,indice);
@@ -1037,8 +1057,8 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   trip->estado = listo;
   trip->tripulante_despierto = false;
   //finaliza seccion critica
-  sem_post(&mutexEXEC);
-  sem_post(&mutexREADY);
+  pthread_mutex_unlock(&mutexEXEC);
+  pthread_mutex_unlock(&mutexREADY);
 
   trip_auxiliar->estado = listo;
   //aviso cambio de cola a MIRAM

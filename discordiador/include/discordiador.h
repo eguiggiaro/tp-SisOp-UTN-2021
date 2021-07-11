@@ -74,7 +74,7 @@ typedef struct Tripulante{
     Estados estado;
 	Tarea* tarea_actual;
 	pthread_t* id_hilo;
-	sem_t semaforo_trip; //este semaforo indica si el tripulante puede ejecutar
+	pthread_mutex_t semaforo_trip; //este semaforo indica si el tripulante puede ejecutar
 	bool tripulante_despierto; //indica cuando está despierto el tripulante, en caso de estar dormido no puede ejecutar
     bool completo_tareas;
 	int quantum;
@@ -82,6 +82,8 @@ typedef struct Tripulante{
 	bool realizo_movimientos_tarea; //en caso de interrupcion, para saber donde retomar
 	bool recibio_input_store; //en caso de interrupcion, para saber donde retomar
 	bool aviso_inicio_tarea_store; 
+	int socket_miram;
+	int socket_store;
 } Tripulante;
 
 Configuracion* configuracion;
@@ -96,22 +98,24 @@ t_list* ready_list;
 t_list* tripulantes_totales;
 
 //Semaforos
-sem_t mutexNEW;
-sem_t mutexEXEC;
 sem_t semaforoEXEC; //semaforo contador para controlar grado de multiprocesamiento
 sem_t semaforoREADY;
-sem_t mutexBLOCK; //aplica para blocked_io
-sem_t mutexEXIT;
-sem_t mutexREADY;
-sem_t mutexBLOCK_EM;
+
+pthread_mutex_t mutexNEW;
+pthread_mutex_t mutexEXEC;
+pthread_mutex_t mutexBLOCK;
+pthread_mutex_t mutexEXIT;
+pthread_mutex_t mutexREADY;
+pthread_mutex_t mutexBLOCK_EM;
+
 
 pthread_t threadSERVER_DISC;
 pthread_t threadCONSOLA_DISC;
 
 //Metodos mensajes
 int leer_config(void);
-void iniciar_conexion_miram(char* ip_destino, char* puerto_destino);
-void iniciar_conexion_store(char* ip_destino, char* puerto_destino);
+int iniciar_conexion_miram(char* ip_destino, char* puerto_destino);
+int iniciar_conexion_store(char* ip_destino, char* puerto_destino);
 int socket_miram;
 int socket_store;
 char* puerto_discordiador;
@@ -134,11 +138,11 @@ Tarea* obtener_tarea(char* tarea_string, Tarea* nueva_tarea); //dado un string c
 void iniciar_planificacion();
 void pausar_planificacion();
 void finalizar_tripulante(Tripulante* trip); //Tripulante pasa de EXEC a EXIT, se liberan sus recursos
-bool tarea_informada(int id_tripulante, char* nombre_tarea, char* parametro);
+bool tarea_informada(Tripulante* trip, char* nombre_tarea, char* parametro);
 void avisar_movimiento_miram(Tripulante* trip, char* eje);
-void avisar_movimiento_bitacora(char* id_trip, char* origen, char* destino);
-void avisar_inicio_tarea_bitacora(char* id_trip, char* tarea_nombre);
-void avisar_fin_tarea_bitacora(char* id_trip, char* tarea_nombre);
+void avisar_movimiento_bitacora(Tripulante* trip, char* origen, char* destino);
+void avisar_inicio_tarea_bitacora(Tripulante* trip, char* tarea_nombre);
+void avisar_fin_tarea_bitacora(Tripulante* trip, char* tarea_nombre);
 void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola);
 void pasar_tripulante_de_exec_a_ready(Tripulante* trip);
 //Metodos Test

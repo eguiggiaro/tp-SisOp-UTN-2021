@@ -9,3 +9,8 @@ truncate -s 0 miram.log
 cd ..
 cd store
 truncate -s 0 store.log
+cd ..
+cd ..
+cd ..
+cd mnt
+rm Blocks.ims

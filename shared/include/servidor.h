@@ -18,6 +18,21 @@
 #include <paquete.h>
 #include <buffer.h>
 
+typedef struct Request {
+    op_code codigo_operacion;
+	t_buffer* buffer_devolucion;
+    int request_fd;
+} Request;
+
+
+typedef struct Invocacion {
+	struct sockaddr_storage direccionRequest;
+	socklen_t tamanioDireccion;
+    int request_fd;
+    void* atender_request;
+} Invocacion;
+
+
 void levantar_servidor(void (*atender_request)(uint32_t), char* puerto);
 void terminar_conexion(int socket_cliente);
 int nueva_conexion(char* ip, char* puerto);
@@ -26,11 +41,7 @@ int esperar_conexion_cliente(int);
 int recibir_operacion(int socket);
 //dado un socket de entrada, devuelve el buffer recibido
 void* recibir_buffer(int socket);
+int escuchar(Invocacion* invocacion);
 
-typedef struct Request {
-    op_code codigo_operacion;
-	t_buffer* buffer_devolucion;
-    int request_fd;
-} Request;
 
 #endif

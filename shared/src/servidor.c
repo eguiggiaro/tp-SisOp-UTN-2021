@@ -6,9 +6,7 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 	struct sockaddr_storage direccionRequest;
 	socklen_t tamanioDireccion = sizeof(struct sockaddr_in);
 	int servidor_fd, puerto_app;
-	op_code codigo_operacion;
-	t_buffer* buffer_devolucion;
-	Request* request;
+
 
 	puerto_app = atoi(puerto);
 	direccionServidor.sin_family = AF_INET;
@@ -23,19 +21,40 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 	if(bind(servidor_fd, (void*) &direccionServidor, sizeof(direccionServidor)) != 0){
 		perror("fallo el bind");
 	}
-
-	while (1)
- 	{
-
-		if(listen(servidor_fd, SOMAXCONN) == -1){
-			perror("fallo el listen");
-		}
+	if(listen(servidor_fd, SOMAXCONN) == -1){
+		perror("fallo el listen");
+	}
 
 		//printf("(Esperando conexiones en Direccion: %i, Puerto: %i ) \n",INADDR_ANY,puerto_app);
-
+		while (1)
+		{
+		
 		int request_fd;
 		request_fd = accept(servidor_fd, (void*) &direccionRequest, &tamanioDireccion);
+		pthread_t escucha;
+
+		Invocacion* invocacion = malloc(sizeof(Invocacion));
+		invocacion->direccionRequest = direccionRequest;
+		invocacion->tamanioDireccion = tamanioDireccion;
+		invocacion->request_fd = request_fd;
+		invocacion->atender_request = atender_request;
+		int thread_status = pthread_create(&escucha, NULL, (void*) escuchar,(void*) invocacion);
 		
+		}
+}
+
+
+int escuchar(Invocacion* invocacion)
+
+{
+		t_buffer* buffer_devolucion;
+		op_code codigo_operacion;
+		Request* request;
+		socklen_t tamanioDireccion = invocacion->tamanioDireccion;
+		struct sockaddr_storage direccionRequest = invocacion->direccionRequest;
+		int request_fd = invocacion->request_fd;
+		void* atender_request = invocacion->atender_request;
+
 		//printf("Se conectó un cliente!\n");
 		miLogInfo("Se conectó un cliente\n");
 
@@ -72,8 +91,9 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 			}
 
 		}
-	}
+
 }
+
 
 int nueva_conexion(char *ip, char* puerto)
 {

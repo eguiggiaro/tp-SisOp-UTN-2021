@@ -362,7 +362,7 @@ void iniciar_patota(char *comando)
 	for (int i = 0; i < cantidad_trip; i++)
 	{ //string con todas las posiciones
 
-		if ((size - 3) == (i + 1))
+		if ((size - 3) >= (i + 1))
 		{
 			string_append_with_format(&string_posiciones, "%s;", list[i + 3]);
 		}

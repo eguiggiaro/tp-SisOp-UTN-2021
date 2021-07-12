@@ -4,7 +4,7 @@
 
 #define MODULE_NAME "I-Mongo-Store"
 #define CONFIG_FILE_PATH "cfg/store.cfg"
-#define LOG_FILE_PATH "store.log"
+#define LOG_FILE_PATH "cfg/store.log"
 
 void signalHandler(int signal){
 	

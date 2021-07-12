@@ -121,6 +121,7 @@ void consola()
 	pthread_t *threadPAUSAR_PLANIFICACION;
 	pthread_t *threadEXPULSAR_TRIPULANTE;
 	pthread_t *threadCOMPACTACION;
+	pthread_t *threadOBTENERBITACORA;
 
 	input_consola = readline(">>");
 
@@ -174,7 +175,11 @@ void consola()
 		        }
 				break;
 			case OBTENER_BITACORA_COM:
-				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
+				printf("Comando es Obtener Bitacora\n");
+				if (pthread_create(&threadOBTENERBITACORA, NULL, (void*) obtener_bitacora,
+				(char*)input_consola) != 0) {
+			     printf("Error obteniendo bitacora\n");
+		        }
 				break;
 			case ALERTA_SABOTAJE_COM:
 			    atender_sabotaje(input_consola);
@@ -205,6 +210,60 @@ void consola()
 			printf("Siguiente comando?\n");
 			input_consola = readline(">>");
 		}
+}
+
+void obtener_bitacora(char* comando){
+
+	t_list* lista_mensajes = list_create();
+	t_list* mensajes_respuesta = list_create();
+
+	char **list;
+	Tripulante* trip;
+
+	list = string_split(comando, " ");
+
+	char* tripulante = list[1]; //leemos el tripulante a pedir bitacora
+
+	list_add(lista_mensajes, tripulante);
+	
+	t_paquete* paquete = crear_paquete(OBTENER_BITACORA);
+    t_buffer* buffer;
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+    enviar_paquete(paquete, socket_store);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(socket_store);
+	if (codigo_operacion == OK) {
+		t_buffer* buffer_respuesta = (t_buffer*)recibir_buffer(socket_store);
+		mensajes_respuesta = deserializar_lista_strings(buffer_respuesta);
+
+		char* bitacora = string_new();
+		bitacora = list_get(mensajes_respuesta, 0);
+
+		generar_archivo_bitacora(tripulante, bitacora);
+		miLogInfo("\nBitacora del tripulante %d obtenida correctamente", tripulante);
+	} else if (codigo_operacion == FAIL){
+        miLogError("ERROR OBTENIENDO LA BITACORA DEL TRIPULANTE %d.", tripulante);
+	}
+
+	list_destroy(lista_mensajes);
+}
+
+void generar_archivo_bitacora(char* tripulante, char* bitacora){
+
+	char* nombreArchivo = string_new();
+	string_append(&nombreArchivo, "Bitacora_tripulante_");
+	string_append(&nombreArchivo, tripulante);
+	string_append(&nombreArchivo, ".bitacora");
+
+	int tamanio = string_length(bitacora);
+
+	FILE* bitacora_file = fopen(nombreArchivo, "w+");
+	fwrite(bitacora, 1 , tamanio, bitacora_file);
+	fclose(bitacora_file);
+
 }
 
 void expulsar_tripulante(char *comando)

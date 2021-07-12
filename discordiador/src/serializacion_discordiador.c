@@ -310,7 +310,7 @@ void paquete_de_prueba(uint32_t socket){
 	}
 }
 
-void obtener_bitacora(uint32_t socket){
+void obtener_bitacora_OLD(uint32_t socket){
 	printf("\nFuncion de OBTENER BITACORA");
 
     t_paquete* paquete = crear_paquete(OBTENER_BITACORA);

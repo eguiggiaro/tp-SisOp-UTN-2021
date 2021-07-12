@@ -152,7 +152,7 @@ void atender_request_store(Request *request) {
 				list_add(lista_mensajes, bitacora);
 			}
 			t_buffer* buffer_respuesta_obtener_bitacora = serializar_lista_strings(lista_mensajes);
-			paquete_devuelto_informacion_bitacora->buffer = buffer_respuesta_obtener_bitacora;
+			paquete_devuelto_obtener_bitacora->buffer = buffer_respuesta_obtener_bitacora;
 			enviar_paquete(paquete_devuelto_obtener_bitacora, request_fd);
 			eliminar_buffer(buffer_devolucion_obtener_bitacora);
 			list_destroy(lista_mensajes);

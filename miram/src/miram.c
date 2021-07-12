@@ -85,6 +85,7 @@ void atender_request_miram(Request *request)
 	case EXPULSAR_TRIPULANTE:
 		//recibo los mensajes
 		pthread_mutex_lock(&mutex_expulsion);
+		pthread_mutex_lock(&mutex_tareas);
 		t_buffer *buffer_devolucion_expulsar = request->buffer_devolucion;
 		lista_mensajes = list_create();
 		//recibo los mensajes
@@ -117,6 +118,7 @@ void atender_request_miram(Request *request)
 		list_destroy(lista);
 		//eliminar_paquete(paquete_devuelto);
 		free(request);
+		pthread_mutex_unlock(&mutex_tareas);
 		pthread_mutex_unlock(&mutex_expulsion);
 
 		break;

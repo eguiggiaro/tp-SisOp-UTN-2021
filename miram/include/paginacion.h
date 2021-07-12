@@ -93,4 +93,6 @@ void* llevar_a_swap(Frame* un_frame, Pagina* una_pagina);
 Frame *hacer_lugar_memoria();
 
 pthread_mutex_t mutex_dump;
+pthread_mutex_t mutex_SWAP_escribir;
+pthread_mutex_t mutex_SWAP_leer;
 #endif

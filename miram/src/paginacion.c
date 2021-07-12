@@ -536,13 +536,12 @@ Frame *hacer_lugar_memoria()
 
 	un_frame_candidato->id_pagina = -1;
 
-	dump_memoria_paginacion(true);
-
 	return un_frame_candidato;
 }
 
 void *llevar_a_swap(Frame *un_frame, Pagina *una_pagina)
 {
+	pthread_mutex_lock(&mutex_SWAP_escribir);
 	int espacio_a_ocupar;
 	bool encontre_posicion_SWAP = false;
 
@@ -568,6 +567,7 @@ void *llevar_a_swap(Frame *un_frame, Pagina *una_pagina)
 	elemento_swap->posicion_SWAP = espacio_a_ocupar;
 
 	list_add(tabla_elementos_SWAP, elemento_swap);
+	pthread_mutex_unlock(&mutex_SWAP_escribir);
 }
 
 Frame *buscar_frame(int id_frame)
@@ -631,6 +631,7 @@ Frame *buscar_frame_por_pagina(int id_pagina)
 
 Frame *traer_de_SWAP(int id_pagina, Frame *un_frame)
 {
+	pthread_mutex_lock(&mutex_SWAP_leer);
 	t_list_iterator *iterador_SWAP = list_iterator_create(tabla_elementos_SWAP);
 	Elemento_SWAP *elemento_swap;
 	Pagina *una_pagina = buscar_pagina_por_id(id_pagina);
@@ -659,7 +660,7 @@ Frame *traer_de_SWAP(int id_pagina, Frame *un_frame)
 	}
 	list_iterator_destroy(iterador_SWAP);
 
-	dump_memoria_paginacion(true);
+	pthread_mutex_unlock(&mutex_SWAP_leer);
 
 	return un_frame;
 }
@@ -696,7 +697,6 @@ int guardar_pagina_en_frame(int id_frame, void *pagina, int id_pagina)
 		}
 	}
 	list_iterator_destroy(list_iterator);
-	dump_memoria_paginacion(true);
 
 	if (encontre_frame)
 	{
@@ -1074,7 +1074,7 @@ char *buscar_tareas(int patota_id)
 	int tamanio_recuperado = 0;
 	int tamanio_a_recuperar = 0;
 	int tamanio_tareas = pcb_adm->tamanio_tareas;
-	void *buffer = malloc(tamanio_tareas);
+	void *buffer = calloc(1,tamanio_tareas);
 	int limite_buffer = 0;
 
 	Frame *un_frame = buscar_frame_por_pagina(pagina);
@@ -1475,6 +1475,9 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 			}
 		}
 	}
+
+	char* aux_tareas = MEMORIA + 8;
+
 
 	un_pcb->Tareas = pcb_adm->pagina_inicio_tareas;
 	guardar_patota(un_pcb, pcb_adm);

@@ -56,7 +56,7 @@ void crearSuperbloque(void){
 
 void crearBlocks(void){
 	
-	FILE* archivoBlocks = fopen(pathBlocks, "w+");
+	FILE* archivoBlocks = fopen(pathBlocks, "w+");	//TODO: Pensar, es necesario que sea binario?
 	int tamanioBlocks = cantidadBloques * tamanioBloque;
 
 	if(archivoBlocks==NULL){

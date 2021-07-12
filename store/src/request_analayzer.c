@@ -87,8 +87,11 @@ void atender_request_store(Request *request) {
 			lista = deserializar_lista_strings(buffer_devolucion_informacion_bitacora);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
-			char* instruccionABitacora = list_get(lista,1);  //Ej: Se finaliza tarea X						
-			char* instruccionALog = list_get(lista,1);
+			char* instruccionABitacora = string_new();  //Ej: Se finaliza tarea X						
+			char* instruccionALog = string_new();
+			
+			instruccionABitacora = strdup(list_get(lista,1));  //Ej: Se finaliza tarea X						
+			instruccionALog = strdup(instruccionABitacora);
 			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.", instruccionALog, id_tripulante);
 
 			string_append(&instruccionABitacora, "\n");
@@ -113,6 +116,8 @@ void atender_request_store(Request *request) {
 			eliminar_buffer(buffer_devolucion_informacion_bitacora);
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
+			free(instruccionABitacora);
+			free(instruccionALog);
 			free(request);
 			pthread_mutex_unlock(&mutex_informacionBitacora);
 

@@ -220,7 +220,7 @@ t_list* escribirBloquesNuevo(char* datos){
 
 	//Antes de empezar tengo que verificar si tengo lugar para todos los bloques. 
 	if(!verificarQueTengoLosBloquesNecesarios(cantidadBloquesNecesarios)){
-		miLogInfo("No hay mas lugar en el archivo Blocks.ims");
+		miLogError("No hay mas lugar en el archivo Blocks.ims");
 		return -1;
 	}
 	
@@ -367,6 +367,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig==NULL){
+		freeMetadataRecurso(metadata);
 		free(direccionDeMetadata);
 		return EXIT_FAILURE;	
 	}
@@ -380,10 +381,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	
-	list_destroy(metadata->blocks);
-	//free(metadata->caracter_llenado);
-	//free(metadata->md5);
-	free(metadata);
+	freeMetadataRecurso(metadata);
 	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
@@ -397,6 +395,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig==NULL){
+		freeMetadataBitacora(metadata);
 		free(direccionDeMetadata);
 		return EXIT_FAILURE;	
 	}
@@ -408,8 +407,7 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	
-	list_destroy(metadata->blocks);
-	free(metadata);
+	freeMetadataBitacora(metadata);
 	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
@@ -479,6 +477,18 @@ int crearMetadataBitacora(char* tripulante){
 	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
+}
+
+void freeMetadataRecurso(MetadataRecurso* metadata){
+	
+	list_destroy(metadata->blocks);
+	free(metadata);
+}
+
+void freeMetadataBitacora(MetadataBitacora* metadata){
+	
+	list_destroy(metadata->blocks);
+	free(metadata);
 }
 
 char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
@@ -609,20 +619,11 @@ int verificarBitmap(){
 
 	if (repararBitmap(bloquesOcupados)){
 		miLogError("No pudo reparar el bitmap del Superbloque.");
-		if(cantidadArchivosBitacoras > 0) list_destroy(metadata->blocks);
-		if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 		list_destroy(bloquesOcupados);
-		free(metadata);
-		free(metadataR);
 		return EXIT_FAILURE;
 	}
 
-	if(cantidadArchivosBitacoras > 0) list_destroy(metadata->blocks);
-	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
-	
 	list_destroy(bloquesOcupados);
-	free(metadata);
-	free(metadataR);
 	return EXIT_SUCCESS;
 }
 
@@ -676,17 +677,13 @@ int verificarSizeEnFile(){
 		if(metadataR->size != tamanioRealArchivo){
 			if(repararSizeEnFile(metadataR, recurso, tamanioRealArchivo)){
 				miLogError("No pudo reparar el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
-				if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 				list_destroy(recursos);
-				free(metadataR);				
 				return EXIT_FAILURE;
 			}
 		}
 	}
-	
-	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
+
 	list_destroy(recursos);
-	free(metadataR);
 	return EXIT_SUCCESS;
 }
 
@@ -712,18 +709,14 @@ int verificarBlockCount(){
 		metadataR = leerMetadataRecurso(recurso);
 		if(metadataR->block_count != list_size(metadataR->blocks)){
 			if(repararBlockCount(metadataR, recurso)){
-				miLogError("No pudo reparar el block count del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
-				if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
-				list_destroy(recursos);
-				free(metadataR);				
+				miLogError("No pudo reparar el block count del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.		
+				list_destroy(recursos);				
 				return EXIT_FAILURE;
 			}
 		}
 	}
 
-	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
-	list_destroy(recursos);
-	free(metadataR);
+	list_destroy(recursos);	
 	return EXIT_SUCCESS;
 }
 
@@ -751,17 +744,13 @@ int verificarBlocks(){
 		if(!compararMd5(metadataR)){
 			if(repararBlocks(metadataR, recurso)){
 				miLogError("No pudo reparar los bloques del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
-				if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
-				list_destroy(recursos);
-				free(metadataR);
+				list_destroy(recursos);				
 				return EXIT_FAILURE;
 			}
 		}
 	}
 
-	if(list_size(recursos) > 0) list_destroy(metadataR->blocks);
 	list_destroy(recursos);
-	free(metadataR);
 	return EXIT_SUCCESS;
 }
 
@@ -793,7 +782,6 @@ int repararBlocks(MetadataRecurso* metadata, tipoRecurso recurso){
 	}
 
 	//msync(punteroBlocks, cantidadBloques*tamanioBloque, 0);
-
 	if(modificarMetadataRecurso(metadata, recurso)){
 		miLogError("No pudo actualizar la metadata del archivo al corregir la lista de bloques del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
 		return EXIT_FAILURE;

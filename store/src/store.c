@@ -174,7 +174,7 @@ void atenderSabotaje(){
 	//1.Avisar a discordiador -> enviar posiciones de sabotaje (configuracion)
 	op_code respuestaDiscordiador = enviarAvisoDeSabotaje(posicionesSabotaje, socket_discordiador); 
 	if (respuestaDiscordiador == OK) {
-		miLogInfo("El Discordiador recibio el alerta de sabotaje correctamente.");
+		miLogInfo("El Discordiador recibio el alerta de sabotaje correctamente. Esperando activacion de protocolo FSCK...");
 		//2.Esperar a que el Discordiador me active el protocolo fsck.
 		pthread_mutex_lock(&mutexEjecucionSabotaje); 
 		while(!esperaSabotaje) { 

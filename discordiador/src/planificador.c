@@ -45,6 +45,8 @@ void iniciar_planificacion()
 
 	planificacion_activada = true;
 
+	miLogInfo("Se inicia la PLANIFICACION. \n");
+
     while(1) {
         sem_wait(&semaforoEXEC);
 		sem_wait(&semaforoREADY);
@@ -63,6 +65,8 @@ void iniciar_planificacion()
 void pausar_planificacion()
 {
 	planificacion_activada = false;
+
+	miLogInfo("Se pausa la PLANIFICACION. \n");
 
     dormir_tripulantes();
 
@@ -100,6 +104,6 @@ void desbloquear_tripulante_io(Tripulante* trip){
 	pthread_mutex_unlock(&mutexBLOCK);
 	pthread_mutex_unlock(&mutexREADY);
 	sem_post(&semaforoREADY);
-    miLogInfo("\nSe desbloquea el tripulante: %d y pasa a READY\n", trip->id_tripulante);
+    miLogInfo("Se desbloquea el tripulante: %d y pasa de BLOCK_IO a READY\n", trip->id_tripulante);
   }
 }

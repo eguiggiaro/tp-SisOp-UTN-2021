@@ -34,7 +34,7 @@ int main()
 	//enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_DEBUG);
-	miLogInfo("Inició Discordiador.");
+	miLogInfo("Inició Discordiador. \n");
 
 	if (leer_config())
 	{
@@ -243,7 +243,7 @@ void obtener_bitacora(char* comando){
 		bitacora = list_get(mensajes_respuesta, 0);
 
 		generar_archivo_bitacora(tripulante, bitacora);
-		miLogInfo("\nBitacora del tripulante %d obtenida correctamente", tripulante);
+		miLogInfo("Bitacora del tripulante %d obtenida correctamente", tripulante);
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR OBTENIENDO LA BITACORA DEL TRIPULANTE %d.", tripulante);
 	}
@@ -301,7 +301,7 @@ void expulsar_tripulante(char *comando)
 	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
 		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
-		miLogInfo("\nTripulante expulsado correctamente");
+		miLogInfo("Tripulante expulsado correctamente\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
 	}
@@ -329,7 +329,7 @@ void compactacion(char *comando)
 	op_code codigo_operacion = recibir_operacion(socket_miram);
 	if (codigo_operacion == OK) {
 		t_buffer* buffer = (t_buffer*)recibir_buffer(socket_miram);
-		miLogInfo("\nCompactacion OK");
+		miLogInfo("Compactacion OK\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("COMPACTACION CON ERROR. \n");
 	}
@@ -342,7 +342,7 @@ void iniciar_patota(char *comando)
 	//INICIAR_PATOTA 5 /home/utnso/tareas/tareasPatota5.txt 1|1 3|4
 	//pthread_t new_hilo_tripulante;
 
-	miLogDebug("Inicia el INICIAR_PATOTA");
+	miLogDebug("Comienza el INICIAR_PATOTA\n");
 
 	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
 	Tripulante_disc trip_hilo;
@@ -416,7 +416,7 @@ void iniciar_patota(char *comando)
 
 	list_destroy(lista_mensajes);
 
-	miLogDebug("Finaliza el INICIAR_PATOTA");
+	miLogDebug("Finaliza el INICIAR_PATOTA\n");
 
 	pthread_exit(0);
 }
@@ -512,7 +512,7 @@ void tripulante_listo(Tripulante *trip)
 	pthread_mutex_unlock(&mutexNEW);
 	pthread_mutex_unlock(&mutexREADY);
 	trip->estado = listo;
-	miLogInfo("\nSe pasa el tripulante a la cola de READY\n");
+	miLogInfo("Se pasa al tripulante %d de la cola NEW a la cola READY\n",trip->id_tripulante);
 	//aviso cambio de cola a MIRAM
 	//informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"READY");
 
@@ -796,7 +796,7 @@ int planificar() {
 		tripulante = (Tripulante *) list_get(ready_list, 0); //obtiene primero en cola de READY
 		list_add(execute_list, tripulante);
 		list_remove(ready_list, 0);
-		miLogInfo("\nEl tripulante: %d pasa de READY a EXEC",tripulante->id_tripulante);
+		miLogInfo("El tripulante: %d pasa de READY a EXEC\n",tripulante->id_tripulante);
 		//aviso cambio de cola a MIRAM
 		//informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
 		tripulante->estado = trabajando;
@@ -806,7 +806,7 @@ int planificar() {
 		}
 		pthread_mutex_unlock(&tripulante->semaforo_trip);
 	} else {
-		miLogInfo("No existen más tripulantes en la cola de READY");
+		miLogInfo("No existen más tripulantes en la cola de READY\n");
 		return -1;
 	}
 	pthread_mutex_unlock(&mutexEXEC);
@@ -832,7 +832,7 @@ void finalizar_tripulante(Tripulante* trip){
 	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
 		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
-		miLogInfo("\nTripulante expulsado correctamente");
+		miLogInfo("Tripulante expulsado correctamente\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
 	}
@@ -910,7 +910,7 @@ bool tarea_informada(Tripulante* tripulante, char* nombre_tarea, char* parametro
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("\nTarea informada correctamente");
+		miLogInfo("Tarea informada correctamente\n");
 		se_informo = true;
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO TAREA. \n");
@@ -950,7 +950,7 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
 	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
 		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
-		miLogInfo("\nNueva posicion informada a MIRAM correctamente");
+		//miLogInfo("Nueva posicion informada a MIRAM correctamente\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA POSICION. \n");
 	}
@@ -985,7 +985,7 @@ void avisar_movimiento_bitacora(Tripulante* tripulante, char* origen, char* dest
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("\nNuevo desplazamiento informado a bitacora correctamente");
+		//miLogInfo("Nuevo desplazamiento informado a bitacora correctamente\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA POSICION A BITACORA. \n");
 	}
@@ -1016,7 +1016,7 @@ void avisar_inicio_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("\nNueva tarea informada a bitacora correctamente");
+		miLogInfo("Nueva tarea informada a bitacora correctamente\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO NUEVA TAREA A BITACORA. \n");
 	}
@@ -1049,7 +1049,7 @@ void avisar_fin_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("\nFin de tarea informado a bitacora correctamente");
+		miLogInfo("Fin de tarea informado a bitacora correctamente\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO FIN DE TAREA A BITACORA. \n");
 	}
@@ -1077,7 +1077,7 @@ void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(socket_miram);
 	if (codigo_operacion == OK) {
-		miLogInfo("\nCambio de estado/cola informado a miram.");
+		miLogInfo("Cambio de estado/cola informado a miram.\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO CAMBIO DE ESTADO/COLA A MIRAM. \n");
 	}
@@ -1109,7 +1109,7 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   //list_remove() devuelve el tripulante que se elimina de la lista
   trip_auxiliar = list_remove(execute_list,indice);
   list_add(ready_list,trip_auxiliar);
-  miLogInfo("\nEl tripulante: %d pasa de EXEC a READY",trip->id_tripulante);
+  miLogInfo("El tripulante: %d pasa de EXEC a READY\n",trip->id_tripulante);
   if(strncmp(configuracion->algoritmo,"RR",2)==0){
 	trip->quantum = configuracion->quantum;
   }

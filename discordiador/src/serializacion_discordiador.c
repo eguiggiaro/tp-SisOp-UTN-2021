@@ -69,7 +69,7 @@ void enviar_accion_seleccionada(op_code codigo_operacion, uint32_t socket){
 
 
 void iniciar_tripulante(uint32_t socket){
-    printf("\nFuncion de INICIAR TRIPULANTE");
+    printf("Funcion de INICIAR TRIPULANTE \n");
 
     t_paquete* paquete = crear_paquete(INICIAR_TRIPULANTE);
 	t_buffer* buffer;
@@ -125,15 +125,15 @@ t_list* iniciar_patota_miram(uint32_t socket, t_list* lista_mensajes ){
 		t_buffer* buffer = (t_buffer*)recibir_buffer(socket);
 		t_list* lista = deserializar_lista_strings(buffer);
 
-		loggear_lista_strings(lista);
+		//loggear_lista_strings(lista);
 
 		eliminar_buffer(buffer);
 
-		miLogInfo("Recibi los mensajes del destino correctamente");
+		miLogInfo("Se inicio patota en MIRAM correctamente \n");
 		return lista;	
 		
 	} else {
-		miLogInfo("No recibi los mensajes del destino correctamente");
+		miLogInfo("No se inicio patota en MIRAM correctamente \n");
 	}
 }
 void informar_tareas_patota_test(uint32_t socket){
@@ -346,7 +346,7 @@ void obtener_bitacora_OLD(uint32_t socket){
 }
 
 void iniciar_fsck(uint32_t socket){
-	printf("\nFuncion de INICIAR FSCK");
+	printf("Funcion de INICIAR FSCK \n");
 
     t_paquete* paquete = crear_paquete(FSCK);
 	t_buffer* buffer;
@@ -366,9 +366,9 @@ void iniciar_fsck(uint32_t socket){
 
 		eliminar_buffer(buffer);
 		
-		miLogInfo("Recibi los mensajes del destino correctamente");
+		miLogInfo("Se inicio FCSK en STORE correctamente");
 	} else {
-		miLogInfo("No recibi los mensajes del destino correctamente");
+		miLogInfo("No se inicio FCSK en STORE correctamente");
 	}
 }
 

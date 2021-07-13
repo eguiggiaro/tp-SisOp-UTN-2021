@@ -26,7 +26,7 @@ void atender_request_discordiador(Request *request){
         string_append(&posicion, ",");
         string_append(&posicion, (char*)list_get(lista,1));
 
-		miLogInfo("\nMe llego operacion: ALERTA SABOTAJE en el punto: (%s)\n", posicion);
+		miLogInfo("Me llego operacion: ALERTA SABOTAJE en el punto: (%s)\n", posicion);
 
         t_paquete *paquete_devuelto = crear_paquete(OK);
 		
@@ -50,7 +50,7 @@ void atender_request_discordiador(Request *request){
 		break;
 
 	default:
-		miLogInfo("\nMe llego una operacion invalida\n");
+		miLogInfo("Me llego una operacion invalida\n");
 
 		break;
 	}
@@ -100,7 +100,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)--;
@@ -125,7 +125,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_x)++;
@@ -155,7 +155,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)--;
@@ -180,7 +180,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
-        miLogInfo("\nSe mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
+        miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
         (trip->pos_y)++;
@@ -237,7 +237,7 @@ void atender_sabotaje(char* posicion){
 
       Tripulante* tripu = list_get(tripulantes_totales,i);
 
-      miLogInfo("\nSe duerme al tripulante: %d \n",tripu->id_tripulante);
+      miLogInfo("Se duerme al tripulante: %d \n",tripu->id_tripulante);
 
       tripu->tripulante_despierto = false;
       //sem_wait(&(tripu->semaforo_trip)); GENERA DEADLOCK - REVISAR
@@ -253,7 +253,7 @@ void atender_sabotaje(char* posicion){
       
       list_add(blocked_io,tripu);
 
-      miLogInfo("\nSe pasa de EXEC a BLOCK al tripulante: %d \n",tripu->id_tripulante);
+      miLogInfo("Se pasa de EXEC a BLOCK al tripulante: %d \n",tripu->id_tripulante);
     }
     }
     pthread_mutex_unlock(&mutexEXEC);
@@ -267,7 +267,7 @@ void atender_sabotaje(char* posicion){
       
       list_add(blocked_io,tripu);
 
-      miLogInfo("\nSe pasa de READY a BLOCK al tripulante: %d \n",tripu->id_tripulante);
+      miLogInfo("Se pasa de READY a BLOCK al tripulante: %d \n",tripu->id_tripulante);
     }
     }
     pthread_mutex_unlock(&mutexREADY);
@@ -281,7 +281,7 @@ void atender_sabotaje(char* posicion){
       
       list_add(blocked_io,tripu);
 
-      miLogInfo("\nSe pasa de NEW a BLOCK al tripulante: %d \n",tripu->id_tripulante);
+      miLogInfo("Se pasa de NEW a BLOCK al tripulante: %d \n",tripu->id_tripulante);
     }
     }
     pthread_mutex_unlock(&mutexNEW);
@@ -300,7 +300,7 @@ void atender_sabotaje(char* posicion){
 
     Tripulante* tripulante_elegido = (Tripulante*) list_get_minimum(blocked_io,(void*)tripulante_mas_cercano);
 
-    miLogInfo("\nEl tripulante elegido para llevar a cabo el sabotaje es el: %d \n",tripulante_elegido->id_tripulante);
+    miLogInfo("El tripulante elegido para llevar a cabo el sabotaje es el: %d \n",tripulante_elegido->id_tripulante);
 
     //3.1 Movemos al tripulante a la cola de block emergencia
     int indice;
@@ -316,12 +316,12 @@ void atender_sabotaje(char* posicion){
     if(tripulante_encontrado){
       Tripulante* trip_aux = list_remove(blocked_io,indice);
       list_add(blocked_em, trip_aux);
-      miLogInfo("\nSe pasa a la cola de BLOCK emergencia al tripulante: %d \n",tripulante_elegido->id_tripulante);
+      miLogInfo("Se pasa a la cola de BLOCK emergencia al tripulante: %d \n",tripulante_elegido->id_tripulante);
     }
 
     //4. Movemos al tripulante elegido al punto de sabotaje.
     mover_tripulante_a_sabotaje(tripulante_elegido, pos_x,pos_y);
-    miLogInfo("El tripulante: %d llego a la posicion de sabotaje",tripulante_elegido->id_tripulante);
+    miLogInfo("El tripulante: %d llego a la posicion de sabotaje \n",tripulante_elegido->id_tripulante);
 
     //5. Enviar FCSK a Store con posicion actual del tripulante.
     enviar_fcsk(tripulante_elegido->id_tripulante, tripulante_elegido->pos_x, tripulante_elegido->pos_y);

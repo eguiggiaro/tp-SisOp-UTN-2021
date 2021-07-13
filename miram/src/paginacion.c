@@ -1138,6 +1138,15 @@ int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool 
 
 	miTCB->pos_X = posicion_x_final;
 
+	int x;
+
+	if(miTCB->pos_X < posicion_x_final) 
+	{
+		x = 1;
+	} else {
+		x = -1;
+	}
+
 	guardar_tripulante(miTCB, pcb_adm);
 
 	if (mapa)
@@ -1149,7 +1158,7 @@ int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool 
 			return -1;
 		}
 
-		mover_tripulante_grilla(identificador, 1, 0);
+		mover_tripulante_grilla(identificador, x, 0);
 	}
 }
 
@@ -1160,6 +1169,15 @@ int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool 
 
 	miTCB->pos_y = posicion_y_final;
 
+	int y;
+
+	if(miTCB->pos_y < posicion_y_final) 
+	{
+		y = 1;
+	} else {
+		y = -1;
+	}
+
 	guardar_tripulante(miTCB, pcb_adm);
 
 	if (mapa)
@@ -1171,7 +1189,7 @@ int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool 
 			return -1;
 		}
 
-		mover_tripulante_grilla(identificador, 0, 1);
+		mover_tripulante_grilla(identificador, 0, y);
 	}
 }
 

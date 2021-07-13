@@ -36,6 +36,7 @@ typedef struct
 {
 	uint32_t PID;
 	int segmento_nro;
+	int tripulantes_activos;
 } PCB_adm;
 
 typedef struct
@@ -55,5 +56,6 @@ Segmento* buscar_segmento_por_id(int id_segmento);
 uint32_t buscar_patota_segmentacion(int PID);
 uint32_t buscar_tripulante_segmentacion(int TCB_ID);
 bool segmentos_orden (Segmento* segmento1, Segmento* segmento_mayor);
+PCB_adm *buscar_pcb_adm_por_id(int PID);
 pthread_mutex_t mutex_dump;
 #endif

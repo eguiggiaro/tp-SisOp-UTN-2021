@@ -5,30 +5,29 @@ void archivo_segmentacion(bool mostrar_vacios)
 {
 	pthread_mutex_lock(&mutex_dump);
 
-	char* nombre_archivo = string_new();
+	char *nombre_archivo = string_new();
 	string_append(&nombre_archivo, "dmp/Dump_");
 	string_append(&nombre_archivo, temporal_get_string_time("%d_%m_%y_%H:%M:%S"));
 	string_append(&nombre_archivo, ".dmp");
 
-	FILE* archivoDump = fopen(nombre_archivo, "w+");
+	FILE *archivoDump = fopen(nombre_archivo, "w+");
 
 	dump_memoria_segmentos_archivo(mostrar_vacios, archivoDump);
-	dump_memoria_contenido_segmentacion_archivo(archivoDump);	
-	
-	fclose(archivoDump);
-	fflush(stdout); 
-	pthread_mutex_unlock(&mutex_dump);
+	dump_memoria_contenido_segmentacion_archivo(archivoDump);
 
+	fclose(archivoDump);
+	fflush(stdout);
+	pthread_mutex_unlock(&mutex_dump);
 }
 
-void dump_memoria_segmentos_archivo(bool mostrar_vacios, FILE* archivoDump)
+void dump_memoria_segmentos_archivo(bool mostrar_vacios, FILE *archivoDump)
 {
-	
-	fprintf(archivoDump,"--------------------------------------------------------------------\n");
-	fprintf(archivoDump,"Detalle segmentos en memoria\n");
-	fprintf(archivoDump,"--------------------------------------------------------------------\n");
-	fprintf(archivoDump,"Dir Inicio\tId segmento\tDesplazamiento\tEstado\n");
-	
+
+	fprintf(archivoDump, "--------------------------------------------------------------------\n");
+	fprintf(archivoDump, "Detalle segmentos en memoria\n");
+	fprintf(archivoDump, "--------------------------------------------------------------------\n");
+	fprintf(archivoDump, "Dir Inicio\tId segmento\tDesplazamiento\tEstado\n");
+
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
 	while (list_iterator_has_next(list_iterator))
 	{
@@ -39,33 +38,30 @@ void dump_memoria_segmentos_archivo(bool mostrar_vacios, FILE* archivoDump)
 			imprimir_segmento_archivo(segmento_aux, archivoDump);
 	}
 
-	fprintf(archivoDump,"--------------------------------------------------------------------\n");
+	fprintf(archivoDump, "--------------------------------------------------------------------\n");
 	list_iterator_destroy(list_iterator);
 }
 
-
-
-void dump_memoria_contenido_segmentacion_archivo(FILE* archivoDump)
+void dump_memoria_contenido_segmentacion_archivo(FILE *archivoDump)
 {
 
-	fprintf(archivoDump,"Detalle patotas en memoria\n");
-	fprintf(archivoDump,"--------------------------------------------------------------------\n");
-	fprintf(archivoDump,"Patota Id\t# Segmento\t  Tipo\t   Inicio\tTamaño\n");
+	fprintf(archivoDump, "Detalle patotas en memoria\n");
+	fprintf(archivoDump, "--------------------------------------------------------------------\n");
+	fprintf(archivoDump, "Patota Id\t# Segmento\t  Tipo\t   Inicio\tTamaño\n");
 
 	t_list_iterator *list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
 	t_list_iterator *list_iterator_tareas;
 	t_list_iterator *list_iterator_tcb;
 
-
-	PCB_adm* pcbadm;
-	Tarea_adm* tareadm;
-	TCB_adm* tcbadm;
+	PCB_adm *pcbadm;
+	Tarea_adm *tareadm;
+	TCB_adm *tcbadm;
 	int patota, segmento, tipo, inicio, tamanio;
-	Segmento* un_segmento;
-	PCB* pcb;
-	TCB* tcb;
+	Segmento *un_segmento;
+	PCB *pcb;
+	TCB *tcb;
 
-	char* tareas;
+	char *tareas;
 
 	while (list_iterator_has_next(list_iterator_pcb))
 	{
@@ -78,7 +74,7 @@ void dump_memoria_contenido_segmentacion_archivo(FILE* archivoDump)
 		tamanio = un_segmento->desplazamiento;
 		pcb = buscar_patota_segmentacion(pcbadm->PID);
 
-		fprintf(archivoDump,"%9d\t%10d\t%6s\t%p\t%5db\n", patota, segmento, tipo,pcb,tamanio);
+		fprintf(archivoDump, "%9d\t%10d\t%6s\t%p\t%5db\n", patota, segmento, tipo, pcb, tamanio);
 
 		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
 
@@ -95,7 +91,7 @@ void dump_memoria_contenido_segmentacion_archivo(FILE* archivoDump)
 				tamanio = un_segmento->desplazamiento;
 				tareas = pcb->Tareas;
 
-				fprintf(archivoDump,"%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tareas,tamanio);
+				fprintf(archivoDump, "%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo, tareas, tamanio);
 				break;
 			}
 		}
@@ -104,45 +100,36 @@ void dump_memoria_contenido_segmentacion_archivo(FILE* archivoDump)
 		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
 
 		while (list_iterator_has_next(list_iterator_tcb))
+		{
+			tcbadm = list_iterator_next(list_iterator_tcb);
+
+			if (tcbadm->PID == pcbadm->PID)
 			{
-				tcbadm = list_iterator_next(list_iterator_tcb);
+				segmento = tcbadm->segmento_nro;
+				tipo = "  TCB";
+				un_segmento = buscar_segmento_por_id(segmento);
+				inicio = un_segmento->dir_inicio;
+				tamanio = un_segmento->desplazamiento;
+				tcb = buscar_tripulante_segmentacion(tcbadm->TID);
 
-					if (tcbadm->PID == pcbadm->PID)
-					{
-						segmento = tcbadm->segmento_nro;
-						tipo = "  TCB";
-						un_segmento = buscar_segmento_por_id(segmento);
-						inicio = un_segmento->dir_inicio;
-						tamanio = un_segmento->desplazamiento;
-						tcb = buscar_tripulante_segmentacion(tcbadm->TID);
-
-						fprintf(archivoDump,"%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tcb,tamanio);
-					}
+				fprintf(archivoDump, "%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo, tcb, tamanio);
 			}
+		}
 		list_iterator_destroy(list_iterator_tcb);
-
 	}
 
-	fprintf(archivoDump,"--------------------------------------------------------------------\n");
+	fprintf(archivoDump, "--------------------------------------------------------------------\n");
 	list_iterator_destroy(list_iterator_pcb);
 }
 
-void imprimir_segmento_archivo(Segmento *segmento_a_imprimir, FILE* archivoDump)
+void imprimir_segmento_archivo(Segmento *segmento_a_imprimir, FILE *archivoDump)
 
 {
-	fprintf(archivoDump,"%d\t%d\t\t%d\t\t%s\n", segmento_a_imprimir->dir_inicio, segmento_a_imprimir->id, segmento_a_imprimir->desplazamiento, segmento_a_imprimir->estado);
+	fprintf(archivoDump, "%d\t%d\t\t%d\t\t%s\n", segmento_a_imprimir->dir_inicio, segmento_a_imprimir->id, segmento_a_imprimir->desplazamiento, segmento_a_imprimir->estado);
 }
-
-
-
-
-
-
-
 
 void dump_memoria_segmentos(bool mostrar_vacios)
 {
-
 
 	printf("--------------------------------------------------------------------\n");
 	printf("Detalle tabla de segmentos\n");
@@ -162,9 +149,6 @@ void dump_memoria_segmentos(bool mostrar_vacios)
 	list_iterator_destroy(list_iterator);
 }
 
-
-
-
 void dump_memoria_contenido_segmentacion()
 {
 
@@ -176,16 +160,15 @@ void dump_memoria_contenido_segmentacion()
 	t_list_iterator *list_iterator_tareas;
 	t_list_iterator *list_iterator_tcb;
 
-
-	PCB_adm* pcbadm;
-	Tarea_adm* tareadm;
-	TCB_adm* tcbadm;
+	PCB_adm *pcbadm;
+	Tarea_adm *tareadm;
+	TCB_adm *tcbadm;
 	int patota, segmento, tipo, inicio, tamanio;
-	Segmento* un_segmento;
-	PCB* pcb;
-	TCB* tcb;
+	Segmento *un_segmento;
+	PCB *pcb;
+	TCB *tcb;
 
-	char* tareas;
+	char *tareas;
 
 	while (list_iterator_has_next(list_iterator_pcb))
 	{
@@ -198,7 +181,7 @@ void dump_memoria_contenido_segmentacion()
 		tamanio = un_segmento->desplazamiento;
 		pcb = buscar_patota_segmentacion(pcbadm->PID);
 
-		printf("%9d\t%10d\t%6s\t%p\t%5db\n", patota, segmento, tipo,pcb,tamanio);
+		printf("%9d\t%10d\t%6s\t%p\t%5db\n", patota, segmento, tipo, pcb, tamanio);
 
 		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
 
@@ -215,7 +198,7 @@ void dump_memoria_contenido_segmentacion()
 				tamanio = un_segmento->desplazamiento;
 				tareas = pcb->Tareas;
 
-				printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tareas,tamanio);
+				printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo, tareas, tamanio);
 				break;
 			}
 		}
@@ -224,30 +207,27 @@ void dump_memoria_contenido_segmentacion()
 		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
 
 		while (list_iterator_has_next(list_iterator_tcb))
+		{
+			tcbadm = list_iterator_next(list_iterator_tcb);
+
+			if (tcbadm->PID == pcbadm->PID)
 			{
-				tcbadm = list_iterator_next(list_iterator_tcb);
+				segmento = tcbadm->segmento_nro;
+				tipo = "  TCB";
+				un_segmento = buscar_segmento_por_id(segmento);
+				inicio = un_segmento->dir_inicio;
+				tamanio = un_segmento->desplazamiento;
+				tcb = buscar_tripulante_segmentacion(tcbadm->TID);
 
-					if (tcbadm->PID == pcbadm->PID)
-					{
-						segmento = tcbadm->segmento_nro;
-						tipo = "  TCB";
-						un_segmento = buscar_segmento_por_id(segmento);
-						inicio = un_segmento->dir_inicio;
-						tamanio = un_segmento->desplazamiento;
-						tcb = buscar_tripulante_segmentacion(tcbadm->TID);
-
-						printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo,tcb,tamanio);
-					}
+				printf("%9d\t%10d\t%4s\t%p\t%5db\n", patota, segmento, tipo, tcb, tamanio);
 			}
+		}
 		list_iterator_destroy(list_iterator_tcb);
-
 	}
 
 	printf("--------------------------------------------------------------------\n");
 	list_iterator_destroy(list_iterator_pcb);
 }
-
-
 
 //Muestra el contenido de la tabla de segmentos
 void dump_memoria_segmentacion(bool mostrar_vacios)
@@ -258,9 +238,8 @@ void dump_memoria_segmentacion(bool mostrar_vacios)
 
 	dump_memoria_segmentos(mostrar_vacios);
 	dump_memoria_contenido_segmentacion();
-	fflush(stdout); 
+	fflush(stdout);
 	pthread_mutex_unlock(&mutex_dump);
-
 }
 
 //Imprime el segmento
@@ -281,8 +260,7 @@ u_int32_t reservar_memoria_segmentacion_bf(int bytes)
 	Segmento *segmento_auxiliar;
 	Segmento *segmento_nuevo;
 	u_int32_t posicion_reservada;
-	int minimo_desplazamiento = tamanio_memoria_segmentacion +1;
-
+	int minimo_desplazamiento = tamanio_memoria_segmentacion + 1;
 
 	while (list_iterator_has_next(list_iterator))
 	{
@@ -296,35 +274,34 @@ u_int32_t reservar_memoria_segmentacion_bf(int bytes)
 			encontre_segmento = true;
 		}
 		index++;
-
 	}
-	
+
 	if (segmento_a_ocupar->desplazamiento == bytes)
 
-		{
-			segmento_a_ocupar->id = contador_segmentos++;
-			segmento_a_ocupar->desplazamiento = bytes;
-			segmento_a_ocupar->estado = "OCUPADO";
-			posicion_reservada = segmento_a_ocupar->dir_inicio;
-		}
+	{
+		segmento_a_ocupar->id = contador_segmentos++;
+		segmento_a_ocupar->desplazamiento = bytes;
+		segmento_a_ocupar->estado = "OCUPADO";
+		posicion_reservada = segmento_a_ocupar->dir_inicio;
+	}
 	else
-		{
-			//Seteo el nuevo segmento
-			segmento_nuevo = malloc(sizeof(Segmento));
-			segmento_nuevo->id = contador_segmentos++;
-			segmento_nuevo->dir_inicio = segmento_a_ocupar->dir_inicio;
-			segmento_nuevo->desplazamiento = bytes;
-			segmento_nuevo->estado = "OCUPADO";
+	{
+		//Seteo el nuevo segmento
+		segmento_nuevo = malloc(sizeof(Segmento));
+		segmento_nuevo->id = contador_segmentos++;
+		segmento_nuevo->dir_inicio = segmento_a_ocupar->dir_inicio;
+		segmento_nuevo->desplazamiento = bytes;
+		segmento_nuevo->estado = "OCUPADO";
 
-			//Reduzco el segmento libre
-			segmento_a_ocupar->dir_inicio = (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
-			segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - bytes;
+		//Reduzco el segmento libre
+		segmento_a_ocupar->dir_inicio = (segmento_nuevo->dir_inicio + (segmento_nuevo->desplazamiento));
+		segmento_a_ocupar->desplazamiento = segmento_a_ocupar->desplazamiento - bytes;
 
-			//Agrego el nuevo segmento a la tabla
-			list_add_in_index(tabla_segmentos, index, segmento_nuevo);
-			posicion_reservada = segmento_nuevo->dir_inicio;
-		}
-	
+		//Agrego el nuevo segmento a la tabla
+		list_add_in_index(tabla_segmentos, index, segmento_nuevo);
+		posicion_reservada = segmento_nuevo->dir_inicio;
+	}
+
 	list_iterator_destroy(list_iterator);
 
 	if (encontre_segmento)
@@ -336,7 +313,6 @@ u_int32_t reservar_memoria_segmentacion_bf(int bytes)
 		return 99; //ERROR
 	}
 }
-
 
 u_int32_t reservar_memoria_segmentacion_ff(int bytes)
 {
@@ -429,10 +405,10 @@ int buscar_segmento(u_int32_t posicion_memoria)
 	}
 }
 
-Segmento* buscar_segmento_por_id(int id_segmento)
+Segmento *buscar_segmento_por_id(int id_segmento)
 {
 	bool encontre_segmento = false;
-	Segmento* segmento_encontrado;
+	Segmento *segmento_encontrado;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos);
 	Segmento *segmento_busqueda;
 
@@ -457,7 +433,6 @@ Segmento* buscar_segmento_por_id(int id_segmento)
 		return 99;
 	}
 }
-
 
 char *buscar_posicion_tripulante_segmentacion(int tripulante_id)
 {
@@ -528,7 +503,6 @@ char *proxima_tarea_tripulante_segmentacion(int tripulante_id)
 	return string_tarea;
 }
 
-
 u_int32_t buscar_posicion(int segmento)
 {
 	bool encontre_posicion = false;
@@ -561,97 +535,103 @@ u_int32_t buscar_posicion(int segmento)
 
 int compactar_segmentacion()
 {
-	t_list_iterator	*list_iterator_segmentos = list_iterator_create(tabla_segmentos);
-	Segmento* segmento1;
-	Segmento* segmento2;
+	t_list_iterator *list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+	Segmento *segmento1;
+	Segmento *segmento2;
 	contador_segmentos = 0;
 	contador_segmentos_libres = -1;
 	int contador_lista = 0;
 	bool borrar_segmento = false;
 
-	if (list_iterator_has_next(list_iterator_segmentos)) {
+	if (list_iterator_has_next(list_iterator_segmentos))
+	{
 		segmento1 = list_iterator_next(list_iterator_segmentos);
 	}
 
 	while (list_iterator_has_next(list_iterator_segmentos))
+	{
+		segmento2 = list_iterator_next(list_iterator_segmentos);
+
+		if (strcmp(segmento1->estado, "LIBRE") == 0 && strcmp(segmento2->estado, "OCUPADO") == 0)
 		{
-			segmento2 = list_iterator_next(list_iterator_segmentos);
-
-			if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"OCUPADO") == 0) 
-			{
-				compactacion_mover_segmentos(segmento1, segmento2, contador_segmentos);
-				contador_segmentos++;
-				segmento1 = segmento2;
-
-			} else {
-				if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LIBRE") == 0) 
-				{
-					compactacion_fusionar_segmentos(segmento1, segmento2);
-					free(segmento2);
-					list_iterator_remove(list_iterator_segmentos);
-				} else {
-							compactacion_renumerar_lleno(segmento1, contador_segmentos);
-							contador_segmentos++;
-							segmento1 = segmento2;
-				}
-				}
-			contador_lista++;
-			dump_memoria_segmentacion(true);
-
-		}
-
-		if (strcmp(segmento1->estado,"OCUPADO") == 0) 
-		{
-			compactacion_renumerar_lleno(segmento1, contador_segmentos);
+			compactacion_mover_segmentos(segmento1, segmento2, contador_segmentos);
 			contador_segmentos++;
-		} else {
-			compactacion_renumerar_vacio(segmento1, contador_segmentos_libres);
-			contador_segmentos_libres--;
+			segmento1 = segmento2;
 		}
-
-		list_iterator_destroy(list_iterator_segmentos);
-
-		dump_memoria_segmentacion(true);
-}
-
-
-int fusion_segmentos_libres()
-{
-	t_list_iterator	*list_iterator_segmentos = list_iterator_create(tabla_segmentos);
-	Segmento* segmento1;
-	Segmento* segmento2;
-
-	if (list_iterator_has_next(list_iterator_segmentos)) {
-		segmento1 = list_iterator_next(list_iterator_segmentos);
-	}
-
-	while (list_iterator_has_next(list_iterator_segmentos))
+		else
 		{
-			segmento2 = list_iterator_next(list_iterator_segmentos);
-
-			if (strcmp(segmento1->estado,"LIBRE") == 0 && strcmp(segmento2->estado,"LIBRE") == 0) 
+			if (strcmp(segmento1->estado, "LIBRE") == 0 && strcmp(segmento2->estado, "LIBRE") == 0)
 			{
-					compactacion_fusionar_segmentos(segmento1, segmento2);
-					free(segmento2);
-					list_iterator_remove(list_iterator_segmentos);
-			} else {
+				compactacion_fusionar_segmentos(segmento1, segmento2);
+				free(segmento2);
+				list_iterator_remove(list_iterator_segmentos);
+			}
+			else
+			{
+				compactacion_renumerar_lleno(segmento1, contador_segmentos);
+				contador_segmentos++;
 				segmento1 = segmento2;
 			}
 		}
-
-		list_iterator_destroy(list_iterator_segmentos);
-
+		contador_lista++;
 		dump_memoria_segmentacion(true);
+	}
+
+	if (strcmp(segmento1->estado, "OCUPADO") == 0)
+	{
+		compactacion_renumerar_lleno(segmento1, contador_segmentos);
+		contador_segmentos++;
+	}
+	else
+	{
+		compactacion_renumerar_vacio(segmento1, contador_segmentos_libres);
+		contador_segmentos_libres--;
+	}
+
+	list_iterator_destroy(list_iterator_segmentos);
+
+	dump_memoria_segmentacion(true);
 }
 
+int fusion_segmentos_libres()
+{
+	t_list_iterator *list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+	Segmento *segmento1;
+	Segmento *segmento2;
 
-void compactacion_renumerar_lleno(Segmento* segmento1, int segmento_lleno)
+	if (list_iterator_has_next(list_iterator_segmentos))
+	{
+		segmento1 = list_iterator_next(list_iterator_segmentos);
+	}
+
+	while (list_iterator_has_next(list_iterator_segmentos))
+	{
+		segmento2 = list_iterator_next(list_iterator_segmentos);
+
+		if (strcmp(segmento1->estado, "LIBRE") == 0 && strcmp(segmento2->estado, "LIBRE") == 0)
+		{
+			compactacion_fusionar_segmentos(segmento1, segmento2);
+			free(segmento2);
+			list_iterator_remove(list_iterator_segmentos);
+		}
+		else
+		{
+			segmento1 = segmento2;
+		}
+	}
+
+	list_iterator_destroy(list_iterator_segmentos);
+
+	dump_memoria_segmentacion(true);
+}
+
+void compactacion_renumerar_lleno(Segmento *segmento1, int segmento_lleno)
 {
 	t_list_iterator *list_iterator_pcb;
 	t_list_iterator *list_iterator_tcb;
 	t_list_iterator *list_iterator_tareas;
-	PCB_adm* pcb_adm;
-	TCB_adm* tcb_adm;
+	PCB_adm *pcb_adm;
+	TCB_adm *tcb_adm;
 	Tarea_adm *tarea_adm;
 	bool encontre_elemento = false;
 
@@ -661,7 +641,8 @@ void compactacion_renumerar_lleno(Segmento* segmento1, int segmento_lleno)
 	{
 		pcb_adm = list_iterator_next(list_iterator_pcb);
 
-		if (pcb_adm->segmento_nro == segmento1->id) {
+		if (pcb_adm->segmento_nro == segmento1->id)
+		{
 			pcb_adm->segmento_nro = segmento_lleno;
 			encontre_elemento = true;
 			break;
@@ -671,14 +652,14 @@ void compactacion_renumerar_lleno(Segmento* segmento1, int segmento_lleno)
 	list_iterator_destroy(list_iterator_pcb);
 	list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
 
-
-	if (!encontre_elemento) 
+	if (!encontre_elemento)
 	{
 		while (list_iterator_has_next(list_iterator_tcb))
 		{
 			tcb_adm = list_iterator_next(list_iterator_tcb);
 
-			if (tcb_adm->segmento_nro == segmento1->id) {
+			if (tcb_adm->segmento_nro == segmento1->id)
+			{
 				tcb_adm->segmento_nro = segmento_lleno;
 				encontre_elemento = true;
 				break;
@@ -689,14 +670,14 @@ void compactacion_renumerar_lleno(Segmento* segmento1, int segmento_lleno)
 	list_iterator_destroy(list_iterator_tcb);
 	list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
 
-
-	if (!encontre_elemento) 
+	if (!encontre_elemento)
 	{
 		while (list_iterator_has_next(list_iterator_tareas))
 		{
 			tarea_adm = list_iterator_next(list_iterator_tareas);
 
-			if (tarea_adm->segmento_nro == segmento1->id) {
+			if (tarea_adm->segmento_nro == segmento1->id)
+			{
 				tarea_adm->segmento_nro = segmento_lleno;
 				encontre_elemento = true;
 				break;
@@ -709,31 +690,29 @@ void compactacion_renumerar_lleno(Segmento* segmento1, int segmento_lleno)
 	segmento1->id = segmento_lleno;
 }
 
-
-void compactacion_renumerar_vacio(Segmento* segmento1, int segmento_vacio)
+void compactacion_renumerar_vacio(Segmento *segmento1, int segmento_vacio)
 {
 	segmento1->id = segmento_vacio;
 }
 
-void compactacion_fusionar_segmentos(Segmento* segmento1, Segmento* segmento2)
+void compactacion_fusionar_segmentos(Segmento *segmento1, Segmento *segmento2)
 {
 	segmento1->desplazamiento = (segmento1->desplazamiento) + (segmento2->desplazamiento);
 }
 
-
-void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int segmento_lleno)
+void compactacion_mover_segmentos(Segmento *segmento1, Segmento *segmento2, int segmento_lleno)
 {
 
-	t_list_iterator	*list_iterator_tcb;
-	t_list_iterator	*list_iterator_pcb;
-	t_list_iterator	*list_iterator_tareas;
+	t_list_iterator *list_iterator_tcb;
+	t_list_iterator *list_iterator_pcb;
+	t_list_iterator *list_iterator_tareas;
 
 	int desplazamiento_final_1;
 	int desplazamiento_final_2;
 
-	TCB_adm* tcb_adm2;
-	PCB_adm* pcb_adm2;
-	Tarea_adm* tarea_adm2;
+	TCB_adm *tcb_adm2;
+	PCB_adm *pcb_adm2;
+	Tarea_adm *tarea_adm2;
 	bool encontre_elemento = false;
 	char tipo_encontrado = 'N';
 
@@ -741,16 +720,16 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 	int segmento_tcb;
 	int segmento_tareas;
 
-	TCB* tcb_auxiliar;
-	PCB* pcb_auxiliar;
-	char* tareas_auxiliar;
+	TCB *tcb_auxiliar;
+	PCB *pcb_auxiliar;
+	char *tareas_auxiliar;
 
 	//Borrar!
-	TCB* tcb_TEST;
-	PCB* pcb_TEST;
-	char* tareas_TEST;
+	TCB *tcb_TEST;
+	PCB *pcb_TEST;
+	char *tareas_TEST;
 
-	Segmento* segmento_auxiliar;
+	Segmento *segmento_auxiliar;
 
 	//Segmento2 (que es el lleno)
 	list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
@@ -759,7 +738,8 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 	{
 		pcb_adm2 = list_iterator_next(list_iterator_pcb);
 
-		if (pcb_adm2->segmento_nro == segmento2->id) {
+		if (pcb_adm2->segmento_nro == segmento2->id)
+		{
 			encontre_elemento = true;
 			tipo_encontrado = 'P';
 			break;
@@ -769,14 +749,14 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 	list_iterator_destroy(list_iterator_pcb);
 	list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
 
-
-	if (!encontre_elemento) 
+	if (!encontre_elemento)
 	{
 		while (list_iterator_has_next(list_iterator_tcb))
 		{
 			tcb_adm2 = list_iterator_next(list_iterator_tcb);
 
-			if (tcb_adm2->segmento_nro == segmento2->id) {
+			if (tcb_adm2->segmento_nro == segmento2->id)
+			{
 				encontre_elemento = true;
 				tipo_encontrado = 'T';
 				break;
@@ -787,14 +767,14 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 	list_iterator_destroy(list_iterator_tcb);
 	list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
 
-
-	if (!encontre_elemento) 
+	if (!encontre_elemento)
 	{
 		while (list_iterator_has_next(list_iterator_tareas))
 		{
 			tarea_adm2 = list_iterator_next(list_iterator_tareas);
 
-			if (tarea_adm2->segmento_nro == segmento2->id) {
+			if (tarea_adm2->segmento_nro == segmento2->id)
+			{
 				encontre_elemento = true;
 				tipo_encontrado = 'K';
 				break;
@@ -804,34 +784,32 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 
 	list_iterator_destroy(list_iterator_tareas);
 
-
 	if (tipo_encontrado == 'P')
 	{
 		pcb_auxiliar = segmento2->dir_inicio;
-		
+
 		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
-		
 
 		list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
 		while (list_iterator_has_next(list_iterator_tareas))
 		{
 			tarea_adm2 = list_iterator_next(list_iterator_tareas);
 
-			if (tarea_adm2->PID == pcb_auxiliar->PID) {
+			if (tarea_adm2->PID == pcb_auxiliar->PID)
+			{
 				segmento_auxiliar = buscar_segmento_por_id(tarea_adm2->segmento_nro);
 				tareas_auxiliar = segmento_auxiliar->dir_inicio;
 				break;
 			}
 		}
-		list_iterator_destroy(list_iterator_tareas);		
-		
+		list_iterator_destroy(list_iterator_tareas);
+
 		//muevo el elemento
 		desplazamiento_final_1 = segmento2->desplazamiento;
 		desplazamiento_final_2 = segmento1->desplazamiento;
 
-
 		memcpy(segmento1->dir_inicio, pcb_auxiliar, segmento2->desplazamiento);
-	
+
 		//Cambio los segmentos
 
 		segmento2->id = segmento1->id;
@@ -843,16 +821,15 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		segmento1->estado = "OCUPADO";
 		segmento1->id = segmento_lleno;
 
-
-		
 		//Cambio estructura administrativa
 		pcb_adm2->segmento_nro = segmento_lleno;
-		
+
 		while (list_iterator_has_next(list_iterator_tcb))
 		{
 			tcb_adm2 = list_iterator_next(list_iterator_tcb);
 
-			if (tcb_adm2->PID == pcb_auxiliar->PID) {
+			if (tcb_adm2->PID == pcb_auxiliar->PID)
+			{
 				segmento_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
 				segmento_auxiliar = segmento_auxiliar->dir_inicio;
 				//Cambio estructuras memoria
@@ -861,21 +838,19 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		}
 		list_iterator_destroy(list_iterator_tcb);
 
-
 		pcb_TEST = segmento1->dir_inicio;
-
 	}
 
 	if (tipo_encontrado == 'T')
 	{
 		tcb_auxiliar = segmento2->dir_inicio;
-		
+
 		//muevo el elemento
 		desplazamiento_final_1 = segmento2->desplazamiento;
 		desplazamiento_final_2 = segmento1->desplazamiento;
 
 		memcpy(segmento1->dir_inicio, tcb_auxiliar, segmento2->desplazamiento);
-	
+
 		//Cambio los segmentos
 		segmento2->id = segmento1->id;
 		segmento2->desplazamiento = desplazamiento_final_2;
@@ -890,8 +865,6 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		tcb_adm2->segmento_nro = segmento_lleno;
 
 		tcb_TEST = segmento1->dir_inicio;
-
-		
 	}
 
 	if (tipo_encontrado == 'K')
@@ -903,10 +876,10 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		{
 			pcb_adm2 = list_iterator_next(list_iterator_pcb);
 
-			if (pcb_adm2->PID == tarea_adm2->PID) {
+			if (pcb_adm2->PID == tarea_adm2->PID)
+			{
 				segmento_auxiliar = buscar_segmento_por_id(pcb_adm2->segmento_nro);
 				pcb_auxiliar = segmento_auxiliar->dir_inicio;
-				
 			}
 		}
 		list_iterator_destroy(list_iterator_pcb);
@@ -916,7 +889,7 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		desplazamiento_final_2 = segmento1->desplazamiento;
 
 		memcpy(segmento1->dir_inicio, tareas_auxiliar, segmento2->desplazamiento);
-	
+
 		//Cambio los segmentos
 		segmento2->id = segmento1->id;
 		segmento2->desplazamiento = desplazamiento_final_2;
@@ -926,7 +899,7 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		segmento1->desplazamiento = desplazamiento_final_1;
 		segmento1->estado = "OCUPADO";
 		segmento1->id = segmento_lleno;
-		
+
 		//Cambio estructura administrativa
 		tarea_adm2->segmento_nro = segmento_lleno;
 
@@ -938,7 +911,8 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		{
 			tcb_adm2 = list_iterator_next(list_iterator_tcb);
 
-			if (tcb_adm2->PID == pcb_auxiliar->PID) {
+			if (tcb_adm2->PID == pcb_auxiliar->PID)
+			{
 				segmento_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
 				tcb_auxiliar = segmento_auxiliar->dir_inicio;
 
@@ -948,21 +922,15 @@ void compactacion_mover_segmentos(Segmento* segmento1, Segmento* segmento2, int 
 		list_iterator_destroy(list_iterator_tcb);
 
 		tareas_TEST = segmento1->dir_inicio;
-
-
 	}
-
 }
-
-
-
-
 
 void alta_patota_segmentacion(PCB *unPCB)
 {
 	PCB_adm *pcb_adm = malloc(sizeof(PCB_adm));
 	pcb_adm->PID = unPCB->PID;
 	pcb_adm->segmento_nro = buscar_segmento(unPCB);
+	pcb_adm->tripulantes_activos = 0;
 	list_add(tabla_segmentos_pcb, pcb_adm);
 }
 
@@ -1053,6 +1021,7 @@ int expulsar_tripulante_segmentacion(int tripulante_id)
 	t_list_iterator *list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
 	t_list_iterator *list_iterator_segmentos = list_iterator_create(tabla_segmentos);
 	TCB_adm *tcb_adm;
+	PCB_adm *pcb_adm;
 
 	while (list_iterator_has_next(list_iterator_tcb))
 	{
@@ -1061,7 +1030,6 @@ int expulsar_tripulante_segmentacion(int tripulante_id)
 		//Si encuentro un segmento libre donde cabe el espacio a ocupar
 		if (tcb_adm->TID == tripulante_id)
 		{
-
 			while (list_iterator_has_next(list_iterator_segmentos))
 			{
 				segmento = list_iterator_next(list_iterator_segmentos);
@@ -1076,6 +1044,9 @@ int expulsar_tripulante_segmentacion(int tripulante_id)
 					break;
 				}
 			}
+
+			pcb_adm = buscar_pcb_adm_por_id(tcb_adm->PID);
+			pcb_adm->tripulantes_activos--;
 		}
 
 		if (elimine_segmento)
@@ -1092,8 +1063,68 @@ int expulsar_tripulante_segmentacion(int tripulante_id)
 			break;
 		}
 	}
+
+	elimine_segmento = false;
 	list_iterator_destroy(list_iterator_tcb);
 	list_iterator_destroy(list_iterator_segmentos);
+
+	if (pcb_adm->tripulantes_activos == 0)
+	{
+		list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+
+		while (list_iterator_has_next(list_iterator_segmentos))
+		{
+			segmento = list_iterator_next(list_iterator_segmentos);
+			if (segmento->id == pcb_adm->segmento_nro)
+			{
+				segmento->id = contador_segmentos_libres--;
+				segmento->estado = "LIBRE";
+				elimine_segmento = true;
+
+				break;
+			}
+		}
+
+		list_iterator_destroy(list_iterator_segmentos);
+
+		Tarea_adm *tarea_adm;
+		t_list_iterator *list_iterator_tareas = list_iterator_create(tabla_segmentos_tareas);
+		list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+
+		while (list_iterator_has_next(list_iterator_tareas))
+		{
+			tarea_adm = list_iterator_next(list_iterator_tareas);
+
+			//Si encuentro un segmento libre donde cabe el espacio a ocupar
+			if (tarea_adm->PID == pcb_adm->PID)
+			{
+				while (list_iterator_has_next(list_iterator_segmentos))
+				{
+					segmento = list_iterator_next(list_iterator_segmentos);
+					if (segmento->id == tarea_adm->segmento_nro)
+					{
+						segmento->id = contador_segmentos_libres--;
+						segmento->estado = "LIBRE";
+						elimine_segmento = true;
+						break;
+					}
+				}
+			}
+
+			if (elimine_segmento)
+			{
+				list_iterator_remove(list_iterator_tareas);
+				break;
+			}
+		}
+	
+		list_iterator_destroy(list_iterator_tareas);
+		list_iterator_destroy(list_iterator_segmentos);
+		borrar_pcb_adm(pcb_adm->PID);
+	}
+
+
+
 
 	fusion_segmentos_libres();
 
@@ -1116,17 +1147,28 @@ int mover_tripulante_en_x_segmentacion(int tripulante, int posicion_x_final, boo
 	{
 		return -1;
 	}
+	int x;
 
-	miTCB->pos_X = posicion_x_final;
-	if (mapa){
-	char identificador = buscar_tripulante_grilla(tripulante);
-
-	if (identificador == '-')
+	if (miTCB->pos_X < posicion_x_final)
 	{
-		return -1;
+		x = 1;
+	}
+	else
+	{
+		x = -1;
 	}
 
-	mover_tripulante_grilla(identificador, 1,0);
+	miTCB->pos_X = posicion_x_final;
+	if (mapa)
+	{
+		char identificador = buscar_tripulante_grilla(tripulante);
+
+		if (identificador == '-')
+		{
+			return -1;
+		}
+
+		mover_tripulante_grilla(identificador, x, 0);
 	}
 }
 
@@ -1138,21 +1180,31 @@ int mover_tripulante_en_y_segmentacion(int tripulante, int posicion_y_final, boo
 	{
 		return -1;
 	}
+	int y;
+
+	if (miTCB->pos_y < posicion_y_final)
+	{
+		y = 1;
+	}
+	else
+	{
+		y = -1;
+	}
 
 	miTCB->pos_y = posicion_y_final;
 
-	if (mapa){
-	char identificador = buscar_tripulante_grilla(tripulante);
-
-	if (identificador == '-')
+	if (mapa)
 	{
-		return -1;
-	}
+		char identificador = buscar_tripulante_grilla(tripulante);
 
-	mover_tripulante_grilla(identificador, 0,1);
+		if (identificador == '-')
+		{
+			return -1;
+		}
+
+		mover_tripulante_grilla(identificador, 0, y);
 	}
 }
-
 
 uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 {
@@ -1199,8 +1251,7 @@ uint32_t buscar_tripulante_no_asignado_segmentacion(int PCB_ID)
 	}
 }
 
-
-TCB* iniciar_tripulante_segmentacion(int patota_id, bool mapa)
+TCB *iniciar_tripulante_segmentacion(int patota_id, bool mapa)
 {
 	u_int32_t posicion_memoria = buscar_tripulante_no_asignado_segmentacion(patota_id);
 
@@ -1212,17 +1263,67 @@ TCB* iniciar_tripulante_segmentacion(int patota_id, bool mapa)
 	TCB *unTCB = posicion_memoria;
 	unTCB->estado = 'R';
 
-	if (mapa) {
+	PCB_adm *pcb_adm = buscar_pcb_adm_por_id(patota_id);
+	pcb_adm->tripulantes_activos++;
+
+	if (mapa)
+	{
 		crear_personaje_grilla(unTCB->TID, unTCB->pos_X, unTCB->pos_y);
 	}
 
 	return unTCB;
 }
 
+void borrar_pcb_adm(int PID)
+{
+	t_list_iterator *iterador = list_iterator_create(tabla_segmentos_pcb);
+	PCB_adm *pcb_adm;
+	bool encontre_PCB = false;
 
+	while (list_iterator_has_next(iterador))
+	{
+		pcb_adm = list_iterator_next(iterador);
+
+		if (pcb_adm->PID == PID)
+		{
+			list_iterator_remove(iterador);
+			encontre_PCB = true;
+			break;
+		}
+	}
+	list_iterator_destroy(iterador);
+}
+
+
+
+PCB_adm *buscar_pcb_adm_por_id(int PID)
+{
+	t_list_iterator *iterador = list_iterator_create(tabla_segmentos_pcb);
+	PCB_adm *pcb_adm;
+	bool encontre_PCB = false;
+
+	while (list_iterator_has_next(iterador))
+	{
+		pcb_adm = list_iterator_next(iterador);
+
+		if (pcb_adm->PID == PID)
+		{
+			encontre_PCB = true;
+			break;
+		}
+	}
+	list_iterator_destroy(iterador);
+
+	if (encontre_PCB)
+		{
+		return pcb_adm;
+		} else {
+			return 99;
+		}
+}
 
 //Crea la tabla de segmentos y el primer segmento vacio
-void inicializar_segmentacion(int tamanio_memoria, char* criterio)
+void inicializar_segmentacion(int tamanio_memoria, char *criterio)
 {
 	contador_segmentos = 0;
 	contador_segmentos_libres = -1;
@@ -1240,11 +1341,9 @@ void inicializar_segmentacion(int tamanio_memoria, char* criterio)
 	segmento_aux->desplazamiento = tamanio_memoria;
 	segmento_aux->estado = "LIBRE";
 
-
 	//Agrego el segmento vacío a la tabla de segmentos
 	list_add(tabla_segmentos, segmento_aux);
 }
-
 
 int inicializar_tripulante_segmentacion(int patota, char *unPunto, u_int32_t tareas)
 {
@@ -1266,7 +1365,7 @@ int inicializar_tripulante_segmentacion(int patota, char *unPunto, u_int32_t tar
 	miTCB->pos_X = atoi(lista_puntos[0]);
 	miTCB->pos_y = atoi(lista_puntos[1]);
 
-	free(lista_puntos); 
+	free(lista_puntos);
 	//linkear a tareas
 	miTCB->proxima_instruccion = tareas;
 	miTCB->PCB = buscar_patota(patota);
@@ -1275,26 +1374,22 @@ int inicializar_tripulante_segmentacion(int patota, char *unPunto, u_int32_t tar
 	alta_tripulante_segmentacion(miTCB, patota);
 }
 
-
-bool segmentos_menor (Segmento* segmento1, Segmento* segmento_mayor)
+bool segmentos_menor(Segmento *segmento1, Segmento *segmento_mayor)
 {
 	return segmento1->desplazamiento <= segmento_mayor->desplazamiento;
 }
 
-bool segmentos_orden (Segmento* segmento1, Segmento* segmento_mayor)
+bool segmentos_orden(Segmento *segmento1, Segmento *segmento_mayor)
 {
 	return segmento1->dir_inicio <= segmento_mayor->dir_inicio;
 }
 
-
-
-
 int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 {
-	t_list_iterator	*list_iterator_segmentos = list_iterator_create(tabla_segmentos);
-	t_list* tabla_segmentos_libres = list_create();
-	Segmento* segmento1;
-	Segmento* segmento_aux;
+	t_list_iterator *list_iterator_segmentos = list_iterator_create(tabla_segmentos);
+	t_list *tabla_segmentos_libres = list_create();
+	Segmento *segmento1;
+	Segmento *segmento_aux;
 	int contador_total_disponible = 0;
 	int contador_total_requerido;
 	bool ubique_pcb = false;
@@ -1305,101 +1400,104 @@ int verifica_espacio(int cantidad_tripulantes, int tareas_tamanio)
 	bool hay_lugar_parcial = false;
 	bool salto_de_segmento = false;
 
-	contador_total_requerido = 8 + (21*cantidad_tripulantes) + tareas_tamanio;
+	contador_total_requerido = 8 + (21 * cantidad_tripulantes) + tareas_tamanio;
 
 	while (list_iterator_has_next(list_iterator_segmentos))
 	{
-			segmento1 = list_iterator_next(list_iterator_segmentos);
+		segmento1 = list_iterator_next(list_iterator_segmentos);
 
-			if (strcmp(segmento1->estado,"LIBRE") == 0) 
+		if (strcmp(segmento1->estado, "LIBRE") == 0)
+		{
+			segmento_aux = malloc(sizeof(Segmento));
+			segmento_aux->id = segmento1->id;
+			segmento_aux->desplazamiento = segmento1->desplazamiento;
+
+			contador_total_disponible += segmento1->desplazamiento;
+			if (strcmp(criterio_seleccion, "FF") == 0)
 			{
-				segmento_aux = malloc(sizeof(Segmento));
-				segmento_aux->id = segmento1->id;
-				segmento_aux->desplazamiento = segmento1->desplazamiento;
-
-				contador_total_disponible += segmento1->desplazamiento;
-				if (strcmp(criterio_seleccion,"FF")==0)
-				{
-					list_add(tabla_segmentos_libres,segmento_aux);
-				} else {
-					list_add_sorted(tabla_segmentos_libres,segmento_aux, segmentos_menor);
-				}
+				list_add(tabla_segmentos_libres, segmento_aux);
 			}
+			else
+			{
+				list_add_sorted(tabla_segmentos_libres, segmento_aux, segmentos_menor);
+			}
+		}
 	}
 
-
-	t_list_iterator	*list_iterator_segmentos_libres = list_iterator_create(tabla_segmentos_libres);
+	t_list_iterator *list_iterator_segmentos_libres = list_iterator_create(tabla_segmentos_libres);
 
 	while (list_iterator_has_next(list_iterator_segmentos_libres))
 	{
 		segmento1 = list_iterator_next(list_iterator_segmentos_libres);
 
-	//	if (strcmp(criterio_seleccion,"FF")==0) 
-	//	{
-			if (!ubique_pcb)
+		//	if (strcmp(criterio_seleccion,"FF")==0)
+		//	{
+		if (!ubique_pcb)
+		{
+			if (segmento1->desplazamiento >= 8)
 			{
-				if(segmento1->desplazamiento>= 8)
-				{
-					ubique_pcb = true;
-					segmento1->desplazamiento = segmento1->desplazamiento - 8;
-				}
+				ubique_pcb = true;
+				segmento1->desplazamiento = segmento1->desplazamiento - 8;
 			}
-			if (!ubique_tareas && ubique_pcb)
+		}
+		if (!ubique_tareas && ubique_pcb)
+		{
+			if (segmento1->desplazamiento >= tareas_tamanio)
 			{
-				if(segmento1->desplazamiento >= tareas_tamanio)
-				{
-					ubique_tareas = true;
-					segmento1->desplazamiento = segmento1->desplazamiento - tareas_tamanio;
-				}
+				ubique_tareas = true;
+				segmento1->desplazamiento = segmento1->desplazamiento - tareas_tamanio;
 			}
+		}
 
-			for (int i=0; i < cantidad_tripulantes; i++)
+		for (int i = 0; i < cantidad_tripulantes; i++)
+		{
+			if (!ubique_tripulantes && ubique_pcb && ubique_tareas)
 			{
-				if (!ubique_tripulantes && ubique_pcb && ubique_tareas)
+				if (segmento1->desplazamiento >= 21)
 				{
-					if(segmento1->desplazamiento >= 21)
+					segmento1->desplazamiento = segmento1->desplazamiento - 21;
+					tripulantes_ubicados++;
+					if (tripulantes_ubicados == cantidad_tripulantes)
 					{
-						segmento1->desplazamiento = segmento1->desplazamiento - 21;
-						tripulantes_ubicados++;
-						if (tripulantes_ubicados == cantidad_tripulantes)
-						{
-							ubique_tripulantes = true;
-						}
+						ubique_tripulantes = true;
 					}
-				}				
+				}
 			}
-	//	}
+		}
+		//	}
 	}
 
 	list_destroy(tabla_segmentos_libres);
 	list_iterator_destroy(list_iterator_segmentos);
 	list_iterator_destroy(list_iterator_segmentos_libres);
 	free(segmento_aux);
-	
-		if (contador_total_disponible >= contador_total_requerido)
-		{
-			hay_lugar_total = true;
-		}
 
-		if (ubique_pcb && ubique_tareas && ubique_tripulantes)
-		{
-			hay_lugar_parcial = true;
-		}
+	if (contador_total_disponible >= contador_total_requerido)
+	{
+		hay_lugar_total = true;
+	}
 
-		if (hay_lugar_total)
+	if (ubique_pcb && ubique_tareas && ubique_tripulantes)
+	{
+		hay_lugar_parcial = true;
+	}
+
+	if (hay_lugar_total)
+	{
+		if (hay_lugar_parcial)
 		{
-			if(hay_lugar_parcial)
-			{
-				return 0;
-			} else {
-				return -2;
-			}
-		} else {
-			return -1;
+			return 0;
 		}
+		else
+		{
+			return -2;
+		}
+	}
+	else
+	{
+		return -1;
+	}
 }
-
-
 
 int iniciar_patota_segmentacion(int cantidad_tripulantes, char *tareas, char *puntos)
 {
@@ -1457,7 +1555,6 @@ int iniciar_patota_segmentacion(int cantidad_tripulantes, char *tareas, char *pu
 	}
 	return unPCB->PID;
 }
-
 
 //Finaliza la segmentación
 void finalizar_segmentacion()

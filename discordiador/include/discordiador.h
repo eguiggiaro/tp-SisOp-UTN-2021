@@ -149,6 +149,7 @@ void avisar_inicio_tarea_bitacora(Tripulante* trip, char* tarea_nombre);
 void avisar_fin_tarea_bitacora(Tripulante* trip, char* tarea_nombre);
 void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola);
 void pasar_tripulante_de_exec_a_ready(Tripulante* trip);
+void borrar_tripulante(Tripulante* trip);
 //Metodos Test
 void elegir_modulo();
 void consola_miram();

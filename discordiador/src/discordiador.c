@@ -325,6 +325,9 @@ void expulsar_tripulante(char *comando)
 			break;
 		}
   	}
+	
+	//Duermo al tripulante
+	trip->tripulante_despierto=false;
 
 	t_paquete* paquete = crear_paquete(EXPULSAR_TRIPULANTE);
     t_buffer* buffer;
@@ -337,9 +340,12 @@ void expulsar_tripulante(char *comando)
 	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
 		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
-		miLogInfo("Tripulante expulsado correctamente\n");
+		miLogInfo("Tripulante %d expulsado correctamente\n", trip->id_tripulante);
+		//Elimino al tripulante
+		borrar_tripulante(trip);
+
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
+        miLogError("ERROR EXPULSANDO TRIPULANTE %d. \n",trip->id_tripulante);
 	}
 
 	list_destroy(lista_mensajes);
@@ -1163,4 +1169,72 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   //planificar();
   }
 
+}
+
+void borrar_tripulante(Tripulante* trip){
+	if(trip->estado==llegada){
+		pthread_mutex_lock(&mutexNEW);
+		for(int i=0;i<list_size(new_list);i++){
+			Tripulante* trip_aux = list_get(new_list,i);
+			if(trip_aux->id_tripulante==trip->id_tripulante){
+				list_remove(new_list,i);
+				list_add(exit_list,trip);
+				trip->estado=finalizado;
+				miLogInfo("Se elimina al tripulante: %d de la cola de NEW\n",trip->id_tripulante);
+			}
+		}
+		pthread_mutex_unlock(&mutexNEW);
+	}
+	else if(trip->estado==listo){
+		pthread_mutex_lock(&mutexREADY);
+		for(int i=0;i<list_size(ready_list);i++){
+			Tripulante* trip_aux = list_get(ready_list,i);
+			if(trip_aux->id_tripulante==trip->id_tripulante){
+				list_remove(ready_list,i);
+				list_add(exit_list,trip);
+				trip->estado=finalizado;
+				miLogInfo("Se elimina al tripulante: %d de la cola de READY\n",trip->id_tripulante);
+			}
+		}
+		pthread_mutex_unlock(&mutexREADY);
+	}
+	else if(trip->estado==trabajando){
+		pthread_mutex_lock(&mutexEXEC);
+		for(int i=0;i<list_size(execute_list);i++){
+			Tripulante* trip_aux = list_get(execute_list,i);
+			if(trip_aux->id_tripulante==trip->id_tripulante){
+				list_remove(execute_list,i);
+				list_add(exit_list,trip);
+				trip->estado=finalizado;
+				miLogInfo("Se elimina al tripulante: %d de la cola de EXEC\n",trip->id_tripulante);
+			}
+		}
+		pthread_mutex_unlock(&mutexEXEC);
+	}
+	else if(trip->estado==bloqueado_io){
+		pthread_mutex_lock(&mutexBLOCK);
+		for(int i=0;i<list_size(blocked_io);i++){
+			Tripulante* trip_aux = list_get(blocked_io,i);
+			if(trip_aux->id_tripulante==trip->id_tripulante){
+				list_remove(blocked_io,i);
+				list_add(exit_list,trip);
+				trip->estado=finalizado;
+				miLogInfo("Se elimina al tripulante: %d de la cola de BLOCK_IO\n",trip->id_tripulante);
+			}
+		}
+		pthread_mutex_unlock(&mutexBLOCK);
+	}
+	else if(trip->estado==bloqueado_emergencia){
+		pthread_mutex_lock(&mutexBLOCK_EM);
+		for(int i=0;i<list_size(blocked_em);i++){
+			Tripulante* trip_aux = list_get(blocked_em,i);
+			if(trip_aux->id_tripulante==trip->id_tripulante){
+				list_remove(blocked_em,i);
+				list_add(exit_list,trip);
+				trip->estado=finalizado;
+				miLogInfo("Se elimina al tripulante: %d de la cola de BLOCK_EM\n",trip->id_tripulante);
+			}
+		}
+		pthread_mutex_unlock(&mutexBLOCK_EM);
+	}
 }

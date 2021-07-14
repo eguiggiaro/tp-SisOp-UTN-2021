@@ -56,7 +56,7 @@ int escuchar(Invocacion* invocacion)
 		void* atender_request = invocacion->atender_request;
 
 		//printf("Se conectó un cliente!\n");
-		miLogInfo("Se conectó un cliente\n");
+		miLogInfo("Se conectó un cliente");
 
 		while(1){
 

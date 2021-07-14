@@ -2,7 +2,7 @@
 
 #define MODULE_NAME "MiRAM"
 #define CONFIG_FILE_PATH "cfg/miram.cfg"
-#define LOG_FILE_PATH "miram.log"
+#define LOG_FILE_PATH "cfg/miram.log"
 
 void compactar_memoria(void)
 {
@@ -98,13 +98,13 @@ void atender_request_miram(Request *request)
 
 		if (resultado == -1)
 		{
-			miLogInfo("ERROR: TRIPULANTE %d NO EXPULSADO", tripulante_expulsion);
+			miLogInfo("ERROR: tripulante %d no expulsado", tripulante_expulsion);
 			paquete_devuelto = crear_paquete(FAIL);
 			list_add(lista_mensajes, "Se produjo un error al expulsar el tripulante");
 		}
 		else
 		{
-			miLogInfo("TRIPULANTE %d EXPULSADO CORRECTAMENTE", tripulante_expulsion);
+			miLogInfo("Tripulado %d expulsado correctamente", tripulante_expulsion);
 
 			paquete_devuelto = crear_paquete(OK);
 			list_add(lista_mensajes, string_itoa(tripulante_expulsion));
@@ -146,13 +146,13 @@ void atender_request_miram(Request *request)
 		resultado = 1;
 		if (resultado == -1)
 		{
-			miLogInfo("ERROR: TRIPULANTE NO INICIADO");
+			miLogInfo("ERROR: Tripulante no iniciado");
 			paquete_devuelto_iniciar_tripulante = crear_paquete(FAIL);
 			list_add(lista_mensajes, "Se produjo un error al iniciar el tripulante");
 		}
 		else
 		{
-			miLogInfo("TRIPULANTE %d INICIADO CORRECTAMENTE", un_tripulante->TID);
+			miLogInfo("Tripulante %d iniciado correctamente", un_tripulante->TID);
 
 			proxima_tarea = proxima_tarea_tripulante(un_tripulante->TID);
 
@@ -228,14 +228,14 @@ void atender_request_miram(Request *request)
 
 		if (resultado == -1)
 		{
-			miLogInfo("ERROR: PATOTA NO INICIADAn");
+			miLogInfo("ERROR: patota no iniciada");
 
 			paquete_devuelto_iniciar_patota = crear_paquete(FAIL);
 			list_add(lista_mensajes, "Se produjo un error al iniciar la patota");
 		}
 		else
 		{
-			miLogInfo("PATOTA %d INICIADA CORRECTAMENTE", resultado);
+			miLogInfo("Patota %d iniciada correctamente", resultado);
 
 			paquete_devuelto_iniciar_patota = crear_paquete(OK);
 			list_add(lista_mensajes, string_itoa(resultado));
@@ -267,7 +267,7 @@ void atender_request_miram(Request *request)
 
 		char *tarea = proxima_tarea_tripulante(tripulante_id);
 
-		miLogInfo("Proxima tarea de tripulante %d enviada: %s", tripulante_id, tarea);
+		miLogInfo("Proxima tarea de tripulante %d enviada", tripulante_id, tarea);
 		paquete_devuelto = crear_paquete(OK);
 		list_add(lista_mensajes, tarea);
 
@@ -320,7 +320,7 @@ void atender_request_miram(Request *request)
 		break;
 
 	default:
-		miLogInfo("Me llego operacion: ...");
+		miLogInfo("Operación recibida no existe");
 
 		break;
 	}
@@ -394,6 +394,15 @@ void mover_tripulante_grilla(char identificador, int pos_x, int pos_y)
 	int err;
 
 	err = item_desplazar(nivel, identificador, pos_x, pos_y);
+	nivel_gui_dibujar(nivel);
+}
+
+void expulsar_tripulante_grilla(char identificador)
+{
+
+	int err;
+
+	err = item_borrar(nivel, identificador);
 	nivel_gui_dibujar(nivel);
 }
 
@@ -669,6 +678,14 @@ TCB* iniciar_tripulante(int patota_id)
 int expulsar_tripulante(int tripulante_id)
 {
 	int resultado;
+	bool mapa = false;
+
+	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
+	{
+		mapa= true;
+	}
+
+
 
 	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
@@ -681,10 +698,10 @@ int expulsar_tripulante(int tripulante_id)
 		}
 		else
 		{
-			resultado = expulsar_tripulante_segmentacion(tripulante_id);
+			resultado = expulsar_tripulante_segmentacion(tripulante_id, mapa);
 		}
 	} else {
-		resultado = expulsar_tripulante_paginacion(tripulante_id);
+		resultado = expulsar_tripulante_paginacion(tripulante_id, mapa);
 	}
 }
 

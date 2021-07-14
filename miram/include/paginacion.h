@@ -73,6 +73,7 @@ typedef struct
 	int tamanio_tareas;
 	t_list* tabla_TCB_admin;
 	int tripulantes_iniciados;
+	int tripulantes_activos;
 } PCB_adm;
 
 typedef struct
@@ -91,6 +92,7 @@ Pagina *buscar_pagina_por_id(int id_pagina);
 Frame *traer_de_SWAP(int id_pagina, Frame* un_frame);
 void* llevar_a_swap(Frame* un_frame, Pagina* una_pagina);
 Frame *hacer_lugar_memoria();
+void *eliminar_patotaadm(int patota_id);
 
 pthread_mutex_t mutex_dump;
 pthread_mutex_t mutex_SWAP_escribir;

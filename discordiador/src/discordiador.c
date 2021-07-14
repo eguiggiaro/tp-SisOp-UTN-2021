@@ -421,39 +421,41 @@ void iniciar_patota(char *comando)
 
 	char *patota_id = list_get(mensajes_respuesta, 0);
 	
-	Tarea *proxima_tarea = malloc(sizeof(Tarea));
-	proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
+	if(strcmp(patota_id,"-1")!=0){
+	  Tarea *proxima_tarea = malloc(sizeof(Tarea));
+	  proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
 
-	//si la tarea no tiene parametro, seteamos un 0.
-	if(proxima_tarea->parametros==NULL){
-		proxima_tarea->parametros = "0";
-	}
+	  //si la tarea no tiene parametro, seteamos un 0.
+	  if(proxima_tarea->parametros==NULL){
+		  proxima_tarea->parametros = "0";
+	  }
 
-	pthread_t hilos_tripulantes[cantidad_trip];
+	  pthread_t hilos_tripulantes[cantidad_trip];
 
-	Tripulante *new_tripulante;
+	  Tripulante *new_tripulante;
 
-	for (int i = 0; i < cantidad_trip; i++)
-	{
-		new_tripulante = malloc(sizeof(Tripulante));
+	  for (int i = 0; i < cantidad_trip; i++)
+	  {
+		  new_tripulante = malloc(sizeof(Tripulante));
 
-		new_tripulante->id_patota = atoi(patota_id);
-		new_tripulante->tarea_actual = proxima_tarea;
-		new_tripulante->tripulante_despierto = false;
-		new_tripulante->completo_tareas = false;
-		new_tripulante->recibio_input_store = false;
-		new_tripulante->realizo_movimientos_tarea = false;
-		//new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
-		//new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
+		  new_tripulante->id_patota = atoi(patota_id);
+		  new_tripulante->tarea_actual = proxima_tarea;
+		  new_tripulante->tripulante_despierto = false;
+		  new_tripulante->completo_tareas = false;
+		  new_tripulante->recibio_input_store = false;
+		  new_tripulante->realizo_movimientos_tarea = false;
+		  //new_tripulante->pos_x=atoi(list_get(mensajes_respuesta,1));
+		  //new_tripulante->pos_y=atoi(list_get(mensajes_respuesta,2));
 
-		if (pthread_create(&hilos_tripulantes[i], NULL, inicializar_tripulante,
-						   (Tripulante *)new_tripulante) != 0)
-		{
-			printf("Error inicializando tripulante/n");
-		}
-		else{
-			new_tripulante->id_hilo = &hilos_tripulantes[i]; //le asigno el hilo a cada tripulante
-		}
+		  if (pthread_create(&hilos_tripulantes[i], NULL, inicializar_tripulante,
+			  			     (Tripulante *)new_tripulante) != 0)
+		  {
+			  printf("Error inicializando tripulante/n");
+		  }
+		  else{
+			  new_tripulante->id_hilo = &hilos_tripulantes[i]; //le asigno el hilo a cada tripulante
+		  }
+	  }
 	}
 
 	list_destroy(lista_mensajes);

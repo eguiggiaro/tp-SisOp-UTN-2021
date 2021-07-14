@@ -13,6 +13,7 @@
 #include "logger.h"
 #include "paquete.h"
 #include<semaphore.h>
+#include<time.h>
 
 typedef struct Configuracion{
 	int puerto;

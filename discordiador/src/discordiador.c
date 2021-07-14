@@ -13,13 +13,20 @@ int id_patota;
 const char *comandos_table[] = {"INICIAR_PATOTA",
 								"INICIAR_PLANIFICACION",
 								"PAUSAR_PLANIFICACION",
-								"LISTAR_TRIPULANTE",
+								"LISTAR_TRIPULANTES",
 								"EXPULSAR_TRIPULANTE",
 								"OBTENER_BITACORA",
 								"FIN",
 								"TEST_MENSAJES",
 								"ALERTA_SABOTAJE",
 								"COMPACTAR", NULL};
+
+const char *estados_table[] = {"NEW",
+                               "READY",
+							   "EXEC",
+							   "BLOCK_IO",
+							   "BLOCK_EM",
+							   "EXIT", NULL};
 
 int main()
 {
@@ -139,7 +146,7 @@ void consola()
 				printf("Comando es Iniciar patota\n");
 				if (pthread_create(&threadPATOTA, NULL, (void*) iniciar_patota,
 				(char*)input_consola) != 0) {
-			     printf("Error iniciando patota/n");
+			     printf("Error iniciando patota\n");
 		        }
 				pthread_detach(threadPATOTA);
 				break;
@@ -154,24 +161,42 @@ void consola()
 				printf("Comando es Pausar Planificacion\n");
 				if (pthread_create(&threadPAUSAR_PLANIFICACION, NULL, (void*) pausar_planificacion,
 				NULL) != 0) {
-			     printf("Error pausando planificacion/n");
+			     printf("Error pausando planificacion\n");
 		        }
 				break;
 			case LISTAR_TRIPULANTE_COM:
-				printf("No implementado todavia. Gracias y vuelva pronto. :)\n");
+				printf("\nComando es Listar Tripulantes\n");
+				time_t current_time;
+                char* c_time_string;
+
+                current_time = time(NULL);
+
+                /* Convert to local time format. */
+                c_time_string = ctime(&current_time);
+
+				printf("\n--------------------------------------------------------------------\n");
+				printf("Estado de la Nave: %s", c_time_string);
+				for(int i = 0; i<list_size(tripulantes_totales); i++){
+					Tripulante* tripu = (Tripulante*) list_get(tripulantes_totales,i);
+					printf("Tripulante: %-5d  Patota: %-5d  Status: %-5s \n", tripu->id_tripulante, 
+					                                                       tripu->id_patota, 
+					                                                       estados_table[tripu->estado]);
+				
+				}
+				printf("--------------------------------------------------------------------\n");
 				break;
 			case EXPULSAR_TRIPULANTE_COM:
 				printf("Comando es Expulsar Tripulante\n");
 				if (pthread_create(&threadEXPULSAR_TRIPULANTE, NULL, (void*) expulsar_tripulante, 
 				(char*)input_consola) != 0) {
-			     printf("Error expulsando tripulante/n");
+			     printf("Error expulsando tripulante\n");
 		        }
 				break;
 			case COMPACTACION_COM:
 				printf("Comando es Expulsar Tripulante\n");
 				if (pthread_create(&threadCOMPACTACION, NULL, (void*) compactacion, 
 				(char*)input_consola) != 0) {
-			     printf("Error compactacion/n");
+			     printf("Error compactacion\n");
 		        }
 				break;
 			case OBTENER_BITACORA_COM:

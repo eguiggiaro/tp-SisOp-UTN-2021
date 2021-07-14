@@ -128,6 +128,7 @@ bool planificacion_activada;
 
 //Metodos Discordidor
 void iniciar_patota(char* ); //?string? chequer commons
+int checkFileExists(char* filename);
 void expulsar_tripulante(char* );
 void obtener_bitacora(char*);
 void generar_archivo_bitacora(char*, char*);

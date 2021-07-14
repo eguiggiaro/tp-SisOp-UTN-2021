@@ -144,9 +144,13 @@ void consola()
 			{
 			case INICIAR_PATOTA_COM:
 				printf("Comando es Iniciar patota\n");
-				if (pthread_create(&threadPATOTA, NULL, (void*) iniciar_patota,
+				if(!checkFileExists(list[2])){
+					printf("La ruta especificada es erronea\n");
+					break;
+				}
+				else if (pthread_create(&threadPATOTA, NULL, (void*) iniciar_patota,
 				(char*)input_consola) != 0) {
-			     printf("Error iniciando patota\n");
+			     printf("Error iniciando patota/n");
 		        }
 				pthread_detach(threadPATOTA);
 				break;
@@ -228,13 +232,20 @@ void consola()
 
 			default:
 				printf("No conozco ese comando, seguro que esta bien?\n");
-				printf("Reescribir, por favor\n");
-				input_consola = readline(">>");
 				break;
 			}
 			printf("Siguiente comando?\n");
 			input_consola = readline(">>");
 		}
+}
+
+int checkFileExists(char* filename)
+{
+    if (fopen(filename, "r")== NULL)
+    {	
+        return 0;
+    }
+    return 1;
 }
 
 void obtener_bitacora(char* comando){
@@ -469,10 +480,6 @@ char *leer_tareas_txt(char *direccion_txt)
 	int index = 0;
 
 	FILE *file_tarea = fopen(direccion_txt, "r");
-	if (file_tarea == NULL)
-	{
-		printf("Error al abrir el fichero");
-	}
 
 	if (!feof(file_tarea))
 	{

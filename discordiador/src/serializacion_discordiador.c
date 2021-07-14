@@ -133,7 +133,7 @@ t_list* iniciar_patota_miram(uint32_t socket, t_list* lista_mensajes ){
 		return lista;	
 		
 	} else {
-		miLogInfo("No se inicio patota en MIRAM correctamente \n");
+		miLogError("No se inicio patota en MIRAM correctamente \n");
 		t_list* lista = list_create();
 		list_add(lista,"-1");
 		return lista;

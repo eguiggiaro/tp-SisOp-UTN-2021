@@ -138,7 +138,7 @@ char* leer_tareas_txt(char* direccion_txt);
 void mandar_tareas_miram(char *);
 int enviar_tareas_miram(char* direccion_txt);
 void tripulante_listo(Tripulante*);
-Tarea* obtener_tarea(char* tarea_string, Tarea* nueva_tarea); //dado un string con los parametros de tarea, genera la estructura Tarea
+void obtener_tarea(char* tarea_string, Tarea* nueva_tarea); //dado un string con los parametros de tarea, genera la estructura Tarea
 void iniciar_planificacion();
 void pausar_planificacion();
 void finalizar_tripulante(Tripulante* trip); //Tripulante pasa de EXEC a EXIT, se liberan sus recursos

@@ -423,7 +423,7 @@ void iniciar_patota(char *comando)
 	
 	if(strcmp(patota_id,"-1")!=0){
 	  Tarea *proxima_tarea = malloc(sizeof(Tarea));
-	  proxima_tarea = obtener_tarea(string_tareas, proxima_tarea);
+	  obtener_tarea(string_tareas, proxima_tarea);
 
 	  //si la tarea no tiene parametro, seteamos un 0.
 	  if(proxima_tarea->parametros==NULL){
@@ -771,7 +771,7 @@ Comandos find_enum_consola(char *sval)
 	return -1;
 }
 
-Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
+void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 {
 	char *token;
 
@@ -819,8 +819,6 @@ Tarea *obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	char *tiempo_aux = strtok(tiempo, "|");
 	nueva_tarea->tiempo = atoi(tiempo_aux);
 	//printf(" tiempo: %i\n", nueva_tarea->tiempo);
-
-	return nueva_tarea;
 }
 
 //Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución

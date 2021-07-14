@@ -284,6 +284,7 @@ t_pos* primerPosicionSabotajeSinAtender(t_list* posiciones){
     }
 	posicionSabotaje = list_find(posiciones, (void*) _estaDesatendida);
 	posicion = posicionSabotaje->posicion;
+	posicionSabotaje->atendida = true;	
 
 	return posicion;
 }

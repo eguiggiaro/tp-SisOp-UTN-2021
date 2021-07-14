@@ -164,11 +164,44 @@ void atender_request_store(Request *request) {
 		
 		case FSCK:
 			//Activar el sabotaje	
-			miLogInfo("Me llego operacion: FSCK");
+			miLogDebug("Me llego operacion: FSCK");
+
+			t_buffer* buffer_devolucion_fsck = request->buffer_devolucion;
+			t_paquete *paquete_devuelto_fsck;
+
+			lista = deserializar_lista_strings(buffer_devolucion_fsck);
+
+			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
+			char* posX = list_get(lista,1);
+			char* posY = list_get(lista,2);
+			miLogInfo("El tripulante: %s, va a solucionar el sabotaje en la posición: %s|%s.", id_tripulante, posX, posY);
+			
 			pthread_mutex_lock(&mutexEjecucionSabotaje);
 			esperaSabotaje = 1;
-			pthread_cond_signal(&condEjecucionSabotaje);
+			int resultado = pthread_cond_signal(&condEjecucionSabotaje);
+			
+			if (resultado != 0)
+			{
+				miLogError("ERROR: NO SE PUDO ACTIVAR EL PROTOCOLO DE SABOTAJE FSCK.");
+				paquete_devuelto_fsck = crear_paquete(FAIL);
+				list_add(lista_mensajes, "No se pudo activar el protocolo.");
+			}
+			else
+			{
+				miLogDebug("El protocolo FSCK fue activado correctamente y esta en ejecucion.");
+				paquete_devuelto_fsck = crear_paquete(OK);
+
+			}
+			t_buffer* buffer_respuesta_fsck = serializar_lista_strings(lista_mensajes);
+			paquete_devuelto_fsck->buffer = buffer_respuesta_fsck;
+			enviar_paquete(paquete_devuelto_fsck, request_fd);
+
+			eliminar_buffer(buffer_devolucion_fsck);
+			list_destroy(lista_mensajes);
+			list_destroy(lista);
+			free(request);
 			pthread_mutex_unlock(&mutexEjecucionSabotaje);
+			break;		
 
 		default:
 			miLogInfo("Me llego operacion: ...");

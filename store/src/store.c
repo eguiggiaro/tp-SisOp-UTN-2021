@@ -159,10 +159,10 @@ int iniciarConexionDiscordiador()
 	int socket = crear_conexion(logger, configuracion->ipDiscordiador, configuracion->puertoDiscordiador);
 	
 	if (socket == -1) {
-		miLogError("No fue posible establecer la conexión del socket solicitado.\n");
+		miLogError("No fue posible establecer la conexión del socket solicitado.");
 		exit(3);
 	}
-	miLogInfo("Conexion con discordiador iniciada correctamente. (Socket: %d).\n", socket);
+	miLogInfo("Conexion con discordiador iniciada correctamente. (Socket: %d).", socket);
 
 	return socket;
 }
@@ -186,7 +186,7 @@ void atenderSabotaje(){
 		protocoloFsck();
 		esperaSabotaje = 0;
 	} else if (respuestaDiscordiador == FAIL){
-        miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje. \n");
+        miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje.");
 	}
 	
 }

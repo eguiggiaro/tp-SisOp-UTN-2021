@@ -95,6 +95,7 @@ void inicializarPosicionesSabotaje();
 void inicializarSemaforos();
 void syncPeriodico();
 void atenderSabotaje();
+void protocoloFsck();
 void finalizarStore();
 t_list* obtenerListaSabotaje(char*);
 

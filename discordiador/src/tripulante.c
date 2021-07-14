@@ -188,6 +188,8 @@ void generar_comida_FIFO(Tripulante *trip)
 
   if (!trip->recibio_input_store)
   {
+    int ciclos_cpu = sleep(retardo * (1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
     if (tarea_informada(trip, tarea, parametro))
@@ -198,10 +200,8 @@ void generar_comida_FIFO(Tripulante *trip)
     {
       miLogError("Error verificando la existencia de Comida.ims \n");
     }
-    //Consume un ciclo de CPU
-    (trip->tarea_actual)->tiempo--;
-    int ciclos_cpu = sleep(retardo * (1));
-    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -212,8 +212,6 @@ void generar_comida_FIFO(Tripulante *trip)
 
   if (trip->estado == trabajando)
   {
-    //Consume ciclos de CPU restantes
-    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
     miLogInfo("Finaliza ejecucion de GENERAR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_COMIDA");
     //seteo parametros para proxima tarea
@@ -240,6 +238,9 @@ void generar_oxigeno_FIFO(Tripulante *trip)
 
   if (!trip->recibio_input_store)
   {
+    //Consume un ciclo de CPU
+    int ciclos_cpu = sleep(retardo * (1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
     if (tarea_informada(trip, tarea, parametro))
@@ -250,10 +251,10 @@ void generar_oxigeno_FIFO(Tripulante *trip)
     {
       miLogError("Error verificando la existencia de Oxigeno.ims \n");
     }
-    //Consume un ciclo de CPU
-    (trip->tarea_actual)->tiempo--;
-    int ciclos_cpu = sleep(retardo * (1));
-    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
+    
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -264,8 +265,6 @@ void generar_oxigeno_FIFO(Tripulante *trip)
 
   if (trip->estado == trabajando)
   {
-    //Consume ciclos de CPU restantes
-    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
     miLogInfo("Finaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
     //seteo parametros para proxima tarea
@@ -292,6 +291,9 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
 
   if (!trip->recibio_input_store)
   {
+    //Consume un ciclo de CPU
+    int ciclos_cpu = sleep(retardo * (1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
     if (tarea_informada(trip, tarea, parametro))
@@ -302,10 +304,10 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
     {
       miLogError("Error verificando la existencia de Oxigeno.ims \n");
     }
-    //Consume un ciclo de CPU
-    (trip->tarea_actual)->tiempo--;
-    int ciclos_cpu = sleep(retardo * (1));
-    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
+    
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -316,8 +318,6 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
 
   if (trip->estado == trabajando)
   {
-    //Consume ciclos de CPU restantes
-    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
     miLogInfo("Finaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_OXIGENO");
     //seteo parametros para proxima tarea
@@ -344,6 +344,9 @@ void consumir_comida_FIFO(Tripulante *trip)
 
   if (!trip->recibio_input_store)
   {
+    //Consume un ciclo de CPU
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+    int ciclos_cpu = sleep(retardo * (1));
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
     if (tarea_informada(trip, tarea, parametro))
@@ -354,10 +357,10 @@ void consumir_comida_FIFO(Tripulante *trip)
     {
       miLogError("Error verificando la existencia de Comida.ims \n");
     }
-    //Consume un ciclo de CPU
-    (trip->tarea_actual)->tiempo--;
-    int ciclos_cpu = sleep(retardo * (1));
-    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
+  
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -368,8 +371,6 @@ void consumir_comida_FIFO(Tripulante *trip)
 
   if (trip->estado == trabajando)
   {
-    //Consume ciclos de CPU restantes
-    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
     miLogInfo("Finaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_COMIDA");
     //seteo parametros para proxima tarea
@@ -397,6 +398,9 @@ void generar_basura_FIFO(Tripulante *trip)
 
   if (!trip->recibio_input_store)
   {
+    //Consume un ciclo de CPU
+    int ciclos_cpu = sleep(retardo * (1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
     if (tarea_informada(trip, tarea, parametro))
@@ -407,10 +411,11 @@ void generar_basura_FIFO(Tripulante *trip)
     {
       miLogError("Error verificando la existencia de Basura.ims \n");
     }
-    //Consume un ciclo de CPU
-    (trip->tarea_actual)->tiempo--;
-    int ciclos_cpu = sleep(retardo * (1));
-    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
+    miLogInfo("Finaliza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
+    
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -421,9 +426,6 @@ void generar_basura_FIFO(Tripulante *trip)
 
   if (trip->estado == trabajando)
   {
-    //Consume ciclos de CPU restantes
-    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-    miLogInfo("Finaliza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_BASURA");
     //seteo parametros para proxima tarea
     trip->tarea_actual = NULL;
@@ -449,6 +451,9 @@ void descartar_basura_FIFO(Tripulante *trip)
 
   if (!trip->recibio_input_store)
   {
+    //Consume un ciclo de CPU
+    int ciclos_cpu = sleep(retardo * (1));
+    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
     if (tarea_informada(trip, tarea, parametro))
@@ -459,10 +464,10 @@ void descartar_basura_FIFO(Tripulante *trip)
     {
       miLogError("Error verificando la existencia de Basura.ims \n");
     }
-    //Consume un ciclo de CPU
-    (trip->tarea_actual)->tiempo--;
-    int ciclos_cpu = sleep(retardo * (1));
-    miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
+
+    //Consume ciclos de CPU restantes
+    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
+    
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -473,8 +478,6 @@ void descartar_basura_FIFO(Tripulante *trip)
 
   if (trip->estado == trabajando)
   {
-    //Consume ciclos de CPU restantes
-    int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
     miLogInfo("Finaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "DESCARTAR_BASURA");
     //seteo parametros para proxima tarea

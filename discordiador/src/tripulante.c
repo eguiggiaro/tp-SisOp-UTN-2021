@@ -49,8 +49,6 @@ void *inicializar_tripulante(Tripulante *tripulante)
     pthread_mutex_lock(&mutexNEW);
     list_add(new_list, tripulante);
     pthread_mutex_unlock(&mutexNEW);
-    //aviso cambio de cola/estado a MIRAM
-    //informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"NEW");
 
     miLogInfo("Tripulante: %d iniciado correctamente \n", tripulante->id_tripulante);
 
@@ -1119,7 +1117,7 @@ void bloquear_tripulante_io(Tripulante *trip)
     pthread_mutex_unlock(&mutexBLOCK);
     pthread_mutex_unlock(&mutexEXEC);
     //aviso cambio de estado/cola a MIRAM
-    //informar_cambio_de_cola_miram(string_itoa(trip_auxiliar->id_tripulante),"BLOCK");
+    informar_cambio_de_cola_miram(string_itoa(trip_auxiliar->id_tripulante),"BLOCKED_IO");
 
     //libero un lugar en la cola de EXEC
     sem_post(&semaforoEXEC);

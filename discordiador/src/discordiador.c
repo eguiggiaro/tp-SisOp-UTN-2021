@@ -547,8 +547,6 @@ void tripulante_listo(Tripulante *trip)
 	pthread_mutex_unlock(&mutexREADY);
 	trip->estado = listo;
 	miLogInfo("Se pasa al tripulante %d de la cola NEW a la cola READY\n",trip->id_tripulante);
-	//aviso cambio de cola a MIRAM
-	//informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"READY");
 
 }
 
@@ -830,7 +828,7 @@ int planificar() {
 		list_remove(ready_list, 0);
 		miLogInfo("El tripulante: %d pasa de READY a EXEC\n",tripulante->id_tripulante);
 		//aviso cambio de cola a MIRAM
-		//informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
+		informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
 		tripulante->estado = trabajando;
 		tripulante->tripulante_despierto = true;
 		if(strncmp(configuracion->algoritmo,"RR",2)==0){
@@ -908,8 +906,6 @@ pthread_mutex_unlock(&mutexEXEC);
   //libero lugar en la cola de EXEC
   sem_post(&semaforoEXEC);
 
-  //aviso cambio de cola a MIRAM
-  //informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"EXIT");
 
   //libero recursos ocupados por el Hilo
 	pthread_exit(0);
@@ -1150,7 +1146,7 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
 
   trip_auxiliar->estado = listo;
   //aviso cambio de cola a MIRAM
-  //informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"EXIT");
+  informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"READY");
 
   //libero lugar en la cola de EXEC
   sem_post(&semaforoEXEC);

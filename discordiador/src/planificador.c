@@ -108,5 +108,7 @@ void desbloquear_tripulante_io(Tripulante* trip){
 	pthread_mutex_unlock(&mutexREADY);
 	sem_post(&semaforoREADY);
     miLogInfo("Se desbloquea el tripulante: %d y pasa de BLOCK_IO a READY\n", trip->id_tripulante);
+	//aviso cambio de cola a MIRAM
+    informar_cambio_de_cola_miram(string_itoa(trip_auxiliar->id_tripulante),"READY");
   }
 }

@@ -320,6 +320,50 @@ void atender_request_miram(Request *request)
 		pthread_mutex_unlock(&mutex_mover);
 		break;
 
+case CAMBIO_COLA:
+
+		pthread_mutex_lock(&mutex_mover);
+		t_buffer *buffer_devolucion_cambio_cola = request->buffer_devolucion;
+
+		lista_mensajes = list_create();
+
+		//recibo los mensajes
+		lista = deserializar_lista_strings(buffer_devolucion_mover);
+
+		int tripulante_id_a_cambiar = atoi(list_get(lista, 0));
+		//miLogInfo("Me llego operacion: MOVER de tripulante %d", tripulante_id_a_mover);
+
+		char *cola_nueva = list_get(lista, 1);
+		char cola_destino;
+
+		if (strcmp(cola_nueva,"READY") == 0)
+		{
+			cola_destino = 'R';
+		}
+		if (strcmp(cola_nueva,"EXEC") == 0)
+		{
+			cola_destino = 'E';
+		}
+		if (strcmp(cola_nueva,"BLOCKED_IO") == 0)
+		{
+			cola_destino = 'B';
+		}
+
+		cambiar_cola_tripulante(tripulante_id_a_cambiar, cola_nueva);
+
+		miLogInfo("Tripulante %d paso a %s", tripulante_id_a_mover, cola_nueva);
+		paquete_devuelto = crear_paquete(OK);
+		list_add(lista_mensajes, "OK");
+
+		t_buffer *buffer_respuesta_cambiar = serializar_lista_strings(lista_mensajes);
+		paquete_devuelto->buffer = buffer_respuesta_mover;
+		enviar_paquete(paquete_devuelto, request_fd);
+		eliminar_buffer(buffer_devolucion_mover);
+		list_destroy(lista_mensajes);
+		list_destroy(lista);
+		pthread_mutex_unlock(&mutex_mover);
+		break;
+
 	default:
 		miLogInfo("Operación recibida no existe");
 
@@ -368,6 +412,18 @@ int mover_tripulante_en_x(int tripulante, int posicion_x_final)
 	else
 	{
 		mover_tripulante_en_x_paginacion(tripulante, posicion_x_final, mapa);
+	}
+}
+
+int cambiar_cola_tripulante(int tripulante, char cola_destino)
+{
+	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
+	{
+		cambiar_cola_tripulante_segmentacion(tripulante, cola_destino);
+	}
+	else
+	{
+		cambiar_cola_tripulante_paginacion(tripulante, cola_destino);
 	}
 }
 

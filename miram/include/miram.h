@@ -54,6 +54,7 @@ char *buscar_posicion_tripulante(int tripulante_id);
 char buscar_tripulante_grilla(int tripulante);
 u_int32_t buscar_tripulante(int TCB_ID);
 TCB* iniciar_tripulante(int patota_id);
+int cambiar_cola_tripulante(int tripulante, char cola_destino);
 
 pthread_mutex_t mutex_tripulantes;
 pthread_mutex_t mutex_tareas;

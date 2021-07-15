@@ -1236,6 +1236,17 @@ char *buscar_tareas(int patota_id)
 	return tareas;
 }
 
+int cambiar_cola_tripulante_paginacion(int tripulante, char cola_destino)
+{
+	TCB *miTCB = buscar_tcb_por_id(tripulante);
+	PCB_adm *pcb_adm = buscar_patota_tripulante(tripulante);
+
+	miTCB->estado = cola_destino;
+
+	guardar_tripulante(miTCB, pcb_adm);
+}
+
+
 //Mueve un tripulante a una dirección destino
 int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool mapa)
 {

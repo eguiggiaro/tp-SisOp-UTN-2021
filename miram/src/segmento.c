@@ -1194,6 +1194,20 @@ int mover_tripulante_en_x_segmentacion(int tripulante, int posicion_x_final, boo
 	}
 }
 
+
+//Mueve un tripulante a una dirección destino
+int cambiar_cola_tripulante_segmentacion(int tripulante, char cola_dest)
+{
+	TCB *miTCB = buscar_tripulante(tripulante);
+
+	if (miTCB == 99)
+	{
+		return -1;
+	}
+	miTCB->estado = cola_dest;
+}
+
+
 int mover_tripulante_en_y_segmentacion(int tripulante, int posicion_y_final, bool mapa)
 {
 	TCB *miTCB = buscar_tripulante(tripulante);

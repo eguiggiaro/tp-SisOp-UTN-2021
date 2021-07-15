@@ -328,7 +328,7 @@ case CAMBIO_COLA:
 		lista_mensajes = list_create();
 
 		//recibo los mensajes
-		lista = deserializar_lista_strings(buffer_devolucion_mover);
+		lista = deserializar_lista_strings(buffer_devolucion_cambio_cola);
 
 		int tripulante_id_a_cambiar = atoi(list_get(lista, 0));
 		//miLogInfo("Me llego operacion: MOVER de tripulante %d", tripulante_id_a_mover);
@@ -356,9 +356,9 @@ case CAMBIO_COLA:
 		list_add(lista_mensajes, "OK");
 
 		t_buffer *buffer_respuesta_cambiar = serializar_lista_strings(lista_mensajes);
-		paquete_devuelto->buffer = buffer_respuesta_mover;
+		paquete_devuelto->buffer = buffer_respuesta_cambiar;
 		enviar_paquete(paquete_devuelto, request_fd);
-		eliminar_buffer(buffer_devolucion_mover);
+		eliminar_buffer(buffer_devolucion_cambio_cola);
 		list_destroy(lista_mensajes);
 		list_destroy(lista);
 		pthread_mutex_unlock(&mutex_mover);

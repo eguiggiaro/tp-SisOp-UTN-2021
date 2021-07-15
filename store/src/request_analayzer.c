@@ -72,6 +72,7 @@ void atender_request_store(Request *request) {
 			eliminar_buffer(buffer_devolucion_informar_tarea);
 			list_destroy(lista_mensajes);
 			list_destroy(lista);
+			liberar_lista(listaNueva);
 			free(request);
 			pthread_mutex_unlock(&mutex_informartareas);
 
@@ -234,7 +235,7 @@ int ejecutarTarea(char* tarea, int cantidadRecursos){
 
 				case CONSUMIR_COMIDA:
 					//printf( "Tarea es CONSUMIR_COMIDA\n" );
-					resultado = consumirRecursos(OXIGENO, cantidadRecursos);
+					resultado = consumirRecursos(COMIDA, cantidadRecursos);
 					break;
 
 				case GENERAR_BASURA:

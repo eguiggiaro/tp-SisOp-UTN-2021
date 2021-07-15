@@ -80,6 +80,7 @@ char* stringFromList(t_list*);
 char* generarMd5(t_list*, int);
 bool compararMd5(MetadataRecurso*);
 void borrarTodosLosArchivos(char*);
+void liberar_lista(char**);
 
 /**** DEṔRECADAS ****/
 void leerSuperBloqueSinMapear(void);

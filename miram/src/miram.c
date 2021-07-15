@@ -120,7 +120,7 @@ void atender_request_miram(Request *request)
 		free(request);
 		pthread_mutex_unlock(&mutex_tareas);
 		pthread_mutex_unlock(&mutex_expulsion);
-
+		dump_memoria(true);
 		break;
 
 	case INICIAR_TRIPULANTE:
@@ -251,6 +251,7 @@ void atender_request_miram(Request *request)
 		list_destroy(lista_mensajes);
 		free(request);
 		pthread_mutex_unlock(&mutex_patota);
+		dump_memoria(true);
 		break;
 
 	case TAREA_SIGUIENTE:
@@ -325,7 +326,7 @@ void atender_request_miram(Request *request)
 		break;
 	}
 
-	dump_memoria(true);
+
 }
 
 // Crea la grilla inicial y la muestra en pantalla

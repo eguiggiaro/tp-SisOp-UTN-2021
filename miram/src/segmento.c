@@ -1100,8 +1100,6 @@ int expulsar_tripulante_segmentacion(int tripulante_id, bool mapa)
 			{
 				segmento->id = contador_segmentos_libres--;
 				segmento->estado = "LIBRE";
-				elimine_segmento = true;
-
 				break;
 			}
 		}

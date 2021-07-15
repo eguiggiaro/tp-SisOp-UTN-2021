@@ -1,16 +1,13 @@
 #!/bin/bash
-cd discordiador
-cd cfg
+cd discordiador/cfg
 truncate -s 0 discordiador.log
 cd ..
 cd ..
-cd miram
+cd miram/cfg
 truncate -s 0 miram.log
 cd ..
-cd store
+cd ..
+cd store/cfg
 truncate -s 0 store.log
-cd ..
-cd ..
-cd ..
-cd mnt
+cd /home/utnso/mnt
 rm Blocks.ims

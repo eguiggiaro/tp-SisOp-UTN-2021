@@ -67,3 +67,7 @@ dkms.conf
 */obj/
 *.log
 /Default/
+*.txt
+*.bin
+*.dmp
+*.cfg

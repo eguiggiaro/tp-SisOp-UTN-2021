@@ -1203,6 +1203,8 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_x)--;
@@ -1230,6 +1232,8 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_x)++;
@@ -1263,6 +1267,8 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_y)--;
@@ -1290,6 +1296,8 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_y)++;
@@ -1337,6 +1345,8 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_x)--;
@@ -1372,6 +1382,8 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_x)++;
@@ -1413,6 +1425,8 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_y)--;
@@ -1448,6 +1462,8 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
+      //consumo ciclo de cpu
+      sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
       //realizo movimiento
       (trip->pos_y)++;

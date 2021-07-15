@@ -221,7 +221,7 @@ t_list* escribirBloquesNuevo(char* datos){
 	//Antes de empezar tengo que verificar si tengo lugar para todos los bloques. 
 	if(!verificarQueTengoLosBloquesNecesarios(cantidadBloquesNecesarios)){
 		miLogError("No hay mas lugar en el archivo Blocks.ims");
-		return -1;
+		return NULL;
 	}
 	
 	t_list* bloques = list_create();	
@@ -230,7 +230,7 @@ t_list* escribirBloquesNuevo(char* datos){
 		int bloqueNuevo = buscarYAsignarProximoBloqueLibre();
 		if(bloqueNuevo == -1) {
 			miLogError("No hay mas lugar en el archivo Blocks.ims");
-			return -1;
+			return NULL;
 		}
 		
 		int tamanioEscritura = tamanioBloque;
@@ -372,9 +372,11 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 		return EXIT_FAILURE;	
 	}
 
+	char* stringBloques = stringFromList(metadata->blocks);
+
 	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
 	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
-	config_set_value(metaConfig, "BLOCKS", stringFromList(metadata->blocks));
+	config_set_value(metaConfig, "BLOCKS", stringBloques);
 	config_set_value(metaConfig, "CARACTER_LLENADO", string_substring_until(&metadata->caracter_llenado,1));
 	config_set_value(metaConfig, "MD5_ARCHIVO", generarMd5(metadata->blocks, metadata->size));
 
@@ -383,6 +385,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	
 	freeMetadataRecurso(metadata);
 	free(direccionDeMetadata);
+	free(stringBloques);
 
 	return EXIT_SUCCESS;
 }
@@ -399,15 +402,17 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 		free(direccionDeMetadata);
 		return EXIT_FAILURE;	
 	}
+	char* stringBloques = stringFromList(metadata->blocks);
 
 	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
 	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
-	config_set_value(metaConfig, "BLOCKS", stringFromList(metadata->blocks));
+	config_set_value(metaConfig, "BLOCKS", stringBloques);
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	
 	freeMetadataBitacora(metadata);
+	free(stringBloques);
 	free(direccionDeMetadata);
 
 	return EXIT_SUCCESS;
@@ -811,26 +816,40 @@ t_list* listaFromArray(char** array){
 		int bloque = atoi(array[i]);
 		list_add(listaBloques,(void*) bloque);
 	}
-	
+	liberar_lista(array);
 	return listaBloques;
+}
+
+void liberar_lista(char** lista){
+	int contador = 0;
+	while(lista[contador] != NULL){
+			free(lista[contador]);
+			contador++;
+	}
+
+	free(lista);
 }
 
 char* stringFromList(t_list* lista){
 	char* strLista = string_new();
+	char* bloque;
 
 	string_append(&strLista, "[");
 	
 	if(list_size(lista) > 0){
-		string_append(&strLista, string_itoa(list_get(lista, 0)));
-		
+		bloque = string_itoa(list_get(lista, 0));
+		string_append(&strLista, bloque);
+		free(bloque);
+
 		for(int i=1; i<list_size(lista);i++){
+			bloque = string_itoa(list_get(lista, i));
 			string_append(&strLista, ",");			
-			string_append(&strLista, string_itoa(list_get(lista, i)));	
+			string_append(&strLista, bloque);	
+			free(bloque);
 		}
 	}
-
 	string_append(&strLista, "]");
-
+	
 	return strLista;
 }
 

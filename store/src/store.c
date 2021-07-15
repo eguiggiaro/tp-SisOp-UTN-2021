@@ -240,7 +240,10 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=3;
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
+		
+		liberar_lista(strPosicion);	
 	}
+	liberar_lista(posicionesSabotaje);
 	
 	return listaPosicionesSabotaje;
 }

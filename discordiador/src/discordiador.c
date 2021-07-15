@@ -123,12 +123,6 @@ void consola()
 	char** list;
 	printf("Hola!\n");
 	printf("Que desea hacer?\n");
-	pthread_t *threadPATOTA;
-	pthread_t *threadINICIAR_PLANIFICACION;
-	pthread_t *threadPAUSAR_PLANIFICACION;
-	pthread_t *threadEXPULSAR_TRIPULANTE;
-	pthread_t *threadCOMPACTACION;
-	pthread_t *threadOBTENERBITACORA;
 
 	input_consola = readline(">>");
 
@@ -1129,6 +1123,9 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   Tripulante* trip_auxiliar;
   bool tripulante_encontrado = false;
 
+  pthread_mutex_lock(&mutexEXEC); //esta bien?
+  pthread_mutex_lock(&mutexREADY);
+
   for(int i =0; i<list_size(execute_list);i++){
 
   trip_auxiliar = list_get(execute_list,i);
@@ -1140,9 +1137,6 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   }
 
   if(tripulante_encontrado){
-
-  pthread_mutex_lock(&mutexEXEC); //esta bien?
-  pthread_mutex_lock(&mutexREADY);
   //empieza seccion critica
   //list_remove() devuelve el tripulante que se elimina de la lista
   trip_auxiliar = list_remove(execute_list,indice);
@@ -1153,9 +1147,6 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   }
   trip->estado = listo;
   trip->tripulante_despierto = false;
-  //finaliza seccion critica
-  pthread_mutex_unlock(&mutexEXEC);
-  pthread_mutex_unlock(&mutexREADY);
 
   trip_auxiliar->estado = listo;
   //aviso cambio de cola a MIRAM
@@ -1168,6 +1159,9 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   //al liberarse un espacio en la cola de EXEC, replanifico 
   //planificar();
   }
+  //finaliza seccion critica
+  pthread_mutex_unlock(&mutexEXEC);
+  pthread_mutex_unlock(&mutexREADY);
 
 }
 

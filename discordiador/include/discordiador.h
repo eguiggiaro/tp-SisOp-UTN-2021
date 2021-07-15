@@ -85,6 +85,7 @@ typedef struct Tripulante{
 	bool aviso_inicio_tarea_store; 
 	int socket_miram;
 	int socket_store;
+	Estados estado_anterior;
 } Tripulante;
 
 Configuracion* configuracion;
@@ -112,6 +113,13 @@ pthread_mutex_t mutexBLOCK_EM;
 
 pthread_t threadSERVER_DISC;
 pthread_t threadCONSOLA_DISC;
+
+pthread_t *threadPATOTA;
+pthread_t *threadINICIAR_PLANIFICACION;
+pthread_t *threadPAUSAR_PLANIFICACION;
+pthread_t *threadEXPULSAR_TRIPULANTE;
+pthread_t *threadCOMPACTACION;
+pthread_t *threadOBTENERBITACORA;
 
 //Metodos mensajes
 int leer_config(void);

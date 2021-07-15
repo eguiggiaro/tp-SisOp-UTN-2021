@@ -54,6 +54,7 @@ void iniciar_planificacion()
         if (planificacion_activada) {
             planificar();
         } else {
+			//pthread_exit(0);
             break;
         }
     }
@@ -75,6 +76,8 @@ void pausar_planificacion()
 	pthread_mutex_lock(&mutexBLOCK);
 	pthread_mutex_lock(&mutexEXEC);
 	pthread_mutex_lock(&mutexEXIT);
+
+	//pthread_exit(0);
 }
 
 //Descripción: Desbloquea tripulante cuyo IO termino

@@ -193,10 +193,15 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
     }
 }
 
-void enviar_fcsk(int id_tripulante, int pos_x, int pos_y){
+void enviar_fcsk(Tripulante* tripu){
 
 	t_paquete* paquete = crear_paquete(FSCK);
   t_buffer* buffer;
+
+  int id_tripulante = tripu->id_tripulante;
+  
+  int pos_x = tripu->pos_x; 
+  int pos_y = tripu->pos_y;
 
 	char* id_auxiliar = string_itoa(id_tripulante);
   char* pos_x_aux = string_itoa(pos_x);
@@ -210,10 +215,10 @@ void enviar_fcsk(int id_tripulante, int pos_x, int pos_y){
 	buffer = serializar_lista_strings(lista_mensajes);
   paquete ->buffer = buffer;
   
-  enviar_paquete(paquete, socket_store);
+  enviar_paquete(paquete, tripu->socket_store);
 
   //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_store);
+	op_code codigo_operacion = recibir_operacion(tripu->socket_store);
 	if (codigo_operacion == OK) {
 		miLogInfo("FCSK informado correctamente\n");
 	} else if (codigo_operacion == FAIL){
@@ -233,6 +238,7 @@ void atender_sabotaje(char* posicion){
 
     //1. Recorro lista general de tripulantes y los duermo a todos
     //TODO: agregar mutex
+    /* 
     for(int i =0; i<list_size(tripulantes_totales);i++){
 
       Tripulante* tripu = list_get(tripulantes_totales,i);
@@ -242,49 +248,46 @@ void atender_sabotaje(char* posicion){
       tripu->tripulante_despierto = false;
       //sem_wait(&(tripu->semaforo_trip)); GENERA DEADLOCK - REVISAR
     }
+    
+   if (pthread_create(&threadPAUSAR_PLANIFICACION, NULL, (void*) pausar_planificacion,
+				NULL) != 0) {
+			     printf("Error pausando planificacion\n");
+		        }*/
 
+    pausar_planificacion();
     //2.1 Recorro lista de EXEC y los paso a BLOCK_IO
     //TODO: ordenar por ID de menor a mayor
-    pthread_mutex_lock(&mutexEXEC);
+    //TODO: cambiar estado
+    //pthread_mutex_lock(&mutexEXEC);
     if(list_size(execute_list) > 0){
-    for(int i =0; i<list_size(execute_list);i++){
+      for(int i =0; i<list_size(execute_list);i++){
 
-      Tripulante* tripu = list_remove(execute_list,i);
+        Tripulante* tripu = list_remove(execute_list,i);
       
-      list_add(blocked_io,tripu);
+        list_add(blocked_em,tripu);
+        tripu->estado_anterior = tripu->estado;
+        tripu->estado = bloqueado_emergencia;
 
-      miLogInfo("Se pasa de EXEC a BLOCK al tripulante: %d \n",tripu->id_tripulante);
+        miLogInfo("Se pasa de EXEC a BLOCK_EM al tripulante: %d , pos: %d|%d\n",tripu->id_tripulante, tripu->pos_x,tripu->pos_y);
+      }
     }
-    }
-    pthread_mutex_unlock(&mutexEXEC);
+   // pthread_mutex_unlock(&mutexEXEC);
 
     //2.2 Recorro lista de READY (deberia chequear si no esta vacia?) y los paso a BLOCK_IO
-    pthread_mutex_lock(&mutexREADY); 
+    //pthread_mutex_lock(&mutexREADY); 
     if(list_size(ready_list)>0){
-    for(int i =0; i<list_size(ready_list);i++){
+      for(int i =0; i<list_size(ready_list);i++){
 
-      Tripulante* tripu = list_remove(ready_list,i);
+        Tripulante* tripu = list_remove(ready_list,i);
       
-      list_add(blocked_io,tripu);
+        list_add(blocked_em,tripu);
+        tripu->estado_anterior = tripu->estado;
+        tripu->estado = bloqueado_emergencia;
 
-      miLogInfo("Se pasa de READY a BLOCK al tripulante: %d \n",tripu->id_tripulante);
+        miLogInfo("Se pasa de READY a BLOCK_EM al tripulante: %d pos: %d|%d\n",tripu->id_tripulante,tripu->pos_x,tripu->pos_y);
+      }
     }
-    }
-    pthread_mutex_unlock(&mutexREADY);
-
-    //2.3 Recorro lista de NEW (deberia chequear si no esta vacia?) y los paso a BLOCK_IO
-    pthread_mutex_lock(&mutexNEW);
-    if(list_size(new_list)>0){ 
-    for(int i =0; i<list_size(new_list);i++){
-
-      Tripulante* tripu = list_remove(new_list,i);
-      
-      list_add(blocked_io,tripu);
-
-      miLogInfo("Se pasa de NEW a BLOCK al tripulante: %d \n",tripu->id_tripulante);
-    }
-    }
-    pthread_mutex_unlock(&mutexNEW);
+   // pthread_mutex_unlock(&mutexREADY);
 
     //3. Calculo al tripulante en la posicion mas cercana y lo paso a cola de BLOCK_EMERGENCIA
     void* tripulante_mas_cercano(Tripulante* un_tripu, Tripulante* otro_tripu){
@@ -298,33 +301,65 @@ void atender_sabotaje(char* posicion){
       return primera_distancia <= segunda_distancia ? un_tripu : otro_tripu;
     }
 
-    Tripulante* tripulante_elegido = (Tripulante*) list_get_minimum(blocked_io,(void*)tripulante_mas_cercano);
+    Tripulante* tripulante_elegido = (Tripulante*) list_get_minimum(blocked_em,(void*)tripulante_mas_cercano);
 
     miLogInfo("El tripulante elegido para llevar a cabo el sabotaje es el: %d \n",tripulante_elegido->id_tripulante);
 
-    //3.1 Movemos al tripulante a la cola de block emergencia
-    int indice;
-    bool tripulante_encontrado = false;
-    for(int i =0; i<list_size(blocked_io);i++){
-      Tripulante* trip_aux = list_get(blocked_io,i);
+    //3.1 Sacamos al tripulante de la cola de block emergencia
+    for(int i =0; i<list_size(blocked_em);i++){
+      Tripulante* trip_aux = list_get(blocked_em,i);
       if(trip_aux->id_tripulante == tripulante_elegido->id_tripulante){
-        indice = i;
-        tripulante_encontrado = true;
+        list_remove(blocked_em,i);
       }
-    }
-
-    if(tripulante_encontrado){
-      Tripulante* trip_aux = list_remove(blocked_io,indice);
-      list_add(blocked_em, trip_aux);
-      miLogInfo("Se pasa a la cola de BLOCK emergencia al tripulante: %d \n",tripulante_elegido->id_tripulante);
     }
 
     //4. Movemos al tripulante elegido al punto de sabotaje.
     mover_tripulante_a_sabotaje(tripulante_elegido, pos_x,pos_y);
-    miLogInfo("El tripulante: %d llego a la posicion de sabotaje \n",tripulante_elegido->id_tripulante);
+    miLogInfo("El tripulante: %d llego a la posicion de sabotaje: %d|%d \n",tripulante_elegido->id_tripulante,
+                                                                            tripulante_elegido->pos_x,
+                                                                            tripulante_elegido->pos_y);
 
     //5. Enviar FCSK a Store con posicion actual del tripulante.
-    enviar_fcsk(tripulante_elegido->id_tripulante, tripulante_elegido->pos_x, tripulante_elegido->pos_y);
+    enviar_fcsk(tripulante_elegido);
 
+    //6. Esperar tiempo de duracion de tarea.
+    int retardo = configuracion->retardo_ciclo_cpu;
+    int ciclos_sabotaje = configuracion->duracion_sabotaje;
+    //sleep(ciclos_sabotaje);
+
+    //7.Pasar tripulante elegido a ultimo lugar en cola de BLOCK_EMERGENCIA
+    list_add(blocked_em,tripulante_elegido);
+
+    //8. Desbloquear y despertar a todos los tripulantes. (previamente, guardar estado anterior)
+    for(int i=0;i<list_size(blocked_em);i++){
+      Tripulante* tripu = list_remove(blocked_em,i);
+      tripu->estado = tripu->estado_anterior;
+      if(tripu->estado==trabajando){
+        list_add(execute_list,tripu);
+        miLogInfo("Se pasa al tripulante: %d de BLOCK_EM a EXEC \n", tripu->id_tripulante);
+        //tripu->tripulante_despierto = true;
+      }
+      else{
+        list_add(ready_list,tripu);
+        miLogInfo("Se pasa al tripulante: %d de BLOCK_EM a READY \n", tripu->id_tripulante);
+        //tripu->tripulante_despierto = true;
+      }
+    }
+
+    /* if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
+				NULL) != 0) {
+			     printf("Error iniciando planificacion/n");
+		        }*/
+    pthread_mutex_unlock(&mutexNEW);
+  	pthread_mutex_unlock(&mutexREADY);
+  	pthread_mutex_unlock(&mutexBLOCK);
+  	pthread_mutex_unlock(&mutexEXEC);
+  	pthread_mutex_unlock(&mutexEXIT);
+
+	  despertar_tripulantes();
+
+  	planificacion_activada = true;
+
+    pthread_exit(0);
 
 }

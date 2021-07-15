@@ -46,7 +46,7 @@ t_list *tabla_identificadores_grilla;
 NIVEL *nivel;
 int cols, rows;
 // mejorar
-char identificadores[11] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A'};
+char identificadores[11] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
 int proximo_identificador = 0;
 
 char *proxima_tarea_tripulante(int tripulante_id);

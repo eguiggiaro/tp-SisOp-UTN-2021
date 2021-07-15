@@ -881,14 +881,14 @@ pthread_mutex_lock(&mutexEXEC);
   }
 
   //Antes de finalizar al tripulante, lo borro de la lista de tripulantes totales
-  for(int i =0; i<list_size(tripulantes_totales);i++){
+  /*for(int i =0; i<list_size(tripulantes_totales);i++){
 
     Tripulante* tripu = list_get(tripulantes_totales,i);
 
     if(trip->id_tripulante == tripu->id_tripulante){
       list_remove(tripulantes_totales, i);
     }
-  }
+  }*/
 pthread_mutex_unlock(&mutexEXEC);
   if(tripulante_encontrado){
 

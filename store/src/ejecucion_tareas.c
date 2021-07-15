@@ -23,11 +23,16 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 		
 	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, cadenaCaracteres);
 
+	free(cadenaCaracteres);
+	
+	if(listaBloquesOcupados == NULL){
+		freeMetadataRecurso(metadataR);
+		return -1;
+	}
+
 	list_add_all(metadataR->blocks, listaBloquesOcupados);
 	metadataR->size += cantidadCaracteres;
 	metadataR->block_count += list_size(listaBloquesOcupados);
-
-	free(cadenaCaracteres);
 
 	if(modificarMetadataRecurso(metadataR, recurso)){
 		return -1;
@@ -125,6 +130,7 @@ char * truncarCadenaHastaCantidad(char* cadenaCaracteres, int posicionEnCadena){
 }
 
 int guardarEnBitacora(char* id_tripulante, char* instruccion){
+	
 	pthread_mutex_lock(&mutex_guardar_en_bitacora);
 	MetadataBitacora* metadata = leerMetadataBitacora(id_tripulante);
 
@@ -141,11 +147,14 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 	t_list* listaBloquesOcupados = list_create();
 	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, instruccion);
 
+	if(listaBloquesOcupados == NULL){
+		freeMetadataBitacora(metadata);
+		return -1;
+	}
+
 	list_add_all(metadata->blocks, listaBloquesOcupados);
 	metadata->size += string_length(instruccion);
 	metadata->block_count += list_size(listaBloquesOcupados);
-
-	list_destroy(listaBloquesOcupados);
 
 	if(modificarMetadataBitacora(metadata, id_tripulante)){
 		return -1;

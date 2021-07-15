@@ -221,7 +221,7 @@ t_list* escribirBloquesNuevo(char* datos){
 	//Antes de empezar tengo que verificar si tengo lugar para todos los bloques. 
 	if(!verificarQueTengoLosBloquesNecesarios(cantidadBloquesNecesarios)){
 		miLogError("No hay mas lugar en el archivo Blocks.ims");
-		return -1;
+		return NULL;
 	}
 	
 	t_list* bloques = list_create();	
@@ -230,7 +230,7 @@ t_list* escribirBloquesNuevo(char* datos){
 		int bloqueNuevo = buscarYAsignarProximoBloqueLibre();
 		if(bloqueNuevo == -1) {
 			miLogError("No hay mas lugar en el archivo Blocks.ims");
-			return -1;
+			return NULL;
 		}
 		
 		int tamanioEscritura = tamanioBloque;

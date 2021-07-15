@@ -349,7 +349,7 @@ case CAMBIO_COLA:
 			cola_destino = 'B';
 		}
 
-		cambiar_cola_tripulante(tripulante_id_a_cambiar, cola_nueva);
+		cambiar_cola_tripulante(tripulante_id_a_cambiar, cola_destino);
 
 		miLogInfo("Tripulante %d paso a %s", tripulante_id_a_mover, cola_nueva);
 		paquete_devuelto = crear_paquete(OK);

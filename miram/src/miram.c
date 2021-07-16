@@ -119,7 +119,7 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_expulsar);
 		list_destroy(lista_mensajes);		
-		list_destroy(lista);		
+		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
 		//eliminar_paquete(paquete_devuelto);
 		free(request);
 		pthread_mutex_unlock(&mutex_expulsion);
@@ -172,7 +172,7 @@ void atender_request_miram(Request *request)
 		free(posicion);
 		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
 		list_destroy(lista_mensajes);		
-		list_destroy(lista);		
+		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
 		free(proxima_tarea);
 		free(request);
 		pthread_mutex_unlock(&mutex_tripulantes);
@@ -208,7 +208,8 @@ void atender_request_miram(Request *request)
 		eliminar_buffer(buffer_devolucion_compactar);
 		//eliminar_paquete(paquete_devuelto);
 		list_destroy(lista_mensajes);		
-		list_destroy(lista);		
+		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
+
 		free(request);
 
 		break;
@@ -251,7 +252,7 @@ void atender_request_miram(Request *request)
 		eliminar_buffer(buffer_devolucion_iniciar_patota);
 		//eliminar_paquete(paquete_devuelto_iniciar_patota);
 		list_destroy(lista_mensajes);		
-		list_destroy(lista);		
+		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 		free(request);
 		pthread_mutex_unlock(&mutex_patota);
 		dump_memoria(true);
@@ -280,7 +281,7 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_tareas);
 		list_destroy(lista_mensajes);		
-		list_destroy(lista);		
+		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 
 		free(request);
 		pthread_mutex_unlock(&mutex_tareas);
@@ -320,7 +321,7 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_mover);
 		list_destroy(lista_mensajes);		
-		list_destroy(lista);		
+		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 		free(request);
 		pthread_mutex_unlock(&mutex_mover);
 		break;
@@ -365,7 +366,7 @@ case CAMBIO_COLA:
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_cambio_cola);
 		list_destroy(lista_mensajes);		
-		list_destroy(lista);		
+		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 		free(request);
 		pthread_mutex_unlock(&mutex_mover);
 		break;

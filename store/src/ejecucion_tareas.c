@@ -19,9 +19,7 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 		ultimoBloque = list_get(metadataR->blocks, posicionUltimoBloque);	
 	} 
 	
-	t_list* listaBloquesOcupados = list_create();
-		
-	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, cadenaCaracteres);
+	t_list* listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, cadenaCaracteres);
 
 	free(cadenaCaracteres);
 	
@@ -46,7 +44,7 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
    
     int cantidadBytesLibres = bytesLibresUltimoBloque(size, blockCount);
     int posicionEnCadena = cantidadBytesLibres;
-	t_list* bloquesEscritos = list_create(); 
+	t_list* bloquesEscritos;
 
     if(cantidadBytesLibres > 0){
 
@@ -55,6 +53,7 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
 
 		if(string_length(cadenaHastaCantidad) == string_length(cadenaCaracteres)){
 			free(cadenaHastaCantidad);
+			bloquesEscritos = list_create();
 			return bloquesEscritos;
 		}
 		free(cadenaHastaCantidad);
@@ -143,11 +142,11 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 		ultimoBloque = list_get(metadata->blocks, posicionUltimoBloque);
 	} 
 
-	t_list* listaBloquesOcupados = list_create();
-	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, instruccion);
+	t_list* listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, instruccion);
 
 	if(listaBloquesOcupados == NULL){
 		//list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
+		list_destroy(listaBloquesOcupados);
 		freeMetadataBitacora(metadata);
 		return -1;
 	}
@@ -156,27 +155,24 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 	metadata->size += string_length(instruccion);
 	metadata->block_count += list_size(listaBloquesOcupados);
 
-	//list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
+	list_destroy(listaBloquesOcupados);
 
 	if(modificarMetadataBitacora(metadata, id_tripulante)){
 		return -1;
 	} 
 	pthread_mutex_unlock(&mutex_guardar_en_bitacora);
-	//si fall{o tengo q devolver -1}
+	//si fallo tengo q devolver -1}
 	return 1;
 }
 
 char* obtenerBitacora(char* id_tripulante){
 
-	MetadataBitacora* metadataB = malloc(sizeof(MetadataBitacora));
-	
-	metadataB = leerMetadataBitacora(id_tripulante);
+	MetadataBitacora* metadataB = leerMetadataBitacora(id_tripulante);
 
 	char* lectura = leerBloques(metadataB->blocks, metadataB->size);
 	//printf("%s",lectura);
-
+	freeMetadataBitacora(metadataB);
 	return lectura;
-
 }
 
 int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
@@ -240,19 +236,18 @@ int saberTamanioUltimobloque(int cantidadBytesLibres){
 int desecharRecurso(tipoRecurso recurso){
 
 	MetadataRecurso* metadataR = leerMetadataRecurso(recurso);
-	t_list* blocks = list_create();
-	blocks = metadataR->blocks;
-	int posicionUltimoBloque = list_size(blocks);
+
+	int posicionUltimoBloque = list_size(metadataR->blocks);
 	int ultimoBloque;
 	
 	while(posicionUltimoBloque > 0){
-		ultimoBloque = obtenerUltimoBloque(blocks, posicionUltimoBloque);
+		ultimoBloque = obtenerUltimoBloque(metadataR->blocks, posicionUltimoBloque);
 		liberarBloque(ultimoBloque);
 		posicionUltimoBloque--;		
 	}
 
 	int resultado = eliminarArchivoBasura();
-	list_destroy(blocks);
+	freeMetadataRecurso(metadataR);
 
 	return 1;
 }

@@ -372,13 +372,18 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 		return EXIT_FAILURE;	
 	}
 
+	pthread_mutex_lock(&mutex_metadataRecurso);
 	char* stringBloques = stringFromList(metadata->blocks);
+	char* size = string_itoa(metadata->size);
+	char* block_count = string_itoa(metadata->block_count);
+	char* caracter = string_substring_until(&metadata->caracter_llenado,1);
+	char* md5 = generarMd5(metadata->blocks, metadata->size);
 
-	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
-	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
+	config_set_value(metaConfig, "SIZE", size);
+	config_set_value(metaConfig, "BLOCK_COUNT", block_count);
 	config_set_value(metaConfig, "BLOCKS", stringBloques);
-	config_set_value(metaConfig, "CARACTER_LLENADO", string_substring_until(&metadata->caracter_llenado,1));
-	config_set_value(metaConfig, "MD5_ARCHIVO", generarMd5(metadata->blocks, metadata->size));
+	config_set_value(metaConfig, "CARACTER_LLENADO", caracter);
+	config_set_value(metaConfig, "MD5_ARCHIVO", md5);
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
@@ -386,6 +391,11 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 	freeMetadataRecurso(metadata);
 	free(direccionDeMetadata);
 	free(stringBloques);
+	free(size);
+	free(block_count);
+	free(caracter);
+	free(md5);
+	pthread_mutex_unlock(&mutex_metadataRecurso);
 
 	return EXIT_SUCCESS;
 }
@@ -402,18 +412,25 @@ int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 		free(direccionDeMetadata);
 		return EXIT_FAILURE;	
 	}
-	char* stringBloques = stringFromList(metadata->blocks);
 
-	config_set_value(metaConfig, "SIZE", string_itoa(metadata->size));
-	config_set_value(metaConfig, "BLOCK_COUNT", string_itoa(metadata->block_count));
+	pthread_mutex_lock(&mutex_metadataBitacora);
+	char* stringBloques = stringFromList(metadata->blocks);
+	char* size = string_itoa(metadata->size);
+	char* block_count = string_itoa(metadata->block_count);
+
+	config_set_value(metaConfig, "SIZE", size);
+	config_set_value(metaConfig, "BLOCK_COUNT", block_count);
 	config_set_value(metaConfig, "BLOCKS", stringBloques);
 
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	
 	freeMetadataBitacora(metadata);
-	free(stringBloques);
 	free(direccionDeMetadata);
+	free(stringBloques);
+	free(size);
+	free(block_count);
+	pthread_mutex_unlock(&mutex_metadataBitacora);
 
 	return EXIT_SUCCESS;
 }
@@ -486,14 +503,12 @@ int crearMetadataBitacora(char* tripulante){
 
 void freeMetadataRecurso(MetadataRecurso* metadata){
 	
-	//list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
 	list_destroy(metadata->blocks);
 	free(metadata);
 }
 
 void freeMetadataBitacora(MetadataBitacora* metadata){
-	
-	//list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
+
 	list_destroy(metadata->blocks);
 	free(metadata);
 }
@@ -551,9 +566,11 @@ int eliminarArchivoBasura(){
 
 	if (!remove(archivoBasura)){
 		miLogInfo("Se borró el archivo Basura.ims.");
+		free(archivoBasura);
 		return EXIT_SUCCESS;
 	} else {
 		miLogError("No se pudo borrar el archivo Basura.ims.");	
+		free(archivoBasura);
 		return EXIT_FAILURE;	
 	}	
 }
@@ -607,7 +624,7 @@ int verificarBitmap(){
 	t_list* bloquesOcupados = list_create();
 	int cantidadArchivosBitacoras = cantidadArchivosEnDirectorio(pathBitacoras);
 	
-	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
+	MetadataBitacora* metadata;
 	//Levanto todos los bloques en uso de las metadatas de bitacoras.
 	for(int i=0; i<cantidadArchivosBitacoras; i++){
 		char* numeroTripulante = string_itoa(i);
@@ -617,7 +634,7 @@ int verificarBitmap(){
 	
 	t_list* recursos = verificarQueArchivosDeRecursosHay();
 
-	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	MetadataRecurso* metadataR;
 	//Levanto todos los bloques en uso de las metadatas de recursos.
 	for(int i=0; i<list_size(recursos); i++){
 		metadataR = leerMetadataRecurso((tipoRecurso)list_get(recursos,i));
@@ -676,7 +693,7 @@ int verificarSizeEnFile(){
 	//Se debe asegurar que el tamaño del archivo sea el correcto, validando con el contenido de sus bloques. 
 	t_list* recursos = verificarQueArchivosDeRecursosHay();
 
-	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	MetadataRecurso* metadataR;
 	//Levanto todos los bloques en uso de las metadatas de recursos.
 	for(int i=0; i<list_size(recursos); i++){
 		tipoRecurso recurso = (tipoRecurso)list_get(recursos,i);
@@ -711,7 +728,7 @@ int verificarBlockCount(){
 	//Al encontrar una diferencia entre estos dos se debe restaurar la consistencia. 
 	t_list* recursos = verificarQueArchivosDeRecursosHay();
 
-	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	MetadataRecurso* metadataR;
 	//Levanto todos los bloques en uso de las metadatas de recursos.
 	for(int i=0; i<list_size(recursos); i++){
 		tipoRecurso recurso = (tipoRecurso)list_get(recursos,i);
@@ -745,7 +762,7 @@ int verificarBlocks(){
 	//Se debe validar que los números de bloques en la lista sean válidos dentro del FS. 
 	t_list* recursos = verificarQueArchivosDeRecursosHay();
 
-	MetadataRecurso* metadataR = malloc(sizeof(MetadataRecurso));
+	MetadataRecurso* metadataR;
 	//Levanto todos los bloques en uso de las metadatas de recursos.
 	for(int i=0; i<list_size(recursos); i++){
 		tipoRecurso recurso = (tipoRecurso)list_get(recursos,i);
@@ -783,8 +800,7 @@ int repararBlocks(MetadataRecurso* metadata, tipoRecurso recurso){
 
 	//Si todavia quedan caracteres para escribir, los escribo en bloques nuevos y actualizo la metadata del recurso.
 	if(cantidadBytesAEscribir > 0){
-		t_list* nuevosBloques = list_create();
-		nuevosBloques = escribirBloquesNuevo(string_substring_from(escrituraCompleta, cantidadBytesAEscribir));
+		t_list* nuevosBloques = escribirBloquesNuevo(string_substring_from(escrituraCompleta, cantidadBytesAEscribir));
 		list_add_all(metadata->blocks, nuevosBloques);
 
 	}

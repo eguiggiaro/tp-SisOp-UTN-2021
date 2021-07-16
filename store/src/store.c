@@ -133,8 +133,7 @@ void inicializarPosicionesSabotaje(){
 	
 	posicionesSabotaje = list_create();
 	
-	t_list* posiciones = list_create();
-	posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);	
+	t_list* posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);	
 
 	PosicionSabotaje* posicionSabotaje;
 

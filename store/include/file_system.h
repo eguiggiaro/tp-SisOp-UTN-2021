@@ -26,6 +26,8 @@ char* punteroBlocks;
 pthread_mutex_t mutex_bitmap;
 pthread_mutex_t mutex_bloques;
 pthread_mutex_t mutex_escribirBloques;
+pthread_mutex_t mutex_metadataRecurso;
+pthread_mutex_t mutex_metadataBitacora;
 
 
 /**** MANEJO FILE SYSTEM ****/

@@ -15,8 +15,8 @@ void atender_request_store(Request *request) {
 
 	op_code codigo_operacion = request->codigo_operacion;
 	int request_fd = request->request_fd;
-	t_list *lista = list_create();
-	t_list *lista_mensajes = list_create();
+	t_list *lista;
+	t_list *lista_mensajes;
 	int resultadoTarea;
 	int resultadoBitacora;
 	char* id_tripulante; 
@@ -30,13 +30,13 @@ void atender_request_store(Request *request) {
 			pthread_mutex_lock(&mutex_informartareas);
 			t_buffer* buffer_devolucion_informar_tarea = request->buffer_devolucion;
 			t_paquete* paquete_devuelto_informar_tarea;
+			lista_mensajes = list_create();
 
 			miLogDebug("Me llego operacion: INFORMAR_TAREA.");
 			lista = deserializar_lista_strings(buffer_devolucion_informar_tarea);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante. 
 			 
-			//t_list* informeTarea = list_create();
 			char* informeTarea = list_get(lista,1);  //Ej: GENERAR_OXIGENO 12
 			miLogInfo("Me llego la tarea: %s, y corresponde al tripulante: %s.", informeTarea, id_tripulante);
 
@@ -73,13 +73,14 @@ void atender_request_store(Request *request) {
 			paquete_devuelto_informar_tarea->buffer = buffer_respuesta_informarTarea;
 			enviar_paquete(paquete_devuelto_informar_tarea, request_fd);
 			eliminar_buffer(buffer_devolucion_informar_tarea);
-			
-			//list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
-			//list_destroy_and_destroy_elements(lista, (void*) free);
 
-			list_destroy(lista_mensajes);
-			list_destroy(lista);
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) char_destroy);
+			list_destroy_and_destroy_elements(lista, (void*) char_destroy);
+			liberar_array(listaNueva);
+			
+			free(mensajeAGuardar);	
 			free(request);
+
 			pthread_mutex_unlock(&mutex_informartareas);
 
 	  	break;
@@ -89,13 +90,14 @@ void atender_request_store(Request *request) {
 			pthread_mutex_lock(&mutex_informacionBitacora);
 			t_buffer* buffer_devolucion_informacion_bitacora = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_informacion_bitacora;
+			lista_mensajes = list_create();
 
 			miLogDebug("Me llego operacion: INFORMACION_BITACORA");
 			lista = deserializar_lista_strings(buffer_devolucion_informacion_bitacora);
 
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
-			char* instruccionABitacora = string_new();  //Ej: Se finaliza tarea X						
-			char* instruccionALog = string_new();
+			char* instruccionABitacora;// = string_new();  //Ej: Se finaliza tarea X						
+			char* instruccionALog;// = string_new();
 			
 			instruccionABitacora = strdup(list_get(lista,1));  //Ej: Se finaliza tarea X						
 			instruccionALog = strdup(instruccionABitacora);
@@ -123,12 +125,9 @@ void atender_request_store(Request *request) {
 			paquete_devuelto_informacion_bitacora->buffer = buffer_respuesta_informacion_bitacora;
 			enviar_paquete(paquete_devuelto_informacion_bitacora, request_fd);
 			eliminar_buffer(buffer_devolucion_informacion_bitacora);
-
-			//list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
-			//list_destroy_and_destroy_elements(lista, (void*) free);
 			
-			list_destroy(lista_mensajes);
-			list_destroy(lista);
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) char_destroy);
+			list_destroy_and_destroy_elements(lista, (void*) char_destroy);
 			free(instruccionABitacora);
 			free(instruccionALog);
 			free(request);
@@ -141,6 +140,7 @@ void atender_request_store(Request *request) {
 			pthread_mutex_lock(&mutex_obtenerBitacora);
 			t_buffer* buffer_devolucion_obtener_bitacora = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_obtener_bitacora;
+			lista_mensajes = list_create();
 
 			miLogDebug("Me llego operacion: OBTENER BITACORA");
 			lista = deserializar_lista_strings(buffer_devolucion_obtener_bitacora);
@@ -148,8 +148,7 @@ void atender_request_store(Request *request) {
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			miLogInfo("Me solicitaron la bitacora del tripulante: %s.", id_tripulante);
 			
-			char* bitacora = string_new();
-			bitacora = obtenerBitacora(id_tripulante);
+			char* bitacora = obtenerBitacora(id_tripulante);
 
 			if (string_is_empty(bitacora))
 			{
@@ -169,9 +168,10 @@ void atender_request_store(Request *request) {
 			enviar_paquete(paquete_devuelto_obtener_bitacora, request_fd);
 			eliminar_buffer(buffer_devolucion_obtener_bitacora);
 			
-			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
-			list_destroy_and_destroy_elements(lista, (void*) free);
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) char_destroy);
+			list_destroy_and_destroy_elements(lista, (void*) char_destroy);
 			free(request);
+
 			pthread_mutex_unlock(&mutex_obtenerBitacora);
 
 		break;
@@ -179,9 +179,9 @@ void atender_request_store(Request *request) {
 		case FSCK:
 			//Activar el sabotaje	
 			miLogDebug("Me llego operacion: FSCK");
-
 			t_buffer* buffer_devolucion_fsck = request->buffer_devolucion;
 			t_paquete *paquete_devuelto_fsck;
+			lista_mensajes = list_create();
 
 			lista = deserializar_lista_strings(buffer_devolucion_fsck);
 
@@ -211,8 +211,8 @@ void atender_request_store(Request *request) {
 			enviar_paquete(paquete_devuelto_fsck, request_fd);
 			eliminar_buffer(buffer_devolucion_fsck);
 		
-			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
-			list_destroy_and_destroy_elements(lista, (void*) free);
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) char_destroy);
+			list_destroy_and_destroy_elements(lista, (void*) char_destroy);
 			free(request);
 			pthread_mutex_unlock(&mutexEjecucionSabotaje);
 			break;		

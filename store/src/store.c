@@ -241,9 +241,9 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
 		
-		liberar_lista(strPosicion);	
+		liberar_array(strPosicion);	
 	}
-	liberar_lista(posicionesSabotaje);
+	liberar_array(posicionesSabotaje);
 	
 	return listaPosicionesSabotaje;
 }

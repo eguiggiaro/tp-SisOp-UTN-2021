@@ -316,7 +316,7 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 		}		
 	}
 
-	t_config* metaConfig = malloc(sizeof(MetadataRecurso));
+	t_config* metaConfig;
 	MetadataRecurso* metadata = malloc(sizeof(MetadataRecurso));
 
 	metaConfig = config_create(direccionDeMetadata);
@@ -344,7 +344,7 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 		}		
 	}
 
-	t_config* metaConfig = malloc(sizeof(MetadataBitacora));
+	t_config* metaConfig;
 	MetadataBitacora* metadata = malloc(sizeof(MetadataBitacora));
 
 	metaConfig = config_create(direccionDeMetadata);
@@ -361,7 +361,7 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
 int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 
-	t_config* metaConfig = malloc(sizeof(MetadataRecurso));
+	t_config* metaConfig;
 	char* direccionDeMetadata = obtenerDireccionDeMetadataRecurso(recurso);
 	
 	metaConfig = config_create(direccionDeMetadata);
@@ -392,7 +392,7 @@ int modificarMetadataRecurso(MetadataRecurso* metadata, tipoRecurso recurso){
 
 int modificarMetadataBitacora(MetadataBitacora* metadata, char* tripulante){
 
-	t_config* metaConfig = malloc(sizeof(MetadataBitacora));
+	t_config* metaConfig;
 	char* direccionDeMetadata = obtenerDireccionDeMetadataBitacora(tripulante);	
 
 	metaConfig = config_create(direccionDeMetadata);
@@ -429,7 +429,7 @@ int crearMetadataRecurso(tipoRecurso recurso){
 	}
 	fclose(file);
 	
-	t_config* metaConfig = malloc(sizeof(MetadataRecurso));
+	t_config* metaConfig;
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig == NULL){
@@ -465,7 +465,7 @@ int crearMetadataBitacora(char* tripulante){
 	}
 	fclose(file);
 	
-	t_config* metaConfig = malloc(sizeof(MetadataBitacora));
+	t_config* metaConfig;
 	metaConfig = config_create(direccionDeMetadata);
 
 	if(metaConfig == NULL){
@@ -486,13 +486,13 @@ int crearMetadataBitacora(char* tripulante){
 
 void freeMetadataRecurso(MetadataRecurso* metadata){
 	
-	list_destroy(metadata->blocks);
+	list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
 	free(metadata);
 }
 
 void freeMetadataBitacora(MetadataBitacora* metadata){
 	
-	list_destroy(metadata->blocks);
+	list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
 	free(metadata);
 }
 
@@ -624,11 +624,11 @@ int verificarBitmap(){
 
 	if (repararBitmap(bloquesOcupados)){
 		miLogError("No pudo reparar el bitmap del Superbloque.");
-		list_destroy(bloquesOcupados);
+		list_destroy_and_destroy_elements(bloquesOcupados, (void*) free);
 		return EXIT_FAILURE;
 	}
 
-	list_destroy(bloquesOcupados);
+	list_destroy_and_destroy_elements(bloquesOcupados, (void*) free);
 	return EXIT_SUCCESS;
 }
 
@@ -783,7 +783,6 @@ int repararBlocks(MetadataRecurso* metadata, tipoRecurso recurso){
 		nuevosBloques = escribirBloquesNuevo(string_substring_from(escrituraCompleta, cantidadBytesAEscribir));
 		list_add_all(metadata->blocks, nuevosBloques);
 
-		list_destroy(nuevosBloques);
 	}
 
 	//msync(punteroBlocks, cantidadBloques*tamanioBloque, 0);
@@ -816,11 +815,11 @@ t_list* listaFromArray(char** array){
 		int bloque = atoi(array[i]);
 		list_add(listaBloques,(void*) bloque);
 	}
-	liberar_lista(array);
+	liberar_array(array);
 	return listaBloques;
 }
 
-void liberar_lista(char** lista){
+void liberar_array(char** lista){
 	int contador = 0;
 	while(lista[contador] != NULL){
 			free(lista[contador]);

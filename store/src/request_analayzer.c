@@ -70,9 +70,10 @@ void atender_request_store(Request *request) {
 			paquete_devuelto_informar_tarea->buffer = buffer_respuesta_informarTarea;
 			enviar_paquete(paquete_devuelto_informar_tarea, request_fd);
 			eliminar_buffer(buffer_devolucion_informar_tarea);
-			list_destroy(lista_mensajes);
-			list_destroy(lista);
-			liberar_lista(listaNueva);
+			eliminar_paquete(paquete_devuelto_informar_tarea);
+			
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
+			list_destroy_and_destroy_elements(lista, (void*) free);
 			free(request);
 			pthread_mutex_unlock(&mutex_informartareas);
 
@@ -115,8 +116,11 @@ void atender_request_store(Request *request) {
 			paquete_devuelto_informacion_bitacora->buffer = buffer_respuesta_informacion_bitacora;
 			enviar_paquete(paquete_devuelto_informacion_bitacora, request_fd);
 			eliminar_buffer(buffer_devolucion_informacion_bitacora);
-			list_destroy(lista_mensajes);
-			list_destroy(lista);
+			eliminar_paquete(paquete_devuelto_informacion_bitacora);
+
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
+			list_destroy_and_destroy_elements(lista, (void*) free);
+			
 			free(instruccionABitacora);
 			free(instruccionALog);
 			free(request);
@@ -156,8 +160,10 @@ void atender_request_store(Request *request) {
 			paquete_devuelto_obtener_bitacora->buffer = buffer_respuesta_obtener_bitacora;
 			enviar_paquete(paquete_devuelto_obtener_bitacora, request_fd);
 			eliminar_buffer(buffer_devolucion_obtener_bitacora);
-			list_destroy(lista_mensajes);
-			list_destroy(lista);
+			eliminar_paquete(paquete_devuelto_obtener_bitacora);
+			
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
+			list_destroy_and_destroy_elements(lista, (void*) free);
 			free(request);
 			pthread_mutex_unlock(&mutex_obtenerBitacora);
 
@@ -196,10 +202,11 @@ void atender_request_store(Request *request) {
 			t_buffer* buffer_respuesta_fsck = serializar_lista_strings(lista_mensajes);
 			paquete_devuelto_fsck->buffer = buffer_respuesta_fsck;
 			enviar_paquete(paquete_devuelto_fsck, request_fd);
-
 			eliminar_buffer(buffer_devolucion_fsck);
-			list_destroy(lista_mensajes);
-			list_destroy(lista);
+			eliminar_paquete(paquete_devuelto_fsck);
+		
+			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
+			list_destroy_and_destroy_elements(lista, (void*) free);
 			free(request);
 			pthread_mutex_unlock(&mutexEjecucionSabotaje);
 			break;		
@@ -207,7 +214,7 @@ void atender_request_store(Request *request) {
 		default:
 			miLogInfo("Me llego operacion: ...");
 	  	break;
-	}
+	}	
 }
 
 

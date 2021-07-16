@@ -53,7 +53,7 @@ t_list* deserializar_lista_strings(t_buffer* buffer){
 	t_list* lista = list_create();
 
  	void* stream = buffer->stream;
-
+	
  	memcpy(&cantElementos, stream, sizeof(uint32_t));
  	stream += sizeof(uint32_t);
 

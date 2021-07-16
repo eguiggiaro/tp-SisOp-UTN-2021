@@ -7,11 +7,11 @@ void despertar_tripulantes()
 	pthread_mutex_lock(&mutexEXEC);
 	Tripulante *tripulante;
 
-	for (int i = 0; list_size(execute_list) < i; i++)
+	for (int i = 0; i < list_size(execute_list); i++)
 	{
 		tripulante = (Tripulante *) list_get(execute_list, i);
 		tripulante->tripulante_despierto = true;
-        //pthread_mutex_unlock(&tripulante->semaforo_trip);
+        pthread_mutex_unlock(&tripulante->semaforo_trip);
 	}
 	pthread_mutex_unlock(&mutexEXEC);
 }
@@ -23,10 +23,12 @@ void dormir_tripulantes()
 	pthread_mutex_lock(&mutexEXEC);
 	Tripulante *tripulante;
 
-	for (int i = 0; list_size(execute_list) < i; i++)
+	for (int i = 0; i < list_size(execute_list); i++)
 	{
 		tripulante = (Tripulante *) list_get(execute_list, i);
 		tripulante->tripulante_despierto = false;
+		//pthread_mutex_lock(&tripulante->semaforo_trip);
+
 	}
 	pthread_mutex_unlock(&mutexEXEC);
 }
@@ -54,7 +56,7 @@ void iniciar_planificacion()
         if (planificacion_activada) {
             planificar();
         } else {
-			//pthread_exit(0);
+			pthread_exit(0);
             break;
         }
     }

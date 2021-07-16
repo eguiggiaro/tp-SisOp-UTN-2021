@@ -254,7 +254,7 @@ void generar_oxigeno_FIFO(Tripulante *trip)
 
     //Consume ciclos de CPU restantes
     ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-    
+
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -308,7 +308,7 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
 
     //Consume ciclos de CPU restantes
     ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-    
+
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -362,7 +362,7 @@ void consumir_comida_FIFO(Tripulante *trip)
 
     //Consume ciclos de CPU restantes
     ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-  
+
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -418,7 +418,7 @@ void generar_basura_FIFO(Tripulante *trip)
     //Consume ciclos de CPU restantes
     ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
     miLogInfo("Finaliza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
-    
+
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -471,7 +471,7 @@ void descartar_basura_FIFO(Tripulante *trip)
 
     //Consume ciclos de CPU restantes
     ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-    
+
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -496,12 +496,22 @@ void tarea_generica_FIFO(Tripulante *trip)
   //Moverse a ubicacion.
   char *nombre_tarea = (trip->tarea_actual)->nombre_tarea;
 
+  if (!trip->tripulante_despierto)
+  {
+    pthread_mutex_lock(&trip->semaforo_trip);
+  }
+
   if (!trip->realizo_movimientos_tarea)
   {
     mover_tripulante(trip);
     trip->realizo_movimientos_tarea = true;
     miLogInfo("Comienza ejecucion de: %s para el tripulante: %d \n", nombre_tarea, trip->id_tripulante);
     avisar_inicio_tarea_bitacora(trip, nombre_tarea);
+  }
+
+  if (!trip->tripulante_despierto)
+  {
+    pthread_mutex_lock(&trip->semaforo_trip);
   }
 
   int retardo = configuracion->retardo_ciclo_cpu;
@@ -585,7 +595,7 @@ void generar_comida_RR(Tripulante *trip)
 
         //Consume ciclos de CPU restantes
         ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-        
+
         //Se desbloquea
         desbloquear_tripulante_io(trip);
 
@@ -618,7 +628,6 @@ void generar_comida_RR(Tripulante *trip)
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
-
       }
     }
   }
@@ -665,9 +674,9 @@ void generar_oxigeno_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-        
+
         ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-        
+
         //Se desbloquea
         desbloquear_tripulante_io(trip);
 
@@ -675,7 +684,6 @@ void generar_oxigeno_RR(Tripulante *trip)
 
         pthread_mutex_lock(&trip->semaforo_trip);
       }
-
 
       if (trip->estado == trabajando)
       {
@@ -700,7 +708,6 @@ void generar_oxigeno_RR(Tripulante *trip)
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
-
       }
     }
   }
@@ -748,7 +755,7 @@ void consumir_oxigeno_RR(Tripulante *trip)
 
         //Consume ciclos de CPU restantes
         ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-        
+
         //Se desbloquea
         desbloquear_tripulante_io(trip);
 
@@ -780,7 +787,6 @@ void consumir_oxigeno_RR(Tripulante *trip)
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
-
       }
     }
   }
@@ -827,7 +833,7 @@ void consumir_comida_RR(Tripulante *trip)
         }
         //Consume ciclos de CPU restantes
         ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-        
+
         //Se desbloquea
         desbloquear_tripulante_io(trip);
 
@@ -859,7 +865,6 @@ void consumir_comida_RR(Tripulante *trip)
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
-
       }
     }
   }
@@ -891,7 +896,7 @@ void generar_basura_RR(Tripulante *trip)
     {
       if (!trip->recibio_input_store)
       {
-         //Consume un ciclo de CPU
+        //Consume un ciclo de CPU
         ciclos_cpu = sleep(retardo * (1));
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
@@ -939,7 +944,6 @@ void generar_basura_RR(Tripulante *trip)
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
-
       }
     }
   }
@@ -987,7 +991,7 @@ void descartar_basura_RR(Tripulante *trip)
 
         //Consume ciclos de CPU restantes
         ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
-        
+
         //Se desbloquea
         desbloquear_tripulante_io(trip);
 
@@ -1019,7 +1023,6 @@ void descartar_basura_RR(Tripulante *trip)
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
-
       }
     }
   }
@@ -1044,6 +1047,11 @@ void tarea_generica_RR(Tripulante *trip)
       mover_tripulante_RR(trip);
     }
 
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
+
     if (trip->quantum > 0)
     {
       if (!trip->aviso_inicio_tarea_store)
@@ -1052,20 +1060,27 @@ void tarea_generica_RR(Tripulante *trip)
         trip->aviso_inicio_tarea_store = true;
       }
 
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
 
       int retardo = configuracion->retardo_ciclo_cpu;
 
-      for(int i = 0; i<trip->tarea_actual->tiempo; i++)
+      for (int i = 0; i < trip->tarea_actual->tiempo; i++)
       {
-          if (trip->quantum <= 0)
-          {
-              return;
-          }
-          int ciclos_cpu = sleep(retardo * (1));
-          trip->tarea_actual->tiempo--;
-          trip->quantum--;
-
-       }
+        if (trip->quantum <= 0)
+        {
+          return;
+        }
+        int ciclos_cpu = sleep(retardo * (1));
+        trip->tarea_actual->tiempo--;
+        trip->quantum--;
+        if (!trip->tripulante_despierto)
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
+      }
 
       miLogInfo("Finaliza ejecucion de: %s para el tripulante: %d \n", nombre_tarea, trip->id_tripulante);
       avisar_fin_tarea_bitacora(trip, nombre_tarea);
@@ -1117,7 +1132,7 @@ void bloquear_tripulante_io(Tripulante *trip)
     pthread_mutex_unlock(&mutexBLOCK);
     pthread_mutex_unlock(&mutexEXEC);
     //aviso cambio de estado/cola a MIRAM
-    informar_cambio_de_cola_miram(string_itoa(trip_auxiliar->id_tripulante),"BLOCKED_IO");
+    informar_cambio_de_cola_miram(string_itoa(trip_auxiliar->id_tripulante), "BLOCKED_IO");
 
     //libero un lugar en la cola de EXEC
     sem_post(&semaforoEXEC);
@@ -1133,7 +1148,6 @@ void comenzar_ejecucion(Tripulante *tripulante)
 {
 
   pthread_mutex_lock(&tripulante->semaforo_trip);
-
 
   while (1)
   {
@@ -1186,6 +1200,11 @@ void mover_tripulante(Tripulante *trip)
     distancia_x = x_origen - x_destino;
     for (int i = 0; i < distancia_x; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
+
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);
@@ -1215,6 +1234,10 @@ void mover_tripulante(Tripulante *trip)
     distancia_x = x_destino - x_origen;
     for (int i = 0; i < distancia_x; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);
@@ -1250,6 +1273,10 @@ void mover_tripulante(Tripulante *trip)
     distancia_y = y_origen - y_destino;
     for (int i = 0; i < distancia_y; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);
@@ -1279,6 +1306,10 @@ void mover_tripulante(Tripulante *trip)
     distancia_y = y_destino - y_origen;
     for (int i = 0; i < distancia_y; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);
@@ -1328,6 +1359,10 @@ void *mover_tripulante_RR(Tripulante *trip)
     distancia_x = x_origen - x_destino;
     for (int i = 0; i < distancia_x; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);
@@ -1365,6 +1400,10 @@ void *mover_tripulante_RR(Tripulante *trip)
     distancia_x = x_destino - x_origen;
     for (int i = 0; i < distancia_x; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);
@@ -1408,6 +1447,10 @@ void *mover_tripulante_RR(Tripulante *trip)
     distancia_y = y_origen - y_destino;
     for (int i = 0; i < distancia_y; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);
@@ -1445,6 +1488,10 @@ void *mover_tripulante_RR(Tripulante *trip)
     distancia_y = y_destino - y_origen;
     for (int i = 0; i < distancia_y; i++)
     {
+      if (!trip->tripulante_despierto)
+      {
+        pthread_mutex_lock(&trip->semaforo_trip);
+      }
       //resto de parametros para enviar a bitacora
       char *x_origen_b = string_itoa(trip->pos_x);
       char *y_origen_b = string_itoa(trip->pos_y);

@@ -913,6 +913,12 @@ pthread_mutex_unlock(&mutexEXEC);
 }
 
 bool tarea_informada(Tripulante* tripulante, char* nombre_tarea, char* parametro){
+
+	if (!tripulante->tripulante_despierto)
+	{
+		pthread_mutex_lock(&tripulante->semaforo_trip);
+	}
+
 	bool se_informo = false;
 
 	t_paquete* paquete = crear_paquete(INFORMAR_TAREA);
@@ -952,6 +958,13 @@ bool tarea_informada(Tripulante* tripulante, char* nombre_tarea, char* parametro
 }
 
 void avisar_movimiento_miram(Tripulante* trip, char* eje){
+
+	if (!trip->tripulante_despierto)
+	{
+		pthread_mutex_lock(&trip->semaforo_trip);
+	}
+
+
 	t_paquete* paquete = crear_paquete(MOV_TRIPULANTE);
     t_buffer* buffer;
 
@@ -987,6 +1000,12 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
 }
 
 void avisar_movimiento_bitacora(Tripulante* tripulante, char* origen, char* destino){
+	
+	if (!tripulante->tripulante_despierto)
+	{
+		pthread_mutex_lock(&tripulante->semaforo_trip);
+	}
+
 	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
     t_buffer* buffer;
 	char* id_trip = string_itoa(tripulante->id_tripulante);
@@ -1024,6 +1043,12 @@ void avisar_movimiento_bitacora(Tripulante* tripulante, char* origen, char* dest
 }
 
 void avisar_inicio_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
+
+	if (!tripulante->tripulante_despierto)
+	{
+		pthread_mutex_lock(&tripulante->semaforo_trip);
+	}
+
 	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
     t_buffer* buffer;
 
@@ -1055,6 +1080,13 @@ void avisar_inicio_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
 }
 
 void avisar_fin_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
+	
+	if (!tripulante->tripulante_despierto)
+	{
+		pthread_mutex_lock(&tripulante->semaforo_trip);
+	}
+
+
 	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
     t_buffer* buffer;
 

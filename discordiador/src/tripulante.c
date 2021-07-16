@@ -1132,7 +1132,7 @@ void bloquear_tripulante_io(Tripulante *trip)
     pthread_mutex_unlock(&mutexBLOCK);
     pthread_mutex_unlock(&mutexEXEC);
     //aviso cambio de estado/cola a MIRAM
-    informar_cambio_de_cola_miram(string_itoa(trip_auxiliar->id_tripulante), "BLOCKED_IO");
+    informar_cambio_de_cola_miram(trip_auxiliar, "BLOCKED_IO");
 
     //libero un lugar en la cola de EXEC
     sem_post(&semaforoEXEC);

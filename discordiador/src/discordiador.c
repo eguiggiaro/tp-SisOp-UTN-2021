@@ -828,7 +828,7 @@ int planificar() {
 		list_remove(ready_list, 0);
 		miLogInfo("El tripulante: %d pasa de READY a EXEC\n",tripulante->id_tripulante);
 		//aviso cambio de cola a MIRAM
-		informar_cambio_de_cola_miram(string_itoa(tripulante->id_tripulante),"EXEC");
+		informar_cambio_de_cola_miram(tripulante,"EXEC");
 		tripulante->estado = trabajando;
 		tripulante->tripulante_despierto = true;
 		if(strncmp(configuracion->algoritmo,"RR",2)==0){
@@ -1119,30 +1119,31 @@ void avisar_fin_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
 	list_destroy(lista_mensajes);
 }
 
-void informar_cambio_de_cola_miram(char* id_trip, char* nueva_cola){
+void informar_cambio_de_cola_miram(Tripulante* tripulante, char* nueva_cola){
 	t_paquete* paquete = crear_paquete(CAMBIO_COLA);
     t_buffer* buffer;
 
 	t_list* lista_mensajes = list_create();
 
 	//Parametros que se envian a Miram:
+	char* id_trip = string_itoa(tripulante->id_tripulante);
 	list_add(lista_mensajes,id_trip);
 	list_add(lista_mensajes, nueva_cola);
 
 	buffer = serializar_lista_strings(lista_mensajes);
     paquete ->buffer = buffer;
   
-    enviar_paquete(paquete, socket_miram);
+    enviar_paquete(paquete, tripulante->socket_miram);
 
    //recibe respuesta de destino
-	op_code codigo_operacion = recibir_operacion(socket_miram);
+	op_code codigo_operacion = recibir_operacion(tripulante->socket_miram);
 	if (codigo_operacion == OK) {
 		miLogInfo("Cambio de estado/cola informado a miram.\n");
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR INFORMANDO CAMBIO DE ESTADO/COLA A MIRAM. \n");
 	}
 
-	buffer = (t_buffer*)recibir_buffer(socket_miram);
+	buffer = (t_buffer*)recibir_buffer(tripulante->socket_miram);
 	list_destroy(lista_mensajes);
 }
 
@@ -1178,7 +1179,7 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
 
   trip_auxiliar->estado = listo;
   //aviso cambio de cola a MIRAM
-  informar_cambio_de_cola_miram(string_itoa(trip->id_tripulante),"READY");
+  informar_cambio_de_cola_miram(trip,"READY");
 
   //libero lugar en la cola de EXEC
   sem_post(&semaforoEXEC);

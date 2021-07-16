@@ -188,7 +188,7 @@ void atenderSabotaje(){
 	} else if (respuestaDiscordiador == FAIL){
         miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje.");
 	}
-	
+	//t_buffer* buffer = (t_buffer*)recibir_buffer(socket_discordiador);
 }
 
 void protocoloFsck(){

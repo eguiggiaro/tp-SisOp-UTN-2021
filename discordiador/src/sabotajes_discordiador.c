@@ -225,7 +225,7 @@ void enviar_fcsk(Tripulante* tripu){
         miLogError("ERROR INFORMANDO FCSK. \n");
 	}
 
-	buffer = (t_buffer*)recibir_buffer(socket_store);
+	buffer = (t_buffer*)recibir_buffer(tripu->socket_store);
 
 	list_destroy(lista_mensajes);
 
@@ -303,6 +303,8 @@ void atender_sabotaje(char* posicion){
 
     Tripulante* tripulante_elegido = (Tripulante*) list_get_minimum(blocked_em,(void*)tripulante_mas_cercano);
 
+    tripulante_elegido->tripulante_despierto = true;
+
     miLogInfo("El tripulante elegido para llevar a cabo el sabotaje es el: %d \n",tripulante_elegido->id_tripulante);
 
     //3.1 Sacamos al tripulante de la cola de block emergencia
@@ -346,11 +348,12 @@ void atender_sabotaje(char* posicion){
       }
     }
 
-    /* if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
+    if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
 				NULL) != 0) {
 			     printf("Error iniciando planificacion/n");
-		        }*/
-    pthread_mutex_unlock(&mutexNEW);
+		}
+    
+    /*pthread_mutex_unlock(&mutexNEW);
   	pthread_mutex_unlock(&mutexREADY);
   	pthread_mutex_unlock(&mutexBLOCK);
   	pthread_mutex_unlock(&mutexEXEC);
@@ -359,6 +362,7 @@ void atender_sabotaje(char* posicion){
 	  despertar_tripulantes();
 
   	planificacion_activada = true;
+    */
 
     pthread_exit(0);
 

@@ -1142,7 +1142,7 @@ int expulsar_tripulante_segmentacion(int tripulante_id, bool mapa)
 		borrar_pcb_adm(pcb_adm->PID);
 	}
 
-	fusion_segmentos_libres();
+	//fusion_segmentos_libres();
 
 	if (elimine_tripulante)
 	{

@@ -66,6 +66,11 @@ int leer_config(void)
 	return EXIT_SUCCESS;
 }
 
+
+static void char_destroy(char* self) {
+    free(self);
+}
+
 // Atiende con hilos los request que son enviados a MiRAM
 void atender_request_miram(Request *request)
 {
@@ -85,7 +90,6 @@ void atender_request_miram(Request *request)
 	case EXPULSAR_TRIPULANTE:
 		//recibo los mensajes
 		pthread_mutex_lock(&mutex_expulsion);
-		pthread_mutex_lock(&mutex_tareas);
 		t_buffer *buffer_devolucion_expulsar = request->buffer_devolucion;
 		lista_mensajes = list_create();
 		//recibo los mensajes
@@ -114,11 +118,10 @@ void atender_request_miram(Request *request)
 		paquete_devuelto->buffer = buffer_respuesta_expulsar;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_expulsar);
+		list_destroy(lista_mensajes);		
 		list_destroy(lista);		
-		list_destroy(lista_mensajes);
 		//eliminar_paquete(paquete_devuelto);
 		free(request);
-		pthread_mutex_unlock(&mutex_tareas);
 		pthread_mutex_unlock(&mutex_expulsion);
 		dump_memoria(true);
 		break;
@@ -168,8 +171,8 @@ void atender_request_miram(Request *request)
 		eliminar_buffer(buffer_devolucion_iniciar_tripulante);
 		free(posicion);
 		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
+		list_destroy(lista_mensajes);		
 		list_destroy(lista);		
-		list_destroy(lista_mensajes);
 		free(proxima_tarea);
 		free(request);
 		pthread_mutex_unlock(&mutex_tripulantes);
@@ -204,8 +207,8 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_compactar);
 		//eliminar_paquete(paquete_devuelto);
+		list_destroy(lista_mensajes);		
 		list_destroy(lista);		
-		list_destroy(lista_mensajes);
 		free(request);
 
 		break;
@@ -247,8 +250,8 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto_iniciar_patota, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_patota);
 		//eliminar_paquete(paquete_devuelto_iniciar_patota);
+		list_destroy(lista_mensajes);		
 		list_destroy(lista);		
-		list_destroy(lista_mensajes);
 		free(request);
 		pthread_mutex_unlock(&mutex_patota);
 		dump_memoria(true);
@@ -276,8 +279,8 @@ void atender_request_miram(Request *request)
 		paquete_devuelto->buffer = buffer_respuesta_tareas;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_tareas);
+		list_destroy(lista_mensajes);		
 		list_destroy(lista);		
-		list_destroy(lista_mensajes);
 
 		free(request);
 		pthread_mutex_unlock(&mutex_tareas);
@@ -316,9 +319,9 @@ void atender_request_miram(Request *request)
 		paquete_devuelto->buffer = buffer_respuesta_mover;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_mover);
+		list_destroy(lista_mensajes);		
 		list_destroy(lista);		
-		list_destroy(lista_mensajes);
-
+		free(request);
 		pthread_mutex_unlock(&mutex_mover);
 		break;
 
@@ -361,9 +364,9 @@ case CAMBIO_COLA:
 		paquete_devuelto->buffer = buffer_respuesta_cambiar;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_cambio_cola);
+		list_destroy(lista_mensajes);		
 		list_destroy(lista);		
-		list_destroy(lista_mensajes);
-
+		free(request);
 		pthread_mutex_unlock(&mutex_mover);
 		break;
 
@@ -375,6 +378,9 @@ case CAMBIO_COLA:
 
 
 }
+
+
+
 
 // Crea la grilla inicial y la muestra en pantalla
 void crear_grilla(void)

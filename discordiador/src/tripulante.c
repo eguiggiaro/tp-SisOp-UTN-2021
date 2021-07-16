@@ -69,7 +69,7 @@ void *inicializar_tripulante(Tripulante *tripulante)
   pthread_mutex_init(&tripulante->semaforo_trip, NULL);
   pthread_mutex_init(&tripulante->ciclos_IO, NULL);
 
-  miLogDebug("Tripulante %d: por comenzar ejecucion \n", tripulante->id_tripulante);
+  //miLogDebug("Tripulante %d: por comenzar ejecucion \n", tripulante->id_tripulante);
 
   //3. Una vez que el tripulante esta listo, se llama a comenzar_ejecucion(tripulante)
   comenzar_ejecucion(tripulante);

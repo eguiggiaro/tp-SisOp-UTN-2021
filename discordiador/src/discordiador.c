@@ -1230,6 +1230,8 @@ void borrar_tripulante(Tripulante* trip){
 				list_add(exit_list,trip);
 				trip->estado=finalizado;
 				miLogInfo("Se elimina al tripulante: %d de la cola de EXEC\n",trip->id_tripulante);
+				//libero lugar en la cola de EXEC
+				sem_post(&semaforoEXEC);
 			}
 		}
 		pthread_mutex_unlock(&mutexEXEC);

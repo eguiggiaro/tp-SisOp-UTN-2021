@@ -68,8 +68,6 @@ typedef struct {
 typedef struct {
 	t_pos* posicion;
 	bool atendida;
-
-
 } PosicionSabotaje;
 
 t_list* posicionesSabotaje;
@@ -98,6 +96,13 @@ void atenderSabotaje();
 void protocoloFsck();
 void finalizarStore();
 t_list* obtenerListaSabotaje(char*);
+
+
+/**** SOPORTE ****/
+static void char_destroy(char* self) {
+    free(self);
+}
+
 
 pthread_mutex_t mutex_informartareas;
 pthread_mutex_t mutex_informacionBitacora;

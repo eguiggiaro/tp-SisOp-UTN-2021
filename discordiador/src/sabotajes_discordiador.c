@@ -228,6 +228,7 @@ void enviar_fcsk(Tripulante* tripu){
 	buffer = (t_buffer*)recibir_buffer(tripu->socket_store);
 
 	list_destroy(lista_mensajes);
+  eliminar_buffer(buffer);
 
 }
 

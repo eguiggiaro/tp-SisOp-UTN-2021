@@ -26,7 +26,7 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	free(cadenaCaracteres);
 	
 	if(listaBloquesOcupados == NULL){
-		list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
+		//list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
 		freeMetadataRecurso(metadataR);
 		return -1;
 	}
@@ -147,7 +147,7 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 	listaBloquesOcupados = llenarBloque(size, block_count, ultimoBloque, instruccion);
 
 	if(listaBloquesOcupados == NULL){
-		list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
+		//list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
 		freeMetadataBitacora(metadata);
 		return -1;
 	}
@@ -156,7 +156,7 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 	metadata->size += string_length(instruccion);
 	metadata->block_count += list_size(listaBloquesOcupados);
 
-	list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
+	//list_destroy_and_destroy_elements(listaBloquesOcupados, (void*) free);
 
 	if(modificarMetadataBitacora(metadata, id_tripulante)){
 		return -1;

@@ -20,6 +20,7 @@ void atender_request_store(Request *request) {
 	int resultadoTarea;
 	int resultadoBitacora;
 	char* id_tripulante; 
+	char* mensaje;
 
 	switch(codigo_operacion)
 	{	
@@ -50,30 +51,34 @@ void atender_request_store(Request *request) {
 			string_append(&mensajeAGuardar, "Comienza ejecucion tarea ");
 			string_append(&mensajeAGuardar, informeTarea);
 			string_append(&mensajeAGuardar, "\n");
-			resultadoBitacora = guardarEnBitacora(id_tripulante, mensajeAGuardar);
+			resultadoBitacora = guardarEnBitacora(id_tripulante, mensajeAGuardar);	
 
 			if (resultadoTarea == -1)
 			{
 				miLogInfo("ERROR: No se pudo realizar la tarea: %s del tripulante: %s.", informeTarea, id_tripulante);
 				paquete_devuelto_informar_tarea = crear_paquete(FAIL);
-				list_add(lista_mensajes, "Se produjo un error intentar realizar la tarea");
+				mensaje = strdup("Se produjo un error intentar realizar la tarea");
+				list_add(lista_mensajes, mensaje);
 			}
 			else
 			{
 				miLogInfo("La tarea: %s del tripulante: %s, se realizo correctamente.", informeTarea, id_tripulante);
 
 				paquete_devuelto_informar_tarea = crear_paquete(OK);
-				list_add(lista_mensajes, "Se realizo la tarea correctamente");
+				mensaje = strdup("Se realizo la tarea correctamente");
+				list_add(lista_mensajes, mensaje);
 			}
 
 			t_buffer *buffer_respuesta_informarTarea = serializar_lista_strings(lista_mensajes);
 			paquete_devuelto_informar_tarea->buffer = buffer_respuesta_informarTarea;
 			enviar_paquete(paquete_devuelto_informar_tarea, request_fd);
 			eliminar_buffer(buffer_devolucion_informar_tarea);
-			eliminar_paquete(paquete_devuelto_informar_tarea);
 			
-			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
-			list_destroy_and_destroy_elements(lista, (void*) free);
+			//list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
+			//list_destroy_and_destroy_elements(lista, (void*) free);
+
+			list_destroy(lista_mensajes);
+			list_destroy(lista);
 			free(request);
 			pthread_mutex_unlock(&mutex_informartareas);
 
@@ -103,24 +108,27 @@ void atender_request_store(Request *request) {
 			{
 				miLogInfo("ERROR: No se pudo guardar la tarea: %s, en la bitacora del tripulante: %s.", instruccionALog, id_tripulante);
 				paquete_devuelto_informacion_bitacora = crear_paquete(FAIL);
-				list_add(lista_mensajes, "Se produjo un error intentar guardar la instruccion");
+				mensaje = strdup("Se produjo un error intentar guardar la instruccion");
+				list_add(lista_mensajes, mensaje);
 			}
 			else
 			{
 				miLogInfo("Se guardo la tarea: %s, en la bitacora del tripulante: %s.", instruccionALog, id_tripulante);
 
 				paquete_devuelto_informacion_bitacora = crear_paquete(OK);
-				list_add(lista_mensajes, "Se guardó la tarea correctamente");
+				mensaje = strdup("Se guardó la tarea correctamente");
+				list_add(lista_mensajes, mensaje);
 			}
 			t_buffer *buffer_respuesta_informacion_bitacora = serializar_lista_strings(lista_mensajes);
 			paquete_devuelto_informacion_bitacora->buffer = buffer_respuesta_informacion_bitacora;
 			enviar_paquete(paquete_devuelto_informacion_bitacora, request_fd);
 			eliminar_buffer(buffer_devolucion_informacion_bitacora);
-			eliminar_paquete(paquete_devuelto_informacion_bitacora);
 
-			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
-			list_destroy_and_destroy_elements(lista, (void*) free);
+			//list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
+			//list_destroy_and_destroy_elements(lista, (void*) free);
 			
+			list_destroy(lista_mensajes);
+			list_destroy(lista);
 			free(instruccionABitacora);
 			free(instruccionALog);
 			free(request);
@@ -160,7 +168,6 @@ void atender_request_store(Request *request) {
 			paquete_devuelto_obtener_bitacora->buffer = buffer_respuesta_obtener_bitacora;
 			enviar_paquete(paquete_devuelto_obtener_bitacora, request_fd);
 			eliminar_buffer(buffer_devolucion_obtener_bitacora);
-			eliminar_paquete(paquete_devuelto_obtener_bitacora);
 			
 			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
 			list_destroy_and_destroy_elements(lista, (void*) free);
@@ -203,7 +210,6 @@ void atender_request_store(Request *request) {
 			paquete_devuelto_fsck->buffer = buffer_respuesta_fsck;
 			enviar_paquete(paquete_devuelto_fsck, request_fd);
 			eliminar_buffer(buffer_devolucion_fsck);
-			eliminar_paquete(paquete_devuelto_fsck);
 		
 			list_destroy_and_destroy_elements(lista_mensajes, (void*) free);
 			list_destroy_and_destroy_elements(lista, (void*) free);

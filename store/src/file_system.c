@@ -486,13 +486,15 @@ int crearMetadataBitacora(char* tripulante){
 
 void freeMetadataRecurso(MetadataRecurso* metadata){
 	
-	list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
+	//list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
+	list_destroy(metadata->blocks);
 	free(metadata);
 }
 
 void freeMetadataBitacora(MetadataBitacora* metadata){
 	
-	list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
+	//list_destroy_and_destroy_elements(metadata->blocks, (void*) free);
+	list_destroy(metadata->blocks);
 	free(metadata);
 }
 
@@ -624,11 +626,13 @@ int verificarBitmap(){
 
 	if (repararBitmap(bloquesOcupados)){
 		miLogError("No pudo reparar el bitmap del Superbloque.");
-		list_destroy_and_destroy_elements(bloquesOcupados, (void*) free);
+		//list_destroy_and_destroy_elements(bloquesOcupados, (void*) free);
+		list_destroy(bloquesOcupados);
 		return EXIT_FAILURE;
 	}
 
-	list_destroy_and_destroy_elements(bloquesOcupados, (void*) free);
+	//list_destroy_and_destroy_elements(bloquesOcupados, (void*) free);
+	list_destroy(bloquesOcupados);
 	return EXIT_SUCCESS;
 }
 

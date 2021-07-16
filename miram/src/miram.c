@@ -328,7 +328,7 @@ void atender_request_miram(Request *request)
 
 case CAMBIO_COLA:
 
-		pthread_mutex_lock(&mutex_mover);
+		pthread_mutex_lock(&mutex_cola);
 		t_buffer *buffer_devolucion_cambio_cola = request->buffer_devolucion;
 
 		lista_mensajes = list_create();
@@ -368,7 +368,7 @@ case CAMBIO_COLA:
 		list_destroy(lista_mensajes);		
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 		free(request);
-		pthread_mutex_unlock(&mutex_mover);
+		pthread_mutex_unlock(&mutex_cola);
 		break;
 
 	default:

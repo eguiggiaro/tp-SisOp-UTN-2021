@@ -543,7 +543,8 @@ char *proxima_tarea_tripulante_paginacion(int tripulante_id)
 	}
 
 	guardar_tripulante(unTCB, pcb_adm);
-
+	free(unTCB);
+	free(tareas);
 	return string_tarea;
 }
 
@@ -1244,6 +1245,7 @@ int cambiar_cola_tripulante_paginacion(int tripulante, char cola_destino)
 	miTCB->estado = cola_destino;
 
 	guardar_tripulante(miTCB, pcb_adm);
+	free(miTCB);
 }
 
 
@@ -1279,6 +1281,7 @@ int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool 
 
 		mover_tripulante_grilla(identificador, x, 0);
 	}
+	free(miTCB);
 }
 
 int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool mapa)
@@ -1312,6 +1315,7 @@ int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool 
 
 		mover_tripulante_grilla(identificador, 0, y);
 	}
+	free(miTCB);
 }
 
 TCB *iniciar_tripulante_paginacion(int patota_id, bool mapa)

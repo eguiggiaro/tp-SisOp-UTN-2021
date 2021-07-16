@@ -4,7 +4,7 @@ t_paquete* crear_paquete(op_code codigo_operacion)
 {
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 	paquete->codigo_operacion = codigo_operacion;
-	paquete->buffer = crear_buffer();
+	//paquete->buffer = crear_buffer();
 	return paquete;
 }
 

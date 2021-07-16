@@ -1138,9 +1138,9 @@ void informar_cambio_de_cola_miram(Tripulante* tripulante, char* nueva_cola){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_miram);
 	if (codigo_operacion == OK) {
-		miLogInfo("Cambio de estado/cola informado a miram.\n");
+		//miLogInfo("Cambio de estado/cola informado a miram.\n");
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO CAMBIO DE ESTADO/COLA A MIRAM. \n");
+        miLogError("ERROR INFORMANDO CAMBIO DE ESTADO/COLA DE TRIPULANTE: %d A MIRAM. \n",tripulante->id_tripulante);
 	}
 
 	buffer = (t_buffer*)recibir_buffer(tripulante->socket_miram);

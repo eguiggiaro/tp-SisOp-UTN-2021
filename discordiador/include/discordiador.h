@@ -86,6 +86,8 @@ typedef struct Tripulante{
 	int socket_miram;
 	int socket_store;
 	Estados estado_anterior;
+	bool en_sabotaje;
+	pthread_mutex_t ciclos_IO; //este semaforo indica si el tripulante puede seguir consumiendo ciclos IO (por sabotaje)
 } Tripulante;
 
 Configuracion* configuracion;

@@ -103,7 +103,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
-        (trip->pos_x)--;
+        trip->pos_x = (trip->pos_x)-1;
         //aviso a miram
         avisar_movimiento_miram(trip,"X");
       }
@@ -128,7 +128,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
-        (trip->pos_x)++;
+        trip->pos_x = (trip->pos_x)+1;
         //aviso a miram
         avisar_movimiento_miram(trip,"X");
       }
@@ -158,7 +158,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
-        (trip->pos_y)--;
+        trip->pos_y = (trip->pos_y)-1;
         //aviso a miram
         avisar_movimiento_miram(trip,"Y");
       }
@@ -183,7 +183,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
         avisar_movimiento_bitacora(id_trip,origen,destino);
         //realizo movimiento
-        (trip->pos_y)++;
+        trip->pos_y = (trip->pos_y)+1;
         //aviso a miram
         avisar_movimiento_miram(trip,"Y");
       }
@@ -259,7 +259,7 @@ void atender_sabotaje(char* posicion){
     //TODO: ordenar por ID de menor a mayor
     //TODO: cambiar estado
     //pthread_mutex_lock(&mutexEXEC);
-    if(list_size(execute_list) > 0){
+    /*if(list_size(execute_list) > 0){
       for(int i =0; i<list_size(execute_list);i++){
 
         Tripulante* tripu = list_remove(execute_list,i);
@@ -270,12 +270,12 @@ void atender_sabotaje(char* posicion){
 
         miLogInfo("Se pasa de EXEC a BLOCK_EM al tripulante: %d , pos: %d|%d\n",tripu->id_tripulante, tripu->pos_x,tripu->pos_y);
       }
-    }
+    } */
    // pthread_mutex_unlock(&mutexEXEC);
 
     //2.2 Recorro lista de READY (deberia chequear si no esta vacia?) y los paso a BLOCK_IO
     //pthread_mutex_lock(&mutexREADY); 
-    if(list_size(ready_list)>0){
+    /*if(list_size(ready_list)>0){
       for(int i =0; i<list_size(ready_list);i++){
 
         Tripulante* tripu = list_remove(ready_list,i);
@@ -286,8 +286,28 @@ void atender_sabotaje(char* posicion){
 
         miLogInfo("Se pasa de READY a BLOCK_EM al tripulante: %d pos: %d|%d\n",tripu->id_tripulante,tripu->pos_x,tripu->pos_y);
       }
-    }
+    }*/
    // pthread_mutex_unlock(&mutexREADY);
+   for(int i = 0; i<list_size(tripulantes_totales); i++){
+		  Tripulante* tripu = (Tripulante*) list_get(tripulantes_totales,i);
+      if(tripu->estado==trabajando){
+        tripu->estado_anterior = tripu->estado;
+        tripu->estado = bloqueado_emergencia;
+        miLogInfo("Se pasa de EXEC a BLOCK_EM al tripulante: %d , pos: %d|%d\n",tripu->id_tripulante, tripu->pos_x,tripu->pos_y);
+      }
+      else if(tripu->estado==listo){
+        tripu->estado_anterior = tripu->estado;
+        tripu->estado = bloqueado_emergencia;
+        miLogInfo("Se pasa de READY a BLOCK_EM al tripulante: %d pos: %d|%d\n",tripu->id_tripulante,tripu->pos_x,tripu->pos_y);
+      }
+      else if(tripu->estado==bloqueado_io){
+        tripu->en_sabotaje = true;
+        miLogInfo("Se frena consumo de ciclos IO para tripulante: %d\n",tripu->id_tripulante);
+      }
+				
+		}
+    list_add_all(blocked_em,execute_list);
+    list_add_all(blocked_em,ready_list);
 
     //3. Calculo al tripulante en la posicion mas cercana y lo paso a cola de BLOCK_EMERGENCIA
     void* tripulante_mas_cercano(Tripulante* un_tripu, Tripulante* otro_tripu){
@@ -312,6 +332,7 @@ void atender_sabotaje(char* posicion){
       Tripulante* trip_aux = list_get(blocked_em,i);
       if(trip_aux->id_tripulante == tripulante_elegido->id_tripulante){
         list_remove(blocked_em,i);
+        break;
       }
     }
 
@@ -327,13 +348,13 @@ void atender_sabotaje(char* posicion){
     //6. Esperar tiempo de duracion de tarea.
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_sabotaje = configuracion->duracion_sabotaje;
-    //sleep(ciclos_sabotaje);
+    sleep(ciclos_sabotaje*retardo);
 
     //7.Pasar tripulante elegido a ultimo lugar en cola de BLOCK_EMERGENCIA
     list_add(blocked_em,tripulante_elegido);
 
     //8. Desbloquear y despertar a todos los tripulantes. (previamente, guardar estado anterior)
-    for(int i=0;i<list_size(blocked_em);i++){
+    /*for(int i=0;i<list_size(blocked_em);i++){
       Tripulante* tripu = list_remove(blocked_em,i);
       tripu->estado = tripu->estado_anterior;
       if(tripu->estado==trabajando){
@@ -346,7 +367,24 @@ void atender_sabotaje(char* posicion){
         miLogInfo("Se pasa al tripulante: %d de BLOCK_EM a READY \n", tripu->id_tripulante);
         //tripu->tripulante_despierto = true;
       }
-    }
+    }*/
+    for(int i = 0; i<list_size(tripulantes_totales); i++){
+		  Tripulante* tripu = (Tripulante*) list_get(tripulantes_totales,i);
+      if(tripu->estado_anterior==trabajando){
+        tripu->estado = trabajando;
+        miLogInfo("Se pasa de BLOCK_EM a EXEC al tripulante: %d , pos: %d|%d\n",tripu->id_tripulante, tripu->pos_x,tripu->pos_y);
+      }
+      else if(tripu->estado_anterior==listo){
+        tripu->estado = listo;
+        miLogInfo("Se pasa de BLOCK_EM a READY al tripulante: %d pos: %d|%d\n",tripu->id_tripulante,tripu->pos_x,tripu->pos_y);
+      }
+      else if(tripu->estado==bloqueado_io){
+        tripu->en_sabotaje = false;
+        miLogInfo("Se reanuda consumo de ciclos IO para tripulante: %d\n",tripu->id_tripulante);
+        pthread_mutex_unlock(&tripu->ciclos_IO);
+      }
+				
+		}
 
     if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
 				NULL) != 0) {

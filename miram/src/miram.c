@@ -96,6 +96,7 @@ void atender_request_miram(Request *request)
 		lista = deserializar_lista_strings(buffer_devolucion_expulsar);
 
 		int tripulante_expulsion = atoi(list_get(lista, 0));
+		char* tripulante_expulsion_char = string_itoa(tripulante_expulsion);
 
 		//miLogInfo("Me llego operacion: Expulsar tripulante %d", tripulante_expulsion);
 		resultado = expulsar_tripulante(tripulante_expulsion);
@@ -111,7 +112,7 @@ void atender_request_miram(Request *request)
 			miLogInfo("Tripulado %d expulsado correctamente", tripulante_expulsion);
 
 			paquete_devuelto = crear_paquete(OK);
-			list_add(lista_mensajes, string_itoa(tripulante_expulsion));
+			list_add(lista_mensajes,tripulante_expulsion_char );
 		}
 
 		t_buffer *buffer_respuesta_expulsar = serializar_lista_strings(lista_mensajes);
@@ -122,6 +123,7 @@ void atender_request_miram(Request *request)
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
 		//eliminar_paquete(paquete_devuelto);
 		free(request);
+		free(tripulante_expulsion_char);
 		pthread_mutex_unlock(&mutex_expulsion);
 		dump_memoria(true);
 		break;
@@ -140,11 +142,13 @@ void atender_request_miram(Request *request)
 		//miLogInfo("Me llego operacion: INICIAR TRIPULANTE PATOTA %d", PATOTA_ID);
 		un_tripulante = iniciar_tripulante(PATOTA_ID);
 		
-		char *posicion = string_new();
-		string_append(&posicion,string_itoa(un_tripulante->pos_X));
+		char* posicion = string_new();
+		char* posicion_x =string_itoa(un_tripulante->pos_X);
+		char* posicion_y = string_itoa(un_tripulante->pos_y);
+		string_append(&posicion,posicion_x);
 		string_append(&posicion,"|");
-		string_append(&posicion,string_itoa(un_tripulante->pos_y));
-
+		string_append(&posicion,posicion_y);
+		char* un_tripulante_id = string_itoa(un_tripulante->TID);
 		char *proxima_tarea;
 		resultado = 1;
 		if (resultado == -1)
@@ -160,7 +164,7 @@ void atender_request_miram(Request *request)
 			proxima_tarea = proxima_tarea_tripulante(un_tripulante->TID);
 
 			paquete_devuelto_iniciar_tripulante = crear_paquete(OK);
-			list_add(lista_mensajes, string_itoa(un_tripulante->TID));
+			list_add(lista_mensajes,un_tripulante_id );
 			list_add(lista_mensajes, posicion);
 			list_add(lista_mensajes, proxima_tarea);
 		}
@@ -170,6 +174,9 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto_iniciar_tripulante, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_tripulante);
 		free(posicion);
+		free(posicion_x);
+		free(posicion_y);
+		free(un_tripulante_id);
 		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
 		list_destroy(lista_mensajes);		
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
@@ -229,6 +236,7 @@ void atender_request_miram(Request *request)
 
 		lista_mensajes = list_create();
 		resultado = iniciar_patota(cantidad_tripulantes, tareas, puntos);
+		char* el_resultado;
 
 		if (resultado == -1)
 		{
@@ -241,8 +249,9 @@ void atender_request_miram(Request *request)
 		{
 			miLogInfo("Patota %d iniciada correctamente", resultado);
 
+			el_resultado = string_itoa(resultado);
 			paquete_devuelto_iniciar_patota = crear_paquete(OK);
-			list_add(lista_mensajes, string_itoa(resultado));
+			list_add(lista_mensajes, el_resultado);
 		}
 
 		t_buffer *buffer_respuesta_iniciar_patota = serializar_lista_strings(lista_mensajes);
@@ -254,6 +263,7 @@ void atender_request_miram(Request *request)
 		list_destroy(lista_mensajes);		
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 		free(request);
+		free(el_resultado);
 		pthread_mutex_unlock(&mutex_patota);
 		dump_memoria(true);
 		break;
@@ -284,6 +294,7 @@ void atender_request_miram(Request *request)
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 
 		free(request);
+		free(tarea);
 		pthread_mutex_unlock(&mutex_tareas);
 		break;
 
@@ -357,7 +368,7 @@ case CAMBIO_COLA:
 
 		cambiar_cola_tripulante(tripulante_id_a_cambiar, cola_destino);
 
-		miLogInfo("Tripulante %d paso a %s", tripulante_id_a_mover, cola_nueva);
+		miLogInfo("Tripulante %d paso a %s", tripulante_id_a_cambiar, cola_nueva);
 		paquete_devuelto = crear_paquete(OK);
 		list_add(lista_mensajes, "OK");
 
@@ -690,11 +701,11 @@ char *proxima_tarea_tripulante(int tripulante_id)
 
 	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
-		proxima_tarea_tripulante_segmentacion(tripulante_id);
+		return proxima_tarea_tripulante_segmentacion(tripulante_id);
 	}
 	else
 	{
-		proxima_tarea_tripulante_paginacion(tripulante_id);
+		return proxima_tarea_tripulante_paginacion(tripulante_id);
 	}
 }
 

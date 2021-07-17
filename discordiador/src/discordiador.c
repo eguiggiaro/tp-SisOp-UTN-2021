@@ -274,10 +274,10 @@ void obtener_bitacora(char* comando){
 		bitacora = list_get(mensajes_respuesta, 0);
 
 		generar_archivo_bitacora(tripulante, bitacora);
-		miLogInfo("Bitacora del tripulante %d obtenida correctamente", tripulante);
+		miLogInfo("Bitacora del tripulante %s obtenida correctamente", tripulante);
 
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR OBTENIENDO LA BITACORA DEL TRIPULANTE %d.", tripulante);
+        miLogError("ERROR OBTENIENDO LA BITACORA DEL TRIPULANTE %s.", tripulante);
 	}
 
 	list_destroy(lista_mensajes);
@@ -870,7 +870,7 @@ void finalizar_tripulante(Tripulante* trip){
 		eliminar_buffer(buffer);
 		miLogInfo("Tripulante %d expulsado correctamente\n", trip->id_tripulante);
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
+        miLogError("ERROR EXPULSANDO TRIPULANTE %d. \n", trip->id_tripulante);
 	}
 
 	list_destroy(lista_mensajes);
@@ -950,10 +950,10 @@ bool tarea_informada(Tripulante* tripulante, char* nombre_tarea, char* parametro
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("Tarea informada correctamente\n");
+		//miLogInfo("Tarea informada correctamente\n");
 		se_informo = true;
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO TAREA. \n");
+        miLogError("Tripulante %d: ERROR INFORMANDO TAREA A STORE. \n",tripulante->id_tripulante);
 	}
 
 	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
@@ -1001,7 +1001,7 @@ void avisar_movimiento_miram(Tripulante* trip, char* eje){
 		eliminar_buffer(buffer);
 		//miLogInfo("Nueva posicion informada a MIRAM correctamente\n");
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO NUEVA POSICION. \n");
+        miLogError("Tripulante %d: ERROR INFORMANDO NUEVA POSICION A MIRAM. \n",trip->id_tripulante);
 	}
 
 	list_destroy(lista_mensajes);
@@ -1042,7 +1042,7 @@ void avisar_movimiento_bitacora(Tripulante* tripulante, char* origen, char* dest
 	if (codigo_operacion == OK) {
 		//miLogInfo("Nuevo desplazamiento informado a bitacora correctamente\n");
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO NUEVA POSICION A BITACORA. \n");
+        miLogError("Tripulante %d: ERROR INFORMANDO NUEVA POSICION A BITACORA. \n",tripulante->id_tripulante);
 	}
 
 	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
@@ -1079,9 +1079,9 @@ void avisar_inicio_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("Nueva tarea informada a bitacora correctamente\n");
+		//miLogInfo("Nueva tarea informada a bitacora correctamente\n");
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO NUEVA TAREA A BITACORA. \n");
+        miLogError("Tripulante %d: ERROR INFORMANDO NUEVA TAREA A BITACORA. \n", tripulante->id_tripulante);
 	}
 
 	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
@@ -1121,9 +1121,9 @@ void avisar_fin_tarea_bitacora(Tripulante* tripulante, char* tarea_nombre){
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("Fin de tarea informado a bitacora correctamente\n");
+		//miLogInfo("Fin de tarea informado a bitacora correctamente\n");
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO FIN DE TAREA A BITACORA. \n");
+        miLogError("Tripulante %d: ERROR INFORMANDO FIN DE TAREA A BITACORA. \n",tripulante->id_tripulante);
 	}
 
 	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);

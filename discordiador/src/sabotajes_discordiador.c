@@ -45,8 +45,6 @@ void atender_request_discordiador(Request *request){
 		  printf("\nError iniciando thread para atender sabotaje\n");
 		}
 
-		pthread_detach(threadSABOTAJE);
-
 		break;
 
 	default:
@@ -373,11 +371,15 @@ void atender_sabotaje(char* posicion){
 		  Tripulante* tripu = (Tripulante*) list_get(tripulantes_totales,i);
       if(tripu->estado_anterior==trabajando){
         tripu->estado = trabajando;
+        tripu->estado_anterior = bloqueado_emergencia;
         miLogInfo("Se pasa de BLOCK_EM a EXEC al tripulante: %d , pos: %d|%d\n",tripu->id_tripulante, tripu->pos_x,tripu->pos_y);
+        //pthread_mutex_unlock(&tripu->semaforo_trip);
       }
       else if(tripu->estado_anterior==listo){
         tripu->estado = listo;
+        tripu->estado_anterior = bloqueado_emergencia;
         miLogInfo("Se pasa de BLOCK_EM a READY al tripulante: %d pos: %d|%d\n",tripu->id_tripulante,tripu->pos_x,tripu->pos_y);
+        
       }
       else if(tripu->estado==bloqueado_io){
         tripu->en_sabotaje = false;
@@ -386,6 +388,8 @@ void atender_sabotaje(char* posicion){
       }
 				
 		}
+
+    list_clean(blocked_em);
 
     if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
 				NULL) != 0) {

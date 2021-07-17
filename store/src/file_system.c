@@ -234,7 +234,7 @@ t_list* escribirBloquesNuevo(char* datos){
 		return NULL;
 	}
 	
-	t_list* bloques = list_create();	
+	t_list* bloques = list_create();
 
 	for(int i = 0; i < cantidadBloquesNecesarios; i++) {
 		int bloqueNuevo = buscarYAsignarProximoBloqueLibre();
@@ -252,11 +252,11 @@ t_list* escribirBloquesNuevo(char* datos){
 				tamanioEscritura = diferencialBloque; // No ocupa un bloque entero -> lo que escribo es lo que ocupa.
 			}
 		}
-		
+				
 		char* escritura = string_substring(datos, startEscritura, tamanioEscritura);
 
 		escribirBloque(bloqueNuevo, 0, escritura);
-		list_add(bloques, (void*)bloqueNuevo);
+		list_add(bloques, bloqueNuevo);
 		startEscritura += tamanioBloque;	
 		free(escritura);
 	}
@@ -307,11 +307,12 @@ char* leerBloque(int bloque, int size) {
 	memcpy(lectura, punteroBlocks + desplazamiento, tamanioBloque);
 	
 	miLogDebug("Leyó: %s, del bloque: %d", lectura, bloque);
-	lectura = string_substring(lectura, 0, size); // Porque tengo que hacer esto???
+	char* lecturaFinal = string_substring(lectura, 0, size); // Porque tengo que hacer esto???
 
+	free(lectura);
 	pthread_mutex_unlock(&mutex_bloques);
-
-	return lectura;
+	
+	return lecturaFinal;
 }
 
 //------------------------------------MANEJO DE METADATA----------------------------------
@@ -333,11 +334,17 @@ MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 
 	metadata->size = config_get_int_value(metaConfig, "SIZE");
 	metadata->block_count = config_get_int_value(metaConfig, "BLOCK_COUNT");
-	metadata->blocks = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
 	metadata->caracter_llenado = *config_get_string_value(metaConfig, "CARACTER_LLENADO");
 	strcpy(metadata->md5, config_get_string_value(metaConfig, "MD5_ARCHIVO"));
+	metadata->blocks = list_create();
+
+	t_list* bloques = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
+	if(list_size(bloques) > 0){
+		list_add_all(metadata->blocks, bloques);
+	}
 
 	config_destroy(metaConfig);
+	list_destroy(bloques);
 	free(direccionDeMetadata);
 
 	return metadata;
@@ -361,9 +368,15 @@ MetadataBitacora* leerMetadataBitacora(char* tripulante){
 
 	metadata->size = config_get_int_value(metaConfig, "SIZE");
 	metadata->block_count = config_get_int_value(metaConfig, "BLOCK_COUNT");
-	metadata->blocks = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
+	metadata->blocks = list_create();
+
+	t_list* bloques = listaFromArray(config_get_array_value(metaConfig, "BLOCKS"));
+	if(list_size(bloques) > 0){
+		list_add_all(metadata->blocks, bloques);
+	}
 
 	config_destroy(metaConfig);
+	list_destroy(bloques);
 	free(direccionDeMetadata);
 
 	return metadata;
@@ -884,14 +897,14 @@ char* stringFromList(t_list* lista){
 
 char* generarMd5(t_list* bloques, int size){
 
-	char* strMd5 = string_new();
 	unsigned char hash[16];
 
 	//char* strBloques = stringFromList(bloques);
 	if(list_size(bloques) == 0){
 		return "";
 	}
-	
+
+	char* strMd5 = string_new();	
 	char* lectura = leerBloques(bloques, size);
 
 	MD5_CTX md5;
@@ -992,6 +1005,7 @@ int tamanioOcupadoRecursoEnBloque(int bloque, tipoRecurso recurso){
 		}
 	}
 
+	free(contenidoUltimoBloque);
 	return posicionUltimoCaracter;
 }
 

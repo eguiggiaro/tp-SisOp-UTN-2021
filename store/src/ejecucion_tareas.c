@@ -33,6 +33,8 @@ int generarRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	metadataR->size += cantidadCaracteres;
 	metadataR->block_count += list_size(listaBloquesOcupados);
 
+	list_destroy(listaBloquesOcupados);
+
 	if(modificarMetadataRecurso(metadataR, recurso)){
 		return -1;
 	}     
@@ -70,12 +72,10 @@ t_list* llenarBloque(int size, int blockCount, int ultimoBloque, char* cadenaCar
 
 char * generarCadenaCaracteres(char caracter, int cantidadCaracteres){
 
-    char * cadenaDeCaracteres;
+    /*char * cadenaDeCaracteres;
 	cadenaDeCaracteres = malloc(sizeof (char) * cantidadCaracteres);
-
-	cadenaDeCaracteres = string_repeat(caracter, cantidadCaracteres);
-		
-    return cadenaDeCaracteres;  
+	cadenaDeCaracteres = string_repeat(caracter, cantidadCaracteres);*/
+    return string_repeat(caracter, cantidadCaracteres);  
 }
 
 char cualEsMiCaracter(tipoRecurso recurso){
@@ -209,8 +209,12 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 		metadataR->size -= cantidadCaracteres;		
 	}
 	
-	metadataR->blocks = list_take(metadataR->blocks, list_size(metadataR->blocks)-bloquesEliminados);
+	t_list* bloquesNuevos = list_take(metadataR->blocks, list_size(metadataR->blocks)-bloquesEliminados);
 
+	list_clean(metadataR->blocks);
+	list_add_all(metadataR->blocks, bloquesNuevos);
+	list_destroy(bloquesNuevos);
+	
 	if(modificarMetadataRecurso(metadataR, recurso)){
 		return -1;
 	} 

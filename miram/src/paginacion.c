@@ -152,6 +152,7 @@ void imprimir_frame(Frame *un_frame)
 	char *auxiliar;
 	int LRU = -1;
 	int clock = -1;
+	char* pagina_char;
 
 	if (strcmp(un_frame->estado, "OCUPADO") == 0)
 	{
@@ -209,7 +210,8 @@ void imprimir_frame(Frame *un_frame)
 	}
 	else
 	{
-		pagina_a_mostrar = string_itoa(una_pagina->id_pagina);
+		pagina_char = string_itoa(una_pagina->id_pagina);
+		pagina_a_mostrar = pagina_char;
 		LRU = una_pagina->LRU;
 		clock = una_pagina->clock;
 	}
@@ -217,6 +219,7 @@ void imprimir_frame(Frame *un_frame)
 
 	printf("%d\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
 	free(contenido);
+	free(pagina_char);
 }
 
 //Muestra el contenido de la memoria
@@ -271,13 +274,23 @@ uint32_t buscar_tripulante_paginacion(int TCB_ID)
     */
 }
 
+void liberar_pagina(Pagina* una_pagina)
+{
+	free(una_pagina->contenido);
+	free(una_pagina->estado);
+	free(una_pagina);
+}
+
 int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 {
 	TCB *unTCB = buscar_tcb_por_id(tripulante_id);
 	TCB_adm *tcb_adm;
 	char *identificador = string_new();
+	char* tripulante_char = string_itoa(tripulante_id);
 	string_append(&identificador, "T");
-	string_append(&identificador, string_itoa(tripulante_id));
+	string_append(&identificador, tripulante_char);
+	free(tripulante_char);
+	char* patota_char;
 
 	PCB_adm *pcb_adm = buscar_patota_tripulante(tripulante_id);
 	t_list_iterator *iterador_tripulantes = list_iterator_create(pcb_adm->tabla_TCB_admin);
@@ -314,6 +327,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 					eliminar_pagina = true;
 				}
 				list_iterator_remove(iterador_contenido);
+				free(contenido_pagina);
 				break;
 			}
 		}
@@ -325,6 +339,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 			un_frame->estado = "LIBRE";
 			un_frame->id_pagina = -1;
 			list_iterator_remove(iterador_paginas);
+			liberar_pagina(una_pagina);
 			eliminar_pagina = false;
 		}
 	}
@@ -332,11 +347,12 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 	list_iterator_destroy(iterador_paginas);
 
 	tcb_adm->cantidad_paginas = 0;
+	free(tcb_adm);
 	pcb_adm->tripulantes_activos--;
-
+	patota_char =  string_itoa(pcb_adm->PID);
 	char *identificador_tareas = string_new();
 	string_append(&identificador_tareas, "Tar");
-	string_append(&identificador_tareas, string_itoa(pcb_adm->PID));
+	string_append(&identificador_tareas,patota_char);
 
 	if (pcb_adm->tripulantes_activos == 0)
 	{
@@ -356,6 +372,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 						eliminar_pagina = true;
 					}
 					list_iterator_remove(iterador_contenido);
+					free(contenido_pagina);
 					break;
 				}
 			}
@@ -367,6 +384,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 				un_frame->estado = "LIBRE";
 				un_frame->id_pagina = -1;
 				list_iterator_remove(iterador_paginas);
+				liberar_pagina(una_pagina);
 				eliminar_pagina = false;
 			}
 		}
@@ -375,7 +393,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 		char *identificador_pcb = string_new();
 		string_append(&identificador_pcb, "P");
-		string_append(&identificador_pcb, string_itoa(pcb_adm->PID));
+		string_append(&identificador_pcb, patota_char);
 
 		iterador_paginas = list_iterator_create(pcb_adm->tabla_paginas);
 		while (list_iterator_has_next(iterador_paginas))
@@ -393,6 +411,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 						eliminar_pagina = true;
 					}
 					list_iterator_remove(iterador_contenido);
+					free(contenido_pagina);
 					break;
 				}
 			}
@@ -404,6 +423,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 				un_frame->estado = "LIBRE";
 				un_frame->id_pagina = -1;
 				list_iterator_remove(iterador_paginas);
+				liberar_pagina(una_pagina);
 				eliminar_pagina = false;
 			}
 		}
@@ -414,6 +434,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 		free(identificador_tareas);
 		free(identificador_pcb);
+		free(patota_char);
 	}
 	free(identificador);
 	if (mapa)
@@ -474,6 +495,7 @@ void *eliminar_patotaadm(int patota_id)
 		if (pcb_adm->PID == patota_id)
 		{
 			list_iterator_remove(iterador_pcbs);
+			free(pcb_adm);
 			break;
 		}
 	}
@@ -1426,6 +1448,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	aux = string_itoa(un_pcb->PID);
 	string_append(&contenido, "P");
 	string_append(&contenido, aux);
+	free(aux);
 	list_add(una_pagina->contenido, contenido);
 	una_pagina->id_pagina = contador_paginas++;
 	pcb_adm->pagina_inicio_pcb = una_pagina->id_pagina;
@@ -1479,6 +1502,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		aux = string_itoa(un_pcb->PID);
 		string_append(&contenido, "P");
 		string_append(&contenido, aux);
+		free(aux);
 		list_add(una_pagina->contenido, contenido);
 		una_pagina->id_pagina = contador_paginas++;
 		list_add(pcb_adm->tabla_paginas, una_pagina);
@@ -1517,8 +1541,6 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	tamanio_alocado = 0;
 	pcb_adm->offset_tareas = offset;
 
-	char *aux6 = MEMORIA + 8;
-
 	//Cargo las tareas
 
 	if (offset > 0)
@@ -1554,6 +1576,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		aux = string_itoa(un_pcb->PID);
 		string_append(&contenido, "Tar");
 		string_append(&contenido, aux);
+		free(aux);
 		list_add(una_pagina->contenido, contenido);
 
 		if (liberar_pagina)
@@ -1582,6 +1605,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 			aux = string_itoa(un_pcb->PID);
 			string_append(&contenido, "Tar");
 			string_append(&contenido, aux);
+			free(aux);
 			list_add(una_pagina->contenido, contenido);
 			list_add(pcb_adm->tabla_paginas, una_pagina);
 			pcb_adm->cantidad_paginas_tareas++;
@@ -1621,8 +1645,6 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		}
 	}
 
-	char *aux_tareas = MEMORIA + 8;
-
 	un_pcb->Tareas = pcb_adm->pagina_inicio_tareas;
 	guardar_patota(un_pcb, pcb_adm);
 	liberar_pagina = false;
@@ -1650,6 +1672,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		un_tcb->pos_X = atoi(lista_puntos[0]);
 		un_tcb->pos_y = atoi(lista_puntos[1]);
 		free(lista_puntos);
+		free(un_punto);
 
 		un_tcb->proxima_instruccion = 0;
 
@@ -1686,6 +1709,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 			aux = string_itoa(un_tcb_adm->TID);
 			string_append(&contenido, "T");
 			string_append(&contenido, aux);
+			free(aux);
 			list_add(una_pagina->contenido, contenido);
 
 			if (liberar_pagina)
@@ -1714,6 +1738,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 				aux = string_itoa(un_tcb_adm->TID);
 				string_append(&contenido, "T");
 				string_append(&contenido, aux);
+				free(aux);
 				list_add(una_pagina->contenido, contenido);
 				list_add(pcb_adm->tabla_paginas, una_pagina);
 

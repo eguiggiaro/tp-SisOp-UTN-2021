@@ -173,10 +173,17 @@ void atender_request_miram(Request *request)
 		paquete_devuelto_iniciar_tripulante->buffer = buffer_respuesta_iniciar_tripulante;
 		enviar_paquete(paquete_devuelto_iniciar_tripulante, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_tripulante);
+		
+		if(strcmp(configuracion->esquema_memoria, "SEGMENTACION") != 0)
+		{
+			free(un_tripulante);
+		}
+		
 		free(posicion);
 		free(posicion_x);
 		free(posicion_y);
 		free(un_tripulante_id);
+
 		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
 		list_destroy(lista_mensajes);		
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
@@ -294,7 +301,7 @@ void atender_request_miram(Request *request)
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 
 		free(request);
-		free(tarea);
+		//free(tarea);
 		pthread_mutex_unlock(&mutex_tareas);
 		break;
 

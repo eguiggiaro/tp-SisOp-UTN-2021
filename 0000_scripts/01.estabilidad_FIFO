@@ -1,0 +1,6 @@
+#!/bin/bash
+cd ..
+cd cfg_entrega/01.estabilidad_FIFO
+cp discordiador.cfg ../../discordiador/cfg/discordiador.cfg
+cp miram.cfg ../../miram/cfg/miram.cfg
+cp store.cfg ../../store/cfg/store.cfg

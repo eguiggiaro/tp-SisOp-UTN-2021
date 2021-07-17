@@ -143,7 +143,7 @@ void inicializarPosicionesSabotaje(){
 		posicionSabotaje->atendida = false;
 
 		list_add(posicionesSabotaje, posicionSabotaje);
-		free(posicionSabotaje);	
+		//free(posicionSabotaje);	
 	}
 	//TEST
 	/*for(int i = 0; i < list_size(posicionesSabotaje); i++){
@@ -235,15 +235,21 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		posicion = malloc(sizeof(t_pos));
 		posicion->x = atoi(strPosicion[0]);	
 		posicion->y = atoi(strPosicion[1]);
-		list_add(listaPosicionesSabotaje,(void*) posicion);
+		list_add(listaPosicionesSabotaje, posicion);
 
 		largo-=3;
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
 		
-		free(posicion);
+		//free(posicion);		
 		liberar_array(strPosicion);	
 	}
+	//TEST
+	/*for(int i = 0; i < list_size(listaPosicionesSabotaje); i++){
+		posicion = (t_pos*) list_get(listaPosicionesSabotaje, i);	
+		printf("x:%s, y:%s\n", string_itoa(posicion->x), string_itoa(posicion->y));
+	}*/
+
 	liberar_array(posicionesSabotaje);
 	
 	return listaPosicionesSabotaje;

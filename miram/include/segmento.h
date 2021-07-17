@@ -12,6 +12,7 @@
 int contador_segmentos;
 int contador_segmentos_libres;
 int tamanio_memoria_segmentacion;
+int compactaciones;
 t_list *tabla_segmentos;
 t_list *tabla_segmentos_pcb;
 t_list *tabla_segmentos_tareas;

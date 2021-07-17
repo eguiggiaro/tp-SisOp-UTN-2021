@@ -84,6 +84,7 @@ typedef struct {
 } Configuracion;
 
 Configuracion* configuracion;
+t_config* config;
 
 int leerConfig();
 void atender_request_store(Request *request);

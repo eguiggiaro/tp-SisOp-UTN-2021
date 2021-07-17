@@ -75,7 +75,9 @@ void crearBlocks(void){
 	}
 	//Dejo el archivo de bloques con el tamaño final que va a tener.
 	if(!ftruncate(fileno(archivoBlocks), tamanioBlocks)){
-		miLogInfo("Se creo el archivo Blocks.ims correctamente, con un tamaño inicial: %s", string_itoa(tamanioBlocks));
+		char* tamBloq = string_itoa(tamanioBlocks);
+		miLogInfo("Se creo el archivo Blocks.ims correctamente, con un tamaño inicial: %s", tamBloq);
+		free(tamBloq);
 	}
 
 	fclose(archivoBlocks);
@@ -478,8 +480,7 @@ int crearMetadataRecurso(tipoRecurso recurso){
 	}
 
 	char caracter = cualEsMiCaracter(recurso);
-	char* strCaracter = string_new();
-	strCaracter = string_repeat(caracter, 1);
+	char* strCaracter = string_repeat(caracter, 1);
 	
 	config_set_value(metaConfig, "SIZE", "0");
 	config_set_value(metaConfig, "BLOCK_COUNT", "0");
@@ -490,6 +491,7 @@ int crearMetadataRecurso(tipoRecurso recurso){
 	config_save(metaConfig);
 	config_destroy(metaConfig);
 	free(direccionDeMetadata);
+	free(strCaracter);
 
 	return EXIT_SUCCESS;
 }
@@ -538,7 +540,7 @@ void freeMetadataBitacora(MetadataBitacora* metadata){
 
 char* obtenerDireccionDeMetadataRecurso (tipoRecurso recurso){ //Devuelve la direccion de la metadata según el recurso que quiero
 
-	char* direccionDeMetadata = string_new();
+	char* direccionDeMetadata;
 
 	switch(recurso)
 	{
@@ -935,8 +937,7 @@ int tamanioArchivo(char* path){
 
 void borrarTodosLosArchivos(char* path){
 
-	char* comando = string_new();
-	comando = string_from_format("%s %s/%s", "rm -r", path, "*");
+	char* comando = string_from_format("%s %s/%s", "rm -r", path, "*");
 
 	int res = system(comando);
 
@@ -944,8 +945,10 @@ void borrarTodosLosArchivos(char* path){
 		miLogInfo("Borró la estructura de file system existente en el punto de montaje %s", path);
 	} else {
 		miLogInfo("No pudo borrar la estructura de file system existente en el punto de montaje %s", path);
+		free(comando);
 		exit(EXIT_FAILURE);
 	}	
+	free(comando);
 }
 
 int cantidadArchivosEnDirectorio(char* path){

@@ -43,10 +43,6 @@ int main(int argc, char* argv[]) {
 	signal(SIGUSR1, signalHandler);
 	signal(SIGINT, signalHandler);
 
-	//Inicio el thread de msync para bloques periodico.
-	pthread_t th_msync;
-	pthread_create(&th_msync, NULL, &syncPeriodico, NULL);
-	
 	if(leerConfig()){
 		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
 		miLogDestroy();
@@ -61,7 +57,6 @@ int main(int argc, char* argv[]) {
 
 int leerConfig(void){
 
-	t_config* config;
 	configuracion = malloc(sizeof(Configuracion));
 
 	config = config_create(CONFIG_FILE_PATH);
@@ -70,16 +65,15 @@ int leerConfig(void){
 		return EXIT_FAILURE;
 	}
 
-	configuracion->puntoMontaje = strdup(config_get_string_value(config, "PUNTO_MONTAJE"));
-	configuracion->puerto = strdup(config_get_string_value(config, "PUERTO"));
+	configuracion->puntoMontaje = config_get_string_value(config, "PUNTO_MONTAJE");
+	configuracion->puerto = config_get_string_value(config, "PUERTO");
 	configuracion->tiempoSincro = config_get_int_value(config, "TIEMPO_SINCRONIZACION");
 	configuracion->blockSizeDefault = config_get_int_value(config, "BLOCK_SIZE");
 	configuracion->blocksQtyDefault = config_get_int_value(config, "BLOCKS");
-	configuracion->posicionesSabotaje = strdup(config_get_string_value(config, "POSICIONES_SABOTAJE")); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]	
-	configuracion->ipDiscordiador = strdup(config_get_string_value(config, "IP_DISCORDIADOR"));
-	configuracion->puertoDiscordiador = strdup(config_get_string_value(config, "PUERTO_DISCORDIADOR"));
+	configuracion->posicionesSabotaje = config_get_string_value(config, "POSICIONES_SABOTAJE"); //POSICIONES_SABOTAJE=[1|1, 2|2, 3|3, 4|4, 5|5, 6|6, 7|7]	
+	configuracion->ipDiscordiador = config_get_string_value(config, "IP_DISCORDIADOR");
+	configuracion->puertoDiscordiador = config_get_string_value(config, "PUERTO_DISCORDIADOR");
 
-	config_destroy(config);
 	return EXIT_SUCCESS;
 }
 
@@ -104,6 +98,10 @@ void inicializarStore(void){
 	subirBlocksAMemoria();
 	inicializarPosicionesSabotaje();
 	inicializarSemaforos();
+
+	//Inicio el thread de msync para bloques periodico.
+	pthread_t th_msync;
+	pthread_create(&th_msync, NULL, &syncPeriodico, NULL);
 	
 	//TEST Obtener bitacora
 	//char* bitacora = obtenerBitacora("0");
@@ -144,7 +142,8 @@ void inicializarPosicionesSabotaje(){
 		posicionSabotaje->posicion = (t_pos*) list_get(posiciones, i);
 		posicionSabotaje->atendida = false;
 
-		list_add(posicionesSabotaje, posicionSabotaje);		
+		list_add(posicionesSabotaje, posicionSabotaje);
+		free(posicionSabotaje);	
 	}
 	//TEST
 	/*for(int i = 0; i < list_size(posicionesSabotaje); i++){
@@ -242,6 +241,7 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
 		
+		free(posicion);
 		liberar_array(strPosicion);	
 	}
 	liberar_array(posicionesSabotaje);
@@ -258,6 +258,7 @@ void finalizarStore(){
 	pthread_attr_destroy(&attrEjecucionSabotaje);
 	
 	free(configuracion);
+	config_destroy(config);
 	miLogDestroy();	
 	finalizarFS();
 }

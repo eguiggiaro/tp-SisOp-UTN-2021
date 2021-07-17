@@ -6,6 +6,7 @@ RULE=""
 echo -e "\n\nInstalling commons libraries...\n\n"
 
 COMMONS="so-commons-library"
+NIVELGUI="so-nivel-gui-library"
 
 cd $CWD
 rm -rf $COMMONS
@@ -14,6 +15,15 @@ cd $COMMONS
 sudo make uninstall
 make all
 sudo make install
+
+cd $CWD
+rm -rf $NIVELGUI
+git clone "https://github.com/sisoputnfrba/${NIVELGUI}.git" $NIVELGUI
+cd $NIVELGUI
+sudo make uninstall
+make all
+sudo make install
+
 
 cd $CWD
 DEPENDENCIES=(shared)

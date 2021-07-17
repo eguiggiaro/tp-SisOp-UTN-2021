@@ -91,7 +91,9 @@ void inicializarStore(void){
 
 	if (!verificarFS()){
 		miLogInfo("No se encontró un FILE SYSTEM válido, se procede a crearlo con los parámetros default");
-		borrarTodosLosArchivos(puntoMontaje);
+		if(verificarExistenciaPuntoMontaje(puntoMontaje)){
+			borrarTodosLosArchivos(puntoMontaje);
+		}
 		crearArbolDirectorios();
 		crearSuperbloque();
 		crearBlocks();

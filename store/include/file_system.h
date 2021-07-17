@@ -32,6 +32,7 @@ pthread_mutex_t mutex_metadataBitacora;
 
 /**** MANEJO FILE SYSTEM ****/
 bool verificarFS();
+bool verificarExistenciaPuntoMontaje(char*);
 void crearSuperbloque();
 void crearBlocks();
 void crearDirectorio(char*);

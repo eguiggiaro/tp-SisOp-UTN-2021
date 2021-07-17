@@ -7,6 +7,16 @@ bool verificarFS(void){
 		return !(fopen(pathSuperbloque, "r") == NULL || fopen(pathBlocks, "r") == NULL);
 }
 
+bool verificarExistenciaPuntoMontaje(char* path){
+	DIR* dirMontaje = opendir(path);
+
+	if(!dirMontaje){		
+		return false;
+	}
+	closedir(dirMontaje);
+	return true;
+}
+
 void crearDirectorio(char* path){
 
 	if(mkdir(path, 0777) == -1){
@@ -17,15 +27,15 @@ void crearDirectorio(char* path){
 }
 
 void crearArbolDirectorios(void){
-	
-	DIR* dirMontaje = opendir(puntoMontaje);
+
+	DIR* dirMontaje = opendir(puntoMontaje);	
 	DIR* dirFiles = opendir(pathFiles);
-	DIR* dirBitacoras = opendir(pathBitacoras);
-	
+	DIR* dirBitacoras = opendir(pathBitacoras);	
+
 	if(!dirMontaje){
 		crearDirectorio(puntoMontaje);
 	}
-
+	
 	if(!dirFiles){
 		crearDirectorio(pathFiles);			
 	} 

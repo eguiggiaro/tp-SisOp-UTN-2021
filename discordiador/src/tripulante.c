@@ -221,7 +221,7 @@ void generar_comida_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de GENERAR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_COMIDA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual);
+  
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -282,7 +282,7 @@ void generar_oxigeno_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual);
+    
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -343,7 +343,7 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_OXIGENO");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual);
+    
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -404,7 +404,7 @@ void consumir_comida_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_COMIDA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual);
+    
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -466,7 +466,7 @@ void generar_basura_FIFO(Tripulante *trip)
   {
     avisar_fin_tarea_bitacora(trip, "GENERAR_BASURA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual);
+    
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -527,7 +527,7 @@ void descartar_basura_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "DESCARTAR_BASURA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual);
+    
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -562,7 +562,7 @@ void tarea_generica_FIFO(Tripulante *trip)
   avisar_fin_tarea_bitacora(trip, nombre_tarea);
   miLogInfo("Finaliza ejecucion de: %s para el tripulante: %d \n", nombre_tarea, trip->id_tripulante);
   //seteo parametros para proxima tarea
-  free(trip->tarea_actual);
+  
   trip->tarea_actual = NULL;
   trip->realizo_movimientos_tarea = false;
   trip->recibio_input_store = false;
@@ -675,7 +675,7 @@ void generar_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual);
+        
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -761,7 +761,7 @@ void generar_oxigeno_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual);
+        
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -847,7 +847,7 @@ void consumir_oxigeno_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual);
+        
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -932,7 +932,7 @@ void consumir_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual);
+        
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1018,7 +1018,7 @@ void generar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual);
+        
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1104,7 +1104,7 @@ void descartar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual);
+        
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1171,7 +1171,7 @@ void tarea_generica_RR(Tripulante *trip)
       avisar_fin_tarea_bitacora(trip, nombre_tarea);
 
       //seteo parametros para proxima tarea
-      free(trip->tarea_actual);
+      
       trip->tarea_actual = NULL;
       trip->realizo_movimientos_tarea = false;
       trip->recibio_input_store = false;

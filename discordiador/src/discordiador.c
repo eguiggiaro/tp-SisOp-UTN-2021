@@ -335,19 +335,18 @@ void expulsar_tripulante(char *comando)
    //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
 	if (codigo_operacion == OK) {
-		t_buffer* buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
+		buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
 		miLogInfo("Tripulante %d expulsado correctamente\n", trip->id_tripulante);
 		//Elimino al tripulante
 		borrar_tripulante(trip);
+		free(buffer->stream);
+	    free(buffer);
 
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR EXPULSANDO TRIPULANTE %d. \n",trip->id_tripulante);
 	}
 
 	list_destroy(lista_mensajes);
-
-	free(buffer->stream);
-	free(buffer);
 }
 
 void compactacion(char *comando)
@@ -869,7 +868,7 @@ void finalizar_tripulante(Tripulante* trip){
 	if (codigo_operacion == OK) {
 		buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
 		eliminar_buffer(buffer);
-		miLogInfo("Tripulante expulsado correctamente\n");
+		miLogInfo("Tripulante %d expulsado correctamente\n", trip->id_tripulante);
 	} else if (codigo_operacion == FAIL){
         miLogError("ERROR EXPULSANDO TRIPULANTE. \n");
 	}

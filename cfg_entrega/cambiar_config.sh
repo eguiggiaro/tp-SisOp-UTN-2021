@@ -1,16 +1,16 @@
 ####### CONFIGURACIONES ##################
 
 ##### DISCORDIADOR ##### 
-NUEVA_IP_DISCORDIADOR=1
-NUEVO_PUERTO_DISCORDIADOR=1
+NUEVA_IP_DISCORDIADOR=192.168.1.1
+NUEVO_PUERTO_DISCORDIADOR=50
 
 ##### MI RAM ##### 
-NUEVA_IP_MI_RAM=2
-NUEVO_PUERTO_MI_RAM=2
+NUEVA_IP_MI_RAM=20.20.20.20
+NUEVO_PUERTO_MI_RAM=23
 
 ##### STORE ##### 
-NUEVA_IP_STORE=3
-NUEVO_PUERTO_STORE=3
+NUEVA_IP_STORE=30.30.30.30
+NUEVO_PUERTO_STORE=44
 
 
 ####################### NO MODIFICAR ####################### 
@@ -47,7 +47,7 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
 
 
@@ -96,13 +96,13 @@ old_ip=`grep "^PUERTO_I_MONGO_STORE=" "$CONFIG_FILE" | sed "s/PUERTO_I_MONGO_STO
 sed "s/^PUERTO_I_MONGO_STORE=.*/PUERTO_I_MONGO_STORE="$NUEVO_PUERTO_STORE"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
 
-
 ### MIRAM
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 
 ### STORE
@@ -161,7 +161,7 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
 
 ### STORE
@@ -222,8 +222,9 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 ### STORE
 CONFIG_FILE="$CARPETA"/store.cfg
@@ -276,7 +277,7 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
 
 
@@ -334,7 +335,7 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
 
 
@@ -391,8 +392,9 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 ### STORE
 CONFIG_FILE="$CARPETA"/store.cfg
@@ -448,8 +450,9 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 ### STORE
 CONFIG_FILE="$CARPETA"/store.cfg
@@ -509,8 +512,9 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 ### STORE
 CONFIG_FILE="$CARPETA"/store.cfg
@@ -570,8 +574,9 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 ### STORE
 CONFIG_FILE="$CARPETA"/store.cfg
@@ -628,8 +633,9 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 ### STORE
 CONFIG_FILE="$CARPETA"/store.cfg
@@ -687,8 +693,9 @@ mv /tmp/temp.x "$CONFIG_FILE"
 CONFIG_FILE="$CARPETA"/miram.cfg
 
 old_ip=`grep "^PUERTO=" "$CONFIG_FILE" | sed "s/PUERTO=//"`
-sed "s/^PUERTO=.*/PUERTO="$NUEVA_IP_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
+sed "s/^PUERTO=.*/PUERTO="$NUEVO_PUERTO_MI_RAM"/" "$CONFIG_FILE" > /tmp/temp.x
 mv /tmp/temp.x "$CONFIG_FILE"
+
 
 
 ### STORE

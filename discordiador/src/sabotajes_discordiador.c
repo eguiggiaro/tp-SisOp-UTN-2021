@@ -69,6 +69,83 @@ double raiz_cuadrada(int numero){
   return root;
 }
 
+void avisar_mov_sabotaje_bitacora(Tripulante* tripulante, char* origen, char* destino){
+
+	t_paquete* paquete = crear_paquete(INFORMACION_BITACORA);
+    t_buffer* buffer;
+	char* id_trip = string_itoa(tripulante->id_tripulante);
+
+	t_list* lista_mensajes = list_create();
+
+	char* mensaje = string_new();
+	string_append(&mensaje, "Se DESPLAZA el tripulante: ");
+	string_append(&mensaje, id_trip);
+	string_append(&mensaje, " desde: ");
+	string_append(&mensaje, origen);
+	string_append(&mensaje, " hasta: ");
+	string_append(&mensaje, destino);
+
+	//Se envia mensaje a Store:
+	list_add(lista_mensajes,id_trip);
+	list_add(lista_mensajes,mensaje);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, tripulante->socket_store);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(tripulante->socket_store);
+	if (codigo_operacion == OK) {
+		//miLogInfo("Nuevo desplazamiento informado a bitacora correctamente\n");
+	} else if (codigo_operacion == FAIL){
+        miLogError("Tripulante %d: ERROR INFORMANDO NUEVA POSICION A BITACORA. \n",tripulante->id_tripulante);
+	}
+
+	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
+
+	list_destroy(lista_mensajes);
+	eliminar_buffer(buffer);
+	free(mensaje);
+}
+
+void avisar_mov_sabotaje_miram(Tripulante* trip, char* eje){
+
+	t_paquete* paquete = crear_paquete(MOV_TRIPULANTE);
+    t_buffer* buffer;
+
+	char* id_auxiliar = string_itoa(trip->id_tripulante);
+	char* nueva_posicion;
+	if(strncmp(eje,"X",1)==0){
+		nueva_posicion = string_itoa(trip->pos_x);
+	}
+	else{
+		nueva_posicion = string_itoa(trip->pos_y);
+	}
+	//Lista de elementos a enviar a miram: 1. ID del tripulante, 2. Eje, 3. Nueva Posicion
+	t_list* lista_mensajes = list_create();
+	list_add(lista_mensajes,id_auxiliar);
+	list_add(lista_mensajes,eje);
+	list_add(lista_mensajes,nueva_posicion);
+
+	buffer = serializar_lista_strings(lista_mensajes);
+    paquete ->buffer = buffer;
+  
+    enviar_paquete(paquete, trip->socket_miram);
+
+   //recibe respuesta de destino
+	op_code codigo_operacion = recibir_operacion(trip->socket_miram);
+	if (codigo_operacion == OK) {
+		buffer = (t_buffer*)recibir_buffer(trip->socket_miram);
+		eliminar_buffer(buffer);
+		//miLogInfo("Nueva posicion informada a MIRAM correctamente\n");
+	} else if (codigo_operacion == FAIL){
+        miLogError("Tripulante %d: ERROR INFORMANDO NUEVA POSICION A MIRAM. \n",trip->id_tripulante);
+	}
+
+	list_destroy(lista_mensajes);
+}
+
 void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino){
     //Me muevo desde la posicion actual hasta donde pide la tarea.
     int distancia_x;
@@ -101,11 +178,11 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
-        avisar_movimiento_bitacora(trip,origen,destino);
+        avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_x = (trip->pos_x)-1;
         //aviso a miram
-        avisar_movimiento_miram(trip,"X");
+        avisar_mov_sabotaje_miram(trip,"X");
       }
     }
     else if(x_origen < x_destino){
@@ -128,11 +205,11 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_movimiento_bitacora(trip,origen,destino);
+        avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_x = (trip->pos_x)+1;
         //aviso a miram
-        avisar_movimiento_miram(trip,"X");
+        avisar_mov_sabotaje_miram(trip,"X");
       }
     }
     else{
@@ -160,11 +237,11 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_movimiento_bitacora(trip,origen,destino);
+        avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_y = (trip->pos_y)-1;
         //aviso a miram
-        avisar_movimiento_miram(trip,"Y");
+        avisar_mov_sabotaje_miram(trip,"Y");
       }
     }
     else if(y_origen < y_destino){
@@ -187,11 +264,11 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_movimiento_bitacora(trip,origen,destino);
+        avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_y = (trip->pos_y)+1;
         //aviso a miram
-        avisar_movimiento_miram(trip,"Y");
+        avisar_mov_sabotaje_miram(trip,"Y");
       }
     }
     else{
@@ -330,7 +407,7 @@ void atender_sabotaje(char* posicion){
 
     Tripulante* tripulante_elegido = (Tripulante*) list_get_minimum(blocked_em,(void*)tripulante_mas_cercano);
 
-    tripulante_elegido->tripulante_despierto = true;
+    //tripulante_elegido->tripulante_despierto = true;
 
     miLogInfo("El tripulante elegido para llevar a cabo el sabotaje es el: %d \n",tripulante_elegido->id_tripulante);
 
@@ -361,20 +438,6 @@ void atender_sabotaje(char* posicion){
     list_add(blocked_em,tripulante_elegido);
 
     //8. Desbloquear y despertar a todos los tripulantes. (previamente, guardar estado anterior)
-    /*for(int i=0;i<list_size(blocked_em);i++){
-      Tripulante* tripu = list_remove(blocked_em,i);
-      tripu->estado = tripu->estado_anterior;
-      if(tripu->estado==trabajando){
-        list_add(execute_list,tripu);
-        miLogInfo("Se pasa al tripulante: %d de BLOCK_EM a EXEC \n", tripu->id_tripulante);
-        //tripu->tripulante_despierto = true;
-      }
-      else{
-        list_add(ready_list,tripu);
-        miLogInfo("Se pasa al tripulante: %d de BLOCK_EM a READY \n", tripu->id_tripulante);
-        //tripu->tripulante_despierto = true;
-      }
-    }*/
     for(int i = 0; i<list_size(tripulantes_totales); i++){
 		  Tripulante* tripu = (Tripulante*) list_get(tripulantes_totales,i);
       if(tripu->estado_anterior==trabajando){
@@ -403,17 +466,6 @@ void atender_sabotaje(char* posicion){
 				NULL) != 0) {
 			     printf("Error iniciando planificacion/n");
 		}
-    
-    /*pthread_mutex_unlock(&mutexNEW);
-  	pthread_mutex_unlock(&mutexREADY);
-  	pthread_mutex_unlock(&mutexBLOCK);
-  	pthread_mutex_unlock(&mutexEXEC);
-  	pthread_mutex_unlock(&mutexEXIT);
-
-	  despertar_tripulantes();
-
-  	planificacion_activada = true;
-    */
 
     pthread_exit(0);
 

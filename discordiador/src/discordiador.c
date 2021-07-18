@@ -1179,6 +1179,7 @@ void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
   if(trip->id_tripulante == trip_auxiliar->id_tripulante){
     indice = i;
 	tripulante_encontrado = true;
+	break;
     }
   }
 

@@ -98,8 +98,10 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
+        sleep(configuracion->retardo_ciclo_cpu);
+
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
-        avisar_movimiento_bitacora(id_trip,origen,destino);
+        avisar_movimiento_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_x = (trip->pos_x)-1;
         //aviso a miram
@@ -123,8 +125,10 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
+        sleep(configuracion->retardo_ciclo_cpu);
+
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_movimiento_bitacora(id_trip,origen,destino);
+        avisar_movimiento_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_x = (trip->pos_x)+1;
         //aviso a miram
@@ -153,8 +157,10 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
+        sleep(configuracion->retardo_ciclo_cpu);
+
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_movimiento_bitacora(id_trip,origen,destino);
+        avisar_movimiento_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_y = (trip->pos_y)-1;
         //aviso a miram
@@ -178,8 +184,10 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
 
+        sleep(configuracion->retardo_ciclo_cpu);
+
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_movimiento_bitacora(id_trip,origen,destino);
+        avisar_movimiento_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_y = (trip->pos_y)+1;
         //aviso a miram
@@ -218,9 +226,9 @@ void enviar_fcsk(Tripulante* tripu){
   //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripu->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("FCSK informado correctamente\n");
+		miLogInfo("FSCK informado correctamente\n");
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO FCSK. \n");
+        miLogError("ERROR INFORMANDO FSCK. \n");
 	}
 
 	buffer = (t_buffer*)recibir_buffer(tripu->socket_store);

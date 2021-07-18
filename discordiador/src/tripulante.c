@@ -556,8 +556,9 @@ void tarea_generica_FIFO(Tripulante *trip)
     pthread_mutex_lock(&trip->semaforo_trip);
   }
 
-  int retardo = configuracion->retardo_ciclo_cpu;
-  int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
+  //int retardo = configuracion->retardo_ciclo_cpu;
+  //int ciclos_cpu = sleep(retardo * ((trip->tarea_actual)->tiempo));
+  consumir_ciclos_cpu(trip);
   avisar_fin_tarea_bitacora(trip, nombre_tarea);
   miLogInfo("Finaliza ejecucion de: %s para el tripulante: %d \n", nombre_tarea, trip->id_tripulante);
   //seteo parametros para proxima tarea
@@ -1158,7 +1159,7 @@ void tarea_generica_RR(Tripulante *trip)
         {
           return;
         }
-        int ciclos_cpu = sleep(retardo * (1));
+        int ciclos_cpu = sleep(retardo);
         trip->tarea_actual->tiempo--;
         trip->quantum--;
         if (!trip->tripulante_despierto)
@@ -1619,4 +1620,22 @@ void *mover_tripulante_RR(Tripulante *trip)
   {
     trip->realizo_movimientos_tarea = true;
   }
+}
+
+void consumir_ciclos_cpu(Tripulante* trip){
+
+  int retardo = configuracion->retardo_ciclo_cpu;
+  int tiempo_cpu = (trip->tarea_actual)->tiempo;
+
+    for (int i = 0; i < tiempo_cpu; i++)
+      {
+        
+        int ciclos_cpu = sleep(retardo);
+        trip->tarea_actual->tiempo--;
+        if (!trip->tripulante_despierto)
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
+      }
+
 }

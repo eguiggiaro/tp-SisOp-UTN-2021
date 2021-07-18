@@ -50,4 +50,5 @@ void* mover_tripulante_RR(Tripulante*);
 
 void bloquear_tripulante_io(Tripulante*);
 void mover_tripulante(Tripulante*);
+void consumir_ciclos_cpu(Tripulante* trip);
 #endif

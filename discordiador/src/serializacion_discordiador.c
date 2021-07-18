@@ -369,9 +369,9 @@ void iniciar_fsck(uint32_t socket){
 
 		eliminar_buffer(buffer);
 		
-		miLogInfo("Se inicio FCSK en STORE correctamente");
+		miLogInfo("Se inicio FSCK en STORE correctamente");
 	} else {
-		miLogInfo("No se inicio FCSK en STORE correctamente");
+		miLogInfo("No se inicio FSCK en STORE correctamente");
 	}
 }
 

@@ -402,7 +402,16 @@ void atender_sabotaje(char* posicion){
       double segunda_distancia = raiz_cuadrada( (pos_x - otro_tripu->pos_x)*(pos_x - otro_tripu->pos_x) +
       (pos_y - otro_tripu->pos_y)*(pos_y - otro_tripu->pos_y) );
 
-      return primera_distancia <= segunda_distancia ? un_tripu : otro_tripu;
+      //return primera_distancia <= segunda_distancia ? un_tripu : otro_tripu;
+      if(primera_distancia < segunda_distancia){
+        return un_tripu;
+      }
+      else if(primera_distancia > segunda_distancia){
+        return otro_tripu;
+      }
+      else{
+        return un_tripu->id_tripulante < otro_tripu->id_tripulante ? un_tripu : otro_tripu;
+      }
     }
 
     Tripulante* tripulante_elegido = (Tripulante*) list_get_minimum(blocked_em,(void*)tripulante_mas_cercano);

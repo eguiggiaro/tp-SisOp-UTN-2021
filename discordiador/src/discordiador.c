@@ -1165,6 +1165,10 @@ void informar_cambio_de_cola_miram(Tripulante* tripulante, char* nueva_cola){
 }
 
 void pasar_tripulante_de_exec_a_ready(Tripulante* trip){
+  if (!trip->tripulante_despierto)
+  {
+	pthread_mutex_lock(&trip->semaforo_trip);
+  }
   int indice;
   Tripulante* trip_auxiliar;
   bool tripulante_encontrado = false;

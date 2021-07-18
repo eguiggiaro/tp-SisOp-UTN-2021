@@ -67,7 +67,7 @@ void *inicializar_tripulante(Tripulante *tripulante)
   sem_post(&semaforoREADY);
 
   pthread_mutex_init(&tripulante->semaforo_trip, NULL);
-  pthread_mutex_init(&tripulante->ciclos_IO, NULL);
+  //pthread_mutex_init(&tripulante->ciclos_IO, NULL);
 
   //miLogDebug("Tripulante %d: por comenzar ejecucion \n", tripulante->id_tripulante);
 
@@ -201,13 +201,7 @@ void generar_comida_FIFO(Tripulante *trip)
       miLogError("Error verificando la existencia de Comida.ims \n");
     }
     //Consume ciclos de CPU restantes
-    ciclos_cpu = (trip->tarea_actual)->tiempo;
-    for(int i = 0; i<ciclos_cpu;i++){
-      if(trip->en_sabotaje){
-        pthread_mutex_lock(&trip->ciclos_IO);
-      }
-      sleep(retardo);
-    }
+    consumir_ciclos_cpu(trip);
     //Se desbloquea
     desbloquear_tripulante_io(trip);
 
@@ -260,13 +254,14 @@ void generar_oxigeno_FIFO(Tripulante *trip)
     }
 
     //Consume ciclos de CPU restantes
-    ciclos_cpu = (trip->tarea_actual)->tiempo;
+    /*ciclos_cpu = (trip->tarea_actual)->tiempo;
     for(int i = 0; i<ciclos_cpu;i++){
       if(trip->en_sabotaje){
-        pthread_mutex_lock(&trip->ciclos_IO);
+        pthread_mutex_lock(&trip->semaforo_trip);
       }
       sleep(retardo);
-    }
+    }*/
+    consumir_ciclos_cpu(trip);
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
@@ -321,13 +316,7 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
     }
 
     //Consume ciclos de CPU restantes
-    ciclos_cpu = (trip->tarea_actual)->tiempo;
-    for(int i = 0; i<ciclos_cpu;i++){
-      if(trip->en_sabotaje){
-        pthread_mutex_lock(&trip->ciclos_IO);
-      }
-      sleep(retardo);
-    }
+    consumir_ciclos_cpu(trip);
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
@@ -382,13 +371,7 @@ void consumir_comida_FIFO(Tripulante *trip)
     }
 
     //Consume ciclos de CPU restantes
-    ciclos_cpu = (trip->tarea_actual)->tiempo;
-    for(int i = 0; i<ciclos_cpu;i++){
-      if(trip->en_sabotaje){
-        pthread_mutex_lock(&trip->ciclos_IO);
-      }
-      sleep(retardo);
-    }
+    consumir_ciclos_cpu(trip);
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
@@ -444,14 +427,7 @@ void generar_basura_FIFO(Tripulante *trip)
     }
 
     //Consume ciclos de CPU restantes
-    ciclos_cpu = (trip->tarea_actual)->tiempo;
-    for(int i = 0; i<ciclos_cpu;i++){
-      if(trip->en_sabotaje){
-        pthread_mutex_lock(&trip->ciclos_IO);
-      }
-      sleep(retardo);
-    }
-    miLogInfo("Finaliza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
+    consumir_ciclos_cpu(trip);
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
@@ -463,6 +439,7 @@ void generar_basura_FIFO(Tripulante *trip)
 
   if (trip->estado == trabajando)
   {
+    miLogInfo("Finaliza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_BASURA");
     //seteo parametros para proxima tarea
     
@@ -505,13 +482,7 @@ void descartar_basura_FIFO(Tripulante *trip)
     }
 
     //Consume ciclos de CPU restantes
-    ciclos_cpu = (trip->tarea_actual)->tiempo;
-    for(int i = 0; i<ciclos_cpu;i++){
-      if(trip->en_sabotaje){
-        pthread_mutex_lock(&trip->ciclos_IO);
-      }
-      sleep(retardo);
-    }
+    consumir_ciclos_cpu(trip);
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
@@ -639,13 +610,7 @@ void generar_comida_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-       ciclos_cpu = (trip->tarea_actual)->tiempo;
-       for(int i = 0; i<ciclos_cpu;i++){
-         if(trip->en_sabotaje){
-          pthread_mutex_lock(&trip->ciclos_IO);
-         }
-         sleep(retardo);
-        }
+       consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -726,13 +691,7 @@ void generar_oxigeno_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-       ciclos_cpu = (trip->tarea_actual)->tiempo;
-       for(int i = 0; i<ciclos_cpu;i++){
-        if(trip->en_sabotaje){
-         pthread_mutex_lock(&trip->ciclos_IO);
-        }
-       sleep(retardo);
-       }
+       consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -812,13 +771,7 @@ void consumir_oxigeno_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-        ciclos_cpu = (trip->tarea_actual)->tiempo;
-        for(int i = 0; i<ciclos_cpu;i++){
-          if(trip->en_sabotaje){
-           pthread_mutex_lock(&trip->ciclos_IO);
-          }
-         sleep(retardo);
-        }
+        consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -897,13 +850,7 @@ void consumir_comida_RR(Tripulante *trip)
           miLogError("Error verificando la existencia de Comida.ims \n");
         }
         //Consume ciclos de CPU restantes
-        ciclos_cpu = (trip->tarea_actual)->tiempo;
-        for(int i = 0; i<ciclos_cpu;i++){
-        if(trip->en_sabotaje){
-          pthread_mutex_lock(&trip->ciclos_IO);
-        }
-        sleep(retardo);
-        }
+        consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -983,13 +930,7 @@ void generar_basura_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-        ciclos_cpu = (trip->tarea_actual)->tiempo;
-        for(int i = 0; i<ciclos_cpu;i++){
-          if(trip->en_sabotaje){
-          pthread_mutex_lock(&trip->ciclos_IO);
-          }
-         sleep(retardo);
-         }
+        consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -1069,13 +1010,7 @@ void descartar_basura_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-        ciclos_cpu = (trip->tarea_actual)->tiempo;
-        for(int i = 0; i<ciclos_cpu;i++){
-          if(trip->en_sabotaje){
-            pthread_mutex_lock(&trip->ciclos_IO);
-          }
-          sleep(retardo);
-        }
+        consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -1202,6 +1137,7 @@ void bloquear_tripulante_io(Tripulante *trip)
     {
       indice = i;
       tripulante_encontrado = true;
+      break;
     }
   }
 
@@ -1634,6 +1570,9 @@ void consumir_ciclos_cpu(Tripulante* trip){
         trip->tarea_actual->tiempo--;
         if (!trip->tripulante_despierto)
         {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
+        if(trip->en_sabotaje){
           pthread_mutex_lock(&trip->semaforo_trip);
         }
       }

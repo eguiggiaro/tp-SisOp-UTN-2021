@@ -392,7 +392,7 @@ void atender_sabotaje(char* posicion){
       else if(tripu->estado==bloqueado_io){
         tripu->en_sabotaje = false;
         miLogInfo("Se reanuda consumo de ciclos IO para tripulante: %d\n",tripu->id_tripulante);
-        pthread_mutex_unlock(&tripu->ciclos_IO);
+        pthread_mutex_unlock(&tripu->semaforo_trip);
       }
 				
 		}

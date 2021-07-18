@@ -152,7 +152,7 @@ void imprimir_frame(Frame *un_frame)
 	char *auxiliar;
 	int LRU = -1;
 	int clock = -1;
-	char* pagina_char;
+	char *pagina_char;
 
 	if (strcmp(un_frame->estado, "OCUPADO") == 0)
 	{
@@ -274,7 +274,7 @@ uint32_t buscar_tripulante_paginacion(int TCB_ID)
     */
 }
 
-void liberar_pagina(Pagina* una_pagina)
+void liberar_pagina(Pagina *una_pagina)
 {
 	free(una_pagina->contenido);
 	free(una_pagina->estado);
@@ -286,11 +286,11 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 	TCB *unTCB = buscar_tcb_por_id(tripulante_id);
 	TCB_adm *tcb_adm;
 	char *identificador = string_new();
-	char* tripulante_char = string_itoa(tripulante_id);
+	char *tripulante_char = string_itoa(tripulante_id);
 	string_append(&identificador, "T");
 	string_append(&identificador, tripulante_char);
 	free(tripulante_char);
-	char* patota_char;
+	char *patota_char;
 
 	PCB_adm *pcb_adm = buscar_patota_tripulante(tripulante_id);
 	t_list_iterator *iterador_tripulantes = list_iterator_create(pcb_adm->tabla_TCB_admin);
@@ -349,10 +349,10 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 	tcb_adm->cantidad_paginas = 0;
 	free(tcb_adm);
 	pcb_adm->tripulantes_activos--;
-	patota_char =  string_itoa(pcb_adm->PID);
+	patota_char = string_itoa(pcb_adm->PID);
 	char *identificador_tareas = string_new();
 	string_append(&identificador_tareas, "Tar");
-	string_append(&identificador_tareas,patota_char);
+	string_append(&identificador_tareas, patota_char);
 
 	if (pcb_adm->tripulantes_activos == 0)
 	{
@@ -434,9 +434,10 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 		free(identificador_tareas);
 		free(identificador_pcb);
-		free(patota_char);
+
 	}
 	free(identificador);
+	free(patota_char);
 	if (mapa)
 	{
 		char ident_trip = buscar_tripulante_grilla(tripulante_id);
@@ -528,7 +529,8 @@ char *proxima_tarea_tripulante_paginacion(int tripulante_id)
 
 	if (unTCB->proxima_instruccion == 99)
 	{
-		return "$";
+		string_append(&string_tarea, "$");
+		return string_tarea;
 	}
 
 	while (1)
@@ -784,6 +786,7 @@ Frame *traer_de_SWAP(int id_pagina, Frame *un_frame)
 			bitarray_clean_bit(bitmap, elemento_swap->posicion_SWAP);
 
 			list_iterator_remove(iterador_SWAP);
+			free(elemento_swap);
 			break;
 		}
 	}
@@ -1269,7 +1272,6 @@ int cambiar_cola_tripulante_paginacion(int tripulante, char cola_destino)
 	guardar_tripulante(miTCB, pcb_adm);
 	free(miTCB);
 }
-
 
 //Mueve un tripulante a una dirección destino
 int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool mapa)
@@ -1782,8 +1784,10 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		tamanio_alocado = 0;
 		liberar_pagina = false;
 		ubique_tripulante = false;
-	}
+		free(un_tcb);
 
+	}
+	free(pagina);
 	return pcb_adm->PID;
 }
 
@@ -1808,14 +1812,8 @@ void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina, int tamanio
 
 	bitmap = bitarray_create_with_mode(bitarray, contador_espacios_SWAP / 8, MSB_FIRST);
 
-	void *pagina = malloc(tamanio_pagina_paginacion);
-
 	SWAP = fopen(path_SWAP, "w+");
 
-	//for (int i = 0; i < contador_espacios_SWAP; i++)
-	//{
-	//	fwrite(&pagina, sizeof(pagina), 1, SWAP);
-	//}
 
 	for (int i = 0; i < contador_frames; i++)
 	{

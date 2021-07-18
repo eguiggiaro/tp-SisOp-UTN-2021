@@ -31,9 +31,7 @@ void signalHandler(int signal)
 		dump();
 		break;
 	case SIGINT:
-		miLogInfo("Se forzó el cierre MiRam.");
-		miLogDestroy();
-		finalizar_memoria();
+		miLogInfo("==== Finalizó MiRAM HQ ====");
 		exit(130); //Control+C
 		break;
 	default:
@@ -183,11 +181,10 @@ void atender_request_miram(Request *request)
 		free(posicion_x);
 		free(posicion_y);
 		free(un_tripulante_id);
-
+		free(proxima_tarea);
 		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
 		list_destroy(lista_mensajes);		
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
-		free(proxima_tarea);
 		free(request);
 		pthread_mutex_unlock(&mutex_tripulantes);
 		break;
@@ -301,7 +298,7 @@ void atender_request_miram(Request *request)
 		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
 
 		free(request);
-		//free(tarea);
+		free(tarea);
 		pthread_mutex_unlock(&mutex_tareas);
 		break;
 
@@ -808,7 +805,7 @@ int main()
 	//Signal para atender la compactación
 	signal(SIGUSR1, signalHandler);
 	signal(SIGUSR2, signalHandler);
-
+	signal(SIGINT, signalHandler);
 	//Inicio el log en un thread... :O
 	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició MiRAM.");

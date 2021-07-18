@@ -303,9 +303,9 @@ void enviar_fcsk(Tripulante* tripu){
   //recibe respuesta de destino
 	op_code codigo_operacion = recibir_operacion(tripu->socket_store);
 	if (codigo_operacion == OK) {
-		miLogInfo("FSCK informado correctamente\n");
+		miLogInfo("FSCK invocado correctamente\n");
 	} else if (codigo_operacion == FAIL){
-        miLogError("ERROR INFORMANDO FSCK. \n");
+        miLogError("ERROR INVOCANDO FSCK. \n");
 	}
 
 	buffer = (t_buffer*)recibir_buffer(tripu->socket_store);
@@ -390,8 +390,19 @@ void atender_sabotaje(char* posicion){
       }
 				
 		}
-    list_add_all(blocked_em,execute_list);
-    list_add_all(blocked_em,ready_list);
+    if(list_is_empty(execute_list) && list_is_empty(ready_list)){
+      miLogInfo("No hay tripulantes en cola de EXEC ni READY para realizar SABOTAJE \n");
+
+      if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
+				NULL) != 0) {
+			     printf("Error reanudando planificacion/n");
+		  }
+      pthread_exit(0);
+    }
+    else{
+      list_add_all(blocked_em,execute_list);
+      list_add_all(blocked_em,ready_list);
+    
 
     //3. Calculo al tripulante en la posicion mas cercana y lo paso a cola de BLOCK_EMERGENCIA
     void* tripulante_mas_cercano(Tripulante* un_tripu, Tripulante* otro_tripu){
@@ -429,21 +440,24 @@ void atender_sabotaje(char* posicion){
       }
     }
 
+
     //4. Movemos al tripulante elegido al punto de sabotaje.
     mover_tripulante_a_sabotaje(tripulante_elegido, pos_x,pos_y);
     miLogInfo("El tripulante: %d llego a la posicion de sabotaje: %d|%d \n",tripulante_elegido->id_tripulante,
                                                                             tripulante_elegido->pos_x,
                                                                             tripulante_elegido->pos_y);
 
-    //5. Enviar FCSK a Store con posicion actual del tripulante.
-    enviar_fcsk(tripulante_elegido);
 
-    //6. Esperar tiempo de duracion de tarea.
+    //5. Esperar tiempo de duracion de tarea.
     int retardo = configuracion->retardo_ciclo_cpu;
     int ciclos_sabotaje = configuracion->duracion_sabotaje;
     sleep(ciclos_sabotaje*retardo);
 
+    //6. Enviar FSCK a Store con posicion actual del tripulante.
+    enviar_fcsk(tripulante_elegido);
+
     //7.Pasar tripulante elegido a ultimo lugar en cola de BLOCK_EMERGENCIA
+    miLogInfo("Se pasa al tripulante %d al final de la cola de BLOCK_EM \n",tripulante_elegido->id_tripulante);
     list_add(blocked_em,tripulante_elegido);
 
     //8. Desbloquear y despertar a todos los tripulantes. (previamente, guardar estado anterior)
@@ -473,9 +487,10 @@ void atender_sabotaje(char* posicion){
 
     if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
 				NULL) != 0) {
-			     printf("Error iniciando planificacion/n");
+			     printf("Error reanudando planificacion/n");
 		}
 
     pthread_exit(0);
+  }
 
 }

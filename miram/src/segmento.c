@@ -498,7 +498,8 @@ char *buscar_posicion_tripulante_segmentacion(int tripulante_id)
 char *proxima_tarea_tripulante_segmentacion(int tripulante_id)
 {
 	char *string_tarea = string_new();
-
+	char caracter;
+	int index = 0;
 
 	u_int32_t posicion_memoria = buscar_tripulante(tripulante_id);
 
@@ -509,42 +510,57 @@ char *proxima_tarea_tripulante_segmentacion(int tripulante_id)
 
 	TCB *unTCB = posicion_memoria;
 
-	char *proxima_tarea_tripulante = unTCB->proxima_instruccion;
-	char *proxima_tarea = strdup(proxima_tarea_tripulante);
+	posicion_memoria = buscar_posicion(unTCB->PCB);
 
-	if (proxima_tarea[0] == '$')
+	PCB* unPCB = posicion_memoria;
+
+	posicion_memoria = buscar_posicion(unPCB->Tareas);
+
+	char *tareas_tripulante = posicion_memoria;
+
+	int contador_tareas = 0;
+
+	if (unTCB->proxima_instruccion == 99)
 	{
-		free(string_tarea);
-		return proxima_tarea;
+		string_append(&string_tarea, "$");
+		return string_tarea;
 	}
 
-	int index = 0;
-
-	char caracter;
+	char *tareas = strdup(tareas_tripulante);
 
 	while (1)
-	{ //string con todas las posiciones
-		caracter = proxima_tarea[index];
+	{
+		caracter = tareas[index];
+
 		if (caracter == '$')
 		{
+			unTCB->proxima_instruccion = 99;
 			break;
 		}
 
 		if (caracter == '|')
 		{
-			string_append_with_format(&string_tarea, "%c", caracter);
-			index++;
-			break;
+			if (contador_tareas == unTCB->proxima_instruccion)
+			{
+				unTCB->proxima_instruccion++;
+				string_append(&string_tarea, "|");
+				break;
+			}
+			else
+			{
+				free(string_tarea);
+				string_tarea = string_new();
+				contador_tareas++;
+			}
 		}
 		else
 		{
 			string_append_with_format(&string_tarea, "%c", caracter);
-			index++;
 		}
-	}
 
-	unTCB->proxima_instruccion = unTCB->proxima_instruccion + index;
-	free(proxima_tarea);
+		index++;
+	}
+	free(tareas);
 	return string_tarea;
 }
 
@@ -876,14 +892,13 @@ void compactacion_mover_segmentos(Segmento *segmento1, Segmento *segmento2, int 
 			if (tcb_adm2->PID == pcb_auxiliar->PID)
 			{
 				segmento_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
-				segmento_auxiliar = segmento_auxiliar->dir_inicio;
+				tcb_auxiliar = segmento_auxiliar->dir_inicio;
 				//Cambio estructuras memoria
-				tcb_auxiliar->PCB = segmento1->dir_inicio;
+				tcb_auxiliar->PCB = segmento1->id;
 			}
 		}
 		list_iterator_destroy(list_iterator_tcb);
 
-		pcb_TEST = segmento1->dir_inicio;
 	}
 
 	if (tipo_encontrado == 'T')
@@ -909,8 +924,7 @@ void compactacion_mover_segmentos(Segmento *segmento1, Segmento *segmento2, int 
 		//Cambio estructura administrativa
 		tcb_adm2->segmento_nro = segmento_lleno;
 
-		tcb_TEST = segmento1->dir_inicio;
-	}
+}
 
 	if (tipo_encontrado == 'K')
 	{
@@ -949,24 +963,8 @@ void compactacion_mover_segmentos(Segmento *segmento1, Segmento *segmento2, int 
 		tarea_adm2->segmento_nro = segmento_lleno;
 
 		//Cambio estructuras memoria
-		pcb_auxiliar->Tareas = tareas_auxiliar;
+		pcb_auxiliar->Tareas = segmento1->id;
 
-		list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
-		while (list_iterator_has_next(list_iterator_tcb))
-		{
-			tcb_adm2 = list_iterator_next(list_iterator_tcb);
-
-			if (tcb_adm2->PID == pcb_auxiliar->PID)
-			{
-				segmento_auxiliar = buscar_segmento_por_id(tcb_adm2->segmento_nro);
-				tcb_auxiliar = segmento_auxiliar->dir_inicio;
-
-				tcb_auxiliar->proxima_instruccion = (tcb_auxiliar->proxima_instruccion) - desplazamiento_final_1;
-			}
-		}
-		list_iterator_destroy(list_iterator_tcb);
-
-		tareas_TEST = segmento1->dir_inicio;
 	}
 }
 
@@ -1431,8 +1429,8 @@ int inicializar_tripulante_segmentacion(int patota, char *unPunto, u_int32_t tar
 	free(lista_puntos[1]);
 	free(lista_puntos);
 	//linkear a tareas
-	miTCB->proxima_instruccion = tareas;
-	miTCB->PCB = buscar_patota(patota);
+	miTCB->proxima_instruccion = 0;
+	miTCB->PCB = buscar_segmento(buscar_patota(patota));
 
 	//alta tripulante
 	alta_tripulante_segmentacion(miTCB, patota);
@@ -1607,7 +1605,7 @@ int iniciar_patota_segmentacion(int cantidad_tripulantes, char *tareas, char *pu
 		return -1;
 	}
 
-	unPCB->Tareas = posicion_memoria;
+	unPCB->Tareas = buscar_segmento(posicion_memoria);
 
 	//alta patota
 	alta_patota(unPCB);

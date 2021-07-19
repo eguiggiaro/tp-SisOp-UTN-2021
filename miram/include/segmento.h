@@ -59,4 +59,5 @@ uint32_t buscar_tripulante_segmentacion(int TCB_ID);
 bool segmentos_orden (Segmento* segmento1, Segmento* segmento_mayor);
 PCB_adm *buscar_pcb_adm_por_id(int PID);
 pthread_mutex_t mutex_dump;
+u_int32_t buscar_posicion(int segmento);
 #endif

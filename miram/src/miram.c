@@ -286,7 +286,7 @@ void atender_request_miram(Request *request)
 
 		char *tarea = proxima_tarea_tripulante(tripulante_id);
 
-		miLogInfo("Proxima tarea de tripulante %d enviada", tripulante_id, tarea);
+		miLogInfo("Proxima tarea de tripulante %d enviada %s", tripulante_id, tarea);
 		paquete_devuelto = crear_paquete(OK);
 		list_add(lista_mensajes, tarea);
 

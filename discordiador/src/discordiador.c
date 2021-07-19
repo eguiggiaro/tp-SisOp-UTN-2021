@@ -136,6 +136,7 @@ void consola()
 			if (!checkFileExists(list[2]))
 			{
 				printf("La ruta especificada es erronea\n");
+				free(input_consola);
 				break;
 			}
 			else if (pthread_create(&threadPATOTA, NULL, (void *)iniciar_patota,
@@ -144,6 +145,7 @@ void consola()
 				printf("Error iniciando patota/n");
 			}
 			pthread_detach(threadPATOTA);
+			
 			break;
 		case INICIAR_PLANIFICACION_COM:
 			printf("Comando es Iniciar Planificacion\n");
@@ -152,6 +154,7 @@ void consola()
 			{
 				printf("Error iniciando planificacion/n");
 			}
+			free(input_consola);
 			break;
 		case PAUSAR_PLANIFICACION_COM:
 			printf("Comando es Pausar Planificacion\n");
@@ -160,6 +163,7 @@ void consola()
 			{
 				printf("Error pausando planificacion\n");
 			}
+			free(input_consola);
 			break;
 		case LISTAR_TRIPULANTE_COM:
 			printf("\nComando es Listar Tripulantes\n");
@@ -181,6 +185,7 @@ void consola()
 					   estados_table[tripu->estado]);
 			}
 			printf("--------------------------------------------------------------------\n");
+			free(input_consola);
 			break;
 		case EXPULSAR_TRIPULANTE_COM:
 			printf("Comando es Expulsar Tripulante\n");
@@ -207,7 +212,7 @@ void consola()
 			}
 			break;
 		case ALERTA_SABOTAJE_COM:
-			atender_sabotaje(input_consola);
+			//atender_sabotaje(input_consola);
 			break;
 		case TEST_MENSAJES:
 			printf("1. Miram\n");
@@ -223,11 +228,13 @@ void consola()
 			{
 				consola_store();
 			}
+			free(input_consola);
 
 			break;
 
 		default:
 			printf("No conozco ese comando, seguro que esta bien?\n");
+			free(input_consola);
 			break;
 		}
 		printf("Siguiente comando?\n");
@@ -287,6 +294,7 @@ void obtener_bitacora(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
+	free(comando);
 }
 
 void generar_archivo_bitacora(char *tripulante, char *bitacora)
@@ -356,6 +364,8 @@ void expulsar_tripulante(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
+	free(comando);
+	liberar_array(list);
 }
 
 void compactacion(char *comando)
@@ -388,6 +398,7 @@ void compactacion(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
+	free(comando);
 }
 
 void iniciar_patota(char *comando)
@@ -397,7 +408,8 @@ void iniciar_patota(char *comando)
 
 	miLogDebug("Comienza el INICIAR_PATOTA\n");
 
-	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
+	t_list *lista_mensajes = list_create();
+	t_list *mensajes_respuesta = list_create();
 	Tripulante_disc trip_hilo;
 
 	char *string_tareas;
@@ -470,9 +482,12 @@ void iniciar_patota(char *comando)
 	}
 
 	list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy);
+	list_destroy_and_destroy_elements(mensajes_respuesta,(void*)char_destroy);
 
 	miLogDebug("Finaliza el INICIAR_PATOTA\n");
 
+	free(comando);
+	liberar_array(list);
 	pthread_exit(0);
 }
 
@@ -827,6 +842,9 @@ void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	char *tiempo_aux = strdup(strtok(tiempo, "|"));
 	nueva_tarea->tiempo = atoi(tiempo_aux);
 	//printf(" tiempo: %i\n", nueva_tarea->tiempo);
+	free(parametros);
+	free(tiempo);
+	free(tiempo_aux);
 }
 
 //Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución
@@ -893,7 +911,7 @@ void finalizar_tripulante(Tripulante *trip)
 		miLogError("ERROR EXPULSANDO TRIPULANTE %d. \n", trip->id_tripulante);
 	}
 
-	list_destroy(lista_mensajes);
+	list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
 
 	pthread_mutex_lock(&mutexEXEC);
 	t_list_iterator* iterador_ejecucion = list_iterator_create(execute_list);
@@ -994,7 +1012,7 @@ bool tarea_informada(Tripulante *tripulante, char *nombre_tarea, char *parametro
 
 	buffer = (t_buffer *)recibir_buffer(tripulante->socket_store);
 
-	list_destroy(lista_mensajes);
+	list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
 	eliminar_buffer(buffer);
 	return se_informo;
 }
@@ -1010,8 +1028,8 @@ void avisar_movimiento_miram(Tripulante *trip, char *eje)
 	t_paquete *paquete = crear_paquete(MOV_TRIPULANTE);
 	t_buffer *buffer;
 
-	char *id_auxiliar = string_itoa(trip->id_tripulante);
-	char *nueva_posicion;
+	char* id_auxiliar = string_itoa(trip->id_tripulante);
+	char* nueva_posicion;
 	if (strncmp(eje, "X", 1) == 0)
 	{
 		nueva_posicion = string_itoa(trip->pos_x);
@@ -1021,7 +1039,7 @@ void avisar_movimiento_miram(Tripulante *trip, char *eje)
 		nueva_posicion = string_itoa(trip->pos_y);
 	}
 	//Lista de elementos a enviar a miram: 1. ID del tripulante, 2. Eje, 3. Nueva Posicion
-	t_list *lista_mensajes = list_create();
+	t_list* lista_mensajes = list_create();
 	list_add(lista_mensajes, id_auxiliar);
 	list_add(lista_mensajes, eje);
 	list_add(lista_mensajes, nueva_posicion);
@@ -1044,7 +1062,7 @@ void avisar_movimiento_miram(Tripulante *trip, char *eje)
 		miLogError("Tripulante %d: ERROR INFORMANDO NUEVA POSICION A MIRAM. \n", trip->id_tripulante);
 	}
 
-	list_destroy(lista_mensajes);
+	list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
 }
 
 void avisar_movimiento_bitacora(Tripulante *tripulante, char *origen, char *destino)
@@ -1091,9 +1109,9 @@ void avisar_movimiento_bitacora(Tripulante *tripulante, char *origen, char *dest
 
 	buffer = (t_buffer *)recibir_buffer(tripulante->socket_store);
 
-	list_destroy(lista_mensajes);
+	list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
 	eliminar_buffer(buffer);
-	free(mensaje);
+	//free(mensaje);
 }
 
 void avisar_inicio_tarea_bitacora(Tripulante *tripulante, char *tarea_nombre)

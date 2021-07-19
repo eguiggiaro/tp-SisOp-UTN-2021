@@ -33,6 +33,8 @@ void *inicializar_tripulante(Tripulante *tripulante)
     t_list *lista = deserializar_lista_strings(buffer);
 
     //loggear_lista_strings(lista);
+    Tarea *proxima_tarea = malloc(sizeof(Tarea));
+    tripulante->tarea_actual = proxima_tarea;
 
     tripulante->id_tripulante = atoi(list_get(lista, 0));
     char **posicion = string_split(list_get(lista, 1), "|");
@@ -110,8 +112,8 @@ void pedir_proxima_tarea(Tripulante *un_tripulante)
       un_tripulante->tarea_actual = una_tarea;
     }
     //sem_destroy...
-
-    list_destroy(lista);
+    list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy_trip);
+    list_destroy_and_destroy_elements(lista, (void *)char_destroy_trip);
     eliminar_buffer(buffer);
   }
   else
@@ -188,15 +190,15 @@ void generar_comida_FIFO(Tripulante *trip)
   if (!trip->recibio_input_store)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Comienza ejecucion de GENERAR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     ciclos_cpu = sleep(retardo * (1));
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
@@ -221,13 +223,14 @@ void generar_comida_FIFO(Tripulante *trip)
   if (trip->estado == trabajando)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Finaliza ejecucion de GENERAR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_COMIDA");
     //seteo parametros para proxima tarea
-  
+
+    free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -252,16 +255,16 @@ void generar_oxigeno_FIFO(Tripulante *trip)
   if (!trip->recibio_input_store)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Comienza ejecucion de GENERAR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     //Consume un ciclo de CPU
     ciclos_cpu = sleep(retardo * (1));
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
@@ -295,13 +298,14 @@ void generar_oxigeno_FIFO(Tripulante *trip)
   if (trip->estado == trabajando)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Finaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
     //seteo parametros para proxima tarea
-    
+
+    free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -356,7 +360,8 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_OXIGENO");
     //seteo parametros para proxima tarea
-    
+
+    free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -381,15 +386,15 @@ void consumir_comida_FIFO(Tripulante *trip)
   if (!trip->recibio_input_store)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Comienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     //Consume un ciclo de CPU
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     ciclos_cpu = sleep(retardo * (1));
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
@@ -417,13 +422,13 @@ void consumir_comida_FIFO(Tripulante *trip)
   if (trip->estado == trabajando)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Finaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_COMIDA");
     //seteo parametros para proxima tarea
-    
+    free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -449,16 +454,16 @@ void generar_basura_FIFO(Tripulante *trip)
   if (!trip->recibio_input_store)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Comienza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     //Consume un ciclo de CPU
     ciclos_cpu = sleep(retardo * (1));
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
@@ -485,13 +490,13 @@ void generar_basura_FIFO(Tripulante *trip)
   if (trip->estado == trabajando)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Finaliza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_BASURA");
     //seteo parametros para proxima tarea
-    
+    free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -516,16 +521,16 @@ void descartar_basura_FIFO(Tripulante *trip)
   if (!trip->recibio_input_store)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Comienza ejecucion de DESCARTAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     //Consume un ciclo de CPU
     ciclos_cpu = sleep(retardo * (1));
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
@@ -552,13 +557,13 @@ void descartar_basura_FIFO(Tripulante *trip)
   if (trip->estado == trabajando)
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("Finaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "DESCARTAR_BASURA");
     //seteo parametros para proxima tarea
-    
+    free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -594,7 +599,8 @@ void tarea_generica_FIFO(Tripulante *trip)
   avisar_fin_tarea_bitacora(trip, nombre_tarea);
   miLogInfo("Finaliza ejecucion de: %s para el tripulante: %d \n", nombre_tarea, trip->id_tripulante);
   //seteo parametros para proxima tarea
-  
+
+  free(trip->tarea_actual);
   trip->tarea_actual = NULL;
   trip->realizo_movimientos_tarea = false;
   trip->recibio_input_store = false;
@@ -644,7 +650,6 @@ void generar_comida_RR(Tripulante *trip)
     char *parametro = (trip->tarea_actual)->parametros;
     int retardo = configuracion->retardo_ciclo_cpu;
 
-    
     //avisar_inicio_tarea_bitacora(string_itoa(trip->id_tripulante),"GENERAR_COMIDA");
     if (!trip->realizo_movimientos_tarea)
     {
@@ -656,16 +661,16 @@ void generar_comida_RR(Tripulante *trip)
       if (!trip->recibio_input_store)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("Comienza ejecucion de GENERAR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
         //Consume un ciclo de CPU
         ciclos_cpu = sleep(retardo * (1));
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
@@ -679,7 +684,7 @@ void generar_comida_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-       consumir_ciclos_cpu(trip);
+        consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -692,9 +697,9 @@ void generar_comida_RR(Tripulante *trip)
       if (trip->estado == trabajando)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
 
         //Consume ciclos de CPU restantes
         /* Estos ciclos se consumen en la cola de BLOCK, por lo que no hay QUANTUM
@@ -714,7 +719,7 @@ void generar_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        
+        free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -724,9 +729,9 @@ void generar_comida_RR(Tripulante *trip)
   else
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d se quedo sin quantum \n", trip->id_tripulante);
     pasar_tripulante_de_exec_a_ready(trip);
   }
@@ -753,16 +758,16 @@ void generar_oxigeno_RR(Tripulante *trip)
       if (!trip->recibio_input_store)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("Comienza ejecucion de GENERAR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
         //Consume un ciclo de CPU
         ciclos_cpu = sleep(retardo * (1));
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
@@ -776,7 +781,7 @@ void generar_oxigeno_RR(Tripulante *trip)
         }
 
         //Consume ciclos de CPU restantes
-       consumir_ciclos_cpu(trip);
+        consumir_ciclos_cpu(trip);
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
@@ -802,15 +807,15 @@ void generar_oxigeno_RR(Tripulante *trip)
 
         }
         */
-       if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        if (!trip->tripulante_despierto)
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("Finaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        
+        free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -820,9 +825,9 @@ void generar_oxigeno_RR(Tripulante *trip)
   else
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d se quedo sin quantum \n", trip->id_tripulante);
     pasar_tripulante_de_exec_a_ready(trip);
   }
@@ -849,16 +854,16 @@ void consumir_oxigeno_RR(Tripulante *trip)
       if (!trip->recibio_input_store)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("Comienza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
         //Consume un ciclo de CPU
         ciclos_cpu = sleep(retardo * (1));
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
@@ -885,9 +890,9 @@ void consumir_oxigeno_RR(Tripulante *trip)
       if (trip->estado == trabajando)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
 
         /* Estos ciclos se consumen en la cola de BLOCK
         for(int i = 0; i<trip->tarea_actual->tiempo; i++)
@@ -906,7 +911,7 @@ void consumir_oxigeno_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        
+        free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -916,9 +921,9 @@ void consumir_oxigeno_RR(Tripulante *trip)
   else
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d se quedo sin quantum \n", trip->id_tripulante);
     pasar_tripulante_de_exec_a_ready(trip);
   }
@@ -945,16 +950,16 @@ void consumir_comida_RR(Tripulante *trip)
       if (!trip->recibio_input_store)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("Comienza ejecucion de CONSUMIR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
         //Consume un ciclo de CPU
         ciclos_cpu = sleep(retardo * (1));
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
@@ -980,9 +985,9 @@ void consumir_comida_RR(Tripulante *trip)
       if (trip->estado == trabajando)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
 
         /* Estos ciclos se consumen en la cola de BLOCK
         for(int i = 0; i<trip->tarea_actual->tiempo; i++)
@@ -1001,7 +1006,7 @@ void consumir_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        
+        free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1011,9 +1016,9 @@ void consumir_comida_RR(Tripulante *trip)
   else
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d se quedo sin quantum \n", trip->id_tripulante);
     pasar_tripulante_de_exec_a_ready(trip);
   }
@@ -1040,16 +1045,16 @@ void generar_basura_RR(Tripulante *trip)
       if (!trip->recibio_input_store)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("Comienza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
         //Consume un ciclo de CPU
         ciclos_cpu = sleep(retardo * (1));
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
@@ -1076,9 +1081,9 @@ void generar_basura_RR(Tripulante *trip)
       if (trip->estado == trabajando)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
 
         /* Estos ciclos se consumen en la cola de BLOCK
         for(int i = 0; i<trip->tarea_actual->tiempo; i++)
@@ -1097,7 +1102,7 @@ void generar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        
+        free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1107,9 +1112,9 @@ void generar_basura_RR(Tripulante *trip)
   else
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d se quedo sin quantum \n", trip->id_tripulante);
     pasar_tripulante_de_exec_a_ready(trip);
   }
@@ -1136,16 +1141,16 @@ void descartar_basura_RR(Tripulante *trip)
       if (!trip->recibio_input_store)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("Comienza ejecucion de DESCARTAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
         //Consume un ciclo de CPU
         ciclos_cpu = sleep(retardo * (1));
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
@@ -1172,9 +1177,9 @@ void descartar_basura_RR(Tripulante *trip)
       if (trip->estado == trabajando)
       {
         if (!trip->tripulante_despierto)
-	      {
-		      pthread_mutex_lock(&trip->semaforo_trip);
-	      }
+        {
+          pthread_mutex_lock(&trip->semaforo_trip);
+        }
 
         /* Estos ciclos se consumen en la cola de BLOCK
         for(int i = 0; i<trip->tarea_actual->tiempo; i++)
@@ -1193,7 +1198,7 @@ void descartar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        
+        free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1203,9 +1208,9 @@ void descartar_basura_RR(Tripulante *trip)
   else
   {
     if (!trip->tripulante_despierto)
-	  {
-		  pthread_mutex_lock(&trip->semaforo_trip);
-	  }
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
     miLogInfo("El tripulante: %d se quedo sin quantum\n", trip->id_tripulante);
     pasar_tripulante_de_exec_a_ready(trip);
   }
@@ -1224,10 +1229,10 @@ void tarea_generica_RR(Tripulante *trip)
       mover_tripulante_RR(trip);
     }
 
-      if (!trip->tripulante_despierto)
-      {
-        pthread_mutex_lock(&trip->semaforo_trip);
-      }
+    if (!trip->tripulante_despierto)
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
 
     if (trip->quantum > 0)
     {
@@ -1264,7 +1269,7 @@ void tarea_generica_RR(Tripulante *trip)
       avisar_fin_tarea_bitacora(trip, nombre_tarea);
 
       //seteo parametros para proxima tarea
-      
+      free(trip->tarea_actual);
       trip->tarea_actual = NULL;
       trip->realizo_movimientos_tarea = false;
       trip->recibio_input_store = false;
@@ -1281,9 +1286,9 @@ void tarea_generica_RR(Tripulante *trip)
 void bloquear_tripulante_io(Tripulante *trip)
 {
   if (!trip->tripulante_despierto)
-	{
-		pthread_mutex_lock(&trip->semaforo_trip);
-	}
+  {
+    pthread_mutex_lock(&trip->semaforo_trip);
+  }
 
   int indice;
   Tripulante *trip_auxiliar;
@@ -1402,13 +1407,18 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, x_destino_b);
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
+      free(x_origen_b);
+      free(y_origen_b);
+      free(x_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_x = (trip->pos_x)-1;
+      trip->pos_x = (trip->pos_x) - 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "X");
     }
@@ -1435,13 +1445,18 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, x_destino_b);
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
+      free(x_origen_b);
+      free(y_origen_b);
+      free(x_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_x = (trip->pos_x)+1;
+      trip->pos_x = (trip->pos_x) + 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "X");
     }
@@ -1475,12 +1490,18 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
 
+      free(x_origen_b);
+      free(y_origen_b);
+      free(y_destino_b);
+
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_y = (trip->pos_y)-1;
+      trip->pos_y = (trip->pos_y) - 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "Y");
     }
@@ -1507,13 +1528,18 @@ void mover_tripulante(Tripulante *trip)
       string_append(&destino, x_destino_b);
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
+      free(x_origen_b);
+      free(y_origen_b);
+      free(y_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_y = (trip->pos_y)+1;
+      trip->pos_y = (trip->pos_y) + 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "Y");
     }
@@ -1560,13 +1586,18 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, x_destino_b);
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
+      free(x_origen_b);
+      free(y_origen_b);
+      free(x_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_x = (trip->pos_x)-1;
+      trip->pos_x = (trip->pos_x) - 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "X");
 
@@ -1575,6 +1606,7 @@ void *mover_tripulante_RR(Tripulante *trip)
 
       if (trip->quantum <= 0)
       {
+        free(id_trip);
         return NULL; //si no me queda quantum salgo del loop y termino funcion
       }
     }
@@ -1601,13 +1633,18 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, x_destino_b);
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
+      free(x_origen_b);
+      free(y_origen_b);
+      free(x_destino_b);
 
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_x = (trip->pos_x)+1;
+      trip->pos_x = (trip->pos_x) + 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "X");
 
@@ -1616,6 +1653,7 @@ void *mover_tripulante_RR(Tripulante *trip)
 
       if (trip->quantum <= 0)
       {
+        free(id_trip);
         return NULL; //si no me queda quantum salgo del loop y termino funcion
       }
     }
@@ -1649,12 +1687,18 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
 
+      free(y_origen_b);
+      free(y_destino_b);
+      free(x_origen_b);
+
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_y = (trip->pos_y)-1;
+      trip->pos_y = (trip->pos_y) - 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "Y");
 
@@ -1663,6 +1707,7 @@ void *mover_tripulante_RR(Tripulante *trip)
 
       if (trip->quantum <= 0)
       {
+        free(id_trip);
         return NULL; //si no me queda quantum salgo del loop y termino funcion
       }
     }
@@ -1690,12 +1735,18 @@ void *mover_tripulante_RR(Tripulante *trip)
       string_append(&destino, "|");
       string_append(&destino, y_destino_b);
 
+      free(y_origen_b);
+      free(y_destino_b);
+      free(x_origen_b);
+
       miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n", id_trip, origen, destino);
       //consumo ciclo de cpu
       sleep(configuracion->retardo_ciclo_cpu);
       avisar_movimiento_bitacora(trip, origen, destino);
+      free(origen);
+      free(destino);
       //realizo movimiento
-      trip->pos_y = (trip->pos_y)+1;
+      trip->pos_y = (trip->pos_y) + 1;
       //aviso a miram
       avisar_movimiento_miram(trip, "Y");
 
@@ -1704,6 +1755,7 @@ void *mover_tripulante_RR(Tripulante *trip)
 
       if (trip->quantum <= 0)
       {
+        free(id_trip);
         return NULL; //si no me queda quantum salgo del loop y termino funcion
       }
     }
@@ -1717,25 +1769,32 @@ void *mover_tripulante_RR(Tripulante *trip)
   {
     trip->realizo_movimientos_tarea = true;
   }
+  free(id_trip);
 }
 
-void consumir_ciclos_cpu(Tripulante* trip){
+void consumir_ciclos_cpu(Tripulante *trip)
+{
 
   int retardo = configuracion->retardo_ciclo_cpu;
   int tiempo_cpu = (trip->tarea_actual)->tiempo;
 
-    for (int i = 0; i < tiempo_cpu; i++)
-      {
-        
-        int ciclos_cpu = sleep(retardo);
-        trip->tarea_actual->tiempo--;
-        if (!trip->tripulante_despierto)
-        {
-          pthread_mutex_lock(&trip->semaforo_trip);
-        }
-        if(trip->en_sabotaje){
-          pthread_mutex_lock(&trip->semaforo_trip);
-        }
-      }
+  for (int i = 0; i < tiempo_cpu; i++)
+  {
 
+    int ciclos_cpu = sleep(retardo);
+    trip->tarea_actual->tiempo--;
+    if (!trip->tripulante_despierto)
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
+    if (trip->en_sabotaje)
+    {
+      pthread_mutex_lock(&trip->semaforo_trip);
+    }
+  }
+}
+
+static void char_destroy_trip(char *self)
+{
+  free(self);
 }

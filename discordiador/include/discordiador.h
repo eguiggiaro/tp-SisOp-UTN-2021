@@ -172,4 +172,7 @@ bool modulo_invalido(char*);
 op_code convertir_codigo_operacion_miram(char*);
 op_code convertir_codigo_operacion_store(char*);
 
+static void char_destroy(char* self);
+void liberar_array(char** lista);
+
 #endif

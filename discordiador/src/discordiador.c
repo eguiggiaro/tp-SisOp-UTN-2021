@@ -796,19 +796,19 @@ void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 
 		if (cont == 0)
 		{
-			parametros = token;
+			parametros = strdup(token);
 		}
 		else if (cont == 1)
 		{
-			pos_x = token;
+			pos_x = strdup(token);
 		}
 		else if (cont == 2)
 		{
-			pos_y = token;
+			pos_y = strdup(token);
 		}
 		else
 		{
-			tiempo = token;
+			tiempo = strdup(token);
 		}
 
 		token = strtok(NULL, ";");
@@ -816,7 +816,7 @@ void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 		cont++;
 	}
 
-	nueva_tarea->nombre_tarea = strtok(parametros, " ");
+	nueva_tarea->nombre_tarea = strdup(strtok(parametros, " "));
 	//printf(" nombre tarea: %s\n", nueva_tarea->nombre_tarea);
 	nueva_tarea->parametros = strtok(NULL, " ");
 	//printf(" parametros: %s\n", nueva_tarea->parametros);
@@ -824,7 +824,7 @@ void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	//printf(" pos x: %s\n", nueva_tarea->pos_x);
 	nueva_tarea->pos_y = pos_y;
 	//printf(" pos y: %s\n", nueva_tarea->pos_y);
-	char *tiempo_aux = strtok(tiempo, "|");
+	char *tiempo_aux = strdup(strtok(tiempo, "|"));
 	nueva_tarea->tiempo = atoi(tiempo_aux);
 	//printf(" tiempo: %i\n", nueva_tarea->tiempo);
 }

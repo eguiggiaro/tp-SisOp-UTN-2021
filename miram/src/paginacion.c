@@ -6,14 +6,17 @@ void archivo_paginacion(bool mostrar_vacios)
 	pthread_mutex_lock(&mutex_dump);
 
 	char *nombre_archivo = string_new();
+	char *temporal = temporal_get_string_time("%d_%m_%y_%H:%M:%S");
 	string_append(&nombre_archivo, "dmp/Dump_");
-	string_append(&nombre_archivo, temporal_get_string_time("%d_%m_%y_%H:%M:%S"));
+	string_append(&nombre_archivo, temporal);
 	string_append(&nombre_archivo, ".dmp");
 
 	FILE *archivoDump = fopen(nombre_archivo, "w+");
 	dump_memoria_paginacion_frames_archivo(mostrar_vacios, archivoDump);
 	fflush(stdout);
 	fclose(archivoDump);
+	free(temporal);
+	free(nombre_archivo);
 	pthread_mutex_unlock(&mutex_dump);
 }
 
@@ -50,6 +53,8 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 	int clock = -1;
 	char *contenido = string_new();
 	char *auxiliar;
+	char * pagina_char;
+
 
 	if (strcmp(un_frame->estado, "OCUPADO") == 0)
 	{
@@ -97,17 +102,19 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 	}
 	else
 	{
-		patota_a_mostrar = "-";
+		string_append(&patota_a_mostrar, "-");
 		string_append(&contenido, "-");
 	}
 
 	if (un_frame->id_pagina == -1)
 	{
-		pagina_a_mostrar = "-";
+		string_append(&pagina_a_mostrar, "-");
+
 	}
 	else
 	{
-		pagina_a_mostrar = string_itoa(una_pagina->id_pagina);
+		pagina_char = string_itoa(una_pagina->id_pagina);
+		pagina_a_mostrar = pagina_char;
 		LRU = una_pagina->LRU;
 		clock = una_pagina->clock;
 	}
@@ -115,6 +122,8 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 
 	fprintf(archivoDump, "%d\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
 	free(contenido);
+	free(pagina_a_mostrar);
+	free(patota_a_mostrar);
 }
 
 void dump_memoria_paginacion_frames(bool mostrar_vacios)
@@ -146,13 +155,13 @@ void imprimir_frame(Frame *un_frame)
 	PCB_adm *un_pcb_adm;
 	Pagina *una_pagina;
 	bool encontre_patota = false;
-	char *pagina_a_mostrar;
-	char *patota_a_mostrar;
+	char *pagina_a_mostrar = string_new();
+	char *patota_a_mostrar = string_new();
 	char *contenido = string_new();
 	char *auxiliar;
 	int LRU = -1;
 	int clock = -1;
-	char *pagina_char;
+	char *pagina_char = string_new();
 
 	if (strcmp(un_frame->estado, "OCUPADO") == 0)
 	{
@@ -200,16 +209,19 @@ void imprimir_frame(Frame *un_frame)
 	}
 	else
 	{
-		patota_a_mostrar = "-";
+		string_append(&patota_a_mostrar, "-");
 		string_append(&contenido, "-");
 	}
 
 	if (un_frame->id_pagina == -1)
 	{
-		pagina_a_mostrar = "-";
+		string_append(&pagina_a_mostrar, "-");
+
 	}
 	else
 	{
+		free(pagina_char);
+		free(pagina_a_mostrar);
 		pagina_char = string_itoa(una_pagina->id_pagina);
 		pagina_a_mostrar = pagina_char;
 		LRU = una_pagina->LRU;
@@ -219,7 +231,8 @@ void imprimir_frame(Frame *un_frame)
 
 	printf("%d\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
 	free(contenido);
-	free(pagina_char);
+	free(pagina_a_mostrar);
+	free(patota_a_mostrar);
 }
 
 //Muestra el contenido de la memoria
@@ -277,7 +290,6 @@ uint32_t buscar_tripulante_paginacion(int TCB_ID)
 void liberar_pagina(Pagina *una_pagina)
 {
 	free(una_pagina->contenido);
-	free(una_pagina->estado);
 	free(una_pagina);
 }
 
@@ -434,7 +446,6 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 		free(identificador_tareas);
 		free(identificador_pcb);
-
 	}
 	free(identificador);
 	free(patota_char);
@@ -444,6 +455,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 		expulsar_tripulante_grilla(ident_trip);
 	}
+	free(unTCB);
 
 	return 1;
 }
@@ -488,19 +500,35 @@ PCB_adm *buscar_patota_tripulante(int tripulante_id)
 void *eliminar_patotaadm(int patota_id)
 {
 	t_list_iterator *iterador_pcbs = list_iterator_create(tabla_pcbs);
+	t_list_iterator *iterador_tcbs;
+
 	PCB_adm *pcb_adm;
+	TCB_adm *tcb_adm;
+
 	while (list_iterator_has_next(iterador_pcbs))
 	{
 		pcb_adm = list_iterator_next(iterador_pcbs);
-
+		
 		if (pcb_adm->PID == patota_id)
 		{
+
+			iterador_tcbs = list_iterator_create(pcb_adm->tabla_TCB_admin);
+
+			while (list_iterator_has_next(iterador_tcbs))
+			{
+				tcb_adm = list_iterator_next(iterador_tcbs);
+				list_iterator_remove(iterador_tcbs);
+			}
+
 			list_iterator_remove(iterador_pcbs);
+			free(pcb_adm->tabla_paginas);
+			free(pcb_adm->tabla_TCB_admin);
 			free(pcb_adm);
 			break;
 		}
 	}
 	list_iterator_destroy(iterador_pcbs);
+	list_iterator_destroy(iterador_tcbs);
 }
 
 char *buscar_posicion_tripulante_paginacion(int tripulante_id)
@@ -529,6 +557,8 @@ char *proxima_tarea_tripulante_paginacion(int tripulante_id)
 
 	if (unTCB->proxima_instruccion == 99)
 	{
+		free(unTCB);
+		free(tareas);
 		string_append(&string_tarea, "$");
 		return string_tarea;
 	}
@@ -1673,6 +1703,8 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		lista_puntos = string_split(un_punto, "|");
 		un_tcb->pos_X = atoi(lista_puntos[0]);
 		un_tcb->pos_y = atoi(lista_puntos[1]);
+		free(lista_puntos[0]);
+		free(lista_puntos[1]);
 		free(lista_puntos);
 		free(un_punto);
 
@@ -1785,9 +1817,11 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		liberar_pagina = false;
 		ubique_tripulante = false;
 		free(un_tcb);
-
 	}
 	free(pagina);
+
+	free(un_pcb);
+
 	return pcb_adm->PID;
 }
 
@@ -1813,7 +1847,6 @@ void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina, int tamanio
 	bitmap = bitarray_create_with_mode(bitarray, contador_espacios_SWAP / 8, MSB_FIRST);
 
 	SWAP = fopen(path_SWAP, "w+");
-
 
 	for (int i = 0; i < contador_frames; i++)
 	{

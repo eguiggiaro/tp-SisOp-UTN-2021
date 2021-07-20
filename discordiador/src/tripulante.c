@@ -310,10 +310,10 @@ void generar_oxigeno_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de GENERAR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual->nombre_tarea);
+    /*free(trip->tarea_actual->nombre_tarea);
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);
+    free(trip->tarea_actual->pos_y);*/
     free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
@@ -846,10 +846,10 @@ void generar_oxigeno_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual->nombre_tarea);
-        free(trip->tarea_actual->parametros);
-        free(trip->tarea_actual->pos_x);
-        free(trip->tarea_actual->pos_y);
+        //free(trip->tarea_actual->nombre_tarea);
+        //free(trip->tarea_actual->parametros);
+        //free(trip->tarea_actual->pos_x);
+        //free(trip->tarea_actual->pos_y);
         free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;

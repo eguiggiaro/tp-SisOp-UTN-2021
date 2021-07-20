@@ -1063,6 +1063,7 @@ void avisar_movimiento_miram(Tripulante *trip, char *eje)
 	}
 
 	//list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
 }
 
 void avisar_movimiento_bitacora(Tripulante *tripulante, char *origen, char *destino)
@@ -1110,6 +1111,7 @@ void avisar_movimiento_bitacora(Tripulante *tripulante, char *origen, char *dest
 	buffer = (t_buffer *)recibir_buffer(tripulante->socket_store);
 
 	//list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
 	eliminar_buffer(buffer);
 	//free(mensaje);
 }

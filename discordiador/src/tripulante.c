@@ -1475,7 +1475,9 @@ void mover_tripulante(Tripulante *trip)
       //realizo movimiento
       trip->pos_x = (trip->pos_x) - 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "X");
+      char* eje = string_new();
+      string_append(&eje,"X");
+      avisar_movimiento_miram(trip, eje);
     }
   }
   else if (x_origen < x_destino)
@@ -1513,7 +1515,9 @@ void mover_tripulante(Tripulante *trip)
       //realizo movimiento
       trip->pos_x = (trip->pos_x) + 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "X");
+      char* eje = string_new();
+      string_append(&eje,"X");
+      avisar_movimiento_miram(trip, eje);
     }
   }
   else
@@ -1558,7 +1562,9 @@ void mover_tripulante(Tripulante *trip)
       //realizo movimiento
       trip->pos_y = (trip->pos_y) - 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "Y");
+      char* eje = string_new();
+      string_append(&eje,"Y");
+      avisar_movimiento_miram(trip, eje);
     }
   }
   else if (y_origen < y_destino)
@@ -1596,7 +1602,9 @@ void mover_tripulante(Tripulante *trip)
       //realizo movimiento
       trip->pos_y = (trip->pos_y) + 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "Y");
+      char* eje = string_new();
+      string_append(&eje,"Y");
+      avisar_movimiento_miram(trip, eje);
     }
   }
   else
@@ -1655,7 +1663,9 @@ void *mover_tripulante_RR(Tripulante *trip)
       //realizo movimiento
       trip->pos_x = (trip->pos_x) - 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "X");
+      char* eje = string_new();
+      string_append(&eje,"X");
+      avisar_movimiento_miram(trip, eje);
 
       //se consume una unidad de quantum
       trip->quantum--;
@@ -1702,7 +1712,9 @@ void *mover_tripulante_RR(Tripulante *trip)
       //realizo movimiento
       trip->pos_x = (trip->pos_x) + 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "X");
+      char* eje = string_new();
+      string_append(&eje,"X");
+      avisar_movimiento_miram(trip, eje);
 
       //se consume una unidad de quantum
       trip->quantum--;
@@ -1756,7 +1768,9 @@ void *mover_tripulante_RR(Tripulante *trip)
       //realizo movimiento
       trip->pos_y = (trip->pos_y) - 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "Y");
+      char* eje = string_new();
+      string_append(&eje,"Y");
+      avisar_movimiento_miram(trip, eje);
 
       //se consume una unidad de quantum
       trip->quantum--;
@@ -1804,7 +1818,9 @@ void *mover_tripulante_RR(Tripulante *trip)
       //realizo movimiento
       trip->pos_y = (trip->pos_y) + 1;
       //aviso a miram
-      avisar_movimiento_miram(trip, "Y");
+      char* eje = string_new();
+      string_append(&eje,"Y");
+      avisar_movimiento_miram(trip, eje);
 
       //se consume una unidad de quantum
       trip->quantum--;

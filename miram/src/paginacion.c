@@ -47,8 +47,8 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 	PCB_adm *un_pcb_adm;
 	Pagina *una_pagina;
 	bool encontre_patota = false;
-	char *pagina_a_mostrar;
-	char *patota_a_mostrar;
+	char *pagina_a_mostrar = string_new();
+	char *patota_a_mostrar = string_new();
 	int LRU = -1;
 	int clock = -1;
 	char *contenido = string_new();

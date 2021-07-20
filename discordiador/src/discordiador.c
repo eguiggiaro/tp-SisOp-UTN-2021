@@ -481,7 +481,7 @@ void iniciar_patota(char *comando)
 		miLogError("Pedido de INICIAR PATOTA denegado por MiRAM");
 	}
 
-	list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy);
+	//list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy);
 	//list_destroy_and_destroy_elements(mensajes_respuesta,(void*)char_destroy);
 
 	miLogDebug("Finaliza el INICIAR_PATOTA\n");

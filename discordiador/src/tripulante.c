@@ -60,8 +60,8 @@ void *inicializar_tripulante(Tripulante *tripulante)
     tripulante_listo(tripulante);
 
     eliminar_buffer(buffer);
-    list_destroy_and_destroy_elements(lista,(void*)char_destroy_trip);
-    liberar_array(posicion);
+    //list_destroy_and_destroy_elements(lista,(void*)char_destroy_trip);
+    //liberar_array(posicion);
   }
   else if (codigo_operacion == FAIL)
   {
@@ -76,7 +76,7 @@ void *inicializar_tripulante(Tripulante *tripulante)
   //miLogDebug("Tripulante %d: por comenzar ejecucion \n", tripulante->id_tripulante);
 
   //3. Una vez que el tripulante esta listo, se llama a comenzar_ejecucion(tripulante)
-  list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy_trip);
+  //list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy_trip);
   comenzar_ejecucion(tripulante);
   return;
 }
@@ -232,10 +232,10 @@ void generar_comida_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de GENERAR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_COMIDA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual->nombre_tarea);
-    free(trip->tarea_actual->parametros);
-    free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);
+    //free(trip->tarea_actual->nombre_tarea);
+    //free(trip->tarea_actual->parametros);
+    //free(trip->tarea_actual->pos_x);
+    //free(trip->tarea_actual->pos_y);
     free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
@@ -369,10 +369,10 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de CONSUMIR_OXIGENO para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_OXIGENO");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual->nombre_tarea);
+    /*free(trip->tarea_actual->nombre_tarea);
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);
+    free(trip->tarea_actual->pos_y);*/
     free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
@@ -440,10 +440,10 @@ void consumir_comida_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de CONSUMIR_COMIDA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "CONSUMIR_COMIDA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual->nombre_tarea);
+    /*free(trip->tarea_actual->nombre_tarea);
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);
+    free(trip->tarea_actual->pos_y);*/
     free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
@@ -512,10 +512,10 @@ void generar_basura_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de GENERAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "GENERAR_BASURA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual->nombre_tarea);
+    /*free(trip->tarea_actual->nombre_tarea);
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);
+    free(trip->tarea_actual->pos_y);*/
     free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
@@ -583,10 +583,10 @@ void descartar_basura_FIFO(Tripulante *trip)
     miLogInfo("Finaliza ejecucion de DESCARTAR_BASURA para el tripulante: %d \n", trip->id_tripulante);
     avisar_fin_tarea_bitacora(trip, "DESCARTAR_BASURA");
     //seteo parametros para proxima tarea
-    free(trip->tarea_actual->nombre_tarea);
+    /*free(trip->tarea_actual->nombre_tarea);
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);
+    free(trip->tarea_actual->pos_y);*/
     free(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
@@ -623,10 +623,10 @@ void tarea_generica_FIFO(Tripulante *trip)
   avisar_fin_tarea_bitacora(trip, nombre_tarea);
   miLogInfo("Finaliza ejecucion de: %s para el tripulante: %d \n", nombre_tarea, trip->id_tripulante);
   //seteo parametros para proxima tarea
-  free(trip->tarea_actual->nombre_tarea);
-  free(trip->tarea_actual->parametros);
-  free(trip->tarea_actual->pos_x);
-  free(trip->tarea_actual->pos_y);
+  /*free(trip->tarea_actual->nombre_tarea);
+    free(trip->tarea_actual->parametros);
+    free(trip->tarea_actual->pos_x);
+    free(trip->tarea_actual->pos_y);*/
   free(trip->tarea_actual);
   trip->tarea_actual = NULL;
   trip->realizo_movimientos_tarea = false;
@@ -746,10 +746,10 @@ void generar_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual->nombre_tarea);
-        free(trip->tarea_actual->parametros);
-        free(trip->tarea_actual->pos_x);
-        free(trip->tarea_actual->pos_y);
+        /*free(trip->tarea_actual->nombre_tarea);
+    free(trip->tarea_actual->parametros);
+    free(trip->tarea_actual->pos_x);
+    free(trip->tarea_actual->pos_y);*/
         free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
@@ -946,10 +946,10 @@ void consumir_oxigeno_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual->nombre_tarea);
-        free(trip->tarea_actual->parametros);
-        free(trip->tarea_actual->pos_x);
-        free(trip->tarea_actual->pos_y);
+        /*free(trip->tarea_actual->nombre_tarea);
+    free(trip->tarea_actual->parametros);
+    free(trip->tarea_actual->pos_x);
+    free(trip->tarea_actual->pos_y);*/
         free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
@@ -1045,10 +1045,10 @@ void consumir_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual->nombre_tarea);
-        free(trip->tarea_actual->parametros);
-        free(trip->tarea_actual->pos_x);
-        free(trip->tarea_actual->pos_y);
+        /*free(trip->tarea_actual->nombre_tarea);
+    free(trip->tarea_actual->parametros);
+    free(trip->tarea_actual->pos_x);
+    free(trip->tarea_actual->pos_y);*/
         free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
@@ -1145,10 +1145,10 @@ void generar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual->nombre_tarea);
-        free(trip->tarea_actual->parametros);
-        free(trip->tarea_actual->pos_x);
-        free(trip->tarea_actual->pos_y);
+        /*free(trip->tarea_actual->nombre_tarea);
+    free(trip->tarea_actual->parametros);
+    free(trip->tarea_actual->pos_x);
+    free(trip->tarea_actual->pos_y);*/
         free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
@@ -1245,10 +1245,10 @@ void descartar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        free(trip->tarea_actual->nombre_tarea);
-        free(trip->tarea_actual->parametros);
-        free(trip->tarea_actual->pos_x);
-        free(trip->tarea_actual->pos_y);
+        /*free(trip->tarea_actual->nombre_tarea);
+    free(trip->tarea_actual->parametros);
+    free(trip->tarea_actual->pos_x);
+    free(trip->tarea_actual->pos_y);*/
         free(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
@@ -1320,10 +1320,10 @@ void tarea_generica_RR(Tripulante *trip)
       avisar_fin_tarea_bitacora(trip, nombre_tarea);
 
       //seteo parametros para proxima tarea
-      free(trip->tarea_actual->nombre_tarea);
-      free(trip->tarea_actual->parametros);
-      free(trip->tarea_actual->pos_x);
-      free(trip->tarea_actual->pos_y);
+      /*free(trip->tarea_actual->nombre_tarea);
+    free(trip->tarea_actual->parametros);
+    free(trip->tarea_actual->pos_x);
+    free(trip->tarea_actual->pos_y);*/
       free(trip->tarea_actual);
       trip->tarea_actual = NULL;
       trip->realizo_movimientos_tarea = false;
@@ -1603,7 +1603,7 @@ void mover_tripulante(Tripulante *trip)
   {
     distancia_y = 0;
   }
-  free(id_trip);
+  //free(id_trip);
 }
 
 void *mover_tripulante_RR(Tripulante *trip)

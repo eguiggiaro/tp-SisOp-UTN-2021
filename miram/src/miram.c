@@ -31,7 +31,9 @@ void signalHandler(int signal)
 		dump();
 		break;
 	case SIGINT:
-		miLogInfo("==== Finalizó MiRAM HQ ====");
+		nivel_destruir(nivel);
+		nivel_gui_terminar();
+		printf("==== Finalizó MiRAM HQ ====");
 		exit(130); //Control+C
 		break;
 	default:

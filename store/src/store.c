@@ -103,10 +103,6 @@ void inicializarStore(void){
 	pthread_t th_msync;
 	pthread_create(&th_msync, NULL, &syncPeriodico, NULL);
 	
-	//TEST Obtener bitacora
-	//char* bitacora = obtenerBitacora("0");
-	//printf(bitacora);
-
 	levantar_servidor(atender_request_store, configuracion->puerto);	
 
 }
@@ -131,19 +127,18 @@ void inicializarSemaforos(){
 
 void inicializarPosicionesSabotaje(){
 	
-	posicionesSabotaje = list_create();
-	
 	t_list* posiciones = obtenerListaSabotaje(configuracion->posicionesSabotaje);	
-
 	PosicionSabotaje* posicionSabotaje;
 
+	posicionesSabotaje = list_create();
 	for(int i = 0; i < list_size(posiciones); i++){
-		posicionSabotaje = malloc(sizeof(PosicionSabotaje));
+		posicionSabotaje = malloc(sizeof(PosicionSabotaje));		
 		posicionSabotaje->posicion = (t_pos*) list_get(posiciones, i);
 		posicionSabotaje->atendida = false;
 
 		list_add(posicionesSabotaje, posicionSabotaje);
-		//free(posicionSabotaje);	
+//		free(posicionSabotaje->posicion);
+//		free(posicionSabotaje);	
 	}
 	//TEST
 	/*for(int i = 0; i < list_size(posicionesSabotaje); i++){
@@ -240,8 +235,7 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 		largo-=3;
 		largo-=strlen(strPosicion[0]);
 		largo-=strlen(strPosicion[1]);
-		
-		//free(posicion);		
+	
 		liberar_array(strPosicion);	
 	}
 	//TEST
@@ -258,13 +252,13 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 void finalizarStore(){
 	miLogInfo("==== Finalizó I-Mongo-Store ====");
 	
-	list_destroy(posicionesSabotaje);
 	pthread_mutex_destroy(&mutexEjecucionSabotaje);
 	pthread_cond_destroy(&condEjecucionSabotaje);
 	pthread_attr_destroy(&attrEjecucionSabotaje);
-	
-	free(configuracion);
+
+	list_destroy_and_destroy_elements(posicionesSabotaje, (void*) posicion_sabotaje_destroy);
 	config_destroy(config);
-	miLogDestroy();	
 	finalizarFS();
+	miLogDestroy();	
+	free(configuracion);	
 }

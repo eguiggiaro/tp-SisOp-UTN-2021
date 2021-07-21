@@ -104,6 +104,10 @@ static void char_destroy(char* self) {
     free(self);
 }
 
+static void posicion_sabotaje_destroy(PosicionSabotaje* self) {
+	free(self->posicion);
+    free(self);
+}
 
 pthread_mutex_t mutex_informartareas;
 pthread_mutex_t mutex_informacionBitacora;

@@ -61,8 +61,8 @@ void *inicializar_tripulante(Tripulante *tripulante)
     tripulante_listo(tripulante);
 
     eliminar_buffer(buffer);
-    //list_destroy_and_destroy_elements(lista,(void*)char_destroy_trip);
-    //liberar_array(posicion);
+    list_destroy_and_destroy_elements(lista,free);
+    liberar_array(posicion);
   }
   else if (codigo_operacion == FAIL)
   {
@@ -748,11 +748,7 @@ void generar_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        /*free(trip->tarea_actual->nombre_tarea);
-    free(trip->tarea_actual->parametros);
-    free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);*/
-        free(trip->tarea_actual);
+        liberar_tarea(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -848,11 +844,7 @@ void generar_oxigeno_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        //free(trip->tarea_actual->nombre_tarea);
-        //free(trip->tarea_actual->parametros);
-        //free(trip->tarea_actual->pos_x);
-        //free(trip->tarea_actual->pos_y);
-        free(trip->tarea_actual);
+        liberar_tarea(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -948,11 +940,7 @@ void consumir_oxigeno_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        /*free(trip->tarea_actual->nombre_tarea);
-    free(trip->tarea_actual->parametros);
-    free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);*/
-        free(trip->tarea_actual);
+        liberar_tarea(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1047,11 +1035,7 @@ void consumir_comida_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        /*free(trip->tarea_actual->nombre_tarea);
-    free(trip->tarea_actual->parametros);
-    free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);*/
-        free(trip->tarea_actual);
+        liberar_tarea(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1147,11 +1131,7 @@ void generar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        /*free(trip->tarea_actual->nombre_tarea);
-    free(trip->tarea_actual->parametros);
-    free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);*/
-        free(trip->tarea_actual);
+        liberar_tarea(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1247,11 +1227,7 @@ void descartar_basura_RR(Tripulante *trip)
         avisar_fin_tarea_bitacora(trip, "GENERAR_OXIGENO");
 
         //seteo parametros para proxima tarea
-        /*free(trip->tarea_actual->nombre_tarea);
-    free(trip->tarea_actual->parametros);
-    free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);*/
-        free(trip->tarea_actual);
+        liberar_tarea(trip->tarea_actual);
         trip->tarea_actual = NULL;
         trip->realizo_movimientos_tarea = false;
         trip->recibio_input_store = false;
@@ -1322,11 +1298,7 @@ void tarea_generica_RR(Tripulante *trip)
       avisar_fin_tarea_bitacora(trip, nombre_tarea);
 
       //seteo parametros para proxima tarea
-      /*free(trip->tarea_actual->nombre_tarea);
-    free(trip->tarea_actual->parametros);
-    free(trip->tarea_actual->pos_x);
-    free(trip->tarea_actual->pos_y);*/
-      free(trip->tarea_actual);
+      liberar_tarea(trip->tarea_actual);
       trip->tarea_actual = NULL;
       trip->realizo_movimientos_tarea = false;
       trip->recibio_input_store = false;

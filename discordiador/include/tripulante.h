@@ -52,4 +52,5 @@ void bloquear_tripulante_io(Tripulante*);
 void mover_tripulante(Tripulante*);
 void consumir_ciclos_cpu(Tripulante* trip);
 static void char_destroy_trip(char* self);
+void liberar_tarea(Tarea* tarea);
 #endif

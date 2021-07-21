@@ -1021,8 +1021,8 @@ bool tarea_informada(Tripulante *tripulante, char *nombre_tarea, char *parametro
 
 	buffer = (t_buffer *)recibir_buffer(tripulante->socket_store);
 
-	//list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
 	eliminar_buffer(buffer);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
 	return se_informo;
 }
 

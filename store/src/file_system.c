@@ -605,6 +605,7 @@ int verificarCantidadBloques(){
 	//Se debe garantizar que la cantidad de bloques que hay en el sistema sea igual a la cantidad que dice haber en el superbloque. 
 	int tamanioBlocksActual = tamanioArchivo(pathBlocks);
 
+	leerSuperbloque();
 	if(tamanioBlocksActual != tamanioBloque * cantidadBloques){
 		if(repararCantidadBloques(tamanioBlocksActual)){
 			miLogError("No pudo reparar el Superbloque por error en cantiudad de bloques.");
@@ -628,7 +629,9 @@ int repararCantidadBloques(int tamanioBlocksActual){
 	memcpy(punteroSuperbloque + sizeof(uint32_t), &cantidadBloquesActual, sizeof(uint32_t));
 	msync(punteroSuperbloque, tamanioSuperbloqueActual, 0);
 
+	miLogWarning("Modificó la cantidad de bloques en el Superbloques porque se detectó un sabotaje. \nEn el Superbloques se indican %d bloques, y en realidad hay %d bloques en el Blocks.", cantidadBloques, cantidadBloquesActual);
 	cantidadBloques = cantidadBloquesActual;
+	
 
 	//Actualizando directamente el archivo.
 	/*FILE* archivoSuperbloque = fopen(pathSuperbloque, "rb+");

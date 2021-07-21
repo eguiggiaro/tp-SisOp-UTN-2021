@@ -51,6 +51,7 @@ char* leerBloques(t_list*, int);
 void liberarBloque(int);
 void escribirBloque(int, int, char*);
 void escribirBloqueUsado(int, int , char*);
+void reescribirBloque(int, char*);
 
 /**** MANEJO METADATA ****/
 MetadataBitacora* leerMetadataBitacora(char*);
@@ -84,6 +85,7 @@ char* generarMd5(t_list*, int);
 bool compararMd5(MetadataRecurso*);
 void borrarTodosLosArchivos(char*);
 void liberar_array(char**);
+char* nombreDelRecurso(tipoRecurso);
 
 /**** DEṔRECADAS ****/
 void leerSuperBloqueSinMapear(void);

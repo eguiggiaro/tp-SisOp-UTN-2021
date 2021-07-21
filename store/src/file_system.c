@@ -317,6 +317,21 @@ char* leerBloque(int bloque, int size) {
 	return lecturaFinal;
 }
 
+void reescribirBloque(int bloque, char* escritura){
+	void* bloqueLimpio = calloc(tamanioBloque, 1);
+	int tamanioEscritura = string_length(escritura);
+	int desplazamiento = (bloque * tamanioBloque);
+	
+	memcpy(bloqueLimpio, escritura, tamanioEscritura);
+
+	pthread_mutex_lock(&mutex_bloques);
+	memcpy(punteroBlocks + desplazamiento, bloqueLimpio, tamanioBloque);
+	pthread_mutex_unlock(&mutex_bloques);
+
+	
+	//escribirBloque(bloque, 0, bloqueLimpio);
+}
+
 //------------------------------------MANEJO DE METADATA----------------------------------
 MetadataRecurso* leerMetadataRecurso(tipoRecurso recurso){
 
@@ -605,6 +620,8 @@ int verificarCantidadBloques(){
 	//Se debe garantizar que la cantidad de bloques que hay en el sistema sea igual a la cantidad que dice haber en el superbloque. 
 	int tamanioBlocksActual = tamanioArchivo(pathBlocks);
 
+	//Libero el bitmap cargado y lo vuelvo a leer para levantar la informacion actualizada en caso que alguien hay modificado el superbloques.
+	bitarray_destroy(bitmap);
 	leerSuperbloque();
 	if(tamanioBlocksActual != tamanioBloque * cantidadBloques){
 		if(repararCantidadBloques(tamanioBlocksActual)){
@@ -629,21 +646,9 @@ int repararCantidadBloques(int tamanioBlocksActual){
 	memcpy(punteroSuperbloque + sizeof(uint32_t), &cantidadBloquesActual, sizeof(uint32_t));
 	msync(punteroSuperbloque, tamanioSuperbloqueActual, 0);
 
-	miLogWarning("Modificó la cantidad de bloques en el Superbloques porque se detectó un sabotaje. \nEn el Superbloques se indican %d bloques, y en realidad hay %d bloques en el Blocks.", cantidadBloques, cantidadBloquesActual);
+	miLogWarning("Modificó la cantidad de bloques en el Superbloques porque se detectó un sabotaje. En el Superbloques se indican %d bloques, y en realidad hay %d bloques en el Blocks.", cantidadBloques, cantidadBloquesActual);
 	cantidadBloques = cantidadBloquesActual;
 	
-
-	//Actualizando directamente el archivo.
-	/*FILE* archivoSuperbloque = fopen(pathSuperbloque, "rb+");
-	if(archivoSuperbloque==NULL){
-		miLogError("No se pudo abrir el archivo de Superbloque.ims para actualizar la cantidad de bloques.");
-		exit(EXIT_FAILURE);
-	}
-
-    fseek(archivoSuperbloque, sizeof(uint32_t), SEEK_SET);
- 	fwrite(&cantidadBloquesActual, 1 , sizeof(uint32_t), archivoSuperbloque);			
-	fclose(archivoSuperbloque);
-	*/
 	return EXIT_SUCCESS;
 }
 
@@ -658,6 +663,8 @@ int verificarBitmap(){
 		char* numeroTripulante = string_itoa(i);
 		metadata = leerMetadataBitacora(numeroTripulante);
 		list_add_all(bloquesOcupados, metadata->blocks);
+		freeMetadataBitacora(metadata);
+		free(numeroTripulante);
 	}
 	
 	t_list* recursos = verificarQueArchivosDeRecursosHay();
@@ -667,6 +674,7 @@ int verificarBitmap(){
 	for(int i=0; i<list_size(recursos); i++){
 		metadataR = leerMetadataRecurso((tipoRecurso)list_get(recursos,i));
 		list_add_all(bloquesOcupados, metadataR->blocks);
+		freeMetadataRecurso(metadataR);
 	}
 
 	if (repararBitmap(bloquesOcupados)){
@@ -677,6 +685,7 @@ int verificarBitmap(){
 	}
 
 	//list_destroy_and_destroy_elements(bloquesOcupados, (void*) free);
+	list_destroy(recursos);
 	list_destroy(bloquesOcupados);
 	return EXIT_SUCCESS;
 }
@@ -734,6 +743,8 @@ int verificarSizeEnFile(){
 				list_destroy(recursos);
 				return EXIT_FAILURE;
 			}
+		}else{
+			freeMetadataRecurso(metadataR);
 		}
 	}
 
@@ -748,6 +759,9 @@ int repararSizeEnFile(MetadataRecurso* metadata, tipoRecurso recurso, int tamani
 		miLogError("No pudo actualizar la metadata del archivo al corregir el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
 		return EXIT_FAILURE;
 	}
+	char* nombreRecurso = nombreDelRecurso(recurso);
+	miLogWarning("Actualizó el size del archivo de metadata %s por sabotaje.", nombreRecurso);
+	free(nombreRecurso);
 
 	return EXIT_SUCCESS;
 }
@@ -767,6 +781,8 @@ int verificarBlockCount(){
 				list_destroy(recursos);				
 				return EXIT_FAILURE;
 			}
+		}else{
+			freeMetadataRecurso(metadataR);
 		}
 	}
 
@@ -782,6 +798,10 @@ int repararBlockCount(MetadataRecurso* metadata, tipoRecurso recurso){
 		miLogError("No pudo actualizar la metadata del archivo al corregir el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.
 		return EXIT_FAILURE;
 	}
+
+	char* nombreRecurso = nombreDelRecurso(recurso);
+	miLogWarning("Actualizó la cantidad de bloques del archivo de metadata %s por sabotaje.", nombreRecurso);
+	free(nombreRecurso);
 
 	return EXIT_SUCCESS;
 }
@@ -801,6 +821,8 @@ int verificarBlocks(){
 				list_destroy(recursos);				
 				return EXIT_FAILURE;
 			}
+		}else{
+			freeMetadataRecurso(metadataR);
 		}
 	}
 
@@ -813,24 +835,28 @@ int repararBlocks(MetadataRecurso* metadata, tipoRecurso recurso){
 	//hasta completar el size del archivo. En caso de que falten bloques, los mismos se deberán agregar al final del mismo.
 	char caracter = metadata->caracter_llenado;
 	int cantidadBytesAEscribir = metadata->size;
-	char* escrituraCompleta = string_repeat(caracter, tamanioBloque);
+	char* escrituraBloqueCompleto = string_repeat(caracter, tamanioBloque);
+	char* escrituraBloqueParcial;
 
 	for(int i=0; i<list_size(metadata->blocks);i++){
 		int bloque = list_get(metadata->blocks, i);
 		if(cantidadBytesAEscribir >= tamanioBloque){
-			escribirBloque(bloque, 0, escrituraCompleta);
+			escribirBloque(bloque, 0, escrituraBloqueCompleto);
 			cantidadBytesAEscribir -= tamanioBloque;
 		} else {
-			escribirBloque(bloque, 0, string_substring_until(escrituraCompleta, cantidadBytesAEscribir));
+			escrituraBloqueParcial = string_substring_until(escrituraBloqueCompleto, cantidadBytesAEscribir);			
+			reescribirBloque(bloque, escrituraBloqueParcial);
 			cantidadBytesAEscribir = 0;
+			free(escrituraBloqueParcial);
 		}
 	}
 
 	//Si todavia quedan caracteres para escribir, los escribo en bloques nuevos y actualizo la metadata del recurso.
 	if(cantidadBytesAEscribir > 0){
-		t_list* nuevosBloques = escribirBloquesNuevo(string_substring_from(escrituraCompleta, cantidadBytesAEscribir));
+		char* escrituraFaltante = string_repeat(caracter, cantidadBytesAEscribir);
+		t_list* nuevosBloques = escribirBloquesNuevo(escrituraFaltante);
 		list_add_all(metadata->blocks, nuevosBloques);
-
+		free(escrituraFaltante);
 	}
 
 	//msync(punteroBlocks, cantidadBloques*tamanioBloque, 0);
@@ -839,6 +865,11 @@ int repararBlocks(MetadataRecurso* metadata, tipoRecurso recurso){
 		return EXIT_FAILURE;
 	}
 	
+	char* nombreRecurso = nombreDelRecurso(recurso);
+	miLogWarning("Actualizó los bloques del archivo de metadata %s por sabotaje.", nombreRecurso);
+	free(nombreRecurso);
+
+	free(escrituraBloqueCompleto);
 	return EXIT_SUCCESS;
 }
 
@@ -993,6 +1024,9 @@ t_list* verificarQueArchivosDeRecursosHay(){
 		list_add(recursos, BASURA);
 	}
 
+	free(direccionDeMetadataOxigeno);
+	free(direccionDeMetadataComida);
+	free(direccionDeMetadataBasura);
 	return recursos;
 
 }
@@ -1000,11 +1034,11 @@ t_list* verificarQueArchivosDeRecursosHay(){
 int tamanioOcupadoRecursoEnBloque(int bloque, tipoRecurso recurso){
 	int posicionUltimoCaracter = 0;
 	char caracter = cualEsMiCaracter(recurso);
-
+	
 	char* contenidoUltimoBloque = leerBloque(bloque, tamanioBloque);
 	int tamanioContenido = string_length(contenidoUltimoBloque);
 
-	for(int i=0; i<tamanioBloque; i++){
+	for(int i=0; i<=tamanioBloque; i++){
 		if(contenidoUltimoBloque[i] != caracter){
 			posicionUltimoCaracter = i;
 			break;
@@ -1018,7 +1052,32 @@ int tamanioOcupadoRecursoEnBloque(int bloque, tipoRecurso recurso){
 bool compararMd5(MetadataRecurso* metadata){
 
 	char* md5SegunBloques = generarMd5(metadata->blocks, metadata->size);
-	
-	return string_equals_ignore_case(md5SegunBloques, metadata->md5);
+	bool resultado = string_equals_ignore_case(md5SegunBloques, metadata->md5);
+
+	free(md5SegunBloques);
+	return resultado;
+}
+
+char* nombreDelRecurso(tipoRecurso recurso){
+	char* nombre;
+
+	switch(recurso)
+	{
+		case OXIGENO:
+			nombre = strdup("Oxigeno");
+			break;
+		case COMIDA:
+			nombre = strdup("Comida");
+			break;
+		case BASURA:
+			nombre = strdup("Basura");
+			break;
+		default:
+			miLogError("Error: No se reconoce el recurso.\n");
+			nombre = "";
+			break;
+	}
+
+	return nombre;
 }
 

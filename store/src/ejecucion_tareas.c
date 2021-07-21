@@ -84,17 +84,17 @@ char cualEsMiCaracter(tipoRecurso recurso){
 	switch (recurso)
 	{
 		case OXIGENO:
-			printf( "OXIGENO\n" );
+			//printf( "OXIGENO\n" );
 			caracter = 'O';
 			break;
 
 		case COMIDA:
-			printf( "COMIDA\n" );
+			//printf( "COMIDA\n" );
 			caracter = 'C';
 			break;
 
 		case BASURA:
-			printf( "BASURA\n" );
+			//printf( "BASURA\n" );
 			caracter = 'B';
 			break;
 
@@ -188,9 +188,9 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	int tamanioUltimoBloque = saberTamanioUltimobloque(cantidadBytesLibres);
 	int posicionUltimoBloque = list_size(metadataR->blocks);
 	int ultimoBloque;
-
-	int bloquesEliminados = 0;
 	
+	int bloquesEliminados = 0;
+
 	while(cantidadCaracteres >= tamanioUltimoBloque && metadataR->block_count > 0){
 	
 		ultimoBloque = obtenerUltimoBloque(metadataR->blocks, posicionUltimoBloque);
@@ -206,7 +206,12 @@ int consumirRecursos(tipoRecurso recurso, int cantidadCaracteres){
 	if(cantidadCaracteres > metadataR->size){
 		miLogError("No se pueden consumir mas recursos.");
 	} else {
-		metadataR->size -= cantidadCaracteres;		
+		//Me quedo un unico bloque que tiene espacio para seguir consumiendo recursos.
+		metadataR->size -= cantidadCaracteres;	
+		ultimoBloque = obtenerUltimoBloque(metadataR->blocks, posicionUltimoBloque);
+		char* escrituraDelUltimoBloque = string_repeat(metadataR->caracter_llenado, tamanioUltimoBloque - cantidadCaracteres);
+		reescribirBloque(ultimoBloque, escrituraDelUltimoBloque);	//Tiene que dejar en el ultimo bloque solo los caracteres del recurso.
+		free(escrituraDelUltimoBloque);
 	}
 	
 	t_list* bloquesNuevos = list_take(metadataR->blocks, list_size(metadataR->blocks)-bloquesEliminados);

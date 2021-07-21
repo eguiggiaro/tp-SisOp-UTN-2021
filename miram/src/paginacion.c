@@ -721,6 +721,7 @@ void *llevar_a_swap(Frame *un_frame, Pagina *una_pagina)
 	{
 		fseek(SWAP, tamanio_pagina_paginacion * espacio_a_ocupar, SEEK_SET);
 		fwrite(un_frame->dir_inicio, tamanio_pagina_paginacion, 1, SWAP);
+		fflush(SWAP);
 	}
 
 	Elemento_SWAP *elemento_swap = malloc(sizeof(Elemento_SWAP));
@@ -1047,7 +1048,7 @@ TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
 	int offset = tcb_adm->offset;
 	int limite_buffer = 0;
 	int tamanio_tcb = 21;
-	void *buffer = malloc(sizeof(TCB));
+	void *buffer = calloc(sizeof(TCB),1);
 	TCB *tcb_retorno;
 
 	Frame *un_frame = buscar_frame_por_pagina(tcb_adm->pagina_inicio);
@@ -1151,12 +1152,12 @@ PCB *buscar_PCB(PCB_adm *pcb_adm)
 	int cantidad_paginas = pcb_adm->cantidad_paginas_pcb;
 	int pagina = pcb_adm->pagina_inicio_pcb;
 	int offset = 0;
-	PCB *un_PCB = malloc(sizeof(PCB));
+	PCB *un_PCB = calloc(sizeof(PCB),1);
 	int tamanio_recuperado = 0;
 	int tamanio_a_recuperar = 0;
 	int tamanio_pcb = 8;
 	int limite_buffer = 0;
-	void *buffer = malloc(tamanio_pcb);
+	void *buffer = calloc(tamanio_pcb,1);
 	Pagina *una_pagina;
 
 	Frame *un_frame = buscar_frame_por_pagina(pagina);
@@ -1449,7 +1450,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	int tamanio_tcb = 21;
 
 	void *pagina = calloc(1, tamanio_pagina_paginacion);
-	PCB *un_pcb = malloc(sizeof(PCB));
+	PCB *un_pcb = calloc(sizeof(PCB),1);
 	TCB *un_tcb;
 	TCB_adm *un_tcb_adm;
 
@@ -1694,7 +1695,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		un_tcb_adm->offset = 0;
 		list_add(pcb_adm->tabla_TCB_admin, un_tcb_adm);
 
-		un_tcb = malloc(sizeof(TCB));
+		un_tcb = calloc(sizeof(TCB),1);
 		un_tcb->estado = 'N';
 		un_tcb->TID = un_tcb_adm->TID;
 		un_tcb->PCB = pcb_adm->pagina_inicio_pcb;
@@ -1807,7 +1808,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 				if (liberar_pagina)
 				{
 					free(pagina);
-					pagina = malloc(tamanio_pagina_paginacion);
+					pagina = calloc(1, tamanio_pagina_paginacion);
 					liberar_pagina = false;
 				}
 			}
@@ -1847,10 +1848,11 @@ void inicializar_paginacion(int tamanio_memoria, int tamanio_pagina, int tamanio
 	bitmap = bitarray_create_with_mode(bitarray, contador_espacios_SWAP / 8, MSB_FIRST);
 
 	SWAP = fopen(path_SWAP, "w+");
+	ftruncate(fileno(SWAP), tamanio_SWAP);
 
 	for (int i = 0; i < contador_frames; i++)
 	{
-		un_frame = malloc(sizeof(Frame));
+		un_frame = calloc(sizeof(Frame),1);
 		un_frame->id_frame = i + 1;
 		un_frame->estado = "LIBRE";
 		un_frame->dir_inicio = MEMORIA + (i * tamanio_pagina);

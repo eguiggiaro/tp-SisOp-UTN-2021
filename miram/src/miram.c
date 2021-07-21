@@ -31,9 +31,12 @@ void signalHandler(int signal)
 		dump();
 		break;
 	case SIGINT:
-		nivel_destruir(nivel);
-		nivel_gui_terminar();
-		printf("==== Finalizó MiRAM HQ ====");
+		if (strcmp(configuracion->mapa, "HABILITADO") == 0)
+		{
+			nivel_destruir(nivel);
+			nivel_gui_terminar();
+		}
+		printf("==== Finalizó MiRAM HQ ====\n");
 		exit(130); //Control+C
 		break;
 	default:
@@ -66,9 +69,9 @@ int leer_config(void)
 	return EXIT_SUCCESS;
 }
 
-
-static void char_destroy(char* self) {
-    free(self);
+static void char_destroy(char *self)
+{
+	free(self);
 }
 
 // Atiende con hilos los request que son enviados a MiRAM
@@ -90,13 +93,15 @@ void atender_request_miram(Request *request)
 	case EXPULSAR_TRIPULANTE:
 		//recibo los mensajes
 		pthread_mutex_lock(&mutex_expulsion);
+		pthread_mutex_lock(&mutex_mover);
+		pthread_mutex_lock(&mutex_cola);
 		t_buffer *buffer_devolucion_expulsar = request->buffer_devolucion;
 		lista_mensajes = list_create();
 		//recibo los mensajes
 		lista = deserializar_lista_strings(buffer_devolucion_expulsar);
 
 		int tripulante_expulsion = atoi(list_get(lista, 0));
-		char* tripulante_expulsion_char = string_itoa(tripulante_expulsion);
+		char *tripulante_expulsion_char = string_itoa(tripulante_expulsion);
 
 		//miLogInfo("Me llego operacion: Expulsar tripulante %d", tripulante_expulsion);
 		resultado = expulsar_tripulante(tripulante_expulsion);
@@ -112,18 +117,20 @@ void atender_request_miram(Request *request)
 			miLogInfo("Tripulado %d expulsado correctamente", tripulante_expulsion);
 
 			paquete_devuelto = crear_paquete(OK);
-			list_add(lista_mensajes,tripulante_expulsion_char );
+			list_add(lista_mensajes, tripulante_expulsion_char);
 		}
 
 		t_buffer *buffer_respuesta_expulsar = serializar_lista_strings(lista_mensajes);
 		paquete_devuelto->buffer = buffer_respuesta_expulsar;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_expulsar);
-		list_destroy(lista_mensajes);		
-		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
+		list_destroy(lista_mensajes);
+		list_destroy_and_destroy_elements(lista, (void *)char_destroy);
 		//eliminar_paquete(paquete_devuelto);
 		free(request);
 		free(tripulante_expulsion_char);
+		pthread_mutex_unlock(&mutex_mover);
+		pthread_mutex_unlock(&mutex_cola);
 		pthread_mutex_unlock(&mutex_expulsion);
 		dump_memoria(true);
 		break;
@@ -133,7 +140,7 @@ void atender_request_miram(Request *request)
 		t_paquete *paquete_devuelto_iniciar_tripulante;
 		t_buffer *buffer_devolucion_iniciar_tripulante = request->buffer_devolucion;
 		lista_mensajes = list_create();
-		TCB* un_tripulante;
+		TCB *un_tripulante;
 
 		//recibo los mensajes
 		lista = deserializar_lista_strings(buffer_devolucion_iniciar_tripulante);
@@ -141,14 +148,14 @@ void atender_request_miram(Request *request)
 		int PATOTA_ID = atoi(list_get(lista, 0));
 		//miLogInfo("Me llego operacion: INICIAR TRIPULANTE PATOTA %d", PATOTA_ID);
 		un_tripulante = iniciar_tripulante(PATOTA_ID);
-		
-		char* posicion = string_new();
-		char* posicion_x =string_itoa(un_tripulante->pos_X);
-		char* posicion_y = string_itoa(un_tripulante->pos_y);
-		string_append(&posicion,posicion_x);
-		string_append(&posicion,"|");
-		string_append(&posicion,posicion_y);
-		char* un_tripulante_id = string_itoa(un_tripulante->TID);
+
+		char *posicion = string_new();
+		char *posicion_x = string_itoa(un_tripulante->pos_X);
+		char *posicion_y = string_itoa(un_tripulante->pos_y);
+		string_append(&posicion, posicion_x);
+		string_append(&posicion, "|");
+		string_append(&posicion, posicion_y);
+		char *un_tripulante_id = string_itoa(un_tripulante->TID);
 		char *proxima_tarea;
 		resultado = 1;
 		if (resultado == -1)
@@ -164,7 +171,7 @@ void atender_request_miram(Request *request)
 			proxima_tarea = proxima_tarea_tripulante(un_tripulante->TID);
 
 			paquete_devuelto_iniciar_tripulante = crear_paquete(OK);
-			list_add(lista_mensajes,un_tripulante_id );
+			list_add(lista_mensajes, un_tripulante_id);
 			list_add(lista_mensajes, posicion);
 			list_add(lista_mensajes, proxima_tarea);
 		}
@@ -173,20 +180,20 @@ void atender_request_miram(Request *request)
 		paquete_devuelto_iniciar_tripulante->buffer = buffer_respuesta_iniciar_tripulante;
 		enviar_paquete(paquete_devuelto_iniciar_tripulante, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_tripulante);
-		
-		if(strcmp(configuracion->esquema_memoria, "SEGMENTACION") != 0)
+
+		if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") != 0)
 		{
 			free(un_tripulante);
 		}
-		
+
 		free(posicion);
 		free(posicion_x);
 		free(posicion_y);
 		free(un_tripulante_id);
 		free(proxima_tarea);
 		//eliminar_paquete(paquete_devuelto_iniciar_tripulante);
-		list_destroy(lista_mensajes);		
-		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
+		list_destroy(lista_mensajes);
+		list_destroy_and_destroy_elements(lista, (void *)char_destroy);
 		free(request);
 		pthread_mutex_unlock(&mutex_tripulantes);
 		break;
@@ -220,8 +227,8 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_compactar);
 		//eliminar_paquete(paquete_devuelto);
-		list_destroy(lista_mensajes);		
-		list_destroy_and_destroy_elements(lista, (void*) char_destroy);	
+		list_destroy(lista_mensajes);
+		list_destroy_and_destroy_elements(lista, (void *)char_destroy);
 
 		free(request);
 
@@ -242,7 +249,7 @@ void atender_request_miram(Request *request)
 
 		lista_mensajes = list_create();
 		resultado = iniciar_patota(cantidad_tripulantes, tareas, puntos);
-		char* el_resultado;
+		char *el_resultado;
 
 		if (resultado == -1)
 		{
@@ -266,8 +273,8 @@ void atender_request_miram(Request *request)
 		enviar_paquete(paquete_devuelto_iniciar_patota, request_fd);
 		eliminar_buffer(buffer_devolucion_iniciar_patota);
 		//eliminar_paquete(paquete_devuelto_iniciar_patota);
-		list_destroy(lista_mensajes);		
-		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
+		list_destroy(lista_mensajes);
+		list_destroy_and_destroy_elements(lista, (void *)char_destroy);
 		free(request);
 		free(el_resultado);
 		pthread_mutex_unlock(&mutex_patota);
@@ -296,8 +303,8 @@ void atender_request_miram(Request *request)
 		paquete_devuelto->buffer = buffer_respuesta_tareas;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_tareas);
-		list_destroy(lista_mensajes);		
-		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
+		list_destroy(lista_mensajes);
+		list_destroy_and_destroy_elements(lista, (void *)char_destroy);
 
 		free(request);
 		free(tarea);
@@ -337,13 +344,13 @@ void atender_request_miram(Request *request)
 		paquete_devuelto->buffer = buffer_respuesta_mover;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_mover);
-		list_destroy(lista_mensajes);		
-		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
+		list_destroy(lista_mensajes);
+		list_destroy_and_destroy_elements(lista, (void *)char_destroy);
 		free(request);
 		pthread_mutex_unlock(&mutex_mover);
 		break;
 
-case CAMBIO_COLA:
+	case CAMBIO_COLA:
 
 		pthread_mutex_lock(&mutex_cola);
 		t_buffer *buffer_devolucion_cambio_cola = request->buffer_devolucion;
@@ -359,15 +366,15 @@ case CAMBIO_COLA:
 		char *cola_nueva = list_get(lista, 1);
 		char cola_destino;
 
-		if (strcmp(cola_nueva,"READY") == 0)
+		if (strcmp(cola_nueva, "READY") == 0)
 		{
 			cola_destino = 'R';
 		}
-		if (strcmp(cola_nueva,"EXEC") == 0)
+		if (strcmp(cola_nueva, "EXEC") == 0)
 		{
 			cola_destino = 'E';
 		}
-		if (strcmp(cola_nueva,"BLOCKED_IO") == 0)
+		if (strcmp(cola_nueva, "BLOCKED_IO") == 0)
 		{
 			cola_destino = 'B';
 		}
@@ -382,8 +389,8 @@ case CAMBIO_COLA:
 		paquete_devuelto->buffer = buffer_respuesta_cambiar;
 		enviar_paquete(paquete_devuelto, request_fd);
 		eliminar_buffer(buffer_devolucion_cambio_cola);
-		list_destroy(lista_mensajes);		
-		list_destroy_and_destroy_elements(lista, (void*) char_destroy);			
+		list_destroy(lista_mensajes);
+		list_destroy_and_destroy_elements(lista, (void *)char_destroy);
 		free(request);
 		pthread_mutex_unlock(&mutex_cola);
 		break;
@@ -393,12 +400,7 @@ case CAMBIO_COLA:
 
 		break;
 	}
-
-
 }
-
-
-
 
 // Crea la grilla inicial y la muestra en pantalla
 void crear_grilla(void)
@@ -541,7 +543,7 @@ void inicializar_memoria(int tamanio_memoria)
 	}
 	else
 	{
-		char* algoritmo_reemplazo = configuracion->algoritmo_reemplazo;
+		char *algoritmo_reemplazo = configuracion->algoritmo_reemplazo;
 		tamanio_pagina = configuracion->tamanio_pagina;
 		inicializar_paginacion(tamanio_memoria, tamanio_pagina, configuracion->tamanio_swap, configuracion->path_swap, algoritmo_reemplazo);
 	}
@@ -741,7 +743,7 @@ int iniciar_patota(int cantidad_tripulantes, char *tareas, char *puntos)
 	}
 }
 
-TCB* iniciar_tripulante(int patota_id)
+TCB *iniciar_tripulante(int patota_id)
 {
 	bool mapa = false;
 	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
@@ -766,10 +768,8 @@ int expulsar_tripulante(int tripulante_id)
 
 	if (strcmp(configuracion->mapa, "HABILITADO") == 0)
 	{
-		mapa= true;
+		mapa = true;
 	}
-
-
 
 	if (strcmp(configuracion->esquema_memoria, "SEGMENTACION") == 0)
 	{
@@ -784,7 +784,9 @@ int expulsar_tripulante(int tripulante_id)
 		{
 			resultado = expulsar_tripulante_segmentacion(tripulante_id, mapa);
 		}
-	} else {
+	}
+	else
+	{
 		resultado = expulsar_tripulante_paginacion(tripulante_id, mapa);
 	}
 }

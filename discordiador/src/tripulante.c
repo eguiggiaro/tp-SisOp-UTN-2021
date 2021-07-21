@@ -70,6 +70,7 @@ void *inicializar_tripulante(Tripulante *tripulante)
   }
 
   sem_post(&semaforoREADY);
+  list_destroy_and_destroy_elements(lista_mensajes,free);
 
   pthread_mutex_init(&tripulante->semaforo_trip, NULL);
   //pthread_mutex_init(&tripulante->ciclos_IO, NULL);

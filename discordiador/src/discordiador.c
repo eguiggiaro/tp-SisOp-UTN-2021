@@ -154,7 +154,7 @@ void consola()
 			{
 				printf("Error iniciando planificacion/n");
 			}
-			//free(input_consola);
+			free(input_consola);
 			break;
 		case PAUSAR_PLANIFICACION_COM:
 			printf("Comando es Pausar Planificacion\n");
@@ -163,7 +163,7 @@ void consola()
 			{
 				printf("Error pausando planificacion\n");
 			}
-			//free(input_consola);
+			free(input_consola);
 			break;
 		case LISTAR_TRIPULANTE_COM:
 			printf("\nComando es Listar Tripulantes\n");
@@ -185,7 +185,7 @@ void consola()
 					   estados_table[tripu->estado]);
 			}
 			printf("--------------------------------------------------------------------\n");
-			//free(input_consola);
+			free(input_consola);
 			break;
 		case EXPULSAR_TRIPULANTE_COM:
 			printf("Comando es Expulsar Tripulante\n");
@@ -234,7 +234,7 @@ void consola()
 
 		default:
 			printf("No conozco ese comando, seguro que esta bien?\n");
-			//free(input_consola);
+			free(input_consola);
 			break;
 		}
 		printf("Siguiente comando?\n");
@@ -364,7 +364,7 @@ void expulsar_tripulante(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
-	//free(comando);
+	free(comando);
 	//liberar_array(list);
 }
 
@@ -375,7 +375,7 @@ void compactacion(char *comando)
 	char *string_posiciones = string_new();
 	char **list;
 
-	list_add(lista_mensajes, "COMPACTACION");
+	list_add(lista_mensajes, "COMPACTACION"); //OJO CON ESTO -> NO SE PUEDE LIBERAR
 
 	t_paquete *paquete = crear_paquete(COMPACTACION);
 	t_buffer *buffer;
@@ -398,7 +398,7 @@ void compactacion(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
-	//free(comando);
+	free(comando);
 }
 
 void iniciar_patota(char *comando)
@@ -486,7 +486,7 @@ void iniciar_patota(char *comando)
 
 	miLogDebug("Finaliza el INICIAR_PATOTA\n");
 
-	//free(comando);
+	free(comando);
 	liberar_array(list);
 	//pthread_exit(0);
 }
@@ -897,7 +897,7 @@ void finalizar_tripulante(Tripulante *trip)
 	Tripulante *trip_auxiliar;
 	bool tripulante_encontrado = false;
 
-	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
+	t_list *lista_mensajes = list_create();
 	char *tripulante = string_itoa(trip->id_tripulante);
 	list_add(lista_mensajes, tripulante);
 	t_paquete *paquete = crear_paquete(EXPULSAR_TRIPULANTE);
@@ -920,7 +920,7 @@ void finalizar_tripulante(Tripulante *trip)
 		miLogError("ERROR EXPULSANDO TRIPULANTE %d. \n", trip->id_tripulante);
 	}
 
-	//list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
 
 	pthread_mutex_lock(&mutexEXEC);
 	t_list_iterator* iterador_ejecucion = list_iterator_create(execute_list);
@@ -1163,9 +1163,10 @@ void avisar_inicio_tarea_bitacora(Tripulante *tripulante, char *tarea_nombre)
 
 	buffer = (t_buffer *)recibir_buffer(tripulante->socket_store);
 
-	list_destroy(lista_mensajes);
+	//list_destroy(lista_mensajes);
 	eliminar_buffer(buffer);
-	free(mensaje);
+	//free(mensaje);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
 }
 
 void avisar_fin_tarea_bitacora(Tripulante *tripulante, char *tarea_nombre)

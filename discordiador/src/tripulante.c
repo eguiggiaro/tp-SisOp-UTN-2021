@@ -43,6 +43,7 @@ void *inicializar_tripulante(Tripulante *tripulante)
     tripulante->pos_y = atoi(posicion[1]);
     tripulante->aviso_inicio_tarea_store = false;
     tripulante->en_sabotaje = false;
+    tripulante->tarea_actual->parametros = NULL;
     obtener_tarea(list_get(lista, 2), tripulante->tarea_actual);
 
     list_add(tripulantes_totales, tripulante);
@@ -111,6 +112,7 @@ void pedir_proxima_tarea(Tripulante *un_tripulante)
     else
     {
       Tarea *una_tarea = malloc(sizeof(Tarea));
+      una_tarea->parametros = NULL;
       obtener_tarea(list_get(lista, 0), una_tarea);
       un_tripulante->tarea_actual = una_tarea;
     }
@@ -236,7 +238,7 @@ void generar_comida_FIFO(Tripulante *trip)
     //free(trip->tarea_actual->parametros);
     //free(trip->tarea_actual->pos_x);
     //free(trip->tarea_actual->pos_y);
-    free(trip->tarea_actual);
+    liberar_tarea(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -314,7 +316,7 @@ void generar_oxigeno_FIFO(Tripulante *trip)
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
     free(trip->tarea_actual->pos_y);*/
-    free(trip->tarea_actual);
+    liberar_tarea(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -373,7 +375,7 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
     free(trip->tarea_actual->pos_y);*/
-    free(trip->tarea_actual);
+    liberar_tarea(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -444,7 +446,7 @@ void consumir_comida_FIFO(Tripulante *trip)
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
     free(trip->tarea_actual->pos_y);*/
-    free(trip->tarea_actual);
+    liberar_tarea(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -516,7 +518,7 @@ void generar_basura_FIFO(Tripulante *trip)
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
     free(trip->tarea_actual->pos_y);*/
-    free(trip->tarea_actual);
+    liberar_tarea(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -587,7 +589,7 @@ void descartar_basura_FIFO(Tripulante *trip)
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
     free(trip->tarea_actual->pos_y);*/
-    free(trip->tarea_actual);
+    liberar_tarea(trip->tarea_actual);
     trip->tarea_actual = NULL;
     trip->realizo_movimientos_tarea = false;
     trip->recibio_input_store = false;
@@ -627,7 +629,7 @@ void tarea_generica_FIFO(Tripulante *trip)
     free(trip->tarea_actual->parametros);
     free(trip->tarea_actual->pos_x);
     free(trip->tarea_actual->pos_y);*/
-  free(trip->tarea_actual);
+  liberar_tarea(trip->tarea_actual);
   trip->tarea_actual = NULL;
   trip->realizo_movimientos_tarea = false;
   trip->recibio_input_store = false;
@@ -1869,4 +1871,12 @@ void consumir_ciclos_cpu(Tripulante *trip)
 static void char_destroy_trip(char *self)
 {
   free(self);
+}
+
+void liberar_tarea(Tarea* tarea){
+  free(tarea->nombre_tarea);
+  free(tarea->parametros);
+  free(tarea->pos_x);
+  free(tarea->pos_y);
+  free(tarea);
 }

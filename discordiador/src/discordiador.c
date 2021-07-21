@@ -438,7 +438,7 @@ void iniciar_patota(char *comando)
 		}
 	}
 
-	list_add(lista_mensajes, list[1]);
+	list_add(lista_mensajes, strdup(list[1]));
 	list_add(lista_mensajes, string_tareas);
 	list_add(lista_mensajes, string_posiciones);
 	mensajes_respuesta = iniciar_patota_miram(socket_miram, lista_mensajes);
@@ -481,14 +481,14 @@ void iniciar_patota(char *comando)
 		miLogError("Pedido de INICIAR PATOTA denegado por MiRAM");
 	}
 
-	//list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy);
-	//list_destroy_and_destroy_elements(mensajes_respuesta,(void*)char_destroy);
+	list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy);
+	list_destroy_and_destroy_elements(mensajes_respuesta,(void*)char_destroy);
 
 	miLogDebug("Finaliza el INICIAR_PATOTA\n");
 
 	//free(comando);
 	liberar_array(list);
-	pthread_exit(0);
+	//pthread_exit(0);
 }
 
 void vaciar_listas()
@@ -803,6 +803,7 @@ void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	char *pos_x;
 	char *pos_y;
 	char *tiempo;
+	char **tarea;
 
 	token = strtok(tarea_str, ";");
 
@@ -831,9 +832,15 @@ void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 		cont++;
 	}
 
-	nueva_tarea->nombre_tarea = strdup(strtok(parametros, " "));
+	tarea = string_split(parametros," ");
+
+	//nueva_tarea->nombre_tarea = strdup(strtok(parametros, " "));
+	nueva_tarea->nombre_tarea = strdup(tarea[0]);
+	if(tarea[1]!=NULL){
+	  nueva_tarea->parametros = strdup(tarea[1]);
+	}
 	//printf(" nombre tarea: %s\n", nueva_tarea->nombre_tarea);
-	nueva_tarea->parametros = strtok(NULL, " ");
+	//nueva_tarea->parametros = strdup(strtok(NULL, " "));
 	//printf(" parametros: %s\n", nueva_tarea->parametros);
 	nueva_tarea->pos_x = pos_x;
 	//printf(" pos x: %s\n", nueva_tarea->pos_x);
@@ -842,9 +849,11 @@ void obtener_tarea(char *tarea_str, Tarea *nueva_tarea)
 	char *tiempo_aux = strdup(strtok(tiempo, "|"));
 	nueva_tarea->tiempo = atoi(tiempo_aux);
 	//printf(" tiempo: %i\n", nueva_tarea->tiempo);
-	//free(parametros);
-	//free(tiempo);
-	//free(tiempo_aux);
+	free(parametros);
+	//free(token);
+	free(tiempo_aux);
+	free(tiempo);
+	liberar_array(tarea);
 }
 
 //Descripción: Planifica en una única vez, un tripulante: de listo a en ejecución

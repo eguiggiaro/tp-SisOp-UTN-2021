@@ -64,7 +64,7 @@ int escuchar(Invocacion* invocacion)
 
 			if (codigo_operacion == -1)
 			{
-				printf("El cliente se desconectó");
+				//printf("El cliente se desconectó");
 				break;
 			}
 

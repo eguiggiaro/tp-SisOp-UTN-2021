@@ -39,7 +39,7 @@ void levantar_servidor(void (*atender_request)(uint32_t), char* puerto)
 		invocacion->request_fd = request_fd;
 		invocacion->atender_request = atender_request;
 		int thread_status = pthread_create(&escucha, NULL, (void*) escuchar,(void*) invocacion);
-		
+		pthread_detach(escucha);
 		}
 }
 
@@ -150,7 +150,7 @@ int recibir_operacion(int fd_entrada)
 	else
 	{
 		close(fd_entrada);
-		printf("Error obteniendo codigo de operacion");
+		//printf("Error obteniendo codigo de operacion");
 		return -1;
 	}
 }

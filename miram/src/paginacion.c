@@ -54,6 +54,7 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 	char *contenido = string_new();
 	char *auxiliar;
 	char * pagina_char;
+	void* direccion = un_frame->dir_inicio;
 
 
 	if (strcmp(un_frame->estado, "OCUPADO") == 0)
@@ -120,7 +121,7 @@ void imprimir_frame_archivo(Frame *un_frame, FILE *archivoDump)
 	}
 	list_iterator_destroy(list_iterator_pcbs);
 
-	fprintf(archivoDump, "%d\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
+	fprintf(archivoDump, "%p\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", direccion, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
 	free(contenido);
 	free(pagina_a_mostrar);
 	free(patota_a_mostrar);
@@ -162,6 +163,7 @@ void imprimir_frame(Frame *un_frame)
 	int LRU = -1;
 	int clock = -1;
 	char *pagina_char = string_new();
+	void* direccion = un_frame->dir_inicio;
 
 	if (strcmp(un_frame->estado, "OCUPADO") == 0)
 	{
@@ -229,7 +231,7 @@ void imprimir_frame(Frame *un_frame)
 	}
 	list_iterator_destroy(list_iterator_pcbs);
 
-	printf("%d\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", un_frame->dir_inicio, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
+	printf("%p\t%d\t\t%s\t%d\t%d\t%s\t%s\t%s\n", direccion, un_frame->id_frame, pagina_a_mostrar, LRU, clock, un_frame->estado, patota_a_mostrar, contenido);
 	free(contenido);
 	free(pagina_a_mostrar);
 	free(patota_a_mostrar);

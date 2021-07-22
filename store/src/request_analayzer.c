@@ -154,7 +154,8 @@ void atender_request_store(Request *request) {
 			{
 				miLogDebug("ERROR: LA BITACORA DEL TRIPULANTE ESTA VACIA.");
 				paquete_devuelto_obtener_bitacora = crear_paquete(FAIL);
-				list_add(lista_mensajes, "La bitacora del tripulante esta vacia");
+				char* mensajeError = strdup("La bitacora del tripulante esta vacia");
+				list_add(lista_mensajes, mensajeError);
 			}
 			else
 			{
@@ -198,7 +199,8 @@ void atender_request_store(Request *request) {
 			{
 				miLogError("ERROR: NO SE PUDO ACTIVAR EL PROTOCOLO DE SABOTAJE FSCK.");
 				paquete_devuelto_fsck = crear_paquete(FAIL);
-				list_add(lista_mensajes, "No se pudo activar el protocolo.");
+				char* mensajeError = strdup("No se pudo activar el protocolo.");
+				list_add(lista_mensajes, mensajeError);
 			}
 			else
 			{

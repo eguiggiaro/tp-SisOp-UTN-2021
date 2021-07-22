@@ -168,9 +168,14 @@ int guardarEnBitacora(char* id_tripulante, char* instruccion){
 char* obtenerBitacora(char* id_tripulante){
 
 	MetadataBitacora* metadataB = leerMetadataBitacora(id_tripulante);
+	char* lectura;
 
-	char* lectura = leerBloques(metadataB->blocks, metadataB->size);
-	//printf("%s",lectura);
+	if(metadataB->size > 0){
+		lectura = leerBloques(metadataB->blocks, metadataB->size);		
+	} else {
+		lectura = string_new(); //Si no tiene nada en la bitacora devuelvo un string vacio.
+	}
+
 	freeMetadataBitacora(metadataB);
 	return lectura;
 }
@@ -268,7 +273,7 @@ op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje, int socket_discordiado
 
 	t_list* lista_mensajes = list_create();
 
-	char* mensaje = string_new();
+	//char* mensaje = string_new();
 
 	t_pos* primerPosicion = primerPosicionSabotajeSinAtender(posicionesSabotaje);
 	char* strX = string_itoa(primerPosicion->x);
@@ -284,7 +289,8 @@ op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje, int socket_discordiado
 
     //Aca deberia recibir la activación del protocolo FSCK?
 	op_code codigo_operacion = recibir_operacion(socket_discordiador);
-		
+
+	free(primerPosicion);	
 	list_destroy(lista_mensajes);
 	return codigo_operacion;
 }

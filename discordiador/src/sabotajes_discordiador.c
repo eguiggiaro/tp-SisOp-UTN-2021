@@ -17,8 +17,6 @@ void atender_request_discordiador(Request *request){
 
 	case ALERTA_SABOTAJE:
 		//recibo los mensajes
-		lista_mensajes = list_create();
-		//recibo los mensajes
 		lista = deserializar_lista_strings(buffer);
 
         char* posicion = string_new();
@@ -29,21 +27,27 @@ void atender_request_discordiador(Request *request){
 		miLogInfo("Me llego operacion: ALERTA SABOTAJE en el punto: (%s)\n", posicion);
 
         t_paquete *paquete_devuelto = crear_paquete(OK);
+
+        lista_mensajes = list_create();
+        char* msj = string_new();
+        string_append(&msj,"Operacion recibida correctamente");
 		
-        list_add(lista_mensajes, "Operacion recibida correctamente");
+        list_add(lista_mensajes, msj);
 
 		buffer = serializar_lista_strings(lista_mensajes);
 		paquete_devuelto->buffer = buffer;
 		enviar_paquete(paquete_devuelto, request_fd);
-		list_destroy(lista_mensajes);
-		list_destroy(lista);
+		list_destroy_and_destroy_elements(lista_mensajes,free);
+		//list_size(lista)>0? list_destroy_and_destroy_elements(lista,free) : list_destroy(lista);
 		//eliminar_paquete(paquete_devuelto);
+    list_destroy_and_destroy_elements(lista,free);
 		free(request);
 
         //Creo un thread para atender el sabotaje ya que puede producirse mas de uno simultaneamente
         if (pthread_create(&threadSABOTAJE, NULL, (void*) atender_sabotaje, (char*)posicion) != 0){
 		  printf("\nError iniciando thread para atender sabotaje\n");
 		}
+    pthread_detach(threadSABOTAJE);
 
 		break;
 
@@ -104,9 +108,10 @@ void avisar_mov_sabotaje_bitacora(Tripulante* tripulante, char* origen, char* de
 
 	buffer = (t_buffer*)recibir_buffer(tripulante->socket_store);
 
-	list_destroy(lista_mensajes);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
 	eliminar_buffer(buffer);
-	free(mensaje);
+  free(origen);
+  free(destino);
 }
 
 void avisar_mov_sabotaje_miram(Tripulante* trip, char* eje){
@@ -143,7 +148,7 @@ void avisar_mov_sabotaje_miram(Tripulante* trip, char* eje){
         miLogError("Tripulante %d: ERROR INFORMANDO NUEVA POSICION A MIRAM. \n",trip->id_tripulante);
 	}
 
-	list_destroy(lista_mensajes);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
 }
 
 void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino){
@@ -174,6 +179,9 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,x_destino_b);
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
+        free(x_origen_b);
+        free(y_origen_b);
+        free(x_destino_b);
 
         sleep(configuracion->retardo_ciclo_cpu);
 
@@ -182,7 +190,9 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         //realizo movimiento
         trip->pos_x = (trip->pos_x)-1;
         //aviso a miram
-        avisar_mov_sabotaje_miram(trip,"X");
+        char* eje = string_new();
+        string_append(&eje,"X");
+        avisar_mov_sabotaje_miram(trip,eje);
       }
     }
     else if(x_origen < x_destino){
@@ -201,6 +211,10 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,x_destino_b);
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
+        free(x_origen_b);
+        free(y_origen_b);
+        free(x_destino_b);
+
 
         sleep(configuracion->retardo_ciclo_cpu);
 
@@ -209,7 +223,9 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         //realizo movimiento
         trip->pos_x = (trip->pos_x)+1;
         //aviso a miram
-        avisar_mov_sabotaje_miram(trip,"X");
+        char* eje = string_new();
+        string_append(&eje,"X");
+        avisar_mov_sabotaje_miram(trip,eje);
       }
     }
     else{
@@ -233,6 +249,9 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,x_destino_b);
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
+        free(x_origen_b);
+        free(y_origen_b);
+        free(y_destino_b);
 
         sleep(configuracion->retardo_ciclo_cpu);
 
@@ -241,7 +260,9 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         //realizo movimiento
         trip->pos_y = (trip->pos_y)-1;
         //aviso a miram
-        avisar_mov_sabotaje_miram(trip,"Y");
+        char* eje = string_new();
+        string_append(&eje,"Y");
+        avisar_mov_sabotaje_miram(trip,eje);
       }
     }
     else if(y_origen < y_destino){
@@ -260,6 +281,9 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         string_append(&destino,x_destino_b);
         string_append(&destino,"|");
         string_append(&destino, y_destino_b);
+        free(x_origen_b);
+        free(y_origen_b);
+        free(y_destino_b);
 
         sleep(configuracion->retardo_ciclo_cpu);
 
@@ -268,15 +292,18 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         //realizo movimiento
         trip->pos_y = (trip->pos_y)+1;
         //aviso a miram
-        avisar_mov_sabotaje_miram(trip,"Y");
+        char* eje = string_new();
+        string_append(&eje,"Y");
+        avisar_mov_sabotaje_miram(trip,eje);
       }
     }
     else{
       distancia_y = 0;
     }
+    free(id_trip);
 }
 
-void enviar_fcsk(Tripulante* tripu){
+void enviar_fsck(Tripulante* tripu){
 
 	t_paquete* paquete = crear_paquete(FSCK);
   t_buffer* buffer;
@@ -310,7 +337,7 @@ void enviar_fcsk(Tripulante* tripu){
 
 	buffer = (t_buffer*)recibir_buffer(tripu->socket_store);
 
-	list_destroy(lista_mensajes);
+	list_destroy_and_destroy_elements(lista_mensajes,free);
   eliminar_buffer(buffer);
 
 }
@@ -397,7 +424,7 @@ void atender_sabotaje(char* posicion){
 				NULL) != 0) {
 			     printf("Error reanudando planificacion/n");
 		  }
-      pthread_exit(0);
+      pthread_detach(threadINICIAR_PLANIFICACION);
     }
     else{
       list_add_all(blocked_em,execute_list);
@@ -456,14 +483,14 @@ void atender_sabotaje(char* posicion){
     sleep(ciclos_sabotaje*retardo);
 
     //6. Enviar FSCK a Store con posicion actual del tripulante.
-    enviar_fcsk(tripulante_elegido);
+    enviar_fsck(tripulante_elegido);
 
-    //7.Pasar tripulante elegido a ultimo lugar en cola de BLOCK_EMERGENCIA
+    //7.0 Devuelvo al tripulante elegido a su posicion inicial
+    mover_tripulante_a_sabotaje(tripulante_elegido,x_anterior,y_anterior);
+
+    //7.1Pasar tripulante elegido a ultimo lugar en cola de BLOCK_EMERGENCIA
     miLogInfo("Se pasa al tripulante %d al final de la cola de BLOCK_EM \n",tripulante_elegido->id_tripulante);
     list_add(blocked_em,tripulante_elegido);
-
-    //7.1 Devuelvo al tripulante elegido a su posicion inicial
-    mover_tripulante_a_sabotaje(tripulante_elegido,x_anterior,y_anterior);
 
     //8. Desbloquear y despertar a todos los tripulantes. (previamente, guardar estado anterior)
     for(int i = 0; i<list_size(tripulantes_totales); i++){
@@ -489,13 +516,16 @@ void atender_sabotaje(char* posicion){
 		}
 
     list_clean(blocked_em);
+    liberar_array(array_posicion);
+    free(posicion);
 
     if (pthread_create(&threadINICIAR_PLANIFICACION, NULL, (void*) iniciar_planificacion,
 				NULL) != 0) {
 			     printf("Error reanudando planificacion/n");
 		}
+    pthread_detach(threadINICIAR_PLANIFICACION);
 
-    pthread_exit(0);
+    //pthread_exit(0);
   }
 
 }

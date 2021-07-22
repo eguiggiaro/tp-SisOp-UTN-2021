@@ -80,6 +80,7 @@ void *inicializar_tripulante(Tripulante *tripulante)
   //3. Una vez que el tripulante esta listo, se llama a comenzar_ejecucion(tripulante)
   //list_destroy_and_destroy_elements(lista_mensajes,(void*)char_destroy_trip);
   comenzar_ejecucion(tripulante);
+  //pthread_exit(0);
   return;
 }
 
@@ -1586,7 +1587,7 @@ void mover_tripulante(Tripulante *trip)
   {
     distancia_y = 0;
   }
-  //free(id_trip);
+  free(id_trip);
 }
 
 void *mover_tripulante_RR(Tripulante *trip)

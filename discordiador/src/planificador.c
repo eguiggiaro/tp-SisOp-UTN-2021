@@ -56,11 +56,10 @@ void iniciar_planificacion()
         if (planificacion_activada) {
             planificar();
         } else {
-			pthread_exit(0);
+			
             break;
         }
     }
-
 }
 
 //Descripción: Pausa la planificacion, no hay cambios en colas, nadie ejecuta

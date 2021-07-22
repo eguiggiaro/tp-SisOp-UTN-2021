@@ -439,7 +439,9 @@ void atender_sabotaje(char* posicion){
         break;
       }
     }
-
+    
+    int x_anterior = tripulante_elegido->pos_x;
+    int y_anterior = tripulante_elegido->pos_y;
 
     //4. Movemos al tripulante elegido al punto de sabotaje.
     mover_tripulante_a_sabotaje(tripulante_elegido, pos_x,pos_y);
@@ -459,6 +461,9 @@ void atender_sabotaje(char* posicion){
     //7.Pasar tripulante elegido a ultimo lugar en cola de BLOCK_EMERGENCIA
     miLogInfo("Se pasa al tripulante %d al final de la cola de BLOCK_EM \n",tripulante_elegido->id_tripulante);
     list_add(blocked_em,tripulante_elegido);
+
+    //7.1 Devuelvo al tripulante elegido a su posicion inicial
+    mover_tripulante_a_sabotaje(tripulante_elegido,x_anterior,y_anterior);
 
     //8. Desbloquear y despertar a todos los tripulantes. (previamente, guardar estado anterior)
     for(int i = 0; i<list_size(tripulantes_totales); i++){

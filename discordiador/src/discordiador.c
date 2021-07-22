@@ -155,6 +155,7 @@ void consola()
 				printf("Error iniciando planificacion/n");
 			}
 			free(input_consola);
+			pthread_detach(threadINICIAR_PLANIFICACION);
 			break;
 		case PAUSAR_PLANIFICACION_COM:
 			printf("Comando es Pausar Planificacion\n");
@@ -164,6 +165,7 @@ void consola()
 				printf("Error pausando planificacion\n");
 			}
 			free(input_consola);
+			pthread_detach(threadPAUSAR_PLANIFICACION);
 			break;
 		case LISTAR_TRIPULANTE_COM:
 			printf("\nComando es Listar Tripulantes\n");
@@ -194,14 +196,16 @@ void consola()
 			{
 				printf("Error expulsando tripulante\n");
 			}
+			pthread_detach(threadEXPULSAR_TRIPULANTE);
 			break;
 		case COMPACTACION_COM:
-			printf("Comando es Expulsar Tripulante\n");
+			printf("Comando es Compactacion\n");
 			if (pthread_create(&threadCOMPACTACION, NULL, (void *)compactacion,
 							   (char *)input_consola) != 0)
 			{
 				printf("Error compactacion\n");
 			}
+			pthread_detach(threadCOMPACTACION);
 			break;
 		case OBTENER_BITACORA_COM:
 			printf("Comando es Obtener Bitacora\n");
@@ -210,6 +214,7 @@ void consola()
 			{
 				printf("Error obteniendo bitacora\n");
 			}
+			pthread_detach(threadOBTENERBITACORA);
 			break;
 		case ALERTA_SABOTAJE_COM:
 			//atender_sabotaje(input_consola);
@@ -256,7 +261,7 @@ void obtener_bitacora(char *comando)
 {
 
 	t_list *lista_mensajes = list_create();
-	t_list *mensajes_respuesta = list_create();
+	t_list *mensajes_respuesta;
 
 	char **list;
 	Tripulante *trip;
@@ -294,7 +299,9 @@ void obtener_bitacora(char *comando)
 	}
 
 	list_destroy(lista_mensajes);
-	//free(comando);
+	list_destroy_and_destroy_elements(mensajes_respuesta,free);
+	liberar_array(list);
+	free(comando);
 }
 
 void generar_archivo_bitacora(char *tripulante, char *bitacora)
@@ -310,11 +317,12 @@ void generar_archivo_bitacora(char *tripulante, char *bitacora)
 	FILE *bitacora_file = fopen(nombreArchivo, "w+");
 	fwrite(bitacora, 1, tamanio, bitacora_file);
 	fclose(bitacora_file);
+	free(nombreArchivo);
 }
 
 void expulsar_tripulante(char *comando)
 {
-	t_list *lista_mensajes = list_create(), *mensajes_respuesta = list_create();
+	t_list *lista_mensajes = list_create();
 	char *string_tareas;
 	char *string_posiciones = string_new();
 	char **list;
@@ -330,11 +338,15 @@ void expulsar_tripulante(char *comando)
 	{
 
 		trip = list_get(tripulantes_totales, i);
+		char* id_trip;
+		id_trip = string_itoa(trip->id_tripulante);
 
-		if (strcmp(tripulante, string_itoa(trip->id_tripulante)) == 0)
+		if (strcmp(tripulante, id_trip) == 0)
 		{
+			free(id_trip);
 			break;
 		}
+		free(id_trip);
 	}
 
 	//Duermo al tripulante
@@ -365,7 +377,7 @@ void expulsar_tripulante(char *comando)
 
 	list_destroy(lista_mensajes);
 	free(comando);
-	//liberar_array(list);
+	liberar_array(list);
 }
 
 void compactacion(char *comando)
@@ -409,7 +421,7 @@ void iniciar_patota(char *comando)
 	miLogDebug("Comienza el INICIAR_PATOTA\n");
 
 	t_list *lista_mensajes = list_create();
-	t_list *mensajes_respuesta = list_create();
+	t_list *mensajes_respuesta;
 	Tripulante_disc trip_hilo;
 
 	char *string_tareas;
@@ -474,6 +486,7 @@ void iniciar_patota(char *comando)
 			{
 				new_tripulante->id_hilo = &hilos_tripulantes[i]; //le asigno el hilo a cada tripulante
 			}
+			pthread_detach(hilos_tripulantes[i]);
 		}
 	}
 	else

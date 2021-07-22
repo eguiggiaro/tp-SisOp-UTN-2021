@@ -120,6 +120,7 @@ void consola()
 	printf("Que desea hacer?\n");
 
 	input_consola = readline(">>");
+	string_trim(&input_consola);
 
 	//*se podria poner ejemplitos de que puede hacer...
 	while (strcmp(input_consola, "FIN") != 0)
@@ -244,6 +245,7 @@ void consola()
 		}
 		printf("Siguiente comando?\n");
 		input_consola = readline(">>");
+		string_trim(&input_consola);
 		liberar_array(list);
 	}
 }

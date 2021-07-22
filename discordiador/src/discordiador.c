@@ -288,7 +288,7 @@ void obtener_bitacora(char *comando)
 		eliminar_buffer(buffer_respuesta);
 
 		char *bitacora = string_new();
-		bitacora = list_get(mensajes_respuesta, 0);
+		string_append(&bitacora,(char*)list_get(mensajes_respuesta, 0));
 
 		generar_archivo_bitacora(tripulante, bitacora);
 		miLogInfo("Bitacora del tripulante %s obtenida correctamente", tripulante);
@@ -318,13 +318,14 @@ void generar_archivo_bitacora(char *tripulante, char *bitacora)
 	fwrite(bitacora, 1, tamanio, bitacora_file);
 	fclose(bitacora_file);
 	free(nombreArchivo);
+	free(bitacora);
 }
 
 void expulsar_tripulante(char *comando)
 {
 	t_list *lista_mensajes = list_create();
-	char *string_tareas;
-	char *string_posiciones = string_new();
+	//char *string_tareas;
+	//char *string_posiciones = string_new();
 	char **list;
 	Tripulante *trip;
 
@@ -1036,6 +1037,7 @@ bool tarea_informada(Tripulante *tripulante, char *nombre_tarea, char *parametro
 
 	eliminar_buffer(buffer);
 	list_destroy_and_destroy_elements(lista_mensajes,free);
+	free(espacio);
 	return se_informo;
 }
 

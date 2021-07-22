@@ -126,6 +126,7 @@ void pedir_proxima_tarea(Tripulante *un_tripulante)
   else
   {
     miLogInfo("ERROR: TAREA NO EXISTE \n");
+    list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy_trip);
   }
 }
 

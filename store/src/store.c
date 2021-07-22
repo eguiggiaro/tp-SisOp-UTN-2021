@@ -103,7 +103,7 @@ void inicializarStore(void){
 	pthread_t th_msync;
 	pthread_create(&th_msync, NULL, &syncPeriodico, NULL);	
 	
-	//protocoloFsck();
+	protocoloFsck();
 
 	levantar_servidor(atender_request_store, configuracion->puerto);	
 
@@ -198,14 +198,10 @@ void protocoloFsck(){
 	}
 
 	if(!verificarBitmap()){
-		miLogInfo("Verificacion del Bitmpa en el Superbloques.ims finalizada con exito.");
+		miLogInfo("Verificacion del Bitmap en el Superbloques.ims finalizada con exito.");
 	}
 
 	//Analizar sabotaje en files
-	if(!verificarBlocks()){
-		miLogInfo("Verificacion de Bloques en los Files de Recursos finalizada con exito.");
-	}
-	
 	if(!verificarBlockCount()){
 		miLogInfo("Verificacion de BlockCount en los Files de Recursos finalizada con exito.");
 	}
@@ -213,6 +209,12 @@ void protocoloFsck(){
 	if(!verificarSizeEnFile()){
 		miLogInfo("Verificacion de Size en los Files de Recursos finalizada con exito.");
 	}
+	
+	if(!verificarBlocks()){
+		miLogInfo("Verificacion de Bloques en los Files de Recursos finalizada con exito.");
+	}
+	
+
 
 	miLogInfo("Finalizó el protocolo FSCK.");
 	

@@ -290,15 +290,17 @@ op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje, int socket_discordiado
     //Aca deberia recibir la activación del protocolo FSCK?
 	op_code codigo_operacion = recibir_operacion(socket_discordiador);
 
-	free(primerPosicion);	
 	list_destroy(lista_mensajes);
+	free(primerPosicion);	
+	free(strX);
+	free(strY);
 	return codigo_operacion;
 }
 
 t_pos* primerPosicionSabotajeSinAtender(t_list* posiciones){
 	
-	PosicionSabotaje* posicionSabotaje = malloc(sizeof(PosicionSabotaje));
-	t_pos* posicion = malloc(sizeof(t_pos));
+	PosicionSabotaje* posicionSabotaje;
+	t_pos* posicion;
 	
 	int _estaDesatendida(PosicionSabotaje* p) {
             return !(p->atendida);

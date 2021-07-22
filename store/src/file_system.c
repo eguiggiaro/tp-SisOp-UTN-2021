@@ -328,8 +328,7 @@ void reescribirBloque(int bloque, char* escritura){
 	memcpy(punteroBlocks + desplazamiento, bloqueLimpio, tamanioBloque);
 	pthread_mutex_unlock(&mutex_bloques);
 
-	
-	//escribirBloque(bloque, 0, bloqueLimpio);
+	free(bloqueLimpio);	
 }
 
 //------------------------------------MANEJO DE METADATA----------------------------------

@@ -297,7 +297,7 @@ void liberar_pagina(Pagina *una_pagina)
 
 int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 {
-	TCB *unTCB = buscar_tcb_por_id(tripulante_id);
+	TCB *unTCB = buscar_tcb_por_id(tripulante_id, "EXPULSION");
 	TCB_adm *tcb_adm;
 	char *identificador = string_new();
 	char *tripulante_char = string_itoa(tripulante_id);
@@ -349,7 +349,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 		if (eliminar_pagina)
 		{
-			un_frame = buscar_frame_por_pagina(una_pagina->id_pagina);
+			un_frame = buscar_frame_por_pagina(una_pagina->id_pagina, pcb_adm->PID, "EXPULSION");
 			un_frame->estado = "LIBRE";
 			un_frame->id_pagina = -1;
 			list_iterator_remove(iterador_paginas);
@@ -394,7 +394,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 			if (eliminar_pagina)
 			{
-				un_frame = buscar_frame_por_pagina(una_pagina->id_pagina);
+				un_frame = buscar_frame_por_pagina(una_pagina->id_pagina, pcb_adm->PID, "EXPULSION");
 				un_frame->estado = "LIBRE";
 				un_frame->id_pagina = -1;
 				list_iterator_remove(iterador_paginas);
@@ -433,7 +433,7 @@ int expulsar_tripulante_paginacion(int tripulante_id, bool mapa)
 
 			if (eliminar_pagina)
 			{
-				un_frame = buscar_frame_por_pagina(una_pagina->id_pagina);
+				un_frame = buscar_frame_por_pagina(una_pagina->id_pagina, pcb_adm->PID, "EXPULSION");
 				un_frame->estado = "LIBRE";
 				un_frame->id_pagina = -1;
 				list_iterator_remove(iterador_paginas);
@@ -536,7 +536,7 @@ void *eliminar_patotaadm(int patota_id)
 char *buscar_posicion_tripulante_paginacion(int tripulante_id)
 {
 
-	TCB *unTCB = buscar_tcb_por_id(tripulante_id);
+	TCB *unTCB = buscar_tcb_por_id(tripulante_id, "MOVIMIENTO");
 
 	char *posicion_tripulante;
 
@@ -549,7 +549,7 @@ char *buscar_posicion_tripulante_paginacion(int tripulante_id)
 
 char *proxima_tarea_tripulante_paginacion(int tripulante_id)
 {
-	TCB *unTCB = buscar_tcb_por_id(tripulante_id);
+	TCB *unTCB = buscar_tcb_por_id(tripulante_id, "NUEVA TAREA");
 	int index = 0;
 	char *string_tarea = string_new();
 	int contador_tareas = 0;
@@ -598,13 +598,13 @@ char *proxima_tarea_tripulante_paginacion(int tripulante_id)
 		index++;
 	}
 
-	guardar_tripulante(unTCB, pcb_adm);
+	guardar_tripulante(unTCB, pcb_adm, "NUEVA TAREA");
 	free(unTCB);
 	free(tareas);
 	return string_tarea;
 }
 
-Frame *buscar_frame_libre()
+Frame *buscar_frame_libre(int patota_id, char* motivo)
 {
 
 	Frame *un_frame_libre;
@@ -632,11 +632,11 @@ Frame *buscar_frame_libre()
 	}
 	else
 	{
-		return hacer_lugar_memoria();
+		return hacer_lugar_memoria(patota_id, motivo);
 	}
 }
 
-Frame *hacer_lugar_memoria()
+Frame *hacer_lugar_memoria(int patota_id, char* motivo)
 {
 
 	Frame *un_frame_candidato;
@@ -668,6 +668,8 @@ Frame *hacer_lugar_memoria()
 			}
 		}
 		list_iterator_destroy(list_iterator);
+		miLogInfo("PAGINACION: Por ocurrir SWAP (LRU)!! Pagina victima %d con LRU %d. Motivo: %s.",una_pagina_candidata->id_pagina, una_pagina_candidata->LRU, motivo);
+
 	}
 	else
 	{
@@ -684,14 +686,15 @@ Frame *hacer_lugar_memoria()
 			}
 			else
 			{
-				una_pagina->clock = 1;
 				una_pagina_candidata = una_pagina;
-				un_frame_candidato = buscar_frame_por_pagina(pagina_candidata);
+				un_frame_candidato = buscar_frame_por_pagina(pagina_candidata, patota_id, motivo);
 				break;
 			}
 		}
+		miLogInfo("PAGINACION: Por ocurrir SWAP (CLOCK)!! Pagina victima %d con clock en %d. Motivo: %s.",una_pagina->id_pagina, una_pagina->clock, motivo);
+		una_pagina->clock = 1;
 	}
-	llevar_a_swap(un_frame_candidato, una_pagina_candidata);
+	llevar_a_swap(un_frame_candidato, una_pagina_candidata, patota_id);
 
 	una_pagina_candidata->en_memoria = false;
 	una_pagina_candidata->LRU = 0;
@@ -702,7 +705,7 @@ Frame *hacer_lugar_memoria()
 	return un_frame_candidato;
 }
 
-void *llevar_a_swap(Frame *un_frame, Pagina *una_pagina)
+void *llevar_a_swap(Frame *un_frame, Pagina *una_pagina, int patota_usurpadora)
 {
 	pthread_mutex_lock(&mutex_SWAP_escribir);
 	int espacio_a_ocupar;
@@ -726,6 +729,10 @@ void *llevar_a_swap(Frame *un_frame, Pagina *una_pagina)
 		fflush(SWAP);
 	}
 
+	int patota_victima = buscar_patota_por_pagina(una_pagina->id_pagina);
+
+	miLogInfo("PAGINACION: Patota usurpadora: %d. Patota victima: %d. Frame %d.",patota_usurpadora, patota_victima, un_frame->id_frame);
+
 	Elemento_SWAP *elemento_swap = malloc(sizeof(Elemento_SWAP));
 	elemento_swap->id_pagina = una_pagina->id_pagina;
 	elemento_swap->posicion_SWAP = espacio_a_ocupar;
@@ -733,6 +740,55 @@ void *llevar_a_swap(Frame *un_frame, Pagina *una_pagina)
 	list_add(tabla_elementos_SWAP, elemento_swap);
 	pthread_mutex_unlock(&mutex_SWAP_escribir);
 }
+
+int buscar_patota_por_pagina(int id_pagina)
+{
+	t_list_iterator* iterador_patota = list_iterator_create(tabla_pcbs);
+	t_list_iterator* iterador_pagina;
+	PCB_adm* pcb_adm;
+	Pagina* una_pagina;
+	bool encontre_patota = false;
+
+	while (list_iterator_has_next(iterador_patota))
+	{
+		pcb_adm = list_iterator_next(iterador_patota);
+		
+		iterador_pagina = list_iterator_create(pcb_adm->tabla_paginas);
+
+		while (list_iterator_has_next(iterador_pagina))
+		{
+			una_pagina = list_iterator_next(iterador_pagina);
+
+			if (una_pagina->id_pagina == id_pagina)
+			{
+				encontre_patota = true;
+				break;
+			}
+		}
+
+		list_iterator_destroy(iterador_pagina);
+		if (encontre_patota)
+		{
+			break;
+		}
+
+	}
+
+	list_iterator_destroy(iterador_patota);
+
+	if (encontre_patota)
+	{
+		return pcb_adm->PID;
+
+	} else 
+	{
+		return -1;
+	}
+
+}
+
+
+
 
 Frame *buscar_frame(int id_frame)
 {
@@ -763,7 +819,7 @@ Frame *buscar_frame(int id_frame)
 	}
 }
 
-Frame *buscar_frame_por_pagina(int id_pagina)
+Frame *buscar_frame_por_pagina(int id_pagina, int id_patota, char* motivo)
 {
 
 	Frame *un_frame;
@@ -788,7 +844,7 @@ Frame *buscar_frame_por_pagina(int id_pagina)
 	}
 	else
 	{
-		un_frame = buscar_frame_libre();
+		un_frame = buscar_frame_libre(id_patota, motivo);
 		return traer_de_SWAP(id_pagina, un_frame);
 	}
 }
@@ -886,7 +942,7 @@ int guardar_patota(PCB *un_pcb, PCB_adm *un_pcb_adm)
 	{
 		una_pagina = list_get(un_pcb_adm->tabla_paginas, i);
 		una_pagina->LRU = contador_LRU++;
-		un_frame = buscar_frame_por_pagina(una_pagina->id_pagina);
+		un_frame = buscar_frame_por_pagina(una_pagina->id_pagina, un_pcb_adm->PID, "INICIO PATOTA");
 		if (i + 1 == cantidad_paginas)
 		{
 			memcpy(un_frame->dir_inicio, (void *)un_pcb, tamanio_pcb - tamanio_alocado);
@@ -900,7 +956,7 @@ int guardar_patota(PCB *un_pcb, PCB_adm *un_pcb_adm)
 	}
 }
 
-int guardar_tripulante(TCB *un_tcb, PCB_adm *un_pcb_adm)
+int guardar_tripulante(TCB *un_tcb, PCB_adm *un_pcb_adm, char* motivo)
 {
 	TCB_adm *un_tcb_adm;
 	t_list_iterator *iterador_tripulantes = list_iterator_create(un_pcb_adm->tabla_TCB_admin);
@@ -926,7 +982,7 @@ int guardar_tripulante(TCB *un_tcb, PCB_adm *un_pcb_adm)
 	int offset = un_tcb_adm->offset;
 	Pagina *pagina;
 
-	Frame *un_frame = buscar_frame_por_pagina(un_tcb_adm->pagina_inicio);
+	Frame *un_frame = buscar_frame_por_pagina(un_tcb_adm->pagina_inicio, un_pcb_adm->PID, motivo);
 	una_pagina = un_tcb_adm->pagina_inicio;
 
 	for (int i = 0; i < cantidad_paginas; i++)
@@ -971,7 +1027,7 @@ int guardar_tripulante(TCB *un_tcb, PCB_adm *un_pcb_adm)
 		if (i + 1 != cantidad_paginas)
 		{
 			una_pagina = siguiente_pagina(una_pagina, un_pcb_adm);
-			un_frame = buscar_frame_por_pagina(una_pagina);
+			un_frame = buscar_frame_por_pagina(una_pagina, un_pcb_adm->PID, motivo);
 		}
 	}
 }
@@ -1035,7 +1091,7 @@ int siguiente_pagina(int pagina_actual, PCB_adm *pcb_adm)
 	return pagina_retorno;
 }
 
-TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
+TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion, char* motivo)
 {
 	if (list_size(pcb_adm->tabla_TCB_admin) < tripulante_posicion)
 	{
@@ -1053,7 +1109,7 @@ TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
 	void *buffer = calloc(sizeof(TCB),1);
 	TCB *tcb_retorno;
 
-	Frame *un_frame = buscar_frame_por_pagina(tcb_adm->pagina_inicio);
+	Frame *un_frame = buscar_frame_por_pagina(tcb_adm->pagina_inicio, pcb_adm->PID, motivo);
 	Pagina *una_pagina;
 
 	for (int i = 0; i < cantidad_paginas; i++)
@@ -1098,7 +1154,7 @@ TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
 		if (i + 1 != cantidad_paginas)
 		{
 			pagina = siguiente_pagina(pagina, pcb_adm);
-			un_frame = buscar_frame_por_pagina(pagina);
+			un_frame = buscar_frame_por_pagina(pagina, pcb_adm->PID, motivo);
 		}
 	}
 
@@ -1107,7 +1163,7 @@ TCB *buscar_tcb(PCB_adm *pcb_adm, int tripulante_posicion)
 	return tcb_retorno;
 }
 
-TCB *buscar_tcb_por_id(int tripulante_id)
+TCB *buscar_tcb_por_id(int tripulante_id, char* motivo)
 {
 	PCB_adm *pcb_adm;
 	TCB_adm *tcb_adm;
@@ -1146,7 +1202,7 @@ TCB *buscar_tcb_por_id(int tripulante_id)
 
 	list_iterator_destroy(iterador_patotas);
 
-	return buscar_tcb(pcb_adm, tripulante_posicion);
+	return buscar_tcb(pcb_adm, tripulante_posicion, motivo);
 }
 
 PCB *buscar_PCB(PCB_adm *pcb_adm)
@@ -1162,7 +1218,7 @@ PCB *buscar_PCB(PCB_adm *pcb_adm)
 	void *buffer = calloc(tamanio_pcb,1);
 	Pagina *una_pagina;
 
-	Frame *un_frame = buscar_frame_por_pagina(pagina);
+	Frame *un_frame = buscar_frame_por_pagina(pagina, pcb_adm->PID, "BUSCAR PCB");
 
 	for (int i = 0; i < cantidad_paginas; i++)
 	{
@@ -1206,7 +1262,7 @@ PCB *buscar_PCB(PCB_adm *pcb_adm)
 		if (i + 1 != cantidad_paginas)
 		{
 			pagina = siguiente_pagina(pagina, pcb_adm);
-			un_frame = buscar_frame_por_pagina(pagina);
+			un_frame = buscar_frame_por_pagina(pagina, pcb_adm->PID, "BUSCAR PCB");
 		}
 	}
 
@@ -1242,7 +1298,7 @@ char *buscar_tareas(int patota_id)
 	void *buffer = calloc(1, tamanio_tareas);
 	int limite_buffer = 0;
 
-	Frame *un_frame = buscar_frame_por_pagina(pagina);
+	Frame *un_frame = buscar_frame_por_pagina(pagina, pcb_adm->PID, "NUEVA TAREA");
 	Pagina *una_pagina;
 
 	for (int i = 0; i < cantidad_paginas; i++)
@@ -1286,7 +1342,7 @@ char *buscar_tareas(int patota_id)
 		if (i + 1 != cantidad_paginas)
 		{
 			pagina = siguiente_pagina(pagina, pcb_adm);
-			un_frame = buscar_frame_por_pagina(pagina);
+			un_frame = buscar_frame_por_pagina(pagina, pcb_adm->PID, "NUEVA TAREA");
 		}
 	}
 
@@ -1297,19 +1353,19 @@ char *buscar_tareas(int patota_id)
 
 int cambiar_cola_tripulante_paginacion(int tripulante, char cola_destino)
 {
-	TCB *miTCB = buscar_tcb_por_id(tripulante);
+	TCB *miTCB = buscar_tcb_por_id(tripulante, "CAMBIO_COLA");
 	PCB_adm *pcb_adm = buscar_patota_tripulante(tripulante);
 
 	miTCB->estado = cola_destino;
 
-	guardar_tripulante(miTCB, pcb_adm);
+	guardar_tripulante(miTCB, pcb_adm, "CAMBIO COLA");
 	free(miTCB);
 }
 
 //Mueve un tripulante a una dirección destino
 int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool mapa)
 {
-	TCB *miTCB = buscar_tcb_por_id(tripulante);
+	TCB *miTCB = buscar_tcb_por_id(tripulante, "MOVIMIENTO");
 	PCB_adm *pcb_adm = buscar_patota_tripulante(tripulante);
 
 	miTCB->pos_X = posicion_x_final;
@@ -1325,7 +1381,7 @@ int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool 
 		x = -1;
 	}
 
-	guardar_tripulante(miTCB, pcb_adm);
+	guardar_tripulante(miTCB, pcb_adm, "MOVIMIENTO");
 
 	if (mapa)
 	{
@@ -1343,7 +1399,7 @@ int mover_tripulante_en_x_paginacion(int tripulante, int posicion_x_final, bool 
 
 int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool mapa)
 {
-	TCB *miTCB = buscar_tcb_por_id(tripulante);
+	TCB *miTCB = buscar_tcb_por_id(tripulante, "MOVIMIENTO");
 	PCB_adm *pcb_adm = buscar_patota_tripulante(tripulante);
 
 	miTCB->pos_y = posicion_y_final;
@@ -1359,7 +1415,7 @@ int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool 
 		y = -1;
 	}
 
-	guardar_tripulante(miTCB, pcb_adm);
+	guardar_tripulante(miTCB, pcb_adm, "MOVIMIENTO");
 
 	if (mapa)
 	{
@@ -1378,11 +1434,11 @@ int mover_tripulante_en_y_paginacion(int tripulante, int posicion_y_final, bool 
 TCB *iniciar_tripulante_paginacion(int patota_id, bool mapa)
 {
 	PCB_adm *pcb_adm = buscar_patota_adm(patota_id);
-	TCB *un_tcb = buscar_tcb(pcb_adm, pcb_adm->tripulantes_iniciados);
+	TCB *un_tcb = buscar_tcb(pcb_adm, pcb_adm->tripulantes_iniciados, "INICIO TRIPULANTE");
 
 	un_tcb->estado = 'R';
 
-	guardar_tripulante(un_tcb, pcb_adm);
+	guardar_tripulante(un_tcb, pcb_adm, "INICIO TRIPULANTE");
 
 	pcb_adm->tripulantes_iniciados++;
 	pcb_adm->tripulantes_activos++;
@@ -1471,7 +1527,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 
 	un_pcb->PID = pcb_adm->PID;
 
-	un_frame_libre = buscar_frame_libre();
+	un_frame_libre = buscar_frame_libre(pcb_adm->PID, "INICIO PATOTA");
 	una_pagina = malloc(sizeof(Pagina));
 	una_pagina->en_memoria = true;
 	una_pagina->clock = -1;
@@ -1525,7 +1581,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 	{
 		//CUIDADOOOO ESTA PRIMER APARTE VA EN UN IF AFUEREA
 
-		un_frame_libre = buscar_frame_libre();
+		un_frame_libre = buscar_frame_libre(pcb_adm->PID, "INICIO PATOTA");
 		una_pagina = malloc(sizeof(Pagina));
 		una_pagina->en_memoria = true;
 		una_pagina->clock = -1;
@@ -1628,7 +1684,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 		while (tamanio_alocado < tamanio_tareas)
 		{
 
-			un_frame_libre = buscar_frame_libre();
+			un_frame_libre = buscar_frame_libre(pcb_adm->PID, "INICIO PATOTA");
 			una_pagina = malloc(sizeof(Pagina));
 			una_pagina->en_memoria = true;
 			una_pagina->clock = -1;
@@ -1763,7 +1819,7 @@ int iniciar_patota_paginacion(int cantidad_tripulantes, char *tareas, char *punt
 			while (tamanio_alocado < tamanio_tcb)
 			{
 
-				un_frame_libre = buscar_frame_libre();
+				un_frame_libre = buscar_frame_libre(pcb_adm->PID, "INICIO PATOTA");
 				una_pagina = malloc(sizeof(Pagina));
 				una_pagina->en_memoria = true;
 				una_pagina->clock = -1;

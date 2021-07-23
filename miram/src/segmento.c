@@ -380,6 +380,7 @@ u_int32_t reservar_memoria_segmentacion_ff(int bytes)
 				segmento_a_ocupar->desplazamiento = bytes;
 				segmento_a_ocupar->estado = "OCUPADO";
 				posicion_reservada = segmento_a_ocupar->dir_inicio;
+				break;
 			}
 			else
 			{

@@ -268,14 +268,18 @@ int desecharRecurso(tipoRecurso recurso){
 
 op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje, int socket_discordiador){
 	
+	t_pos* primerPosicion = primerPosicionSabotajeSinAtender(posicionesSabotaje);
+
+	//No hay mas posiciones disponibles.
+	if(primerPosicion == NULL){
+		return SIN_POS_SABOTAJE;
+	}
+	
 	t_paquete* paquete = crear_paquete(ALERTA_SABOTAJE);
     t_buffer* buffer;
 
 	t_list* lista_mensajes = list_create();
-
-	//char* mensaje = string_new();
-
-	t_pos* primerPosicion = primerPosicionSabotajeSinAtender(posicionesSabotaje);
+	
 	char* strX = string_itoa(primerPosicion->x);
 	char* strY = string_itoa(primerPosicion->y);
 
@@ -300,14 +304,17 @@ op_code enviarAvisoDeSabotaje(t_list* posicionesSabotaje, int socket_discordiado
 t_pos* primerPosicionSabotajeSinAtender(t_list* posiciones){
 	
 	PosicionSabotaje* posicionSabotaje;
-	t_pos* posicion;
+	t_pos* posicion = NULL;
 	
 	int _estaDesatendida(PosicionSabotaje* p) {
             return !(p->atendida);
     }
 	posicionSabotaje = list_find(posiciones, (void*) _estaDesatendida);
-	posicion = posicionSabotaje->posicion;
-	posicionSabotaje->atendida = true;	
-
+	
+	if(posicionSabotaje != NULL){
+		posicion = posicionSabotaje->posicion;
+		posicionSabotaje->atendida = true;	
+	}
+	
 	return posicion;
 }

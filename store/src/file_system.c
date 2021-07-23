@@ -88,7 +88,7 @@ void inicializarBitmap(FILE* archivoSuperbloque){
 	void* bitmap = calloc(cantidadBloques/8, 1);
 
 	fwrite(bitmap, 1, cantidadBloques/8, archivoSuperbloque);
-	miLogInfo("Inicializó el bitmap del archivo SuperBloque.");
+	miLogInfo("Inicializo el bitmap del archivo SuperBloque.");
 	
 	free(bitmap);
 }
@@ -118,7 +118,7 @@ void subirBlocksAMemoria(){
 	int tamanioBlocks = cantidadBloques * tamanioBloque;
 	
 	punteroBlocks = mmap(NULL, tamanioBlocks, PROT_READ | PROT_WRITE, MAP_SHARED, archivoBlocks, 0);
-	miLogInfo("Se subió el archivo Blocks.ims a memoria.");
+	miLogInfo("Se subio el archivo Blocks.ims a memoria.");
 
 	close(archivoBlocks);
 }
@@ -127,7 +127,7 @@ void finalizarFS(void){
 	
 	bitarray_destroy(bitmap);
 	if (munmap(punteroBlocks, tamanioBloque * cantidadBloques) == -1){ 
-		perror("Falló al desmapear el Superbloque.");
+		perror("Fallo al desmapear el Superbloque.");
         exit(1); 
     }
 
@@ -152,7 +152,7 @@ int buscarYAsignarProximoBloqueLibre(void){
 			bitarray_set_bit(bitmap ,i); //Asigno el bloque libre (pongo en 1 el bit).
 			msync(bitmap, cantidadBloques/8, 0); //Fuerzo la actualización del bitmap en el archivo.
 
-			miLogDebug("Asignó el bloque %d.", i);	
+			miLogDebug("Asigno el bloque %d.", i);	
 			pthread_mutex_unlock(&mutex_bitmap);
 			return i; //Devuelvo el número de bloque que asigné.		 
 		}
@@ -178,7 +178,7 @@ void liberarBloque(int index){
 	pthread_mutex_lock(&mutex_bitmap);
 	
 	bitarray_clean_bit(bitmap, index);
-	miLogInfo("Se liberó el bloque %d", index );
+	miLogInfo("Se libero el bloque %d", index );
 	msync(bitmap, cantidadBloques/8 ,0);
 	
 	pthread_mutex_unlock(&mutex_bitmap);
@@ -308,7 +308,7 @@ char* leerBloque(int bloque, int size) {
 	pthread_mutex_lock(&mutex_bloques);
 	memcpy(lectura, punteroBlocks + desplazamiento, tamanioBloque);
 	
-	miLogDebug("Leyó: %s, del bloque: %d", lectura, bloque);
+	miLogDebug("Leyo: %s, del bloque: %d", lectura, bloque);
 	char* lecturaFinal = string_substring(lectura, 0, size); // Porque tengo que hacer esto???
 
 	free(lectura);
@@ -604,7 +604,7 @@ int eliminarArchivoBasura(){
 	fclose(basura);
 
 	if (!remove(archivoBasura)){
-		miLogInfo("Se borró el archivo Basura.ims.");
+		miLogInfo("Se borro el archivo Basura.ims.");
 		free(archivoBasura);
 		return EXIT_SUCCESS;
 	} else {
@@ -645,7 +645,7 @@ int repararCantidadBloques(int tamanioBlocksActual){
 	memcpy(punteroSuperbloque + sizeof(uint32_t), &cantidadBloquesActual, sizeof(uint32_t));
 	msync(punteroSuperbloque, tamanioSuperbloqueActual, 0);
 
-	miLogWarning("Modificó la cantidad de bloques en el Superbloques porque se detectó un sabotaje. En el Superbloques se indican %d bloques, y en realidad hay %d bloques en el Blocks.", cantidadBloques, cantidadBloquesActual);
+	miLogWarning("Modifico la cantidad de bloques en el Superbloques porque se detecto un sabotaje. En el Superbloques se indican %d bloques, y en realidad hay %d bloques en el Blocks.", cantidadBloques, cantidadBloquesActual);
 	cantidadBloques = cantidadBloquesActual;
 	
 	return EXIT_SUCCESS;
@@ -763,7 +763,7 @@ int repararSizeEnFile(MetadataRecurso* metadata, tipoRecurso recurso, int tamani
 		return EXIT_FAILURE;
 	}
 	char* nombreRecurso = nombreDelRecurso(recurso);
-	miLogWarning("Actualizó el size del archivo de metadata %s por sabotaje.", nombreRecurso);
+	miLogWarning("Actualizo el size del archivo de metadata %s por sabotaje.", nombreRecurso);
 	free(nombreRecurso);
 
 	return EXIT_SUCCESS;
@@ -803,7 +803,7 @@ int repararBlockCount(MetadataRecurso* metadata, tipoRecurso recurso){
 	}
 
 	char* nombreRecurso = nombreDelRecurso(recurso);
-	miLogWarning("Actualizó la cantidad de bloques del archivo de metadata %s por sabotaje.", nombreRecurso);
+	miLogWarning("Actualizo la cantidad de bloques del archivo de metadata %s por sabotaje.", nombreRecurso);
 	free(nombreRecurso);
 
 	return EXIT_SUCCESS;
@@ -869,7 +869,7 @@ int repararBlocks(MetadataRecurso* metadata, tipoRecurso recurso){
 	}
 	
 	char* nombreRecurso = nombreDelRecurso(recurso);
-	miLogWarning("Actualizó los bloques del archivo de metadata %s por sabotaje.", nombreRecurso);
+	miLogWarning("Actualizo los bloques del archivo de metadata %s por sabotaje.", nombreRecurso);
 	free(nombreRecurso);
 
 	free(escrituraBloqueCompleto);
@@ -979,7 +979,7 @@ void borrarTodosLosArchivos(char* path){
 	int res = system(comando);
 
 	if(!res){
-		miLogInfo("Borró la estructura de file system existente en el punto de montaje %s", path);
+		miLogInfo("Borro la estructura de file system existente en el punto de montaje %s", path);
 	} else {
 		miLogInfo("No pudo borrar la estructura de file system existente en el punto de montaje %s", path);
 		free(comando);

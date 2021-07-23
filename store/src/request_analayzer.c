@@ -118,7 +118,7 @@ void atender_request_store(Request *request) {
 				miLogInfo("Se guardo la tarea: %s, en la bitacora del tripulante: %s.", instruccionALog, id_tripulante);
 
 				paquete_devuelto_informacion_bitacora = crear_paquete(OK);
-				mensaje = strdup("Se guardó la tarea correctamente");
+				mensaje = strdup("Se guardo la tarea correctamente");
 				list_add(lista_mensajes, mensaje);
 			}
 			t_buffer *buffer_respuesta_informacion_bitacora = serializar_lista_strings(lista_mensajes);
@@ -189,7 +189,7 @@ void atender_request_store(Request *request) {
 			id_tripulante = list_get(lista,0); //Ej: id_tripulante.  
 			char* posX = list_get(lista,1);
 			char* posY = list_get(lista,2);
-			miLogInfo("El tripulante: %s, va a solucionar el sabotaje en la posición: %s|%s.", id_tripulante, posX, posY);
+			miLogInfo("El tripulante: %s, va a solucionar el sabotaje en la posicion: %s|%s.", id_tripulante, posX, posY);
 			
 			pthread_mutex_lock(&mutexEjecucionSabotaje);
 			esperaSabotaje = 1;

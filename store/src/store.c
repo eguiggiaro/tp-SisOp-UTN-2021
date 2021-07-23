@@ -10,11 +10,11 @@ void signalHandler(int signal){
 	
 	switch(signal) {
 		case SIGUSR1:
-			miLogInfo("Me llegó la señal %d, atiendo el sabotaje", signal);	
+			miLogInfo("Me llego la señal %d, atiendo el sabotaje", signal);	
 			atenderSabotaje();	
 			break;
 		case SIGINT:
-			miLogInfo("Se forzó el cierre del I-Mongo-Store.");
+			miLogInfo("Se forzo el cierre del I-Mongo-Store.");
 			finalizarStore();
 			exit(130);	//Control+C
 			break;
@@ -30,7 +30,7 @@ void syncPeriodico(void){
 	while(1){
         sleep(configuracion->tiempoSincro);
         msync(punteroBlocks, tamanioBlocks, 0); //Fuerzo la actualización del bitmap en el archivo.
-		miLogInfo("Se forzó la sincronizacion del archivo Blocks.ims a disco. La próxima sincronización será dentro de %d segundos.", configuracion->tiempoSincro);
+		miLogInfo("Se forzo la sincronizacion del archivo Blocks.ims a disco. La proxima sincronizacion sera dentro de %d segundos.", configuracion->tiempoSincro);
     }   
 }
 
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 	signal(SIGINT, signalHandler);
 
 	if(leerConfig()){
-		miLogInfo("Error al iniciar I-Mongo-Store: No se encontró el archivo de configuración");
+		miLogInfo("Error al iniciar I-Mongo-Store: No se encontro el archivo de configuracion");
 		miLogDestroy();
 		return EXIT_FAILURE;
 	}
@@ -79,19 +79,19 @@ int leerConfig(void){
 
 void inicializarStore(void){
 	
-	miLogInfo("==== Inició I-Mongo-Store =====");
+	miLogInfo("==== Inicio I-Mongo-Store =====");
 
 	inicializarParametrosFS();
 
 	if (!verificarFS()){
-		miLogInfo("No se encontró un FILE SYSTEM válido, se procede a crearlo con los parámetros default");
+		miLogInfo("No se encontro un FILE SYSTEM valido, se procede a crearlo con los parametros default");
 		if(verificarExistenciaPuntoMontaje(puntoMontaje)){
 			borrarTodosLosArchivos(puntoMontaje);
 		}
 		crearArbolDirectorios();
 		crearSuperbloque();
 		crearBlocks();
-		miLogInfo("FILE SYSTEM creado exitósamente");
+		miLogInfo("FILE SYSTEM creado exitosamente");
 	}
 
 	leerSuperbloque();
@@ -156,7 +156,7 @@ int iniciarConexionDiscordiador()
 	int socket = crear_conexion(logger, configuracion->ipDiscordiador, configuracion->puertoDiscordiador);
 	
 	if (socket == -1) {
-		miLogError("No fue posible establecer la conexión del socket solicitado.");
+		miLogError("No fue posible establecer la conexion del socket solicitado.");
 		exit(3);
 	}
 	miLogInfo("Conexion con discordiador iniciada correctamente. (Socket: %d).", socket);
@@ -216,7 +216,7 @@ void protocoloFsck(){
 	
 
 
-	miLogInfo("Finalizó el protocolo FSCK.");
+	miLogInfo("Finalizo el protocolo FSCK.");
 	
 }
 
@@ -254,7 +254,7 @@ t_list* obtenerListaSabotaje(char* strPosicionesSabotaje){
 }
 
 void finalizarStore(){
-	miLogInfo("==== Finalizó I-Mongo-Store ====");
+	miLogInfo("==== Finalizo I-Mongo-Store ====");
 	
 	pthread_mutex_destroy(&mutexEjecucionSabotaje);
 	pthread_cond_destroy(&condEjecucionSabotaje);

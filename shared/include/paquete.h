@@ -17,11 +17,12 @@ typedef enum
 	INFORMACION_BITACORA,//discor->store - 
 	FSCK,
 	ALERTA_SABOTAJE,
+	SIN_POS_SABOTAJE,
 	INFORMAR_TAREAS_PATOTA,//Borrar luego
 	COMPACTACION,
 	CAMBIO_COLA,
     OK = 20,
-	FAIL = 21,
+	FAIL = 21,	
 } op_code;
 
 typedef struct

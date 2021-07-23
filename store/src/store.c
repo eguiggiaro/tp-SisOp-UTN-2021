@@ -184,6 +184,8 @@ void atenderSabotaje(){
 		esperaSabotaje = 0;
 	} else if (respuestaDiscordiador == FAIL){
         miLogError("ERROR: Fallo la respuesta del discordiador al pedido de resolucion de sabotaje.");
+	} else if (respuestaDiscordiador == SIN_POS_SABOTAJE){
+		miLogWarning("NO hay mas posiciones de sabotaje disponibles. Se cancela el pedido de resolucion de sabotaje.");
 	}
 	//t_buffer* buffer = (t_buffer*)recibir_buffer(socket_discordiador);
 }

@@ -85,12 +85,12 @@ typedef struct
 } TCB_adm;
 
 char *buscar_tareas(int patota_id);
-TCB *buscar_tcb_por_id(int tripulante_id);
-Frame *buscar_frame_por_pagina(int id_pagina);
+TCB *buscar_tcb_por_id(int tripulante_id, char* motivo);
+Frame *buscar_frame_por_pagina(int id_pagina, int id_patota, char* motivo);
 PCB_adm* buscar_patota_tripulante(int tripulante_id);
 Pagina *buscar_pagina_por_id(int id_pagina);
 Frame *traer_de_SWAP(int id_pagina, Frame* un_frame);
-void* llevar_a_swap(Frame* un_frame, Pagina* una_pagina);
+void* llevar_a_swap(Frame* un_frame, Pagina* una_pagina, int patota);
 Frame *hacer_lugar_memoria();
 void *eliminar_patotaadm(int patota_id);
 

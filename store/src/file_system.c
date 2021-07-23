@@ -734,8 +734,12 @@ int verificarSizeEnFile(){
 	for(int i=0; i<list_size(recursos); i++){
 		tipoRecurso recurso = (tipoRecurso)list_get(recursos,i);
 		metadataR = leerMetadataRecurso(recurso);
-		int ultimoBloque = list_get(metadataR->blocks,metadataR->block_count - 1);
-		int tamanioRealArchivo = (metadataR->block_count - 1) * tamanioBloque + tamanioOcupadoRecursoEnBloque(ultimoBloque, recurso);
+
+		int tamanioRealArchivo = 0;
+		for(int i = 0; i < metadataR->block_count; i++){
+			tamanioRealArchivo += tamanioOcupadoRecursoEnBloque(list_get(metadataR->blocks, i), recurso);
+		}
+				
 		if(metadataR->size != tamanioRealArchivo){
 			if(repararSizeEnFile(metadataR, recurso, tamanioRealArchivo)){
 				miLogError("No pudo reparar el size del archivo."); //TODO: ver si se ṕuede poner el nombre del recurso.

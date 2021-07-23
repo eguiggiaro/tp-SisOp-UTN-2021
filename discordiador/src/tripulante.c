@@ -210,6 +210,7 @@ void generar_comida_FIFO(Tripulante *trip)
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
+    pthread_mutex_lock(&mutexIO);
     if (tarea_informada(trip, tarea, parametro))
     {
       miLogDebug("Se verifico la existencia de Comida.ims correctamente \n");
@@ -222,6 +223,7 @@ void generar_comida_FIFO(Tripulante *trip)
     consumir_ciclos_cpu(trip);
     //Se desbloquea
     desbloquear_tripulante_io(trip);
+    pthread_mutex_unlock(&mutexIO);
 
     trip->recibio_input_store = true;
   }
@@ -279,6 +281,7 @@ void generar_oxigeno_FIFO(Tripulante *trip)
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
+    pthread_mutex_lock(&mutexIO);
     if (tarea_informada(trip, tarea, parametro))
     {
       miLogDebug("Se verifico la existencia de Oxigeno.ims correctamente \n");
@@ -300,6 +303,7 @@ void generar_oxigeno_FIFO(Tripulante *trip)
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
+    pthread_mutex_unlock(&mutexIO);
 
     trip->recibio_input_store = true;
   }
@@ -349,6 +353,7 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
+    pthread_mutex_lock(&mutexIO);
     if (tarea_informada(trip, tarea, parametro))
     {
       miLogDebug("Se verifico la existencia de Oxigeno.ims correctamente \n");
@@ -363,6 +368,7 @@ void consumir_oxigeno_FIFO(Tripulante *trip)
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
+    pthread_mutex_unlock(&mutexIO);
 
     trip->recibio_input_store = true;
   }
@@ -416,6 +422,7 @@ void consumir_comida_FIFO(Tripulante *trip)
     ciclos_cpu = sleep(retardo * (1));
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
+    pthread_mutex_lock(&mutexIO);
     if (tarea_informada(trip, tarea, parametro))
     {
       miLogDebug("Se verifico la existencia de Comida.ims correctamente \n");
@@ -430,6 +437,7 @@ void consumir_comida_FIFO(Tripulante *trip)
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
+    pthread_mutex_unlock(&mutexIO);
 
     trip->recibio_input_store = true;
   }
@@ -488,6 +496,7 @@ void generar_basura_FIFO(Tripulante *trip)
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
+    pthread_mutex_lock(&mutexIO);
     if (tarea_informada(trip, tarea, parametro))
     {
       miLogInfo("Se verifico la existencia de Basura.ims correctamente \n");
@@ -502,6 +511,7 @@ void generar_basura_FIFO(Tripulante *trip)
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
+    pthread_mutex_unlock(&mutexIO);
 
     trip->recibio_input_store = true;
   }
@@ -559,6 +569,7 @@ void descartar_basura_FIFO(Tripulante *trip)
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
+    pthread_mutex_lock(&mutexIO);
     if (tarea_informada(trip, tarea, parametro))
     {
       miLogDebug("Se verifico la existencia de Basura.ims correctamente \n");
@@ -573,6 +584,7 @@ void descartar_basura_FIFO(Tripulante *trip)
 
     //Se desbloquea
     desbloquear_tripulante_io(trip);
+    pthread_mutex_unlock(&mutexIO);
 
     trip->recibio_input_store = true;
   }
@@ -706,6 +718,7 @@ void generar_comida_RR(Tripulante *trip)
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
+        pthread_mutex_lock(&mutexIO);
         if (tarea_informada(trip, tarea, parametro))
         {
           miLogDebug("Se verifico la existencia de Comida.ims correctamente \n");
@@ -720,6 +733,7 @@ void generar_comida_RR(Tripulante *trip)
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
+        pthread_mutex_unlock(&mutexIO);
 
         trip->recibio_input_store = true;
 
@@ -803,6 +817,7 @@ void generar_oxigeno_RR(Tripulante *trip)
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
+        pthread_mutex_lock(&mutexIO);
         if (tarea_informada(trip, tarea, parametro))
         {
           miLogDebug("Se verifico la existencia de Oxigeno.ims correctamente \n");
@@ -817,6 +832,7 @@ void generar_oxigeno_RR(Tripulante *trip)
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
+        pthread_mutex_unlock(&mutexIO);
 
         trip->recibio_input_store = true;
 
@@ -899,6 +915,7 @@ void consumir_oxigeno_RR(Tripulante *trip)
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
+        pthread_mutex_lock(&mutexIO);
         if (tarea_informada(trip, tarea, parametro))
         {
           miLogDebug("Se verifico la existencia de Oxigeno.ims correctamente \n");
@@ -913,6 +930,7 @@ void consumir_oxigeno_RR(Tripulante *trip)
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
+        pthread_mutex_unlock(&mutexIO);
 
         trip->recibio_input_store = true;
 
@@ -995,6 +1013,7 @@ void consumir_comida_RR(Tripulante *trip)
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
+        pthread_mutex_lock(&mutexIO);
         if (tarea_informada(trip, tarea, parametro))
         {
           miLogDebug("Se verifico la existencia de Comida.ims correctamente \n");
@@ -1008,6 +1027,7 @@ void consumir_comida_RR(Tripulante *trip)
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
+        pthread_mutex_unlock(&mutexIO);
 
         trip->recibio_input_store = true;
 
@@ -1090,6 +1110,7 @@ void generar_basura_RR(Tripulante *trip)
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
+        pthread_mutex_lock(&mutexIO);
         if (tarea_informada(trip, tarea, parametro))
         {
           miLogDebug("Se verifico la existencia de Basura.ims correctamente \n");
@@ -1104,6 +1125,7 @@ void generar_basura_RR(Tripulante *trip)
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
+        pthread_mutex_unlock(&mutexIO);
 
         trip->recibio_input_store = true;
 
@@ -1186,6 +1208,7 @@ void descartar_basura_RR(Tripulante *trip)
         miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
         //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
         bloquear_tripulante_io(trip);
+        pthread_mutex_lock(&mutexIO);
         if (tarea_informada(trip, tarea, parametro))
         {
           miLogDebug("Se verifico la existencia de Basura.ims correctamente \n");
@@ -1200,6 +1223,7 @@ void descartar_basura_RR(Tripulante *trip)
 
         //Se desbloquea
         desbloquear_tripulante_io(trip);
+        pthread_mutex_unlock(&mutexIO);
 
         trip->recibio_input_store = true;
 

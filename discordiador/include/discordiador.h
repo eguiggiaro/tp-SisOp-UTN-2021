@@ -111,7 +111,7 @@ pthread_mutex_t mutexBLOCK;
 pthread_mutex_t mutexEXIT;
 pthread_mutex_t mutexREADY;
 pthread_mutex_t mutexBLOCK_EM;
-
+pthread_mutex_t mutexIO;
 
 pthread_t threadSERVER_DISC;
 pthread_t threadCONSOLA_DISC;

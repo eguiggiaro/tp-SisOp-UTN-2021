@@ -90,7 +90,7 @@ void desbloquear_tripulante_io(Tripulante* trip){
   Tripulante* trip_auxiliar;
   pthread_mutex_lock(&mutexBLOCK);
   pthread_mutex_lock(&mutexREADY);
-
+/*
   for(int i =0; i<list_size(blocked_io);i++){
     trip_auxiliar = list_get(blocked_io,i);
     if(trip->id_tripulante == trip_auxiliar->id_tripulante){
@@ -99,17 +99,37 @@ void desbloquear_tripulante_io(Tripulante* trip){
       break;
     }
   }
+*/
+  bool id_tripu(Tripulante* tripu){
+	  return trip->id_tripulante == tripu->id_tripulante;
+  }
 
-  if(tripulante_encontrado){
+  trip_auxiliar = list_remove_by_condition(blocked_io, id_tripu);
+
+  if(trip_auxiliar!=NULL){
+	list_add(ready_list, trip);
+	trip->estado = listo;
+	miLogInfo("Se desbloquea el tripulante: %d y pasa de BLOCK_IO a READY\n", trip->id_tripulante);
+	informar_cambio_de_cola_miram(trip,"READY");
+	sem_post(&semaforoREADY);
+  }
+  pthread_mutex_unlock(&mutexBLOCK);
+  pthread_mutex_unlock(&mutexREADY);
+
+  /*if(tripulante_encontrado){
   //Se saca tripulante de cola de BLOCK y se pasa a cola de READY.
     trip_auxiliar = list_remove(blocked_io,indice);
     list_add(ready_list, trip_auxiliar);
 	trip_auxiliar->estado = listo;
 	pthread_mutex_unlock(&mutexBLOCK);
-	pthread_mutex_unlock(&mutexREADY);
-	sem_post(&semaforoREADY);
+    pthread_mutex_unlock(&mutexREADY);
+    sem_post(&semaforoREADY);
     miLogInfo("Se desbloquea el tripulante: %d y pasa de BLOCK_IO a READY\n", trip->id_tripulante);
 	//aviso cambio de cola a MIRAM
     informar_cambio_de_cola_miram(trip_auxiliar,"READY");
   }
+  else{
+	  pthread_mutex_unlock(&mutexBLOCK);
+      pthread_mutex_unlock(&mutexREADY);
+  }*/
 }

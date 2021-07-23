@@ -125,7 +125,7 @@ void pedir_proxima_tarea(Tripulante *un_tripulante)
   }
   else
   {
-    miLogInfo("ERROR: TAREA NO EXISTE \n");
+    miLogInfo("ERROR: TAREA DEL TRIPULANTE %d NO EXISTE \n", un_tripulante->id_tripulante);
     list_destroy_and_destroy_elements(lista_mensajes, (void *)char_destroy_trip);
   }
 }
@@ -210,6 +210,7 @@ void generar_comida_FIFO(Tripulante *trip)
     miLogInfo("El tripulante: %d consumio un ciclo de CPU por peticion I/O\n", trip->id_tripulante);
     //El tripulante pasa a la cola de BLOCKED_IO mientras espera la respuesta de Store.
     bloquear_tripulante_io(trip);
+
     pthread_mutex_lock(&mutexIO);
     if (tarea_informada(trip, tarea, parametro))
     {
@@ -1370,18 +1371,17 @@ void bloquear_tripulante_io(Tripulante *trip)
     pthread_mutex_lock(&mutexEXEC); //esta bien?
     //comienza seccion critica
     //list_remove() devuelve el tripulante que se elimina de la lista
-    trip_auxiliar = list_remove(execute_list, indice);
-    list_add(blocked_io, trip_auxiliar);
-    trip_auxiliar->estado = bloqueado_io;
+    list_remove(execute_list, indice);
+    list_add(blocked_io, trip);
+    trip->estado = bloqueado_io;
     //finaliza seccion critica
     pthread_mutex_unlock(&mutexBLOCK);
     pthread_mutex_unlock(&mutexEXEC);
     //aviso cambio de estado/cola a MIRAM
-    informar_cambio_de_cola_miram(trip_auxiliar, "BLOCKED_IO");
+    informar_cambio_de_cola_miram(trip, "BLOCKED_IO");
 
     //libero un lugar en la cola de EXEC
     sem_post(&semaforoEXEC);
-    trip->estado = bloqueado_io;
     //trip->tripulante_despierto = false;
     miLogInfo("Se pasa al tripulante: %d a la cola de BLOCK IO\n", trip->id_tripulante);
     //al liberarse un lugar en la cola de EXEC, replanifico:

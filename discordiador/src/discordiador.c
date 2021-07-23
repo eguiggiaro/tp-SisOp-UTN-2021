@@ -896,14 +896,16 @@ int planificar()
 			tripulante->quantum = configuracion->quantum;
 		}
 		pthread_mutex_unlock(&tripulante->semaforo_trip);
+		pthread_mutex_unlock(&mutexEXEC);
+	    pthread_mutex_unlock(&mutexREADY);
 	}
 	else
 	{
 		miLogInfo("No existen más tripulantes en la cola de READY\n");
+		pthread_mutex_unlock(&mutexEXEC);
+	    pthread_mutex_unlock(&mutexREADY);
 		return -1;
 	}
-	pthread_mutex_unlock(&mutexEXEC);
-	pthread_mutex_unlock(&mutexREADY);
 }
 
 void finalizar_tripulante(Tripulante *trip)
@@ -1269,6 +1271,7 @@ void informar_cambio_de_cola_miram(Tripulante *tripulante, char *nueva_cola)
 
 void pasar_tripulante_de_exec_a_ready(Tripulante *trip)
 {
+	miLogDebug("Por verificar si tripulante %d dormido", trip->id_tripulante);
 	if (!trip->tripulante_despierto)
 	{
 		pthread_mutex_lock(&trip->semaforo_trip);
@@ -1277,7 +1280,9 @@ void pasar_tripulante_de_exec_a_ready(Tripulante *trip)
 	Tripulante *trip_auxiliar;
 	bool tripulante_encontrado = false;
 
+	miLogDebug("Tripulante %d : Por hacer wait de EXEC", trip->id_tripulante);
 	pthread_mutex_lock(&mutexEXEC); //esta bien?
+	miLogDebug("Tripulante %d : Por hacer wait de READY", trip->id_tripulante);
 	pthread_mutex_lock(&mutexREADY);
 
 	for (int i = 0; i < list_size(execute_list); i++)
@@ -1295,6 +1300,7 @@ void pasar_tripulante_de_exec_a_ready(Tripulante *trip)
 
 	if (tripulante_encontrado)
 	{
+		miLogDebug("Tripulante %d : encontrado en EXEC", trip->id_tripulante);
 		//empieza seccion critica
 		//list_remove() devuelve el tripulante que se elimina de la lista
 		trip_auxiliar = list_remove(execute_list, indice);

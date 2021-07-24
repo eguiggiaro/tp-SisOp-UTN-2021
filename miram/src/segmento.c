@@ -696,6 +696,9 @@ void compactacion_renumerar_lleno(Segmento *segmento1, int segmento_lleno)
 	TCB_adm *tcb_adm;
 	Tarea_adm *tarea_adm;
 	bool encontre_elemento = false;
+	TCB* un_tcb;
+	PCB* un_pcb;
+	Segmento* seg_aux;
 
 	list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
 
@@ -707,7 +710,26 @@ void compactacion_renumerar_lleno(Segmento *segmento1, int segmento_lleno)
 		{
 			pcb_adm->segmento_nro = segmento_lleno;
 			encontre_elemento = true;
+
+			list_iterator_tcb = list_iterator_create(tabla_segmentos_tcb);
+
+			while (list_iterator_has_next(list_iterator_tcb))
+			{
+				tcb_adm = list_iterator_next(list_iterator_tcb);
+
+				if (tcb_adm->PID == pcb_adm->PID)
+				{
+					seg_aux = buscar_segmento_por_id(tcb_adm->segmento_nro);
+
+					un_tcb = seg_aux->dir_inicio;
+					un_tcb->PCB = segmento_lleno;
+				}
+			}
+
+			list_iterator_destroy(list_iterator_tcb);
+
 			break;
+
 		}
 	}
 
@@ -742,6 +764,25 @@ void compactacion_renumerar_lleno(Segmento *segmento1, int segmento_lleno)
 			{
 				tarea_adm->segmento_nro = segmento_lleno;
 				encontre_elemento = true;
+
+
+			list_iterator_pcb = list_iterator_create(tabla_segmentos_pcb);
+
+			while (list_iterator_has_next(list_iterator_pcb))
+			{
+				pcb_adm = list_iterator_next(list_iterator_pcb);
+
+				if (pcb_adm->PID == tarea_adm->PID)
+				{
+					seg_aux = buscar_segmento_por_id(pcb_adm->segmento_nro);
+
+					un_pcb = seg_aux->dir_inicio;
+					un_pcb->Tareas = segmento_lleno;
+				}
+			}
+
+			list_iterator_destroy(list_iterator_pcb);
+
 				break;
 			}
 		}
@@ -1028,6 +1069,8 @@ void alta_tareas_segmentacion(int PCB_ID, char *tareas)
 uint32_t buscar_tripulante_segmentacion(int TCB_ID)
 {
 	bool encontre_tripulante = false;
+
+
 	u_int32_t posicion_tripulante;
 	t_list_iterator *list_iterator = list_iterator_create(tabla_segmentos_tcb);
 	TCB_adm *tcb_adm;

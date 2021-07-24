@@ -39,7 +39,7 @@ int main()
 
 	//enviar_tareas_miram("/home/utnso/tareas/tareasPatota5.txt",id_patota);
 	//Inicio el log en un thread... :O
-	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_DEBUG);
+	miLogInitMutex(LOG_FILE_PATH, MODULE_NAME, false, LOG_LEVEL_INFO);
 	miLogInfo("Inició Discordiador. \n");
 
 	if (leer_config())

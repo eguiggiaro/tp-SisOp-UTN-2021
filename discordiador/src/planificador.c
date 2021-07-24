@@ -37,7 +37,7 @@ void dormir_tripulantes()
 //Hecho por: Emiliano
 void iniciar_planificacion()
 {
-	pthread_mutex_unlock(&mutexNEW);
+	//pthread_mutex_unlock(&mutexNEW);
 	pthread_mutex_unlock(&mutexREADY);
 	pthread_mutex_unlock(&mutexBLOCK);
 	pthread_mutex_unlock(&mutexEXEC);
@@ -72,7 +72,7 @@ void pausar_planificacion()
 
     dormir_tripulantes();
 
-	pthread_mutex_lock(&mutexNEW);
+	//pthread_mutex_lock(&mutexNEW);
 	pthread_mutex_lock(&mutexREADY);
 	pthread_mutex_lock(&mutexBLOCK);
 	pthread_mutex_lock(&mutexEXEC);

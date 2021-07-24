@@ -45,6 +45,7 @@ void *inicializar_tripulante(Tripulante *tripulante)
     tripulante->en_sabotaje = false;
     tripulante->tarea_actual->parametros = NULL;
     obtener_tarea(list_get(lista, 2), tripulante->tarea_actual);
+    tripulante->estado = llegada;
 
     list_add(tripulantes_totales, tripulante);
     //sem_destroy...

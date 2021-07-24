@@ -11,6 +11,7 @@
 #include <nivel-gui/tad_nivel.h>
 #include "estructuras.h"
 #include "servidor.h"
+#include "mutex.h"
 
 t_config *config;
 typedef struct Configuracion
@@ -56,10 +57,4 @@ u_int32_t buscar_tripulante(int TCB_ID);
 TCB* iniciar_tripulante(int patota_id);
 int cambiar_cola_tripulante(int tripulante, char cola_destino);
 
-pthread_mutex_t mutex_tripulantes;
-pthread_mutex_t mutex_tareas;
-pthread_mutex_t mutex_expulsion;
-pthread_mutex_t mutex_patota;
-pthread_mutex_t mutex_mover;
-pthread_mutex_t mutex_cola;
 #endif

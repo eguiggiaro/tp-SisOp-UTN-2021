@@ -597,6 +597,12 @@ u_int32_t buscar_posicion(int segmento)
 
 int compactar_segmentacion()
 {
+		pthread_mutex_lock(&mutex_expulsion);
+		pthread_mutex_lock(&mutex_mover);
+		pthread_mutex_lock(&mutex_cola);
+		pthread_mutex_lock(&mutex_tareas);
+
+
 	t_list_iterator *list_iterator_segmentos = list_iterator_create(tabla_segmentos);
 	Segmento *segmento1;
 	Segmento *segmento2;
@@ -653,6 +659,10 @@ int compactar_segmentacion()
 	list_iterator_destroy(list_iterator_segmentos);
 
 	dump_memoria(true);
+		pthread_mutex_unlock(&mutex_expulsion);
+		pthread_mutex_unlock(&mutex_mover);
+		pthread_mutex_unlock(&mutex_cola);
+		pthread_mutex_unlock(&mutex_tareas);
 }
 
 int fusion_segmentos_libres()

@@ -186,7 +186,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s",id_trip,origen,destino);
-        avisar_mov_sabotaje_bitacora(trip,origen,destino);
+        //avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_x = (trip->pos_x)-1;
         //aviso a miram
@@ -219,7 +219,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_mov_sabotaje_bitacora(trip,origen,destino);
+        //avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_x = (trip->pos_x)+1;
         //aviso a miram
@@ -256,7 +256,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_mov_sabotaje_bitacora(trip,origen,destino);
+        //avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_y = (trip->pos_y)-1;
         //aviso a miram
@@ -288,7 +288,7 @@ void mover_tripulante_a_sabotaje(Tripulante* trip, int x_destino, int y_destino)
         sleep(configuracion->retardo_ciclo_cpu);
 
         miLogInfo("Se mueve el tripulante: %s desde: %s hasta: %s \n",id_trip,origen,destino);
-        avisar_mov_sabotaje_bitacora(trip,origen,destino);
+        //avisar_mov_sabotaje_bitacora(trip,origen,destino);
         //realizo movimiento
         trip->pos_y = (trip->pos_y)+1;
         //aviso a miram
